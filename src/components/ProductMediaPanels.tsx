@@ -1,36 +1,42 @@
 import {startTransition} from 'react'
-import {motion, type Variants} from 'framer-motion'
+import {motion, type Variants, useReducedMotion} from 'framer-motion'
 import {OptimizedImage} from './OptimizedImage'
-import ScrollReveal from './ScrollReveal'
+import {TextMaskReveal} from './TextMaskReveal'
 import type {LocalizedString, Product, R2ImageMetadata} from '../types'
-
-const containerVariants: Variants = {
-  hidden: {opacity: 0},
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.14,
-      delayChildren: 0.08,
-    },
-  },
-}
 
 const itemVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 35,
-    scale: 0.97,
+    y: 40,
   },
-  visible: {
+  visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.7,
+      duration: 0.85,
+      delay: (i % 3) * 0.09,
       ease: [0.215, 0.61, 0.355, 1],
     },
-  },
+  }),
 }
+
+const getMediaZoomVariants = (reduceMotion: boolean): Variants => ({
+  hidden: {
+    scale: reduceMotion ? 1 : 1.22,
+    originX: 0,
+    originY: 0.5,
+  },
+  visible: (i: number = 0) => ({
+    scale: 1,
+    originX: 0,
+    originY: 0.5,
+    transition: {
+      duration: reduceMotion ? 0.01 : 1.25,
+      delay: reduceMotion ? 0 : (i % 3) * 0.09,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  }),
+})
 
 interface ProductMediaItem {
   type: 'image' | 'video' | 'youtube'
@@ -72,6 +78,9 @@ export function ProductMediaPanels({
   openPanelLightbox,
   t,
 }: ProductMediaPanelsProps) {
+  const shouldReduceMotion = Boolean(useReducedMotion())
+  const mediaZoomVariants = getMediaZoomVariants(shouldReduceMotion)
+
   const media =
     Array.isArray(product?.bottomMedia) && product.bottomMedia.length > 0
       ? product.bottomMedia
@@ -89,18 +98,20 @@ export function ProductMediaPanels({
 
   return (
     <section className="mt-8 md:mt-10">
-      <ScrollReveal delay={0} threshold={0.1}>
+      <TextMaskReveal delay={80}>
         <h2 className="text-xl font-light text-gray-600 mb-3 md:mb-4">{sectionTitle}</h2>
-      </ScrollReveal>
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-x-2 md:gap-x-2.5 gap-y-1 md:gap-y-1.5"
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{once: true, amount: 0.08}}
-      >
+      </TextMaskReveal>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-x-2 md:gap-x-2.5 gap-y-1 md:gap-y-1.5">
         {media.map((m, idx) => (
-          <motion.div key={idx} variants={itemVariants} className="overflow-hidden">
+          <motion.div
+            key={idx}
+            variants={itemVariants}
+            custom={idx}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{once: true, amount: 0.12, margin: '0px 0px -30px 0px'}}
+            className="overflow-hidden"
+          >
             <button
               type="button"
               onClick={() => {
@@ -108,58 +119,67 @@ export function ProductMediaPanels({
                   openPanelLightbox(idx)
                 })
               }}
-              className="relative w-full aspect-video bg-gray-200 flex items-center justify-center cursor-pointer"
+              className={`relative w-full aspect-video bg-gray-200 flex items-center justify-center cursor-pointer overflow-hidden group ${imageBorderClass}`}
             >
-              {m.type === 'image' ? (
-                <OptimizedImage
-                  src={m.url}
-                  srcMobile={m.urlMobile}
-                  srcDesktop={m.urlDesktop}
-                  alt={`media-${idx}`}
-                  className={`w-full h-full object-cover ${imageBorderClass}`}
-                  loading="lazy"
-                  quality={85}
-                  crop={m.crop}
-                  hotspot={m.hotspot}
-                  origWidth={m.origWidth as number}
-                  origHeight={m.origHeight as number}
-                  cropMobile={m.cropMobile}
-                  hotspotMobile={m.hotspotMobile}
-                  origWidthMobile={m.origWidthMobile as number}
-                  origHeightMobile={m.origHeightMobile as number}
-                  cropDesktop={
-                    (m as unknown as Record<string, unknown>)[
-                      'cropDesktop'
-                    ] as R2ImageMetadata['crop']
-                  }
-                  hotspotDesktop={
-                    (m as unknown as Record<string, unknown>)[
-                      'hotspotDesktop'
-                    ] as R2ImageMetadata['hotspot']
-                  }
-                  origWidthDesktop={
-                    (m as unknown as Record<string, unknown>)['origWidthDesktop'] as number
-                  }
-                  origHeightDesktop={
-                    (m as unknown as Record<string, unknown>)['origHeightDesktop'] as number
-                  }
-                  isMirrored={m.isMirrored}
-                  isMirroredMobile={m.isMirroredMobile}
-                  isMirroredDesktop={m.isMirroredDesktop}
-                />
-              ) : m.type === 'video' ? (
-                <div className={`w-full h-full bg-gray-300 ${imageBorderClass}`} />
-              ) : (
-                <OptimizedImage
-                  src={youTubeThumb(m.url)}
-                  alt={`youtube thumb ${idx + 1}`}
-                  className={`w-full h-full object-cover ${imageBorderClass}`}
-                  loading="lazy"
-                  quality={75}
-                />
-              )}
+              <motion.div
+                variants={mediaZoomVariants}
+                custom={idx}
+                className="w-full h-full transform-gpu origin-left"
+                style={{transformOrigin: 'left center'}}
+              >
+                <div className="w-full h-full transition-transform duration-700 ease-out group-hover:scale-[1.04] origin-left">
+                  {m.type === 'image' ? (
+                    <OptimizedImage
+                      src={m.url}
+                      srcMobile={m.urlMobile}
+                      srcDesktop={m.urlDesktop}
+                      alt={`media-${idx}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      quality={85}
+                      crop={m.crop}
+                      hotspot={m.hotspot}
+                      origWidth={m.origWidth as number}
+                      origHeight={m.origHeight as number}
+                      cropMobile={m.cropMobile}
+                      hotspotMobile={m.hotspotMobile}
+                      origWidthMobile={m.origWidthMobile as number}
+                      origHeightMobile={m.origHeightMobile as number}
+                      cropDesktop={
+                        (m as unknown as Record<string, unknown>)[
+                          'cropDesktop'
+                        ] as R2ImageMetadata['crop']
+                      }
+                      hotspotDesktop={
+                        (m as unknown as Record<string, unknown>)[
+                          'hotspotDesktop'
+                        ] as R2ImageMetadata['hotspot']
+                      }
+                      origWidthDesktop={
+                        (m as unknown as Record<string, unknown>)['origWidthDesktop'] as number
+                      }
+                      origHeightDesktop={
+                        (m as unknown as Record<string, unknown>)['origHeightDesktop'] as number
+                      }
+                      isMirrored={m.isMirrored}
+                      isMirroredMobile={m.isMirroredMobile}
+                      isMirroredDesktop={m.isMirroredDesktop}
+                    />
+                  ) : m.type === 'video' ? (
+                    <div className="w-full h-full bg-gray-300" />
+                  ) : (
+                    <OptimizedImage
+                      src={youTubeThumb(m.url)}
+                      alt={`youtube thumb ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      quality={75}
+                    />
+                  )}
+                </div>
+              </motion.div>
               {(m.type === 'video' || m.type === 'youtube') && (
-                <span className="pointer-events-none absolute bottom-2 right-2">
+                <span className="pointer-events-none absolute bottom-2 right-2 z-10">
                   <span className="bg-white/85 text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +196,7 @@ export function ProductMediaPanels({
             {m.title && <div className="px-1 pt-2 text-sm text-gray-600">{t(m.title)}</div>}
           </motion.div>
         ))}
-      </motion.div>
+      </div>
     </section>
   )
 }

@@ -8,6 +8,7 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useCategories} from '../hooks/useCategories'
 import {useProducts} from '../hooks/useProducts'
 import ScrollReveal from '../components/ScrollReveal'
+import {ProductCardReveal, getProductCardStaggerDelay} from '../components/ProductCardReveal'
 import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 
@@ -117,19 +118,17 @@ export function CategoriesPage() {
         {categoriesWithImages.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2">
             {categoriesWithImages.map((category, index) => (
-              <ScrollReveal
+              <ProductCardReveal
                 key={category.id}
-                delay={index < 12 ? index * 50 : 0}
-                threshold={0.01}
-                initialScale={1}
-                distance={0}
-                direction="none"
+                delay={getProductCardStaggerDelay(index, 3)}
+                duration={1.2}
+                className="h-[300px] sm:h-[350px] lg:h-[450px]"
               >
                 <Link
                   to={`/products/${category.id}`}
-                  className="group block overflow-hidden rounded-none"
+                  className="group block w-full h-full overflow-hidden rounded-none"
                 >
-                  <div className="relative h-[300px] sm:h-[350px] lg:h-[450px] overflow-hidden rounded-none border-none flex items-center justify-center bg-[var(--bg-primary)]">
+                  <div className="relative w-full h-full overflow-hidden rounded-none border-none flex items-center justify-center bg-[var(--bg-primary)]">
                     {category.displayImage && (
                       <OptimizedImage
                         src={
@@ -245,18 +244,17 @@ export function CategoriesPage() {
                     )}
                     {/* Text content inside at the bottom */}
                     <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 lg:p-6 flex flex-col justify-end z-10">
-                      <h2 className="text-lg md:text-xl lg:text-2xl font-light tracking-widest text-gray-400 uppercase leading-tight transform transition-all duration-500 ease-out group-hover:-translate-y-2 group-hover:text-[var(--text-primary)]">
-                        {t(category.name)}
-                      </h2>
-                      {category.subtitle && (
-                        <p className="mt-1 text-[var(--text-secondary)] text-xs md:text-sm font-light tracking-widest uppercase opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 ease-out line-clamp-2">
-                          {t(category.subtitle)}
-                        </p>
-                      )}
+                      <div className="inline-block w-fit">
+                        <h2 className="text-lg md:text-xl lg:text-2xl font-light tracking-widest text-gray-400 uppercase leading-tight transition-colors duration-500 ease-out group-hover:text-[var(--text-primary)]">
+                          {t(category.name)}
+                        </h2>
+                        {/* Architectural expanding underline */}
+                        <div className="h-[1.5px] w-full bg-gradient-to-r from-[var(--text-primary)] via-[var(--text-primary)]/80 to-[var(--text-primary)]/20 origin-left scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100 transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] mt-2" />
+                      </div>
                     </div>
                   </div>
                 </Link>
-              </ScrollReveal>
+              </ProductCardReveal>
             ))}
           </div>
         ) : (

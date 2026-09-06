@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import {Link, useLocation} from 'react-router-dom'
 import {OptimizedImage} from '../OptimizedImage'
 import {OptimizedVideo} from '../OptimizedVideo'
@@ -101,6 +101,15 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   const {isExpanding, phase, setTargetRect} = useCardTransition()
   const fromCard = location.state?.fromCard || isExpanding
   const heroRef = useRef<HTMLElement>(null)
+  const [hasStartedReveal, setHasStartedReveal] = useState(false)
+
+  useEffect(() => {
+    setHasStartedReveal(false)
+    const timer = setTimeout(() => {
+      setHasStartedReveal(true)
+    }, 200)
+    return () => clearTimeout(timer)
+  }, [product.id])
 
   useEffect(() => {
     if (phase === 'animating' && heroRef.current) {
@@ -335,36 +344,63 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-end justify-between gap-4">
             {/* Left Info: Product Name & Designer */}
             <div className="flex-1">
+              {/* Product Title (Model Name) with Visible Mask Reveal */}
               <div
                 style={{
-                  transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
-                  opacity: isTitleVisible ? 1 : 0,
-                  transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
+                  overflow: 'hidden',
+                  clipPath: 'inset(0)',
+                  isolation: 'isolate',
                 }}
+                className="relative pb-1"
               >
-                <h1 className="product-hero-title text-white text-lg max-md:landscape:text-sm md:text-4xl lg:text-5xl font-extrabold tracking-[-0.08em] drop-shadow-lg font-michroma pointer-events-auto">
-                  {t(product.name)}
-                </h1>
-              </div>
-              {(designers.length > 0 || Boolean(product.year)) && (
-                <div
-                  className="product-hero-details mt-1 md:mt-2 text-xs max-md:landscape:text-[9px] md:text-sm lg:text-lg text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
-                  style={{
-                    transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
-                    opacity: isDesignerVisible ? 1 : 0,
-                    transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
+                <motion.div
+                  key={`hero-title-${product.id}`}
+                  initial={{y: '-130%'}}
+                  animate={hasStartedReveal && isTitleVisible ? {y: '0%'} : {y: '-130%'}}
+                  transition={{
+                    duration: 1.15,
+                    delay: 0.1,
+                    ease: [0.22, 1, 0.36, 1],
                   }}
                 >
-                  {designers.map((d, i) => (
-                    <span key={d.id}>
-                      <Link to={`/designer/${d.id}`} className="hover:text-white font-michroma">
-                        {t(d.name)}
-                      </Link>
-                      {i < designers.length - 1 ? ' & ' : ''}
-                    </span>
-                  ))}
-                  {designers.length > 0 && product.year && ' '}
-                  {product.year && <span>— {product.year}</span>}
+                  <h1 className="product-hero-title text-white text-lg max-md:landscape:text-sm md:text-4xl lg:text-5xl font-extrabold tracking-[-0.08em] drop-shadow-lg font-michroma pointer-events-auto">
+                    {t(product.name)}
+                  </h1>
+                </motion.div>
+              </div>
+
+              {/* Designer & Year with Separate Visible Mask Reveal */}
+              {(designers.length > 0 || Boolean(product.year)) && (
+                <div
+                  style={{
+                    overflow: 'hidden',
+                    clipPath: 'inset(0)',
+                    isolation: 'isolate',
+                  }}
+                  className="relative mt-1 md:mt-2 pb-1"
+                >
+                  <motion.div
+                    key={`hero-designer-${product.id}`}
+                    initial={{y: '-130%'}}
+                    animate={hasStartedReveal && isDesignerVisible ? {y: '0%'} : {y: '-130%'}}
+                    transition={{
+                      duration: 1.15,
+                      delay: 0.55, // Distinct, separate descent after title is well underway
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    className="product-hero-details text-xs max-md:landscape:text-[9px] md:text-sm lg:text-lg text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
+                  >
+                    {designers.map((d, i) => (
+                      <span key={d.id}>
+                        <Link to={`/designer/${d.id}`} className="hover:text-white font-michroma">
+                          {t(d.name)}
+                        </Link>
+                        {i < designers.length - 1 ? ' & ' : ''}
+                      </span>
+                    ))}
+                    {designers.length > 0 && product.year && ' '}
+                    {product.year && <span>— {product.year}</span>}
+                  </motion.div>
                 </div>
               )}
             </div>

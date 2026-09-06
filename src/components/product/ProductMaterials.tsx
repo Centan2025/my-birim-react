@@ -3,6 +3,7 @@ import {motion, type Variants} from 'framer-motion'
 import {OptimizedImage} from '../OptimizedImage'
 import {useTranslation} from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
+import {TextMaskReveal} from '../TextMaskReveal'
 import type {LocalizedString} from '../../types'
 import {mapImage, SanityImageLike} from '../../services/sanity/client'
 
@@ -26,30 +27,51 @@ const sideReveal: Record<string, Variants> = {
     revealOff: {opacity: 0},
     revealOn: {
       opacity: 1,
-      transition: {staggerChildren: 0.1},
+      transition: {
+        staggerChildren: 0.045,
+        delayChildren: 0.02,
+      },
     },
   },
   item: {
-    revealOff: {opacity: 0, x: -50},
+    revealOff: {
+      opacity: 0,
+      y: 12,
+    },
     revealOn: {
       opacity: 1,
-      x: 0,
-      transition: {type: 'spring', stiffness: 100, damping: 20},
+      y: 0,
+      transition: {
+        duration: 0.42,
+        ease: [0.22, 1, 0.36, 1],
+      },
     },
   },
   wrapper: {
-    revealOff: {scaleX: 0, transformOrigin: 'left'},
+    revealOff: {
+      scaleX: 0,
+      transformOrigin: 'left',
+    },
     revealOn: {
       scaleX: 1,
-      transition: {duration: 0.8, ease: [0.22, 1, 0.36, 1]},
+      transition: {
+        duration: 0.58,
+        ease: [0.22, 1, 0.36, 1],
+      },
     },
   },
   image: {
-    revealOff: {opacity: 0, x: -20},
+    revealOff: {
+      opacity: 0,
+      x: -20,
+    },
     revealOn: {
       opacity: 1,
       x: 0,
-      transition: {delay: 0.2, duration: 0.8},
+      transition: {
+        duration: 0.58,
+        ease: [0.22, 1, 0.36, 1],
+      },
     },
   },
 }
@@ -78,6 +100,29 @@ const AnimatedContent: React.FC<{
   )
 }
 
+/**
+ * Resolves a lightweight thumbnail URL for material preview cards:
+ * - R2 WebP swatches: uses the pre-generated -400w.webp (58 KB instead of 1.4 MB)
+ * - Sanity CDN: adds w=400&q=80&auto=format query parameters
+ * This dramatically reduces initial page load weight, memory usage, and GPU decoding lag.
+ */
+export const getMaterialThumbnailUrl = (url: string | undefined): string => {
+  if (!url || typeof url !== 'string') return ''
+  if (
+    url.includes('.webp') &&
+    !url.includes('-400w') &&
+    !url.includes('-800w') &&
+    !url.includes('-1600w')
+  ) {
+    return url.replace(/\.webp(\?.*)?$/, '-400w.webp$1')
+  }
+  if (url.includes('cdn.sanity.io')) {
+    const delim = url.includes('?') ? '&' : '?'
+    return `${url}${delim}w=400&q=80&auto=format`
+  }
+  return url
+}
+
 const MaterialCard: React.FC<{
   material: {image: string; name: string | LocalizedString}
   imageBorderClass: string
@@ -85,45 +130,54 @@ const MaterialCard: React.FC<{
   onClick: () => void
   className?: string
   disableVariants?: boolean
-}> = ({material, imageBorderClass, t, onClick, className, disableVariants}) => (
-  <motion.div
-    variants={disableVariants ? undefined : sideReveal['item']}
-    className={`text-center group cursor-pointer flex flex-col items-center ${className ?? 'w-full sm:w-28 md:w-32'}`}
-    title={t(material.name)}
-    onClick={onClick}
-    onKeyDown={e => {
-      if (e.key === 'Enter' || e.key === ' ') onClick()
-    }}
-    role="button"
-    tabIndex={0}
-  >
+}> = ({material, imageBorderClass, t, onClick, className, disableVariants}) => {
+  const thumbUrl = getMaterialThumbnailUrl(material.image)
+
+  return (
     <motion.div
-      variants={disableVariants ? undefined : sideReveal['wrapper']}
-      className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-sm shadow-sm"
+      variants={disableVariants ? undefined : sideReveal['item']}
+      style={{willChange: 'transform, opacity'}}
+      className={`text-center group cursor-pointer flex flex-col items-center ${className ?? 'w-full sm:w-28 md:w-32'}`}
+      title={t(material.name)}
+      onClick={onClick}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') onClick()
+      }}
+      role="button"
+      tabIndex={0}
     >
       <motion.div
-        variants={disableVariants ? undefined : sideReveal['image']}
-        className="w-full h-full overflow-hidden"
+        variants={disableVariants ? undefined : sideReveal['wrapper']}
+        style={{willChange: 'transform'}}
+        className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-sm shadow-sm"
       >
-        <OptimizedImage
-          src={material.image}
-          alt={t(material.name)}
-          className={`w-full h-full object-cover border border-[var(--border-primary)] group-hover:opacity-80 transition-all duration-300 ${imageBorderClass}`}
-          loading="lazy"
-          disableResizing={true}
-          style={{
-            transform: 'scale(3.5)',
-            transformOrigin: 'center center',
-            imageRendering: 'auto',
-          }}
-        />
+        <motion.div
+          variants={disableVariants ? undefined : sideReveal['image']}
+          style={{willChange: 'transform, opacity'}}
+          className="w-full h-full overflow-hidden"
+        >
+          <OptimizedImage
+            src={thumbUrl}
+            fallbackSrc={material.image}
+            alt={t(material.name)}
+            className={`w-full h-full object-cover border border-[var(--border-primary)] group-hover:opacity-80 transition-opacity duration-300 ${imageBorderClass}`}
+            loading="lazy"
+            style={{
+              transform: 'scale(1.35)',
+              transformOrigin: 'center center',
+              imageRendering: 'auto',
+            }}
+          />
+        </motion.div>
       </motion.div>
+      <div className="w-full pt-1">
+        <p className="text-[9px] sm:text-[9.5px] md:text-[10.5px] leading-snug text-[var(--text-primary)] font-normal tracking-wide w-full break-words">
+          {t(material.name)}
+        </p>
+      </div>
     </motion.div>
-    <p className="mt-2 md:mt-3 text-[11px] leading-tight md:text-sm text-[var(--text-primary)] font-normal tracking-wider w-full break-words">
-      {t(material.name)}
-    </p>
-  </motion.div>
-)
+  )
+}
 
 interface CollapsibleMaterialSectionProps {
   materials: {image: string; name: LocalizedString}[]
@@ -160,8 +214,9 @@ const CollapsibleMaterialSection: React.FC<CollapsibleMaterialSectionProps> = ({
     if (carouselRef.current) {
       const h = carouselRef.current.offsetHeight
       if (h > 0) setCarouselHeight(h)
+      carouselRef.current.scrollLeft = 0
     }
-  }, [materials])
+  }, [materials, containerKey])
 
   useEffect(() => {
     const el = carouselRef.current
@@ -297,7 +352,10 @@ const CollapsibleMaterialSection: React.FC<CollapsibleMaterialSectionProps> = ({
       {/* Mobile View: Smooth collapsible container when > 4 materials */}
       <div className="sm:hidden">
         {materials.length <= 4 ? (
-          <div className="grid grid-cols-3 gap-3 pt-1">
+          <div
+            key={containerKey ? `mob-short-${containerKey}` : undefined}
+            className="grid grid-cols-3 gap-3 pt-1"
+          >
             {materials.map((material, index) => (
               <MaterialCard
                 key={`mob-short-${index}-${material.image || index}`}
@@ -305,6 +363,7 @@ const CollapsibleMaterialSection: React.FC<CollapsibleMaterialSectionProps> = ({
                 imageBorderClass={imageBorderClass}
                 t={t}
                 className="w-full"
+                disableVariants={true}
                 onClick={() => onOpenMaterialLightbox(lightboxItems, index)}
               />
             ))}
@@ -330,32 +389,24 @@ const CollapsibleMaterialSection: React.FC<CollapsibleMaterialSectionProps> = ({
               {isExpanded ? (
                 <div className="w-full grid grid-cols-3 gap-3 pt-1 pb-2 px-4">
                   {materials.map((material, index) => (
-                    <motion.div
+                    <MaterialCard
                       key={`grid-${index}-${material.image || index}`}
-                      initial={{opacity: 0, scale: 0.96}}
-                      animate={{opacity: 1, scale: 1}}
-                      transition={{
-                        duration: 0.22,
-                        delay: Math.min(index * 0.02, 0.2),
-                        ease: 'easeOut',
-                      }}
-                    >
-                      <MaterialCard
-                        material={material}
-                        imageBorderClass={imageBorderClass}
-                        t={t}
-                        className="w-full"
-                        disableVariants={true}
-                        onClick={() => onOpenMaterialLightbox(lightboxItems, index)}
-                      />
-                    </motion.div>
+                      material={material}
+                      imageBorderClass={imageBorderClass}
+                      t={t}
+                      className="w-full"
+                      disableVariants={true}
+                      onClick={() => onOpenMaterialLightbox(lightboxItems, index)}
+                    />
                   ))}
                 </div>
               ) : (
                 <div className="w-full">
                   <div
                     ref={carouselRef}
-                    className="w-full flex overflow-x-auto no-scrollbar snap-x snap-mandatory gap-3 pb-3 pt-1 px-4"
+                    key={containerKey ? `mob-car-${containerKey}` : undefined}
+                    className="w-full flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-pl-4 scroll-pr-4 gap-3 pb-3 pt-1"
+                    style={{scrollPaddingLeft: '1rem', scrollPaddingRight: '1rem'}}
                   >
                     {materials.map((material, index) => (
                       <MaterialCard
@@ -363,7 +414,7 @@ const CollapsibleMaterialSection: React.FC<CollapsibleMaterialSectionProps> = ({
                         material={material}
                         imageBorderClass={imageBorderClass}
                         t={t}
-                        className="w-24 shrink-0 snap-start"
+                        className="w-24 shrink-0 snap-start first:ml-4"
                         disableVariants={true}
                         onClick={() => onOpenMaterialLightbox(lightboxItems, index)}
                       />
@@ -372,7 +423,7 @@ const CollapsibleMaterialSection: React.FC<CollapsibleMaterialSectionProps> = ({
                     {/* Extra interactive card at the end of the carousel when not expanded */}
                     <div
                       onClick={handleToggleExpanded}
-                      className="text-center group cursor-pointer flex flex-col items-center w-24 shrink-0 snap-start"
+                      className="text-center group cursor-pointer flex flex-col items-center w-24 shrink-0 snap-start mr-4"
                       role="button"
                       tabIndex={0}
                       title={t('show_more') || 'Daha Fazla Göster'}
@@ -519,9 +570,11 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
         }
       `}</style>
       <div className="pb-4">
-        <h2 className="text-xl font-light text-[var(--text-secondary)] mb-4">
-          {t('material_alternatives')}
-        </h2>
+        <TextMaskReveal delay={80}>
+          <h2 className="text-xl font-light text-[var(--text-secondary)] mb-4">
+            {t('material_alternatives')}
+          </h2>
+        </TextMaskReveal>
         {hasMaterialGroups ? (
           <>
             {/* Group tabs */}
@@ -563,10 +616,10 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                           type="button"
                           role="tab"
                           aria-selected={isSelected}
-                          className="relative shrink-0 px-4 py-0 bg-transparent border-0 rounded-none whitespace-nowrap cursor-pointer focus:outline-none select-none"
+                          className={`relative shrink-0 ${idx === 0 ? 'pl-0' : 'pl-4'} pr-4 py-0 bg-transparent border-0 rounded-none whitespace-nowrap cursor-pointer focus:outline-none select-none`}
                         >
                           <span
-                            className={`relative inline-block py-2.5 text-xs sm:text-sm font-medium tracking-wider transition-colors duration-200 ${
+                            className={`relative inline-block pt-2 pb-1 text-xs sm:text-sm font-medium tracking-wider transition-colors duration-200 ${
                               isSelected
                                 ? 'text-[var(--text-primary)]'
                                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'

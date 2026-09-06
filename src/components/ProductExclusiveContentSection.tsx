@@ -1,5 +1,6 @@
 import type {NavigateFunction} from 'react-router-dom'
 import ScrollReveal from './ScrollReveal'
+import {TextMaskReveal} from './TextMaskReveal'
 import type {LocalizedString, User} from '../types'
 
 interface ExclusiveDownloadItem {
@@ -134,16 +135,20 @@ export function ProductExclusiveContentSection({
     <ScrollReveal delay={600} threshold={0.05}>
       <div className="relative rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)]/70 backdrop-blur p-6 sm:p-8 pb-10">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl md:text-3xl font-light text-[var(--text-primary)]">
-            {t('downloadable_files') || 'Ürün Kaynakları'}
-          </h2>
+          <TextMaskReveal delay={80}>
+            <h2 className="text-2xl md:text-3xl font-light text-[var(--text-primary)]">
+              {t('downloadable_files') || 'Ürün Kaynakları'}
+            </h2>
+          </TextMaskReveal>
         </div>
         <div className={`grid grid-cols-1 ${gridColsClass} gap-6`}>
           {hasImages && (
             <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
-              <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
-                {t('additional_images') || 'Ek Görseller'}
-              </div>
+              <TextMaskReveal delay={120}>
+                <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+                  {t('additional_images') || 'Ek Görseller'}
+                </div>
+              </TextMaskReveal>
               <ul className="space-y-2">
                 {exclusiveContent.images!.map((img, idx) => {
                   const url = typeof img === 'string' ? img : img?.url || img?.image || ''
@@ -199,9 +204,11 @@ export function ProductExclusiveContentSection({
 
           {hasDrawings && (
             <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
-              <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
-                {t('technical_drawings') || 'Teknik Çizimler'}
-              </div>
+              <TextMaskReveal delay={120}>
+                <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+                  {t('technical_drawings') || 'Teknik Çizimler'}
+                </div>
+              </TextMaskReveal>
               <ul className="space-y-2">
                 {exclusiveContent.drawings!.map((doc, idx) => (
                   <li key={idx} className="group">
@@ -226,9 +233,11 @@ export function ProductExclusiveContentSection({
 
           {hasModels3d && (
             <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
-              <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
-                {t('3d_models') || '3D Modeller'}
-              </div>
+              <TextMaskReveal delay={120}>
+                <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+                  {t('3d_models') || '3D Modeller'}
+                </div>
+              </TextMaskReveal>
               <ul className="space-y-2">
                 {exclusiveContent.models3d!.map((model, idx) => (
                   <li key={idx} className="group">

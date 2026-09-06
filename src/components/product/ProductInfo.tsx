@@ -1,7 +1,7 @@
 import React from 'react'
 import {Link} from 'react-router-dom'
 import {useTranslation} from '../../i18n'
-import ScrollReveal from '../ScrollReveal'
+import {TextMaskReveal} from '../TextMaskReveal'
 import PortableTextLite from '../PortableTextLite'
 import type {LocalizedString} from '../../types'
 
@@ -99,45 +99,67 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
       )}
 
       {product.buyable && product.price && product.price > 0 && (
-        <div>
+        <TextMaskReveal delay={120}>
           <p className="text-3xl font-medium text-gray-900 dark:text-gray-100">
             {new Intl.NumberFormat(locale, {
               style: 'currency',
               currency: product.currency || 'TRY',
             }).format(product.price)}
           </p>
-        </div>
+        </TextMaskReveal>
       )}
 
       <div>
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)]">
-          {t(product.name)}
-        </h2>
-        <ScrollReveal delay={200}>
-          {(() => {
-            const desc = t(product.description)
-            const isPortableText =
-              Array.isArray(desc) ||
-              (typeof desc === 'object' &&
-                desc !== null &&
-                (desc as {_type?: string})._type === 'block')
+        <TextMaskReveal delay={60}>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)]">
+            {t(product.name)}
+          </h2>
+        </TextMaskReveal>
 
-            if (isPortableText) {
-              const blocks = Array.isArray(desc) ? desc : [desc]
-              return (
+        {(() => {
+          const desc = t(product.description)
+          const isPortableText =
+            Array.isArray(desc) ||
+            (typeof desc === 'object' &&
+              desc !== null &&
+              (desc as {_type?: string})._type === 'block')
+
+          if (isPortableText) {
+            const blocks = Array.isArray(desc) ? desc : [desc]
+            return (
+              <TextMaskReveal delay={180}>
                 <div className="mt-4 text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed max-w-3xl font-roboto-thin">
                   <PortableTextLite value={blocks} />
                 </div>
-              )
-            }
-
-            return (
-              <p className="mt-4 text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed max-w-3xl font-roboto-thin">
-                {desc}
-              </p>
+              </TextMaskReveal>
             )
-          })()}
-        </ScrollReveal>
+          }
+
+          const rawDesc = typeof desc === 'string' ? desc : ''
+          const paragraphs = rawDesc.split(/\n\n+/).filter(Boolean)
+
+          if (paragraphs.length > 1) {
+            return (
+              <div className="mt-4 space-y-4 max-w-3xl">
+                {paragraphs.map((para, idx) => (
+                  <TextMaskReveal key={idx} delay={180 + idx * 80}>
+                    <p className="text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed font-roboto-thin">
+                      {para}
+                    </p>
+                  </TextMaskReveal>
+                ))}
+              </div>
+            )
+          }
+
+          return (
+            <TextMaskReveal delay={180}>
+              <p className="mt-4 text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed max-w-3xl font-roboto-thin">
+                {rawDesc}
+              </p>
+            </TextMaskReveal>
+          )
+        })()}
       </div>
     </section>
   )

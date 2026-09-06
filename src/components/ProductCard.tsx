@@ -81,7 +81,7 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
         <div
           className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-[var(--bg-primary)]"
           style={{
-            transition: 'scale 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)',
+            transition: 'scale 1.1s cubic-bezier(0.25, 0.1, 0.25, 1)',
           }}
         >
           <OptimizedImage
@@ -89,7 +89,7 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
             srcMobile={mainImageMobile}
             srcDesktop={mainImageDesktop}
             alt={t(product.name)}
-            className="w-full h-full transform transition-transform duration-700 group-hover:scale-[1.04]"
+            className="w-full h-full transform transition-transform duration-1000 ease-out group-hover:scale-[1.04]"
             loading="lazy"
             quality={85}
             crop={mainImageCrop}

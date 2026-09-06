@@ -25,6 +25,7 @@ import {ProductAddToCart} from '../components/product/ProductAddToCart'
 import {useCardTransition} from '../context/CardTransitionContext'
 import {useSiteSettings} from '../context/SiteSettingsContext'
 import {AiRoomPlannerModal} from '../components/AiRoomPlannerModal'
+import {TextMaskReveal} from '../components/TextMaskReveal'
 
 export function ProductDetailPage() {
   const {productId: liveId} = useParams<{productId: string}>()
@@ -343,29 +344,31 @@ export function ProductDetailPage() {
 
           {settings?.enableAiRoomPlanner !== false && (
             <div className="mt-8 pt-6 border-t border-[var(--border-color,rgba(255,255,255,0.1))]">
-              <button
-                onClick={() => setIsAiPlannerOpen(true)}
-                className="group relative inline-flex items-center gap-3 px-7 py-3.5 bg-white hover:bg-neutral-100 text-black font-medium text-xs uppercase tracking-widest rounded-none border border-neutral-300 shadow-none transition-all duration-300 cursor-pointer overflow-hidden"
-              >
-                <div className="w-6 h-6 rounded-none bg-black text-white flex items-center justify-center transition-colors">
-                  <svg
-                    className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                </div>
-                <span className="relative z-10 font-sans tracking-widest text-black font-semibold">
-                  Odamda Gör • AI Oda Tasarımı
-                </span>
-              </button>
+              <TextMaskReveal delay={100} display="inline-block">
+                <button
+                  onClick={() => setIsAiPlannerOpen(true)}
+                  className="group relative inline-flex items-center gap-3 px-7 py-3.5 bg-white hover:bg-neutral-100 text-black font-medium text-xs uppercase tracking-widest rounded-none border border-neutral-300 shadow-none transition-all duration-300 cursor-pointer overflow-hidden"
+                >
+                  <div className="w-6 h-6 rounded-none bg-black text-white flex items-center justify-center transition-colors">
+                    <svg
+                      className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    </svg>
+                  </div>
+                  <span className="relative z-10 font-sans tracking-widest text-black font-semibold">
+                    Odamda Gör • AI Oda Tasarımı
+                  </span>
+                </button>
+              </TextMaskReveal>
             </div>
           )}
 

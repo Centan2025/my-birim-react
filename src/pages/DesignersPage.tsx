@@ -1,4 +1,4 @@
-import {motion} from 'framer-motion'
+import {motion, useReducedMotion} from 'framer-motion'
 import {useNavigate} from 'react-router-dom'
 import type {Designer} from '../types'
 import {useTranslation} from '../i18n'
@@ -12,6 +12,7 @@ export function DesignersPage() {
   const {data: designers = [], isLoading: loading} = useDesigners()
   const {t} = useTranslation()
   const navigate = useNavigate()
+  const shouldReduceMotion = useReducedMotion()
 
   // SEO meta
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
@@ -71,24 +72,68 @@ export function DesignersPage() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: shouldReduceMotion ? 0 : 0.12,
+        delayChildren: shouldReduceMotion ? 0 : 0.1,
       },
     },
   }
 
-  const cardVariants = {
-    hidden: {opacity: 0, scale: 0.95, y: 30},
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ease: [0.215, 0.61, 0.355, 1] as any,
-      },
-    },
-  }
+  const cardVariants = shouldReduceMotion
+    ? {
+        hidden: {opacity: 0},
+        visible: {opacity: 1, transition: {duration: 0.3}},
+      }
+    : {
+        hidden: {
+          opacity: 0,
+          clipPath: 'inset(0% 0% 100% 0%)',
+        },
+        visible: {
+          opacity: 1,
+          clipPath: 'inset(0% 0% 0% 0%)',
+          transition: {
+            duration: 1.15,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ease: [0.19, 1, 0.22, 1] as any,
+          },
+        },
+      }
+
+  const imageVariants = shouldReduceMotion
+    ? {
+        hidden: {scale: 1},
+        visible: {scale: 1},
+      }
+    : {
+        hidden: {scale: 1.12},
+        visible: {
+          scale: 1,
+          transition: {
+            duration: 1.4,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ease: [0.19, 1, 0.22, 1] as any,
+          },
+        },
+      }
+
+  const contentVariants = shouldReduceMotion
+    ? {
+        hidden: {opacity: 1, y: 0},
+        visible: {opacity: 1, y: 0},
+      }
+    : {
+        hidden: {opacity: 0, y: 16},
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: {
+            duration: 0.8,
+            delay: 0.2,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ease: [0.19, 1, 0.22, 1] as any,
+          },
+        },
+      }
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] overflow-x-hidden pt-20 md:pt-20 lg:pt-20 pb-32">
@@ -131,57 +176,68 @@ export function DesignersPage() {
             <motion.div
               key={designer.id}
               variants={cardVariants}
-              whileHover={{y: -8}}
+              whileHover={shouldReduceMotion ? undefined : {y: -8}}
               onClick={() => navigate(`/designer/${designer.id}`)}
-              className="group relative cursor-pointer overflow-hidden aspect-[4/5] bg-[var(--bg-secondary)] border border-[var(--border-primary)]/20 transition-all duration-500"
+              className="group relative cursor-pointer overflow-hidden aspect-[4/5] bg-[var(--bg-secondary)] border border-[var(--border-primary)]/20"
+              style={{willChange: 'clip-path, transform'}}
             >
               {/* Image Container */}
               <div className="w-full h-full overflow-hidden relative">
-                <OptimizedImage
-                  alt={t(designer.name)}
-                  className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0 brightness-[1.08] contrast-[1.02]"
-                  src={getImageUrl(designer)}
-                  srcMobile={
-                    typeof designer.image === 'object' ? designer.image.urlMobile : undefined
-                  }
-                  srcDesktop={
-                    typeof designer.image === 'object' ? designer.image.urlDesktop : undefined
-                  }
-                  crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
-                  hotspot={typeof designer.image === 'object' ? designer.image.hotspot : undefined}
-                  origWidth={
-                    typeof designer.image === 'object' ? designer.image.origWidth : undefined
-                  }
-                  origHeight={
-                    typeof designer.image === 'object' ? designer.image.origHeight : undefined
-                  }
-                  cropMobile={
-                    typeof designer.image === 'object' ? designer.image.cropMobile : undefined
-                  }
-                  hotspotMobile={
-                    typeof designer.image === 'object' ? designer.image.hotspotMobile : undefined
-                  }
-                  origWidthMobile={
-                    typeof designer.image === 'object' ? designer.image.origWidthMobile : undefined
-                  }
-                  origHeightMobile={
-                    typeof designer.image === 'object' ? designer.image.origHeightMobile : undefined
-                  }
-                  cropDesktop={
-                    typeof designer.image === 'object' ? designer.image.cropDesktop : undefined
-                  }
-                  hotspotDesktop={
-                    typeof designer.image === 'object' ? designer.image.hotspotDesktop : undefined
-                  }
-                  origWidthDesktop={
-                    typeof designer.image === 'object' ? designer.image.origWidthDesktop : undefined
-                  }
-                  origHeightDesktop={
-                    typeof designer.image === 'object'
-                      ? designer.image.origHeightDesktop
-                      : undefined
-                  }
-                />
+                <motion.div variants={imageVariants} className="w-full h-full">
+                  <OptimizedImage
+                    alt={t(designer.name)}
+                    className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0 brightness-[1.08] contrast-[1.02]"
+                    src={getImageUrl(designer)}
+                    srcMobile={
+                      typeof designer.image === 'object' ? designer.image.urlMobile : undefined
+                    }
+                    srcDesktop={
+                      typeof designer.image === 'object' ? designer.image.urlDesktop : undefined
+                    }
+                    crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
+                    hotspot={
+                      typeof designer.image === 'object' ? designer.image.hotspot : undefined
+                    }
+                    origWidth={
+                      typeof designer.image === 'object' ? designer.image.origWidth : undefined
+                    }
+                    origHeight={
+                      typeof designer.image === 'object' ? designer.image.origHeight : undefined
+                    }
+                    cropMobile={
+                      typeof designer.image === 'object' ? designer.image.cropMobile : undefined
+                    }
+                    hotspotMobile={
+                      typeof designer.image === 'object' ? designer.image.hotspotMobile : undefined
+                    }
+                    origWidthMobile={
+                      typeof designer.image === 'object'
+                        ? designer.image.origWidthMobile
+                        : undefined
+                    }
+                    origHeightMobile={
+                      typeof designer.image === 'object'
+                        ? designer.image.origHeightMobile
+                        : undefined
+                    }
+                    cropDesktop={
+                      typeof designer.image === 'object' ? designer.image.cropDesktop : undefined
+                    }
+                    hotspotDesktop={
+                      typeof designer.image === 'object' ? designer.image.hotspotDesktop : undefined
+                    }
+                    origWidthDesktop={
+                      typeof designer.image === 'object'
+                        ? designer.image.origWidthDesktop
+                        : undefined
+                    }
+                    origHeightDesktop={
+                      typeof designer.image === 'object'
+                        ? designer.image.origHeightDesktop
+                        : undefined
+                    }
+                  />
+                </motion.div>
 
                 {/* Refined Overlays */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-50 group-hover:opacity-25 transition-opacity duration-700"></div>
@@ -192,7 +248,7 @@ export function DesignersPage() {
               <div className="absolute bottom-0 left-0 w-full p-8 lg:p-10 translate-y-[calc(100%-110px)] group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)]">
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 border-t border-white/10"></div>
 
-                <div className="relative z-10">
+                <motion.div variants={contentVariants} className="relative z-10">
                   <div className="overflow-hidden mb-2">
                     <p className="text-[9px] tracking-[0.5em] font-medium text-white/40 uppercase group-hover:text-white/60 transition-colors duration-500">
                       {t('designer') || 'Tasarımcı'}
@@ -214,7 +270,7 @@ export function DesignersPage() {
                       {t('explore_designer') || 'View Profile'}
                     </span>
                   </div>
-                </div>
+                </motion.div>
               </div>
 
               {/* Decorative Linear Accents */}

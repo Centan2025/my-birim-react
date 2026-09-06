@@ -178,5 +178,8 @@ describe('ProductMaterials - Mobile Collapsible Animation', () => {
       'aria-selected',
       'true'
     )
+
+    // New kartela's material is rendered
+    expect(screen.getAllByText(/deri 1|leather 1/i).length).toBeGreaterThan(0)
   })
 })
