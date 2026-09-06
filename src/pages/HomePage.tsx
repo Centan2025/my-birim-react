@@ -165,7 +165,7 @@ export function HomePage() {
     }
   }, [isMobile, viewportWidth, mobileHeroHeight])
 
-  // Desktop Home Page Section-to-Section Smooth Gliding Scroll Snap Controller (Strict intentional wheel only)
+  // Desktop Home Page Section Snap & Smooth Navigation Controller
   useEffect(() => {
     if (isMobile) return
 
@@ -173,8 +173,43 @@ export function HomePage() {
     let lastSnapTime = 0
     let accumulatedDelta = 0
     let resetTimer: ReturnType<typeof setTimeout> | null = null
-    const INTENTIONAL_THRESHOLD = 75 // Sadece belirgin ve bilinçli tekerlek kaydırmalarında tetikle
-    const COOLDOWN_MS = 900 // Snap animasyonu ve atalet boyunca kilit
+    let safetyUnlockTimer: ReturnType<typeof setTimeout> | null = null
+    const INTENTIONAL_THRESHOLD = 50 // Belirgin kaydırmada tetikle
+    const COOLDOWN_MS = 400 // Kısa ve akıcı geçiş süresi
+
+    const snapTo = (targetY: number) => {
+      isSnapping = true
+      lastSnapTime = Date.now()
+
+      const unlock = () => {
+        isSnapping = false
+        if (safetyUnlockTimer) {
+          clearTimeout(safetyUnlockTimer)
+          safetyUnlockTimer = null
+        }
+      }
+
+      if (safetyUnlockTimer) clearTimeout(safetyUnlockTimer)
+      safetyUnlockTimer = setTimeout(unlock, 600)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const win = window as any
+      if (win.lenis && typeof win.lenis.scrollTo === 'function') {
+        win.lenis.scrollTo(targetY, {
+          offset: 0,
+          duration: 0.6,
+          lock: false,
+          easing: (t: number) => 1 - Math.pow(1 - t, 3),
+          onComplete: unlock,
+        })
+      } else {
+        window.scrollTo({
+          top: targetY,
+          behavior: 'smooth',
+        })
+        setTimeout(unlock, 500)
+      }
+    }
 
     const handleWheel = (e: WheelEvent) => {
       // Yatay kaydırma, Ctrl+zoom es geç
@@ -190,21 +225,18 @@ export function HomePage() {
 
       const now = Date.now()
       if (isSnapping || now - lastSnapTime < COOLDOWN_MS) {
-        accumulatedDelta = 0
         return
       }
 
-      // Mikro titreşimleri ve hafif parmak temaslarını yoksay
-      if (Math.abs(e.deltaY) < 20) {
-        return
-      }
+      // Mikro titreşimleri yoksay
+      if (Math.abs(e.deltaY) < 15) return
 
       accumulatedDelta += e.deltaY
 
       if (resetTimer) clearTimeout(resetTimer)
       resetTimer = setTimeout(() => {
         accumulatedDelta = 0
-      }, 150)
+      }, 120)
 
       if (Math.abs(accumulatedDelta) < INTENTIONAL_THRESHOLD) {
         return
@@ -217,11 +249,27 @@ export function HomePage() {
       const scrollY = window.scrollY
       const docHeight = document.documentElement.scrollHeight
 
-      // Hero ve içerik bloklarını snap hedefleri olarak al
       const heroElem = document.getElementById('home-hero-section')
+      const heroHeight = heroElem ? heroElem.offsetHeight : winHeight
+
+      // Yukarı kaydırırken Hero bölgesine yakınsak DOĞRUDAN Hero'ya git (0)
+      if (direction === 'up') {
+        if (scrollY <= 10) return
+        if (scrollY <= heroHeight + 120) {
+          snapTo(0)
+          return
+        }
+      }
+
+      // En altta footer'a doğru serbest doğal geçiş
+      if (direction === 'down' && winHeight + scrollY >= docHeight - 60) {
+        return
+      }
+
+      // Hero ve içerik bloklarını hedefler olarak al
       const blockElems = Array.from(
         document.querySelectorAll<HTMLElement>('.home-content-block-snap')
-      )
+      ).filter(el => el && el.offsetHeight > 0)
 
       const targets: HTMLElement[] = []
       if (heroElem) targets.push(heroElem)
@@ -229,61 +277,75 @@ export function HomePage() {
 
       if (targets.length === 0) return
 
-      // Sayfanın en üstünde yukarı veya en altında aşağı aşırı snap yapılmasını önle
-      if (direction === 'up' && scrollY < 40) return
-      if (direction === 'down' && winHeight + scrollY >= docHeight - 80) return
-
-      // Aktif ekrandaki en yakın bloğu bul
+      // Viewport merkezine göre aktif bloğu bul
+      const viewportCenter = scrollY + winHeight * 0.45
       let currentIndex = 0
       let closestDist = Infinity
 
       for (let i = 0; i < targets.length; i++) {
         const el = targets[i]
         if (!el) continue
-        const rect = el.getBoundingClientRect()
-        const dist = Math.abs(rect.top)
+        const top = el.offsetTop
+        const height = el.offsetHeight
+
+        if (viewportCenter >= top && viewportCenter <= top + height) {
+          currentIndex = i
+          break
+        }
+        const dist = Math.abs(top - scrollY)
         if (dist < closestDist) {
           closestDist = dist
           currentIndex = i
         }
       }
 
-      let targetElem: HTMLElement | null = null
+      const currentElem = targets[currentIndex]
+      if (!currentElem) return
+      const currentRect = currentElem.getBoundingClientRect()
+
+      let targetScrollY: number | null = null
 
       if (direction === 'down') {
-        if (currentIndex < targets.length - 1) {
-          targetElem = targets[currentIndex + 1] || null
+        const remainingBelow = currentRect.bottom - winHeight
+
+        // Eğer mevcut bölüm ekrandan uzunsa ve altı henüz ekranda değilse kalan kısmı göster
+        if (remainingBelow > 40) {
+          const step = Math.min(remainingBelow, winHeight * 0.8)
+          targetScrollY = scrollY + step
+        } else if (currentIndex < targets.length - 1) {
+          const nextElem = targets[currentIndex + 1]
+          if (nextElem) {
+            targetScrollY = scrollY + nextElem.getBoundingClientRect().top
+          }
         }
       } else {
-        if (currentIndex > 0) {
-          targetElem = targets[currentIndex - 1] || null
+        // direction === 'up'
+        const hiddenAbove = -currentRect.top
+
+        // Eğer bu bölümün üst kısmı ekranın yukarısında kalmışsa önce orayı göster
+        if (hiddenAbove > 40) {
+          const step = Math.min(hiddenAbove, winHeight * 0.8)
+          targetScrollY = scrollY - step
+        } else if (currentIndex > 0) {
+          const prevElem = targets[currentIndex - 1]
+          if (currentIndex - 1 === 0) {
+            // Önceki hedef Hero ise doğrudan en tepeye git
+            targetScrollY = 0
+          } else if (prevElem) {
+            const prevRect = prevElem.getBoundingClientRect()
+            if (prevRect.height > winHeight) {
+              targetScrollY = scrollY + prevRect.bottom - winHeight
+            } else {
+              targetScrollY = scrollY + prevRect.top
+            }
+          }
+        } else {
+          targetScrollY = 0
         }
       }
 
-      if (targetElem) {
-        const targetRect = targetElem.getBoundingClientRect()
-        if (Math.abs(targetRect.top) < 15) return
-
-        isSnapping = true
-        lastSnapTime = Date.now()
-
-        const unlock = () => {
-          isSnapping = false
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const win = window as any
-        if (win.lenis && typeof win.lenis.scrollTo === 'function') {
-          win.lenis.scrollTo(targetElem, {
-            offset: 0,
-            duration: 0.8,
-            easing: (t: number) => 1 - Math.pow(1 - t, 3),
-            onComplete: unlock,
-          })
-        } else {
-          targetElem.scrollIntoView({behavior: 'smooth', block: 'start'})
-          setTimeout(unlock, 700)
-        }
+      if (targetScrollY !== null && Math.abs(targetScrollY - scrollY) > 15) {
+        snapTo(targetScrollY)
       }
     }
 
@@ -292,6 +354,7 @@ export function HomePage() {
     return () => {
       window.removeEventListener('wheel', handleWheel)
       if (resetTimer) clearTimeout(resetTimer)
+      if (safetyUnlockTimer) clearTimeout(safetyUnlockTimer)
     }
   }, [isMobile])
 
@@ -589,6 +652,7 @@ export function HomePage() {
 
         return (
           <section
+            id="home-quick-banner"
             className={`w-full bg-[#484d54] text-white transition-colors duration-500 font-roboto ${
               !hasTextContent ? 'py-3 md:py-4' : 'py-3.5 md:py-4'
             }`}
