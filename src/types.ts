@@ -837,6 +837,9 @@ export interface ContactLocationMedia {
     }
     _type?: string
   }
+  imageR2?: unknown
+  imageDesktopR2?: unknown
+  imageMobileR2?: unknown
   videoFile?: {
     asset?: {
       _ref?: string
@@ -845,6 +848,7 @@ export interface ContactLocationMedia {
     }
     _type?: string
   }
+  videoFileR2?: unknown
   url?: string
 }
 
@@ -854,9 +858,19 @@ export interface ContactLocationMedia {
 export interface ContactLocation {
   type: LocalizedString
   title: LocalizedString
+  imageR2?: unknown
+  image?: {
+    asset?: {
+      _ref?: string
+      _type?: string
+      url?: string
+    }
+    _type?: string
+  }
   address: string
   phone: string
   email?: string
+  hours?: LocalizedString | string
   mapEmbedUrl?: string
   media?: ContactLocationMedia[]
   isMediaVisible?: boolean

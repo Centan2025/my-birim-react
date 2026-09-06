@@ -774,6 +774,18 @@ export const contactLocation = defineType({
     defineField({name: 'phone', title: 'Telefon', type: 'string'}),
     defineField({name: 'email', title: 'E-posta', type: 'string'}),
     defineField({
+      name: 'imageR2',
+      title: 'Kapak Görseli (Ana Görsel)',
+      type: 'r2Asset',
+      description: 'Lokasyon kartında görüntülenecek ana fotoğraf',
+    }),
+    defineField({
+      name: 'hours',
+      title: 'Çalışma Saatleri',
+      type: 'localizedString',
+      description: 'Örn: Hafta İçi: 09:00 – 18:30 · Cumartesi: 10:00 – 17:00',
+    }),
+    defineField({
       name: 'mapEmbedUrl',
       title: 'Google Maps Embed URL',
       type: 'string',
@@ -781,10 +793,10 @@ export const contactLocation = defineType({
     }),
     defineField({
       name: 'media',
-      title: 'Lokasyon Medyaları',
+      title: 'Lokasyon Medyaları (Galeri / Ek Görseller)',
       type: 'array',
       of: [{type: 'contactLocationMedia'}],
-      description: 'Lokasyon için bant şeklinde gösterilecek medyalar',
+      description: 'Lokasyon için tıklanınca tam ekran açılacak ek fotoğraflar/videolar',
     }),
     defineField({
       name: 'isMediaVisible',
@@ -800,21 +812,19 @@ export const contactLocation = defineType({
       typeTr: 'type.tr',
       typeEn: 'type.en',
       address: 'address',
+      imageR2Url: 'imageR2.url',
+      media0Url: 'media.0.imageR2.url',
     },
     prepare(selection: Record<string, unknown>) {
-      const {titleTr, titleEn, typeTr, typeEn, address} = selection as {
-        titleTr?: string
-        titleEn?: string
-        typeTr?: string
-        typeEn?: string
-        address?: string
-      }
+      const {titleTr, titleEn, typeTr, typeEn, address, imageR2Url, media0Url} = selection as any
       const title = titleTr || titleEn || 'İsimsiz Lokasyon'
       const locType = typeTr || typeEn || ''
       const subtitle = locType ? `${locType}${address ? ` — ${address}` : ''}` : address || ''
+      const finalUrl = getPreviewUrl(imageR2Url || media0Url)
       return {
         title,
         subtitle,
+        media: renderPreviewMedia(finalUrl, 'image'),
       }
     },
   },

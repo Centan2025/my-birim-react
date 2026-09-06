@@ -1,57 +1,72 @@
-import React, {Suspense, lazy} from 'react'
+import React, {Suspense} from 'react'
 import {Routes, Route, Location} from 'react-router-dom'
 import {PageLoading} from '../components/LoadingSpinner'
 import {ErrorBoundary} from '../components/ErrorBoundary'
 import {Footer} from '../components/Footer'
+import {lazyWithRetry} from '../utils/lazyWithRetry'
 
-// Lazy loaded pages
-const HomePage = lazy(() => import('../pages/HomePage').then(m => ({default: m.HomePage})))
-const CategoriesPage = lazy(() =>
+// Lazy loaded pages with auto-retry on new deployment / chunk failure
+const HomePage = lazyWithRetry(() => import('../pages/HomePage').then(m => ({default: m.HomePage})))
+const CategoriesPage = lazyWithRetry(() =>
   import('../pages/CategoriesPage').then(m => ({default: m.CategoriesPage}))
 )
-const ProductsPage = lazy(() =>
+const ProductsPage = lazyWithRetry(() =>
   import('../pages/ProductsPage').then(m => ({default: m.ProductsPage}))
 )
-const ProductDetailPage = lazy(() =>
+const ProductDetailPage = lazyWithRetry(() =>
   import('../pages/ProductDetailPage').then(m => ({default: m.ProductDetailPage}))
 )
-const DesignersPage = lazy(() =>
+const DesignersPage = lazyWithRetry(() =>
   import('../pages/DesignersPage').then(m => ({default: m.DesignersPage}))
 )
-const DesignerDetailPage = lazy(() =>
+const DesignerDetailPage = lazyWithRetry(() =>
   import('../pages/DesignerDetailPage').then(m => ({default: m.DesignerDetailPage}))
 )
-const ProjectsPage = lazy(() =>
+const ProjectsPage = lazyWithRetry(() =>
   import('../pages/ProjectsPage').then(m => ({default: m.ProjectsPage}))
 )
-const ProjectDetailPage = lazy(() =>
+const ProjectDetailPage = lazyWithRetry(() =>
   import('../pages/ProjectDetailPage').then(m => ({default: m.ProjectDetailPage}))
 )
-const AboutPageNew = lazy(() =>
+const AboutPageNew = lazyWithRetry(() =>
   import('../pages/AboutPageNew').then(m => ({default: m.AboutPageNew}))
 )
-const FactoryPage = lazy(() => import('../pages/FactoryPage').then(m => ({default: m.FactoryPage})))
-const ContactPage = lazy(() => import('../pages/ContactPage').then(m => ({default: m.ContactPage})))
-const LoginPage = lazy(() => import('../pages/LoginPage').then(m => ({default: m.LoginPage})))
-const ProfilePage = lazy(() => import('../pages/ProfilePage').then(m => ({default: m.ProfilePage})))
-const VerifyEmailPage = lazy(() =>
+const FactoryPage = lazyWithRetry(() =>
+  import('../pages/FactoryPage').then(m => ({default: m.FactoryPage}))
+)
+const ContactPage = lazyWithRetry(() =>
+  import('../pages/ContactPage').then(m => ({default: m.ContactPage}))
+)
+const LoginPage = lazyWithRetry(() =>
+  import('../pages/LoginPage').then(m => ({default: m.LoginPage}))
+)
+const ProfilePage = lazyWithRetry(() =>
+  import('../pages/ProfilePage').then(m => ({default: m.ProfilePage}))
+)
+const VerifyEmailPage = lazyWithRetry(() =>
   import('../pages/VerifyEmailPage').then(m => ({default: m.VerifyEmailPage}))
 )
-const ResetPasswordPage = lazy(() =>
+const ResetPasswordPage = lazyWithRetry(() =>
   import('../pages/ResetPasswordPage').then(m => ({default: m.ResetPasswordPage}))
 )
-const NewsPage = lazy(() => import('../pages/NewsPage').then(m => ({default: m.NewsPage})))
-const NewsDetailPage = lazy(() =>
+const NewsPage = lazyWithRetry(() => import('../pages/NewsPage').then(m => ({default: m.NewsPage})))
+const NewsDetailPage = lazyWithRetry(() =>
   import('../pages/NewsDetailPage').then(m => ({default: m.NewsDetailPage}))
 )
-const CookiesPage = lazy(() => import('../pages/CookiesPage').then(m => ({default: m.default})))
-const PrivacyPage = lazy(() => import('../pages/PrivacyPage').then(m => ({default: m.default})))
-const TermsPage = lazy(() => import('../pages/TermsPage').then(m => ({default: m.default})))
-const KvkkPage = lazy(() => import('../pages/KvkkPage').then(m => ({default: m.default})))
-const AiRoomPlannerPage = lazy(() =>
+const CookiesPage = lazyWithRetry(() =>
+  import('../pages/CookiesPage').then(m => ({default: m.default}))
+)
+const PrivacyPage = lazyWithRetry(() =>
+  import('../pages/PrivacyPage').then(m => ({default: m.default}))
+)
+const TermsPage = lazyWithRetry(() =>
+  import('../pages/TermsPage').then(m => ({default: m.default}))
+)
+const KvkkPage = lazyWithRetry(() => import('../pages/KvkkPage').then(m => ({default: m.default})))
+const AiRoomPlannerPage = lazyWithRetry(() =>
   import('../pages/AiRoomPlannerPage').then(m => ({default: m.AiRoomPlannerPage}))
 )
-const AnalyticsPage = lazy(() => import('../pages/AnalyticsPage'))
+const AnalyticsPage = lazyWithRetry(() => import('../pages/AnalyticsPage'))
 
 interface PageBoundaryProps {
   children: React.ReactNode
@@ -192,7 +207,23 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           path="/contact"
           element={
             <PageBoundary pageName="İletişim">
-              <ContactPage />
+              <ContactPage defaultVersion="v2" />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/contact-v2"
+          element={
+            <PageBoundary pageName="İletişim V2">
+              <ContactPage defaultVersion="v2" />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/contact-v1"
+          element={
+            <PageBoundary pageName="İletişim V1">
+              <ContactPage defaultVersion="v1" />
             </PageBoundary>
           }
         />

@@ -208,32 +208,70 @@ export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
 
 export const getContactPageContent = async (): Promise<ContactPageContent> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type == "contactPage"][0]{ ..., locations[]{ ..., media[]{ type, url, imageR2, videoFileR2 } } }`
+    const q = groq`*[_type == "contactPage"][0]{ 
+      ..., 
+      locations[]{ 
+        ..., 
+        imageR2,
+        image,
+        media[]{ 
+          ...,
+          type, 
+          url, 
+          image, 
+          imageR2, 
+          imageDesktopR2, 
+          imageMobileR2, 
+          videoFile, 
+          videoFileR2 
+        } 
+      } 
+    }`
     const data = await sanity.fetch(q)
     if (data?.locations) {
       data.locations = data.locations.map((loc: Record<string, unknown>) => {
+        const rawLocImage = (loc['imageR2'] || loc['image']) as SanityImageLike | undefined
+        const locImageUrl = rawLocImage ? mapImage(rawLocImage) : undefined
+        const locImageMeta = rawLocImage ? mapR2Metadata(rawLocImage) : {}
+
         const media = loc['media']
+        let processedMedia: Record<string, unknown>[] = []
         if (media && Array.isArray(media)) {
-          const processedMedia = (media as Record<string, unknown>[])
+          processedMedia = (media as Record<string, unknown>[])
             .map((mediaItem: Record<string, unknown>) => {
               let mediaUrl = mediaItem['url'] as string | undefined
-              const type = mediaItem['type'] as string | undefined
-              const imageR2 = mediaItem['imageR2']
-              const videoFileR2 = mediaItem['videoFileR2'] as Record<string, unknown> | undefined
+              const type = (mediaItem['type'] as string | undefined) || 'image'
+              const rawImage = (mediaItem['imageR2'] ||
+                mediaItem['imageDesktopR2'] ||
+                mediaItem['imageMobileR2'] ||
+                mediaItem['image']) as SanityImageLike | undefined
+              const videoFileR2 = (mediaItem['videoFileR2'] || mediaItem['videoFile']) as
+                | Record<string, unknown>
+                | undefined
 
               if (type === 'image') {
-                mediaUrl = mapImage(imageR2 as never) || mediaUrl
+                mediaUrl = (rawImage ? mapImage(rawImage) : null) || mediaUrl
               } else if (type === 'video') {
                 const videoUrl = videoFileR2?.['url'] as string | undefined
                 mediaUrl = (videoUrl ? rewriteR2Url(videoUrl) : null) || mediaUrl
               }
-              const metadata = imageR2 ? mapR2Metadata(imageR2) : {}
+              const metadata = rawImage ? mapR2Metadata(rawImage) : {}
               return {...mediaItem, url: mediaUrl, ...metadata}
             })
-            .filter((m: Record<string, unknown>) => typeof m['url'] === 'string')
-          return {...loc, media: processedMedia}
+            .filter(
+              (m: Record<string, unknown>) => typeof m['url'] === 'string' && Boolean(m['url'])
+            )
         }
-        return loc
+
+        if (locImageUrl && processedMedia.length === 0) {
+          processedMedia = [{type: 'image', url: locImageUrl, ...locImageMeta}]
+        }
+
+        return {
+          ...loc,
+          image: locImageUrl ? {url: locImageUrl, ...locImageMeta} : loc['image'],
+          media: processedMedia,
+        }
       })
     }
     return data

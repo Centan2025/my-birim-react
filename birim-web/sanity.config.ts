@@ -33,9 +33,12 @@ if (typeof window === 'undefined') {
   // @ts-ignore
   if (!globalThis.Element.prototype.matches) globalThis.Element.prototype.matches = () => false
   // @ts-ignore
-  if (!globalThis.Element.prototype.closest) globalThis.Element.prototype.closest = () => null
-  // @ts-ignore
-  globalThis.navigator = globalThis.navigator || {userAgent: 'node'}
+  try {
+    // @ts-ignore
+    globalThis.navigator = globalThis.navigator || {userAgent: 'node'}
+  } catch {
+    // ignore
+  }
 }
 
 import {structureTool} from 'sanity/structure'

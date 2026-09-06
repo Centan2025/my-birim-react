@@ -9,6 +9,19 @@ import {initWebVitals} from './lib/webVitals'
 import {validateEnv, checkRequiredEnv} from './lib/envValidation'
 import './index.css'
 
+// Handle Vite dynamic import / chunk preload errors (happens when a new build is deployed and chunk hashes change)
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', () => {
+    const key = 'vite_preload_reload'
+    const lastReload = sessionStorage.getItem(key)
+    const now = Date.now()
+    if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+      sessionStorage.setItem(key, String(now))
+      window.location.reload()
+    }
+  })
+}
+
 const DEBUG_LOGS = (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
 // Validate environment variables

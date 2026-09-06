@@ -1,4 +1,4 @@
-import {Suspense, lazy, useEffect} from 'react'
+import {Suspense, useEffect} from 'react'
 import {BrowserRouter, Routes, Route, useLocation, useNavigate} from 'react-router-dom'
 import {QueryClientProvider} from '@tanstack/react-query'
 
@@ -21,8 +21,10 @@ import {BackToTopButton} from './components/BackToTopButton'
 import {MediaCropDebugOverlay} from './components/debug/MediaCropDebugOverlay'
 import {MainLayout} from './layouts/MainLayout'
 
+import {lazyWithRetry} from './utils/lazyWithRetry'
+
 // Lazy load pages for code splitting
-const ComingSoonPage = lazy(() =>
+const ComingSoonPage = lazyWithRetry(() =>
   import('./pages/ComingSoonPage').then(m => ({default: m.ComingSoonPage}))
 )
 

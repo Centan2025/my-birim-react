@@ -1,5 +1,6 @@
 import {Component, ErrorInfo, ReactNode} from 'react'
 import {errorReporter} from '../lib/errorReporting'
+import {isChunkLoadError} from '../utils/lazyWithRetry'
 
 interface Props {
   children: ReactNode
@@ -31,6 +32,18 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // If it's a chunk loading failure from a new deployment, auto-reload once to refresh chunks
+    if (isChunkLoadError(error)) {
+      const key = 'error_boundary_chunk_reload'
+      const lastReload = sessionStorage.getItem(key)
+      const now = Date.now()
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        sessionStorage.setItem(key, String(now))
+        window.location.reload()
+        return
+      }
+    }
+
     // Log error to console in development
     if (import.meta.env.DEV) {
       console.error('ErrorBoundary caught an error:', error, errorInfo)
@@ -53,6 +66,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = () => {
+    if (isChunkLoadError(this.state.error)) {
+      window.location.reload()
+      return
+    }
+
     this.setState({
       hasError: false,
       error: null,
@@ -66,12 +84,18 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback
       }
 
+      const isChunkError = isChunkLoadError(this.state.error)
+
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
           <div className="max-w-2xl w-full text-center">
-            <h1 className="text-4xl font-bold mb-4">Bir Hata Oluştu</h1>
+            <h1 className="text-4xl font-bold mb-4">
+              {isChunkError ? 'Yeni Bir Güncelleme Mevcut' : 'Bir Hata Oluştu'}
+            </h1>
             <p className="text-gray-300 mb-6">
-              Üzgünüz, beklenmeyen bir hata oluştu. Lütfen sayfayı yenileyin veya ana sayfaya dönün.
+              {isChunkError
+                ? 'Uygulamanın yeni bir sürümü yayınlandı. Sayfayı yenileyerek kesintisiz devam edebilirsiniz.'
+                : 'Üzgünüz, beklenmeyen bir hata oluştu. Lütfen sayfayı yenileyin veya ana sayfaya dönün.'}
             </p>
 
             {import.meta.env.DEV && this.state.error && (
@@ -87,10 +111,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div className="mt-8 flex gap-4 justify-center">
               <button
-                onClick={this.handleReset}
-                className="px-6 py-2 bg-white text-gray-900 rounded hover:bg-gray-200 transition-colors"
+                onClick={isChunkError ? () => window.location.reload() : this.handleReset}
+                className="px-6 py-2 bg-white text-gray-900 rounded hover:bg-gray-200 transition-colors cursor-pointer"
               >
-                Tekrar Dene
+                {isChunkError ? 'Sayfayı Yenile' : 'Tekrar Dene'}
               </button>
               <a
                 href="/"
