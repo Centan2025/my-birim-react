@@ -79,9 +79,13 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         transitionDelay: hasEntered && !isClosing ? '0ms' : `${animationDelay}ms`,
         transitionDuration: hasEntered && !isClosing ? '0ms' : '500ms',
         height: '100dvh',
-        width: '100vw',
-        minWidth: '100vw',
-        maxWidth: '100vw',
+        width: '100%',
+        minWidth: '100%',
+        maxWidth: '100%',
+        flex: '0 0 100%',
+        flexShrink: 0,
+        flexGrow: 0,
+        flexBasis: '100%',
         marginTop: '0',
         marginBottom: '0',
         boxSizing: 'border-box',
@@ -105,7 +109,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           fetchPriority="high"
           style={{
             maxHeight: '100dvh',
-            maxWidth: '100vw',
+            maxWidth: '100%',
             width: '100%',
             height: '100%',
             display: 'flex',
@@ -140,7 +144,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           className="w-full h-full object-contain mx-auto my-auto"
           style={{
             maxHeight: '100dvh',
-            maxWidth: '100vw',
+            maxWidth: '100%',
             width: '100%',
             height: '100%',
             display: 'block',
@@ -157,14 +161,14 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         />
       ) : (
         <iframe
-          className="w-full h-full max-w-[100vw] max-h-[100dvh] mx-auto my-auto"
+          className="w-full h-full max-w-full max-h-[100dvh] mx-auto my-auto"
           title={`fullscreen-media-youtube-${index}`}
           src={toYouTubeEmbed(item.url)}
           allow="autoplay; encrypted-media; fullscreen"
           frameBorder="0"
           style={{
             height: '100dvh',
-            width: '100vw',
+            width: '100%',
             aspectRatio: '16/9',
             margin: 'auto',
           }}
