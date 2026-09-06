@@ -353,7 +353,7 @@ export function ProjectDetailPageV2() {
     <div className="min-h-screen bg-white text-[var(--text-primary)] selection:bg-neutral-900 selection:text-white font-sans">
       {/* 1. CINEMATIC FULL-BLEED HERO BANNER */}
       <section
-        className="relative w-full h-[calc(100dvh-48px)] md:h-[calc(100dvh-56px)] min-h-[600px] flex flex-col justify-end overflow-hidden"
+        className="relative w-full h-[calc(100vh-48px)] h-[calc(100svh-48px)] md:h-[calc(100vh-56px)] md:h-[calc(100svh-56px)] md:min-h-[600px] flex flex-col justify-end overflow-hidden hero-section"
         onMouseEnter={() => setIsAutoplayPaused(true)}
         onMouseLeave={() => setIsAutoplayPaused(false)}
       >

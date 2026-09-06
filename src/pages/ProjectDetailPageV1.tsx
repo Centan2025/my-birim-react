@@ -581,7 +581,7 @@ export function ProjectDetailPageV1() {
 
   return (
     <div
-      className={`min-h-screen bg-[var(--bg-primary)] transition-all duration-700 ease-out ${
+      className={`min-h-screen bg-[var(--bg-primary)] transition-opacity transition-transform duration-700 ease-out ${
         isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
       }`}
     >
@@ -610,7 +610,7 @@ export function ProjectDetailPageV1() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         style={{touchAction: 'pan-y'}}
-        className="relative w-full h-[calc(100dvh-48px)] md:h-[calc(100dvh-56px)] overflow-hidden select-none touch-pan-y"
+        className="relative w-full h-[calc(100vh-48px)] h-[calc(100svh-48px)] md:h-[calc(100vh-56px)] md:h-[calc(100svh-56px)] overflow-hidden select-none touch-pan-y hero-section"
       >
         {heroCount > 0 ? (
           <div className="absolute inset-0 overflow-hidden">
