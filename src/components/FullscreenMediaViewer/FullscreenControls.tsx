@@ -40,7 +40,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
         <button
           type="button"
           onClick={handleClose}
-          className={`group flex items-center justify-center rounded-none border border-white/80 bg-black/60 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 active:scale-95 shadow-xl ${
+          className={`group flex items-center justify-center rounded-none border border-white/80 bg-black/30 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/50 active:scale-95 shadow-xl ${
             isMobile ? 'h-12 w-12' : 'h-14 w-14'
           }`}
           style={{
@@ -87,7 +87,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
           <button
             type="button"
             onClick={onPrev}
-            className={`group flex items-center justify-center rounded-none border border-white/80 bg-black/60 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 active:scale-95 shadow-xl ${
+            className={`group flex items-center justify-center rounded-none border border-white/80 bg-black/30 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/50 active:scale-95 shadow-xl ${
               isMobile ? 'h-12 w-12' : 'h-14 w-14'
             }`}
             aria-label="Previous"
@@ -112,7 +112,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
           <button
             type="button"
             onClick={onNext}
-            className={`group flex items-center justify-center rounded-none border border-white/80 bg-black/60 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 active:scale-95 shadow-xl ${
+            className={`group flex items-center justify-center rounded-none border border-white/80 bg-black/30 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/50 active:scale-95 shadow-xl ${
               isMobile ? 'h-12 w-12' : 'h-14 w-14'
             }`}
             aria-label="Next"
@@ -140,7 +140,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
         <button
           type="button"
           onClick={handleScrollToTop}
-          className={`absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-none border border-white/80 bg-black/60 text-white backdrop-blur-md transition-all duration-300 z-30 shadow-xl ${
+          className={`absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-none border border-white/80 bg-black/30 text-white backdrop-blur-md transition-all duration-300 z-30 shadow-xl ${
             showScrollToTop
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-4 pointer-events-none'
