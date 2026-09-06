@@ -33,10 +33,10 @@ interface FullscreenMediaItemProps {
 export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
   item,
   index,
-  isVisible,
-  isClosing,
-  hasEntered,
-  animationDelay,
+  isVisible: _isVisible,
+  isClosing: _isClosing,
+  hasEntered: _hasEntered,
+  animationDelay: _animationDelay,
   isMobile,
   isLandscape: _isLandscape,
   itemRef,
@@ -66,18 +66,8 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
   return (
     <div
       ref={itemRef}
-      className={`flex-shrink-0 flex items-center justify-center ${
-        hasEntered && !isClosing
-          ? 'opacity-100 translate-y-0 scale-100'
-          : `transition-all cubic-bezier(0.23, 1, 0.32, 1) ${
-              isVisible && !isClosing
-                ? 'opacity-100 translate-y-0 scale-100'
-                : 'opacity-0 translate-y-12 scale-95'
-            }`
-      }`}
+      className="flex-shrink-0 flex items-center justify-center w-full h-full"
       style={{
-        transitionDelay: hasEntered && !isClosing ? '0ms' : `${animationDelay}ms`,
-        transitionDuration: hasEntered && !isClosing ? '0ms' : '500ms',
         height: '100dvh',
         width: '100%',
         minWidth: '100%',

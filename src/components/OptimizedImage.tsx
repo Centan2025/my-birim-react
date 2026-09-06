@@ -229,7 +229,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           max-height: 100% !important;
         }
         .responsive-crop-wrapper.has-aspect {
-          width: 100% !important;
+          width: auto !important;
           height: auto !important;
           max-height: 100% !important;
           max-width: 100% !important;
@@ -282,7 +282,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
           }
           .responsive-crop-wrapper.is-contain-mobile {
-            width: 100% !important;
+            width: auto !important;
             height: auto !important;
             max-height: 100% !important;
             max-width: 100% !important;
@@ -294,7 +294,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
           }
           .responsive-crop-wrapper.has-aspect:not(.is-contain-mobile) {
-            width: 100% !important;
+            width: auto !important;
             max-width: 100% !important;
             max-height: 100% !important;
             height: auto !important;
@@ -986,7 +986,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   )
   const alignFlexClass = isBottomAligned
     ? 'items-end'
-    : isCoverMode || classList.some(c => c.includes('h-full'))
+    : isCoverMode
       ? 'items-stretch h-full'
       : 'items-center'
 

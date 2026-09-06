@@ -58,6 +58,20 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const checkMobileAndOrientation = () => {
       setIsMobile(window.innerWidth < 768)
       setIsLandscape(window.innerWidth > window.innerHeight)
+      if (scrollContainerRef.current) {
+        const container = scrollContainerRef.current
+        const curr = currentDisplayIndexRef.current
+        const targetEl = itemRefs.current[curr]
+        if (targetEl) {
+          container.style.scrollSnapType = 'none'
+          container.scrollLeft = targetEl.offsetLeft
+          setTimeout(() => {
+            if (scrollContainerRef.current) {
+              scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+            }
+          }, 50)
+        }
+      }
     }
     checkMobileAndOrientation()
     window.addEventListener('resize', checkMobileAndOrientation)
@@ -205,13 +219,14 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         const distToCloned = Math.abs(container.scrollLeft - clonedFirstEl.offsetLeft)
         if (distToCloned < 100) {
           isJumpingRef.current = true
-          if (!isMobile) container.style.scrollSnapType = 'none'
+          container.style.scrollSnapType = 'none'
           container.style.scrollBehavior = 'auto'
           container.scrollLeft = realFirstEl.offsetLeft
           currentDisplayIndexRef.current = 1
           requestAnimationFrame(() => {
             if (scrollContainerRef.current) {
               scrollContainerRef.current.style.scrollBehavior = 'smooth'
+              scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
             }
             isJumpingRef.current = false
           })
@@ -224,20 +239,21 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         const distToCloned = Math.abs(container.scrollLeft - clonedLastEl.offsetLeft)
         if (distToCloned < 100) {
           isJumpingRef.current = true
-          if (!isMobile) container.style.scrollSnapType = 'none'
+          container.style.scrollSnapType = 'none'
           container.style.scrollBehavior = 'auto'
           container.scrollLeft = realLastEl.offsetLeft
           currentDisplayIndexRef.current = slideCount
           requestAnimationFrame(() => {
             if (scrollContainerRef.current) {
               scrollContainerRef.current.style.scrollBehavior = 'smooth'
+              scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
             }
             isJumpingRef.current = false
           })
         }
       }
     }
-  }, [displayCount, slideCount, isLooping, isMobile])
+  }, [displayCount, slideCount, isLooping])
 
   // Navigation & Scroll Handlers
   const scrollToDisplayIndex = useCallback(
@@ -247,10 +263,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       const targetEl = itemRefs.current[index]
       if (targetEl) {
         if (smooth) {
-          if (!isMobile) container.style.scrollSnapType = 'none'
+          container.style.scrollSnapType = 'none'
           if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current)
           snapTimeoutRef.current = setTimeout(() => {
-            if (scrollContainerRef.current && !isDraggingRef.current && !isMobile) {
+            if (scrollContainerRef.current && !isDraggingRef.current) {
               scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
             }
             checkBoundaryWrap()
@@ -264,7 +280,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         currentDisplayIndexRef.current = index
       }
     },
-    [isMobile, checkBoundaryWrap]
+    [checkBoundaryWrap]
   )
 
   // Drag Handlers (Desktop Mouse Drag via Window Event Listeners for zero stutter)
@@ -529,11 +545,29 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
   // Initial scroll positioning
   useEffect(() => {
-    if (initialIndex >= 0 && scrollContainerRef.current) {
-      const targetIdx = isLooping ? initialIndex + 1 : initialIndex
-      setTimeout(() => scrollToDisplayIndex(targetIdx, false), 80)
+    if (initialIndex < 0 || !scrollContainerRef.current) return
+
+    const targetIdx = isLooping ? initialIndex + 1 : initialIndex
+    const container = scrollContainerRef.current
+    container.style.scrollSnapType = 'none'
+    container.style.scrollBehavior = 'auto'
+
+    const targetEl = itemRefs.current[targetIdx]
+    if (targetEl) {
+      container.scrollLeft = targetEl.offsetLeft
+    } else {
+      container.scrollLeft = targetIdx * container.clientWidth
     }
-  }, [initialIndex, isLooping, scrollToDisplayIndex])
+    currentDisplayIndexRef.current = targetIdx
+
+    const timer = setTimeout(() => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+        scrollContainerRef.current.style.scrollBehavior = 'smooth'
+      }
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [initialIndex, isLooping])
 
   const handleScrollToTop = () => {
     scrollContainerRef.current?.scrollTo({top: 0, behavior: 'smooth'})
