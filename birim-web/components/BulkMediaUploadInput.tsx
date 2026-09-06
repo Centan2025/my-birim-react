@@ -91,7 +91,6 @@ async function uploadFileViaPresignedUrl(
     res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
       method: 'POST',
       headers,
-      credentials: 'include',
       body: JSON.stringify({
         filename,
         contentType,
@@ -103,7 +102,6 @@ async function uploadFileViaPresignedUrl(
       res = await fetch(getApiUrl('/api/media/presigned-url'), {
         method: 'POST',
         headers,
-        credentials: 'include',
         body: JSON.stringify({
           filename,
           contentType,

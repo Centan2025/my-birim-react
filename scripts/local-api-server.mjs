@@ -89,14 +89,19 @@ app.use((req, res, next) => {
     origin &&
     (ALLOWED_ORIGINS.includes(origin) ||
       origin.endsWith('.sanity.studio') ||
-      origin.endsWith('.vercel.app'))
+      origin.endsWith('.vercel.app') ||
+      origin.includes('localhost'))
   ) {
     res.setHeader('Access-Control-Allow-Origin', origin)
   } else {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001')
   }
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Requested-With, X-Api-Secret, Accept'
+  )
   if (req.method === 'OPTIONS') return res.sendStatus(200)
   next()
 })
