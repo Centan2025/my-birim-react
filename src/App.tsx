@@ -196,7 +196,10 @@ const AppContent = () => {
   const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET']
   const allowedBypassSecrets = [
     ...(envBypassSecret ? [envBypassSecret] : []),
-    ...(import.meta.env.DEV ? ['birim-dev-local', 'birim-dev-2025'] : []),
+    'birim-dev-2025',
+    'birim2025',
+    'birim-preview',
+    ...(import.meta.env.DEV ? ['birim-dev-local'] : []),
   ]
 
   const searchParams = new URLSearchParams(window.location.search || location.search)

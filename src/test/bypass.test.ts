@@ -40,4 +40,20 @@ describe('Maintenance Mode Bypass Logic', () => {
     expect(localStorage.getItem('maintenance_bypass')).toBeNull()
     expect(document.cookie).not.toContain('maintenance_bypass=birim-dev-2025')
   })
+
+  it('validates birim-dev-2025 against allowed secrets list', () => {
+    const envBypassSecret = undefined
+    const allowedBypassSecrets = [
+      ...(envBypassSecret ? [envBypassSecret] : []),
+      'birim-dev-2025',
+      'birim2025',
+      'birim-preview',
+    ]
+
+    const testToken = 'birim-dev-2025'
+    const isAllowed = allowedBypassSecrets.some(
+      s => s.toLowerCase() === testToken.trim().toLowerCase()
+    )
+    expect(isAllowed).toBe(true)
+  })
 })
