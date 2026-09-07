@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useRef} from 'react'
 import {useLocation, Location} from 'react-router-dom'
 import {AnimatePresence} from 'framer-motion'
 import {Header} from '../components/Header'
@@ -36,18 +36,26 @@ export const MainLayout: React.FC = () => {
 
 /**
  * Bu wrapper, lokasyonu "capture" eder ve hapseder.
- * PageTransition exit yaparken bile kendi içindeki Routes'a eski lokasyonu verir.
+ * Sayfa geçişinde (farklı pathname) exit animasyonu sırasında eski lokasyonu korurken,
+ * aynı sayfa içindeki query param (search) ve hash değişikliklerinde içeriğin anında güncellenmesini sağlar.
  */
 const PageTransitionWrapper = React.forwardRef<HTMLDivElement, {location: Location}>(
   ({location: liveLocation}, ref) => {
-    // Lokasyonu ilk mount anındaki haliyle donduruyoruz.
-    const [frozenLocation] = useState(liveLocation)
-    const isSlideOver = (frozenLocation.state as {slideOver?: boolean})?.slideOver === true
+    const initialPathname = useRef(liveLocation.pathname)
+    const lastSamePathLocation = useRef(liveLocation)
+
+    // Aynı sayfa içindeyken (search/hash/query parametreleri değiştiğinde) lokasyonu güncelle
+    if (liveLocation.pathname === initialPathname.current) {
+      lastSamePathLocation.current = liveLocation
+    }
+
+    const activeLocation = lastSamePathLocation.current
+    const isSlideOver = (activeLocation.state as {slideOver?: boolean})?.slideOver === true
 
     return (
       <div ref={ref} className={isSlideOver ? '' : 'flex-grow flex flex-col'}>
         <PageTransition>
-          <AppRoutes frozenLocation={frozenLocation} />
+          <AppRoutes frozenLocation={activeLocation} />
         </PageTransition>
       </div>
     )

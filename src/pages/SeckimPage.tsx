@@ -19,7 +19,21 @@ export function SeckimPage() {
   const {t} = useTranslation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const activeTab = searchParams.get('tab') === 'projeler' ? 'projeler' : 'seckim'
+  const tabFromUrl = searchParams.get('tab') === 'projeler' ? 'projeler' : 'seckim'
+  const [activeTab, setActiveTab] = useState<'seckim' | 'projeler'>(tabFromUrl)
+
+  useEffect(() => {
+    setActiveTab(tabFromUrl)
+  }, [tabFromUrl])
+
+  const handleTabChange = (tab: 'seckim' | 'projeler') => {
+    setActiveTab(tab)
+    if (tab === 'projeler') {
+      setSearchParams({tab: 'projeler'}, {replace: true})
+    } else {
+      setSearchParams({}, {replace: true})
+    }
+  }
 
   const {selectedProductIds, projects, removeFromSelection, deleteProject, isSelectionEnabled} =
     useSelection()
@@ -206,7 +220,7 @@ export function SeckimPage() {
         <div className="flex items-center gap-8 pt-8 border-b border-[var(--border-primary)]">
           <button
             type="button"
-            onClick={() => setSearchParams({tab: 'seckim'})}
+            onClick={() => handleTabChange('seckim')}
             className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer ${
               activeTab === 'seckim'
                 ? 'text-[var(--text-primary)]'
@@ -221,7 +235,7 @@ export function SeckimPage() {
 
           <button
             type="button"
-            onClick={() => setSearchParams({tab: 'projeler'})}
+            onClick={() => handleTabChange('projeler')}
             className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer ${
               activeTab === 'projeler'
                 ? 'text-[var(--text-primary)]'
