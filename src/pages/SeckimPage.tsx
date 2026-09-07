@@ -119,10 +119,18 @@ export function SeckimPage() {
       {/* Top Breadcrumbs */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-4">
         <Breadcrumbs
-          items={[
-            {label: t('homepage') || 'ANASAYFA', to: '/'},
-            {label: 'SEÇTİKLERİM', to: '/seckim'},
-          ]}
+          items={
+            activeTab === 'projeler'
+              ? [
+                  {label: t('homepage') || 'ANASAYFA', to: '/'},
+                  {label: 'SEÇTİKLERİM', to: '/seckim'},
+                  {label: 'PROJELERİM', to: '/seckim?tab=projeler'},
+                ]
+              : [
+                  {label: t('homepage') || 'ANASAYFA', to: '/'},
+                  {label: 'SEÇTİKLERİM', to: '/seckim'},
+                ]
+          }
         />
       </div>
 

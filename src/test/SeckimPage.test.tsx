@@ -67,8 +67,8 @@ const renderSeckimPage = (initialUrl = '/seckim') => {
   )
 }
 
-describe('SeckimPage Tab Switcher', () => {
-  it('renders "TÜM SEÇTİKLERİM" tab by default and switches to "PROJELERİM" on click', () => {
+describe('SeckimPage Tab Switcher and Breadcrumbs', () => {
+  it('renders "TÜM SEÇTİKLERİM" tab by default and switches to "PROJELERİM" on click with dynamic breadcrumbs', () => {
     renderSeckimPage('/seckim')
 
     // Tab buttons exist
@@ -81,22 +81,36 @@ describe('SeckimPage Tab Switcher', () => {
     // Default tab is "TÜM SEÇTİKLERİM"
     expect(screen.getByText(/Henüz bir seçiminiz yok/i)).toBeInTheDocument()
 
+    // Breadcrumbs on default tab
+    const breadcrumbNav = screen.getByRole('navigation', {name: /breadcrumb/i})
+    expect(breadcrumbNav).toHaveTextContent(/SEÇTİKLERİM/i)
+    expect(breadcrumbNav).not.toHaveTextContent(/PROJELERİM/i)
+
     // Click "PROJELERİM" tab
     fireEvent.click(projelerTabBtn)
 
     // Should switch to "PROJELERİM" view immediately
     expect(screen.getByText(/Henüz bir proje oluşturmadınız/i)).toBeInTheDocument()
 
+    // Breadcrumbs updated to include PROJELERİM
+    expect(breadcrumbNav).toHaveTextContent(/SEÇTİKLERİM/i)
+    expect(breadcrumbNav).toHaveTextContent(/PROJELERİM/i)
+
     // Click back to "TÜM SEÇTİKLERİM" tab
     fireEvent.click(seckimTabBtn)
 
     // Should switch back immediately
     expect(screen.getByText(/Henüz bir seçiminiz yok/i)).toBeInTheDocument()
+    expect(breadcrumbNav).not.toHaveTextContent(/PROJELERİM/i)
   })
 
-  it('renders "PROJELERİM" tab directly when URL has ?tab=projeler', () => {
+  it('renders "PROJELERİM" tab and breadcrumbs directly when URL has ?tab=projeler', () => {
     renderSeckimPage('/seckim?tab=projeler')
 
     expect(screen.getByText(/Henüz bir proje oluşturmadınız/i)).toBeInTheDocument()
+
+    const breadcrumbNav = screen.getByRole('navigation', {name: /breadcrumb/i})
+    expect(breadcrumbNav).toHaveTextContent(/SEÇTİKLERİM/i)
+    expect(breadcrumbNav).toHaveTextContent(/PROJELERİM/i)
   })
 })
