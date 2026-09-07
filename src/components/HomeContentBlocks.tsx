@@ -707,7 +707,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 return (
                   <p
                     ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
-                    className={`text-[var(--text-primary)] opacity-90 ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${isTopBody ? 'mt-0' : ''}`}
+                    className={`text-[var(--text-primary)] opacity-90 ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} leading-relaxed whitespace-pre-line ${widthClass} ${marginClass} ${isTopBody ? 'mt-0' : ''}`}
                     style={!isNormalContentFont ? {fontWeight: 300} : {}}
                   >
                     {desc}

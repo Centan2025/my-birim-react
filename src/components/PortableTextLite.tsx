@@ -52,8 +52,18 @@ type Block = {
 
 function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
   return spans.map((s, i) => {
-    const sanitizedText = sanitizeText(s.text)
-    let el: ReactNode = sanitizedText
+    const sanitizedText = sanitizeText(s.text || '')
+    const normalizedText = sanitizedText.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+    const lines = normalizedText.split('\n')
+    let el: ReactNode =
+      lines.length > 1
+        ? lines.map((line, lineIdx) => (
+            <Fragment key={lineIdx}>
+              {lineIdx > 0 && <br />}
+              {line}
+            </Fragment>
+          ))
+        : sanitizedText
 
     if (s.marks && s.marks.length) {
       const isFontSizeMark = (markName: string) =>

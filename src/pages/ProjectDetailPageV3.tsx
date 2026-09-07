@@ -514,13 +514,13 @@ export function ProjectDetailPageV3() {
                   const excerptContent = resolvePortableTextOrString(project.excerpt, locale)
                   if (!excerptContent) return null
                   return (
-                    <div className="p-4 sm:p-5 bg-white border-l-2 border-neutral-900 text-neutral-800 leading-relaxed font-normal text-base md:text-[16.5px] shadow-sm">
+                    <div className="p-4 sm:p-5 bg-white border-l-2 border-neutral-900 text-neutral-800 leading-relaxed font-normal text-base md:text-[16.5px] shadow-sm whitespace-pre-line">
                       {Array.isArray(excerptContent) ? (
                         <PortableTextLite
                           value={excerptContent as Parameters<typeof PortableTextLite>[0]['value']}
                         />
                       ) : (
-                        <p className="leading-relaxed">{excerptContent}</p>
+                        <p className="leading-relaxed whitespace-pre-line">{excerptContent}</p>
                       )}
                     </div>
                   )

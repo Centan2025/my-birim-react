@@ -930,13 +930,13 @@ export function ProjectDetailPageV1() {
               const excerptContent = resolvePortableTextOrString(project.excerpt, locale)
               if (!excerptContent) return null
               return (
-                <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
+                <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed whitespace-pre-line">
                   {Array.isArray(excerptContent) ? (
                     <PortableTextLite
                       value={excerptContent as Parameters<typeof PortableTextLite>[0]['value']}
                     />
                   ) : (
-                    <p>{excerptContent}</p>
+                    <p className="whitespace-pre-line">{excerptContent}</p>
                   )}
                 </div>
               )
@@ -945,13 +945,13 @@ export function ProjectDetailPageV1() {
               const bodyContent = resolvePortableTextOrString(project.body, locale)
               if (!bodyContent) return null
               return (
-                <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
+                <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed whitespace-pre-line">
                   {Array.isArray(bodyContent) ? (
                     <PortableTextLite
                       value={bodyContent as Parameters<typeof PortableTextLite>[0]['value']}
                     />
                   ) : (
-                    <p>{bodyContent}</p>
+                    <p className="whitespace-pre-line">{bodyContent}</p>
                   )}
                 </div>
               )

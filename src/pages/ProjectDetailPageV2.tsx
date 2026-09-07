@@ -633,13 +633,13 @@ export function ProjectDetailPageV2() {
                   const excerptContent = resolvePortableTextOrString(project.excerpt, locale)
                   if (!excerptContent) return null
                   return (
-                    <div className="p-6 md:p-8 rounded-none bg-neutral-50 border border-neutral-200 text-neutral-800 leading-relaxed font-normal shadow-sm">
+                    <div className="p-6 md:p-8 rounded-none bg-neutral-50 border border-neutral-200 text-neutral-800 leading-relaxed font-normal shadow-sm whitespace-pre-line">
                       {Array.isArray(excerptContent) ? (
                         <PortableTextLite
                           value={excerptContent as Parameters<typeof PortableTextLite>[0]['value']}
                         />
                       ) : (
-                        <p>{excerptContent}</p>
+                        <p className="whitespace-pre-line">{excerptContent}</p>
                       )}
                     </div>
                   )
