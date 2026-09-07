@@ -204,7 +204,7 @@ export default {
     "BİRİM'in en yeni koleksiyonları, tasarım hikayeleri ve özel videolarından ilk siz haberdar olun.",
   newsletter_prompt:
     "BİRİM'in en yeni koleksiyonları, tasarım hikayeleri ve özel videolarından ilk siz haberdar olun.",
-  join_us: 'Bültenimize üye olun',
+  join_us: 'Bültenimize abone olun',
   waiting: 'Bekleyin',
   complete_application: 'Başvuruyu tamamla',
   professional_disclaimer: '* Üyeliğiniz onaylandıktan sonra tam erişim sağlayabileceksiniz.',
