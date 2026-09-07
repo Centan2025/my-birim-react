@@ -325,7 +325,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
         <Route
           path="/seckim"
           element={
-            <PageBoundary pageName="Seçkim">
+            <PageBoundary pageName="Seçtiklerim">
               <SeckimPage />
             </PageBoundary>
           }
@@ -333,7 +333,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
         <Route
           path="/seckim/proje/:projectId"
           element={
-            <PageBoundary pageName="Proje Seçkisi">
+            <PageBoundary pageName="Proje Seçtikleri">
               <SeckimProjectDetailPage />
             </PageBoundary>
           }
@@ -341,7 +341,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
         <Route
           path="/seckim/paylas/:shareToken"
           element={
-            <PageBoundary pageName="Paylaşılan Seçki">
+            <PageBoundary pageName="Paylaşılan Proje">
               <SharedProjectPage />
             </PageBoundary>
           }

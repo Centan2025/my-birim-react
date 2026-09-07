@@ -40,8 +40,8 @@ export function SeckimProjectDetailPage() {
   }, [projects, projectId])
 
   useSEO({
-    title: project ? `${project.name} • Proje Seçkisi` : 'Proje Seçkisi',
-    description: project?.description || 'Birim Mobilya proje ürün seçkisi.',
+    title: project ? `${project.name} • Proje Seçtikleri` : 'Proje Seçtikleri',
+    description: project?.description || 'Birim Mobilya proje ürün seçtikleri.',
   })
 
   const categoryMap = useMemo(() => {
@@ -177,7 +177,7 @@ export function SeckimProjectDetailPage() {
               </p>
             ) : (
               <p className="text-xs sm:text-sm text-neutral-400 font-light mt-1 italic">
-                Projeniz için oluşturduğunuz ürün seçkisi.
+                Projeniz için oluşturduğunuz ürün seçtikleri.
               </p>
             )}
           </div>

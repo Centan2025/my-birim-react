@@ -506,8 +506,8 @@ export function Header() {
             to: '/seckim',
             label:
               selectionCount > 0
-                ? `${(t('seckim') || 'Seçkim').toLocaleUpperCase('tr')} (${selectionCount})`
-                : (t('seckim') || 'Seçkim').toLocaleUpperCase('tr'),
+                ? `${(t('seckim') || 'Seçtiklerim').toLocaleUpperCase('tr')} (${selectionCount})`
+                : (t('seckim') || 'Seçtiklerim').toLocaleUpperCase('tr'),
           },
         ]
       : []),
@@ -964,11 +964,11 @@ export function Header() {
                           color: headerForegroundColor,
                           transition: colorTransition,
                         }}
-                        aria-label={`${t('seckim') || 'Seçkim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
+                        aria-label={`${t('seckim') || 'Seçtiklerim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
                       >
                         <span className="relative flex items-center">
                           <span className="relative inline-block uppercase header-nav-text">
-                            {t('seckim') || 'SEÇKİM'}
+                            {t('seckim') || 'SEÇTİKLERİM'}
                             <span
                               className="header-nav-underline"
                               style={{
@@ -1073,7 +1073,7 @@ export function Header() {
                       onClick={openDrawer}
                       className="group relative p-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer"
                       style={{color: headerForegroundColor, transition: colorTransition}}
-                      aria-label={`${t('seckim') || 'Seçkim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
+                      aria-label={`${t('seckim') || 'Seçtiklerim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
                     >
                       <svg
                         className="w-5 h-5"

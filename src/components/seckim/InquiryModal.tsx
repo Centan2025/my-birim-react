@@ -85,7 +85,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
       analytics.event({
         category: 'seckim',
         action: 'inquiry_submitted',
-        label: currentProjectName || 'Genel Seçki',
+        label: currentProjectName || 'Genel Seçtiklerim',
         value: selectedProducts.length,
       })
 

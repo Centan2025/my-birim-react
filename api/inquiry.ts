@@ -91,7 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     <div style="max-width: 600px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111; line-height: 1.6; padding: 24px;">
       <div style="border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 24px;">
         <span style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #888;">BİRİM MOBİLYA</span>
-        <h2 style="margin: 4px 0 0 0; font-size: 20px; font-weight: 600; text-transform: uppercase;">YENİ PROJE / SEÇKİ TEKLİF TALEBİ</h2>
+        <h2 style="margin: 4px 0 0 0; font-size: 20px; font-weight: 600; text-transform: uppercase;">YENİ PROJE / SEÇTİKLERİM TEKLİF TALEBİ</h2>
       </div>
 
       <div style="background-color: #f8f8f8; padding: 16px 20px; margin-bottom: 24px; border-left: 3px solid #111;">
@@ -99,7 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <p style="margin: 0 0 6px 0;"><strong>Firma / Ofis:</strong> ${company || '-'}</p>
         <p style="margin: 0 0 6px 0;"><strong>E-posta:</strong> <a href="mailto:${email}">${email}</a></p>
         <p style="margin: 0 0 6px 0;"><strong>Telefon:</strong> ${phone || '-'}</p>
-        <p style="margin: 0;"><strong>Proje:</strong> ${projectName || 'Genel Seçki'}</p>
+        <p style="margin: 0;"><strong>Proje:</strong> ${projectName || 'Genel Seçtiklerim'}</p>
       </div>
 
       ${
@@ -114,14 +114,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       <div style="margin-bottom: 24px;">
-        <h4 style="margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666;">
-          Seçilen Ürünler (${selectedProducts.length}):
-        </h4>
+        <h4 style="margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666;">Talep Edilen Ürünler:</h4>
         ${productsListHtml}
       </div>
 
       <div style="border-top: 1px solid #eee; padding-top: 16px; font-size: 11px; color: #999; text-align: center;">
-        Bu e-posta birim.com Seçkim & Proje sisteminden otomatik olarak oluşturulmuştur.
+        Bu e-posta birim.com Seçtiklerim & Proje sisteminden otomatik olarak oluşturulmuştur.
       </div>
     </div>
   `
@@ -136,7 +134,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await resend.emails.send({
         from: 'Birim Web <onboarding@resend.dev>',
         to: ['birimdesign@birim.com', 'birim@birim.com'],
-        subject: `Yeni Proje Talebi: ${name} - ${projectName || 'Birim Seçki'}`,
+        subject: `Yeni Proje Talebi: ${name} - ${projectName || 'Birim Seçtiklerim'}`,
         html: emailHtml,
       })
     } else if (smtpPassword) {

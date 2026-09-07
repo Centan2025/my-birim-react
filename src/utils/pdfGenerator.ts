@@ -184,7 +184,7 @@ async function loadProductImage(imageUrl: string, crop?: any): Promise<LoadedIma
 }
 
 export async function generateSeckimPDF({
-  projectName = 'PROJE SEÇKİSİ',
+  projectName = 'PROJE SEÇTİKLERİ',
   projectDescription,
   products,
   date = new Date().toLocaleDateString('tr-TR', {year: 'numeric', month: 'long', day: 'numeric'}),
@@ -267,7 +267,7 @@ export async function generateSeckimPDF({
       doc.setFontSize(7.5)
       doc.setTextColor(130, 130, 130)
       doc.text('|', margin + logoW + 3.5, margin + 6.8)
-      doc.text('MİMARİ PROJE SEÇKİSİ', margin + logoW + 6.5, margin + 6.8)
+      doc.text('MİMARİ PROJE SEÇTİKLERİ', margin + logoW + 6.5, margin + 6.8)
     } else {
       doc.setFont(activeFont, 'bold')
       doc.setFontSize(15)
@@ -277,7 +277,7 @@ export async function generateSeckimPDF({
       doc.setFont(activeFont, 'normal')
       doc.setFontSize(7.5)
       doc.setTextColor(130, 130, 130)
-      doc.text('MİMARİ PROJE SEÇKİSİ', margin + 24, margin + 7)
+      doc.text('MİMARİ PROJE SEÇTİKLERİ', margin + 24, margin + 7)
     }
 
     // Top right: Date & Total Products

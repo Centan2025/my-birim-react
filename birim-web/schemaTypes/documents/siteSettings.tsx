@@ -164,12 +164,12 @@ export default defineType({
     }),
     defineField({
       name: 'enableSelections',
-      title: 'Seçkim / Projelerim Özelliğini Etkinleştir',
+      title: 'Seçtiklerim / Projelerim Özelliğini Etkinleştir',
       type: 'boolean',
       fieldset: 'features',
       initialValue: true,
       description:
-        'Pasif edildiğinde sitedeki Seçkim butonu, Seçkim çekmecesi ve /seckim sayfaları gizlenir/devre dışı kalır.',
+        'Pasif edildiğinde sitedeki Seçtiklerim butonu, Seçtiklerim çekmecesi ve /seckim sayfaları gizlenir/devre dışı kalır.',
     }),
   ],
   preview: {

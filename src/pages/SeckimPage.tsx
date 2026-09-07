@@ -42,8 +42,8 @@ export function SeckimPage() {
   }
 
   useSEO({
-    title: 'Seçkim & Projelerim • Birim Mobilya',
-    description: 'Birim Mobilya mimari ve iç mimari proje seçkisi, koleksiyon ve ürün grupları.',
+    title: 'Seçtiklerim & Projelerim • Birim Mobilya',
+    description: 'Birim Mobilya mimari ve iç mimari ürün seçimleri, koleksiyon ve ürün grupları.',
   })
 
   const categoryMap = useMemo(() => {
@@ -72,8 +72,8 @@ export function SeckimPage() {
     setIsGeneratingPdf(true)
     try {
       const pdfBlob = await generateSeckimPDF({
-        projectName: 'BİRİM MOBİLYA - GENEL SEÇKİ',
-        projectDescription: 'Mimari ve İç Mimari Proje Seçkisi',
+        projectName: 'BİRİM MOBİLYA - GENEL SEÇTİKLERİM',
+        projectDescription: 'Mimari ve İç Mimari Ürün Seçimleri',
         products: selectedProducts,
         designerNamesMap: designerMap,
         categoryNamesMap: Object.fromEntries(categoryMap),
@@ -82,13 +82,13 @@ export function SeckimPage() {
       const url = URL.createObjectURL(pdfBlob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `Birim-Seckim-${new Date().toISOString().slice(0, 10)}.pdf`
+      a.download = `Birim-Sectiklerim-${new Date().toISOString().slice(0, 10)}.pdf`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch (err) {
-      console.error('PDF error:', err)
+      console.error('PDF creation error:', err)
       alert('PDF oluşturulurken bir sorun oluştu. Lütfen tekrar deneyin.')
     } finally {
       setIsGeneratingPdf(false)
@@ -96,13 +96,13 @@ export function SeckimPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] pb-24">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pb-32">
       {/* Top Breadcrumbs */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-8 sm:pt-12">
         <Breadcrumbs
           items={[
             {label: t('homepage') || 'ANASAYFA', to: '/'},
-            {label: 'SEÇKİM', to: '/seckim'},
+            {label: 'SEÇTİKLERİM', to: '/seckim'},
           ]}
         />
       </div>
@@ -115,7 +115,7 @@ export function SeckimPage() {
               PROJE YÖNETİMİ
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-[var(--text-primary)] mt-2">
-              SEÇKİM & PROJELERİM
+              SEÇTİKLERİM & PROJELERİM
             </h1>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-light mt-2 max-w-xl leading-relaxed">
               Mekan ve projeleriniz için seçtiğiniz Birim tasarımlarını bir araya getirin, projelere
@@ -208,7 +208,7 @@ export function SeckimPage() {
                 : 'text-neutral-400 hover:text-[var(--text-primary)]'
             }`}
           >
-            <span>TÜM SEÇKİM ({selectedProducts.length})</span>
+            <span>TÜM SEÇTİKLERİM ({selectedProducts.length})</span>
             {activeTab === 'seckim' && (
               <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
             )}
@@ -230,7 +230,7 @@ export function SeckimPage() {
           </button>
         </div>
 
-        {/* TAB 1: SEÇKİM */}
+        {/* TAB 1: SEÇTİKLERİM */}
         {activeTab === 'seckim' && (
           <div className="pt-8">
             {isProductsLoading && selectedProductIds.length > 0 ? (
@@ -259,10 +259,10 @@ export function SeckimPage() {
                   </svg>
                 </div>
                 <h2 className="text-xl font-light uppercase tracking-wider text-[var(--text-primary)]">
-                  Henüz bir seçkiniz yok
+                  Henüz bir seçiminiz yok
                 </h2>
                 <p className="text-xs text-[var(--text-secondary)] mt-2.5 font-light leading-relaxed">
-                  Beğendiğiniz ürünleri seçkinize ekleyerek projeniz için bir araya
+                  Beğendiğiniz ürünleri seçtiklerinize ekleyerek projeniz için bir araya
                   getirebilirsiniz.
                 </p>
                 <Link

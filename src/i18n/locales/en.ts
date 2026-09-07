@@ -270,4 +270,5 @@ export default {
   no_3d_models: 'No 3D models available',
   show_more: 'Show More',
   show_less: 'Show Less',
+  seckim: 'Selections',
 }

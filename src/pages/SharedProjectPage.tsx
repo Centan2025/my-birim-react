@@ -65,9 +65,9 @@ export function SharedProjectPage() {
 
   useSEO({
     title: project
-      ? `${project.name} • Proje Seçkisi | Birim Mobilya`
+      ? `${project.name} • Proje Seçtikleri | Birim Mobilya`
       : 'Paylaşılan Proje • Birim Mobilya',
-    description: project?.description || 'Birim Mobilya mimari mobilya seçkisi.',
+    description: project?.description || 'Birim Mobilya mimari mobilya seçtikleri.',
   })
 
   const categoryMap = useMemo(() => {
@@ -140,7 +140,7 @@ export function SharedProjectPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
         <h2 className="text-xl font-light uppercase tracking-wider text-[var(--text-primary)]">
-          Paylaşılan Seçki Bulunamadı
+          Paylaşılan Proje Bulunamadı
         </h2>
         <p className="text-xs text-[var(--text-secondary)] mt-2 font-light">
           Bu proje bağlantısı geçersiz, kaldırılmış veya erişime kapatılmış olabilir.
@@ -354,7 +354,7 @@ export function SharedProjectPage() {
                         onClick={() => addToSelection(product.id, getLocalizedText(product.name))}
                         className="text-[11px] font-light text-neutral-500 hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                       >
-                        + Seçkime Ekle
+                        + Seçtiklerime Ekle
                       </button>
                     </div>
                   </div>

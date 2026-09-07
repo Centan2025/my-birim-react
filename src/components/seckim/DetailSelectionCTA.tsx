@@ -32,7 +32,7 @@ export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product})
               ? 'bg-[var(--text-primary)] text-[var(--bg-primary)] border-[var(--text-primary)] shadow-sm'
               : 'bg-transparent text-[var(--text-primary)] border-[var(--border-primary)] hover:border-[var(--text-primary)]'
           }`}
-          aria-label={selected ? `${rawName} seçkiden çıkar` : `${rawName} seçkiye ekle`}
+          aria-label={selected ? `${rawName} seçtiklerimden çıkar` : `${rawName} seçtiklerime ekle`}
         >
           <svg
             className="w-4 h-4 transition-transform duration-300 group-hover:scale-105"
@@ -45,7 +45,9 @@ export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product})
           >
             <path d="M6.5 3.5H17.5V20.5L12 16.75L6.5 20.5V3.5Z" />
           </svg>
-          <span className="tracking-widest">{selected ? 'SEÇKİDEN ÇIKAR' : 'SEÇKİYE EKLE'}</span>
+          <span className="tracking-widest">
+            {selected ? 'SEÇTİKLERİMDEN ÇIKAR' : 'SEÇTİKLERİME EKLE'}
+          </span>
         </button>
 
         <button

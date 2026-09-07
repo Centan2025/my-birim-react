@@ -73,7 +73,7 @@ export const SelectionDrawer: React.FC = () => {
               <div className="px-6 py-6 border-b border-[var(--border-primary)] flex items-start justify-between">
                 <div>
                   <h2 className="text-xl font-light tracking-wider uppercase text-[var(--text-primary)]">
-                    SEÇKİM
+                    SEÇTİKLERİM
                   </h2>
                   <p className="text-xs text-[var(--text-secondary)] mt-1 font-light tracking-wide">
                     Projeniz için seçtiğiniz ürünler
@@ -187,8 +187,8 @@ export const SelectionDrawer: React.FC = () => {
                               type="button"
                               onClick={() => removeFromSelection(product.id)}
                               className="p-2 text-neutral-400 hover:text-red-500 transition-colors cursor-pointer"
-                              aria-label={`${t(product.name)} seçkiden çıkar`}
-                              title="Seçkiden çıkar"
+                              aria-label={`${t(product.name)} seçtiklerimden çıkar`}
+                              title="Seçtiklerimden çıkar"
                             >
                               <svg
                                 className="w-4 h-4"
@@ -226,10 +226,10 @@ export const SelectionDrawer: React.FC = () => {
                           </svg>
                         </div>
                         <h3 className="text-base font-light uppercase tracking-wider text-[var(--text-primary)]">
-                          Henüz bir seçkiniz yok
+                          Henüz bir seçiminiz yok
                         </h3>
                         <p className="text-xs text-[var(--text-secondary)] mt-2 max-w-xs font-light leading-relaxed">
-                          Beğendiğiniz ürünleri seçkinize ekleyerek projeniz için bir araya
+                          Beğendiğiniz ürünleri seçtiklerinize ekleyerek projeniz için bir araya
                           getirebilirsiniz.
                         </p>
                         <button
@@ -268,7 +268,7 @@ export const SelectionDrawer: React.FC = () => {
                         onClick={handleNavigateToSeckim}
                         className="w-full py-3.5 px-3 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs tracking-widest uppercase font-semibold hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all duration-200 text-center cursor-pointer"
                       >
-                        SEÇKİYİ GÖRÜNTÜLE
+                        SEÇTİKLERİMİ GÖRÜNTÜLE
                       </button>
 
                       <button

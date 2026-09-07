@@ -43,8 +43,8 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
             ? 'bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 border border-neutral-950 dark:border-white shadow-[0_2px_10px_rgba(0,0,0,0.16)] hover:scale-105 active:scale-95'
             : 'bg-white/90 dark:bg-neutral-900/80 text-neutral-700 dark:text-neutral-200 hover:text-neutral-950 dark:hover:text-white hover:bg-white dark:hover:bg-neutral-900 border border-black/[0.07] dark:border-white/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:scale-105 active:scale-95'
         }`}
-        aria-label={selected ? `${rawName} seçkiden çıkar` : `${rawName} seçkiye ekle`}
-        title={selected ? 'Seçkiden çıkar' : 'Seçkiye ekle'}
+        aria-label={selected ? `${rawName} seçtiklerimden çıkar` : `${rawName} seçtiklerime ekle`}
+        title={selected ? 'Seçtiklerimden çıkar' : 'Seçtiklerime ekle'}
       >
         <svg
           className="w-4 h-4 transition-transform duration-300 ease-out group-hover/btn:scale-105 group-active/btn:scale-90"
@@ -60,7 +60,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
 
         {showLabel && (
           <span className="ml-2 text-xs uppercase tracking-wider font-light">
-            {selected ? 'Seçkiden Çıkar' : 'Seçkiye Ekle'}
+            {selected ? 'Seçtiklerimden Çıkar' : 'Seçtiklerime Ekle'}
           </span>
         )}
       </button>
@@ -77,7 +77,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
             className="hidden sm:flex flex-col items-end absolute right-0 bottom-full mb-2 pointer-events-none z-30"
           >
             <span className="text-[9px] tracking-[0.18em] uppercase font-medium text-neutral-900 dark:text-white bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md px-2.5 py-1 shadow-sm border border-black/[0.06] dark:border-white/[0.1] whitespace-nowrap">
-              {selected ? 'Seçkiden Çıkar' : 'Seçkiye Ekle'}
+              {selected ? 'Seçtiklerimden Çıkar' : 'Seçtiklerime Ekle'}
             </span>
             {/* Tam genişlikte sağdan sola çizilen zarif animasyonlu yatay çizgi */}
             <motion.div
