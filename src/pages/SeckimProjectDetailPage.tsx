@@ -73,7 +73,7 @@ export function SeckimProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 pt-24">
         <h2 className="text-xl font-light uppercase tracking-wider text-[var(--text-primary)]">
           Proje Bulunamadı
         </h2>
@@ -145,20 +145,20 @@ export function SeckimProjectDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] pb-24">
+    <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] pt-16 md:pt-20 lg:pt-24 pb-24">
       {/* Top Breadcrumbs */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-8 sm:pt-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-4">
         <Breadcrumbs
           items={[
             {label: t('homepage') || 'ANASAYFA', to: '/'},
-            {label: 'SEÇKİM', to: '/seckim'},
+            {label: 'SEÇTİKLERİM', to: '/seckim'},
             {label: 'PROJELERİM', to: '/seckim?tab=projeler'},
             {label: project.name.toUpperCase(), to: `/seckim/proje/${project.id}`},
           ]}
         />
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-2 sm:pt-4">
         {/* Project Header Banner */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-[var(--border-primary)]">
           <div>

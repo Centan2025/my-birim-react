@@ -138,7 +138,7 @@ export function SharedProjectPage() {
 
   if (!project) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 pt-24">
         <h2 className="text-xl font-light uppercase tracking-wider text-[var(--text-primary)]">
           Paylaşılan Proje Bulunamadı
         </h2>
@@ -156,7 +156,7 @@ export function SharedProjectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] pb-24">
+    <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] pt-16 md:pt-20 lg:pt-24 pb-24">
       {/* Brand Top bar */}
       <div className="border-b border-[var(--border-primary)] bg-[var(--bg-primary)]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-3 flex items-center justify-between">

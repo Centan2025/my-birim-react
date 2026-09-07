@@ -115,9 +115,9 @@ export function SeckimPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pb-32">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pt-16 md:pt-20 lg:pt-24 pb-32">
       {/* Top Breadcrumbs */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-8 sm:pt-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-4">
         <Breadcrumbs
           items={[
             {label: t('homepage') || 'ANASAYFA', to: '/'},
@@ -126,7 +126,7 @@ export function SeckimPage() {
         />
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-2 sm:pt-4">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[var(--border-primary)]">
           <div>
