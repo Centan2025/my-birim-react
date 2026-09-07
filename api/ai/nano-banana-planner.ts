@@ -3,39 +3,13 @@ import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
 import crypto from 'crypto'
 import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
 import {handleCors} from '../../lib/server/cors.js'
-
-// Rate Limiting (In-Memory IP Tracker)
-interface RateLimitRecord {
-  count: number
-  resetTime: number
-}
-const ipStore = new Map<string, RateLimitRecord>()
-
-function checkRateLimit(
-  ip: string,
-  limit = 3,
-  windowMs = 60 * 1000
-): {allowed: boolean; remaining: number; resetMs: number} {
-  if (ip === '127.0.0.1' || ip === '::1' || ip === 'localhost') {
-    return {allowed: true, remaining: 999, resetMs: 0}
-  }
-  const now = Date.now()
-  const record = ipStore.get(ip)
-  if (!record || now > record.resetTime) {
-    ipStore.set(ip, {count: 1, resetTime: now + windowMs})
-    return {allowed: true, remaining: limit - 1, resetMs: windowMs}
-  }
-  if (record.count >= limit) {
-    return {allowed: false, remaining: 0, resetMs: record.resetTime - now}
-  }
-  record.count += 1
-  return {allowed: true, remaining: limit - record.count, resetMs: record.resetTime - now}
-}
+import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 
 function sanitizePrompt(input?: unknown, maxLength = 150): string {
   if (!input || typeof input !== 'string') return ''
   const sanitized = input.trim().slice(0, maxLength)
   return sanitized
+    .replace(/[\r\n]+/g, ' ')
     .replace(/<[^>]*>?/gm, '')
     .replace(/javascript:/gi, '')
     .replace(/data:/gi, '')
@@ -58,7 +32,7 @@ import type {VercelRequest, VercelResponse} from '@vercel/node'
 /**
  * Normalizes input image string (Data URL or HTTP URL or raw base64) into base64 + mimeType
  */
-async function getBase64FromImageInput(
+async function _getBase64FromImageInput(
   imageInput: string
 ): Promise<{base64Data: string; mimeType: string}> {
   if (imageInput.startsWith('data:')) {
@@ -74,15 +48,21 @@ async function getBase64FromImageInput(
       const parsedUrl = new URL(targetUrl)
       const hostname = parsedUrl.hostname.toLowerCase()
 
-      // SSRF Protection: Block internal IPs and Cloud metadata IP addresses
+      // SSRF Protection: Block internal IPs, Cloud metadata, IPv6 loopback, and local network
       if (
         hostname === 'localhost' ||
         hostname === '127.0.0.1' ||
         hostname === '0.0.0.0' ||
-        hostname === '169.254.169.254' ||
+        hostname === '::1' ||
+        hostname === '[::1]' ||
+        hostname.includes('169.254.') ||
         hostname.startsWith('10.') ||
         hostname.startsWith('192.168.') ||
-        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) ||
+        hostname.startsWith('fc00:') ||
+        hostname.startsWith('fe80:') ||
+        hostname.startsWith('0x') ||
+        /^\d+$/.test(hostname)
       ) {
         throw new Error('Dahili ağ URL adreslerine erişim engellendi.')
       }
@@ -107,7 +87,16 @@ async function getBase64FromImageInput(
     if (!fetchRes.ok) {
       throw new Error(`Referans görsel indirilemedi: ${fetchRes.statusText}`)
     }
+
+    const contentLength = fetchRes.headers.get('content-length')
+    if (contentLength && parseInt(contentLength, 10) > 10 * 1024 * 1024) {
+      throw new Error('Görsel dosya boyutu 10 MB sınırını aşıyor.')
+    }
+
     const arrayBuffer = await fetchRes.arrayBuffer()
+    if (arrayBuffer.byteLength > 10 * 1024 * 1024) {
+      throw new Error('Görsel dosya boyutu 10 MB sınırını aşıyor.')
+    }
     const buffer = Buffer.from(arrayBuffer)
     const mimeType = fetchRes.headers.get('content-type') || 'image/jpeg'
     return {
@@ -185,7 +174,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
     const headerToken =
       typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-    const isAdminAuthorized = Boolean(adminSecret && headerToken && headerToken === adminSecret)
+    const isAdminAuthorized = Boolean(
+      adminSecret &&
+        headerToken &&
+        headerToken.length === adminSecret.length &&
+        crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(adminSecret))
+    )
 
     if (!payload && !isAdminAuthorized && process.env['NODE_ENV'] === 'production') {
       return res
@@ -193,16 +187,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({error: 'Oda tasarlama AI servisini kullanmak için oturum açmanız gerekmektedir.'})
     }
 
-    const clientIp =
-      (req.headers?.['x-forwarded-for'] as string)?.split(',')[0] ||
-      req.socket?.remoteAddress ||
-      '127.0.0.1'
+    const clientIp = getClientIp(req)
 
-    const rateCheck = checkRateLimit(clientIp, 3, 60 * 1000)
-    if (!rateCheck.allowed) {
+    if (await isRateLimitedAsync(`ai_planner_ip_${clientIp}`, {limit: 5, windowMs: 60 * 1000})) {
       return res.status(429).json({
         error: 'Çok fazla istek attınız, lütfen 1 dakika bekleyin.',
-        retryAfterSeconds: Math.ceil(rateCheck.resetMs / 1000),
       })
     }
 
@@ -236,34 +225,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-      if (!roomImage.startsWith('http') && !roomImage.startsWith('data:image/')) {
-        throw new Error('Geçersiz oda görseli formatı.')
-      }
-      if (!productImage.startsWith('http') && !productImage.startsWith('data:image/')) {
-        throw new Error('Geçersiz ürün görseli formatı.')
-      }
+      // SSRF ve Boyut Koruması: Girdileri doğrula ve güvenli hale getir
+      await Promise.all([
+        _getBase64FromImageInput(roomImage),
+        _getBase64FromImageInput(productImage),
+      ])
 
+      const safeProductName = sanitizePrompt(productName, 60) || 'furniture'
       let promptText = cleanPrompt
         ? cleanPrompt
-        : `A photorealistic interior design photograph of a room featuring ${productName || 'furniture'}. High quality, professional photography, soft realistic lighting.`
+        : `A photorealistic interior design photograph of a room featuring ${safeProductName}. High quality, professional photography, soft realistic lighting.`
 
       if (productDetails && typeof productDetails === 'object') {
         const detailsList: string[] = []
-        if (productDetails.material) detailsList.push(`Material: ${productDetails.material}`)
-        if (productDetails.legStyle) detailsList.push(`Leg style: ${productDetails.legStyle}`)
-        if (productDetails.color) detailsList.push(`Color: ${productDetails.color}`)
-        if (productDetails.description) detailsList.push(`Details: ${productDetails.description}`)
+        if (productDetails.material)
+          detailsList.push(`Material: ${sanitizePrompt(productDetails.material, 50)}`)
+        if (productDetails.legStyle)
+          detailsList.push(`Leg style: ${sanitizePrompt(productDetails.legStyle, 50)}`)
+        if (productDetails.color)
+          detailsList.push(`Color: ${sanitizePrompt(productDetails.color, 50)}`)
+        if (productDetails.description)
+          detailsList.push(`Details: ${sanitizePrompt(productDetails.description, 100)}`)
         if (detailsList.length > 0) {
           promptText += `, ${detailsList.join(', ')}`
         }
       }
 
       if (angle && typeof angle === 'string') {
-        promptText += `, view from angle: ${angle}`
+        const cleanAngle = sanitizePrompt(angle, 30)
+        if (cleanAngle) {
+          promptText += `, view from angle: ${cleanAngle}`
+        }
       }
 
       if (alignmentInstruction && typeof alignmentInstruction === 'string') {
-        promptText += `, placed: ${alignmentInstruction}`
+        const cleanAlignment = sanitizePrompt(alignmentInstruction, 50)
+        if (cleanAlignment) {
+          promptText += `, placed: ${cleanAlignment}`
+        }
       }
 
       // Initialize official @google/genai SDK instance

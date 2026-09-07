@@ -430,7 +430,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               value={subscribeEmail}
               onChange={e => setSubscribeEmail(e.target.value)}
               placeholder={t('email_placeholder')}
-              className={`w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[15px] text-center ${
+              className={`w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 text-[15px] text-center ${
                 isMobileLocaleTransition ? 'cross-fade-input' : ''
               }`}
               style={{

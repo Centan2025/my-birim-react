@@ -16,6 +16,7 @@ import {useHeaderTheme} from '../context/HeaderThemeContext'
 import PortableTextLite from '../components/PortableTextLite'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
 import {InteractiveShowcase} from '../components/InteractiveShowcase'
+import {resolvePortableTextOrString} from '../utils/portableText'
 import type {ContentBlock, R2ImageMetadata} from '../types'
 
 interface MediaItem {
@@ -509,29 +510,45 @@ export function ProjectDetailPageV3() {
               </div>
 
               <div className="space-y-4 text-neutral-700 font-normal text-base md:text-[16px] leading-relaxed max-h-[440px] overflow-y-auto pr-2 scrollbar-thin">
-                {project.excerpt ? (
-                  <div className="p-4 sm:p-5 bg-white border-l-2 border-neutral-900 text-neutral-800 leading-relaxed font-normal text-base md:text-[16.5px] shadow-sm">
-                    {typeof t(project.excerpt as never) === 'string' ? (
-                      <p className="leading-relaxed">{String(t(project.excerpt as never))}</p>
-                    ) : (
-                      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                      <PortableTextLite value={t(project.excerpt as never) as any} />
-                    )}
-                  </div>
-                ) : null}
+                {(() => {
+                  const excerptContent = resolvePortableTextOrString(project.excerpt, locale)
+                  if (!excerptContent) return null
+                  return (
+                    <div className="p-4 sm:p-5 bg-white border-l-2 border-neutral-900 text-neutral-800 leading-relaxed font-normal text-base md:text-[16.5px] shadow-sm">
+                      {Array.isArray(excerptContent) ? (
+                        <PortableTextLite
+                          value={excerptContent as Parameters<typeof PortableTextLite>[0]['value']}
+                        />
+                      ) : (
+                        <p className="leading-relaxed">{excerptContent}</p>
+                      )}
+                    </div>
+                  )
+                })()}
 
-                {project.body ? (
-                  <div className="prose max-w-none text-neutral-700 text-base md:text-[16px] leading-relaxed prose-p:text-neutral-700 prose-p:leading-relaxed prose-headings:font-michroma prose-headings:text-neutral-800">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <PortableTextLite value={t(project.body as never) as any} />
-                  </div>
-                ) : !project.excerpt ? (
+                {(() => {
+                  const bodyContent = resolvePortableTextOrString(project.body, locale)
+                  if (!bodyContent) return null
+                  return (
+                    <div className="prose max-w-none text-neutral-700 text-base md:text-[16px] leading-relaxed prose-p:text-neutral-700 prose-p:leading-relaxed prose-headings:font-michroma prose-headings:text-neutral-800">
+                      {Array.isArray(bodyContent) ? (
+                        <PortableTextLite
+                          value={bodyContent as Parameters<typeof PortableTextLite>[0]['value']}
+                        />
+                      ) : (
+                        <p>{bodyContent}</p>
+                      )}
+                    </div>
+                  )
+                })()}
+
+                {!project.excerpt && !project.body && (
                   <p className="text-sm text-neutral-600 italic leading-relaxed">
                     {isTr
                       ? `${projectTitle}, Birim koleksiyonunun çağdaş mimari ve mekan kurgusunu yansıtan özel bir projesidir.`
                       : `${projectTitle} is a bespoke project curated with Birim furniture collection, reflecting contemporary spatial architecture.`}
                   </p>
-                ) : null}
+                )}
               </div>
             </div>
 

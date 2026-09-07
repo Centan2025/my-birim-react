@@ -30,7 +30,6 @@ class Analytics {
   private posthogClient: PostHogClient | null = null
   private hasRejectionHandler = false
   private hasErrorHandler = false
-  private storagePatched = false
 
   /**
    * Initialize analytics
@@ -38,27 +37,23 @@ class Analytics {
   init() {
     if (this.isInitialized) return
 
-    // GA ID olsa da olmasa da, Storage patch'ini devreye al ki
-    // "Access to storage is not allowed..." hataları development'ta konsolu kirletmesin.
-    this.patchStorageIfNeeded()
-
-    // PostHog Analytics
-    this.posthogKey =
-      import.meta.env['VITE_POSTHOG_KEY'] || 'phc_obys5oBjGrg83u3X2tcyAD2qJ3Cs67fk8ZUfZJFzD5Gm'
-    this.posthogHost = import.meta.env['VITE_POSTHOG_HOST'] || 'https://us.i.posthog.com'
-    if (this.posthogKey) {
-      this.initPostHog(this.posthogKey, this.posthogHost || 'https://us.i.posthog.com')
+    // PostHog Analytics (Consent-based lazy load)
+    this.posthogKey = (import.meta.env['VITE_POSTHOG_KEY'] as string | undefined) || null
+    this.posthogHost =
+      (import.meta.env['VITE_POSTHOG_HOST'] as string | undefined) || 'https://us.i.posthog.com'
+    if (this.posthogKey && this.isConsentGranted()) {
+      this.initPostHog(this.posthogKey, this.posthogHost)
     }
 
-    // Google Analytics
-    this.googleAnalyticsId = import.meta.env['VITE_GA_ID'] || 'G-CV9BKX26XF'
-    if (this.googleAnalyticsId) {
+    // Google Analytics (Consent-based load)
+    this.googleAnalyticsId = (import.meta.env['VITE_GA_ID'] as string | undefined) || null
+    if (this.googleAnalyticsId && this.isConsentGranted()) {
       this.initGoogleAnalytics(this.googleAnalyticsId)
     }
 
     // Plausible Analytics
-    this.plausibleDomain = import.meta.env['VITE_PLAUSIBLE_DOMAIN'] || null
-    if (this.plausibleDomain) {
+    this.plausibleDomain = (import.meta.env['VITE_PLAUSIBLE_DOMAIN'] as string | undefined) || null
+    if (this.plausibleDomain && this.isConsentGranted()) {
       this.initPlausible(this.plausibleDomain)
     }
 
@@ -73,10 +68,19 @@ class Analytics {
             // Ignore
           }
         } else if (detail?.analytics === true) {
-          try {
-            this.posthogClient?.opt_in_capturing()
-          } catch (_err) {
-            // Ignore
+          if (this.googleAnalyticsId) {
+            this.initGoogleAnalytics(this.googleAnalyticsId)
+          }
+          if (this.posthogKey) {
+            if (!this.posthogClient) {
+              this.initPostHog(this.posthogKey, this.posthogHost || 'https://us.i.posthog.com')
+            } else {
+              try {
+                this.posthogClient?.opt_in_capturing()
+              } catch (_err) {
+                // Ignore
+              }
+            }
           }
         }
       }) as EventListener)
@@ -94,19 +98,20 @@ class Analytics {
   }
 
   private isConsentGranted(): boolean {
-    if (typeof window === 'undefined') return true
+    if (typeof window === 'undefined') return false
     try {
       const consentStr = localStorage.getItem('cookie_consent_v2')
-      if (!consentStr) return true
+      if (!consentStr) return false
       const consent = JSON.parse(consentStr)
-      return consent.analytics !== false && !consent.rejected
+      return consent.analytics === true && !consent.rejected
     } catch {
-      return true
+      return false
     }
   }
 
   private async initPostHog(key: string, host: string) {
     if (typeof window === 'undefined') return
+    if (!this.isConsentGranted()) return
     try {
       const {default: ph} = await import('posthog-js')
       this.posthogClient = ph
@@ -116,13 +121,6 @@ class Analytics {
         autocapture: true,
         capture_pageview: true,
       })
-      if (!this.isConsentGranted()) {
-        try {
-          ph.opt_out_capturing()
-        } catch {
-          // Ignore
-        }
-      }
     } catch (_e: unknown) {
       // PostHog init hatasını sessizce yut
     }
@@ -130,12 +128,6 @@ class Analytics {
 
   private initGoogleAnalytics(gaId: string) {
     if (typeof window === 'undefined') return
-
-    // Bazı ortamlarda (özellikle Safari / 3rd party context) localStorage erişimi
-    // "Access to storage is not allowed from this context" hatası fırlatabiliyor.
-    // GA'yı kapatmak yerine, Storage API'lerini sarmalayıp bu spesifik hatayı
-    // yutan bir patch uyguluyoruz.
-    this.patchStorageIfNeeded()
 
     try {
       // react-ga4, GA4 script'ini kendi yükler ve initialize eder
@@ -206,54 +198,6 @@ class Analytics {
       )
       this.hasErrorHandler = true
     }
-  }
-
-  /**
-   * Storage API'lerini (localStorage / sessionStorage) patch ederek
-   * "Access to storage is not allowed..." hatasını sessizce yutar.
-   *
-   * Not: GA'yı kapatmıyoruz; sadece bu özel storage hatasını engelliyoruz.
-   */
-  private patchStorageIfNeeded() {
-    if (this.storagePatched) return
-    if (typeof window === 'undefined') return
-    const StorageCtor = (window as Window & {Storage?: typeof Storage}).Storage
-    const StorageProto = StorageCtor && StorageCtor.prototype
-    if (!StorageProto) return
-
-    const BLOCK_SUBSTRING = 'Access to storage is not allowed'
-
-    const wrapMethod = (methodName: keyof Storage) => {
-      const original = (StorageProto as unknown as Record<string, unknown>)[methodName]
-      if (typeof original !== 'function') return
-      ;(StorageProto as unknown as Record<string, unknown>)[methodName] = function (
-        ...args: unknown[]
-      ) {
-        try {
-          return original.apply(this, args)
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err || '')
-          if (typeof msg === 'string' && msg.includes(BLOCK_SUBSTRING)) {
-            // API sözleşmesine yakın kal: getItem / key için null döndür,
-            // diğerleri için undefined yeterli.
-            if (methodName === 'getItem' || methodName === 'key') {
-              return null
-            }
-            return undefined
-          }
-          // Farklı bir hata ise normal şekilde fırlat
-          throw err
-        }
-      }
-    }
-
-    wrapMethod('getItem')
-    wrapMethod('setItem')
-    wrapMethod('removeItem')
-    wrapMethod('clear')
-    wrapMethod('key')
-
-    this.storagePatched = true
   }
 
   /**

@@ -8,7 +8,7 @@ export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
   const navigate = useNavigate()
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,7 +29,7 @@ export function ResetPasswordPage() {
     setIsLoading(true)
 
     try {
-      await requestPasswordReset(email)
+      await requestPasswordReset(email, locale)
       setSuccess(t('reset_link_sent'))
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('generic_error'))

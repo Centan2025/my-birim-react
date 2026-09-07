@@ -3,6 +3,7 @@ import type {ConfigContext} from 'sanity'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {PreviewView} from './components/PreviewView'
 import {AnalyticsStudioView} from './components/AnalyticsStudioView'
+import {SupabaseUsersStudioView} from './components/SupabaseUsersStudioView'
 
 export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
   return S.list()
@@ -12,6 +13,10 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
         .title('Site Analitiği')
         .icon(() => '📊')
         .child(S.component(AnalyticsStudioView).title('Google Analytics Raporu')),
+      S.listItem()
+        .title('Üyeler & Mimarlar (Supabase)')
+        .icon(() => '👥')
+        .child(S.component(SupabaseUsersStudioView).title('Üye & Mimar Yönetimi')),
       S.divider(),
       S.listItem()
         .title('Site Ayarları')
@@ -146,46 +151,5 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
             ]),
         ),
       S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),
-      // Üyeler
-      S.listItem()
-        .title('Üyeler')
-        .child(
-          S.list()
-            .title('Üyeler')
-            .items([
-              S.listItem()
-                .title('E-posta Aboneleri')
-                .child(
-                  S.documentList()
-                    .title('E-posta Aboneleri')
-                    .schemaType('user')
-                    .filter('_type == "user" && userType == $t')
-                    .params({t: 'email_subscriber'})
-                    .apiVersion('2024-01-01'),
-                ),
-              S.listItem()
-                .title('Profesyonel Aboneler')
-                .child(
-                  S.documentList()
-                    .title('Profesyonel Aboneler')
-                    .schemaType('user')
-                    .filter('_type == "user" && userType == $t')
-                    .params({t: 'professional_subscriber'})
-                    .apiVersion('2024-01-01'),
-                ),
-              S.listItem()
-                .title('Tam Üyeler')
-                .child(
-                  S.documentList()
-                    .title('Tam Üyeler')
-                    .schemaType('user')
-                    .filter('_type == "user" && userType == $t')
-                    .params({t: 'full_member'})
-                    .apiVersion('2024-01-01'),
-                ),
-              S.divider(),
-              S.documentTypeListItem('user').title('Tüm Üyeler'),
-            ]),
-        ),
     ])
 }

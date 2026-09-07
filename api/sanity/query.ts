@@ -29,11 +29,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({error: 'Missing query parameter'})
   }
 
-  // Block sensitive queries targeting users, passwords, tokens (normalize string)
-  const normalizedQuery = query.toLowerCase().replace(/[\s\r\n\t'"`+=_]/g, '')
+  // 1. Block sensitive keywords targeting users, passwords, tokens
+  const compactQuery = query.toLowerCase().replace(/[\s\r\n\t]/g, '')
+  const strippedAlphaQuery = compactQuery.replace(/[^a-z0-9]/g, '')
+
   const sensitiveKeywords = [
     'user',
     'password',
+    'hash',
     'verificationtoken',
     'resetpasswordtoken',
     'resettoken',
@@ -41,11 +44,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     'token',
   ]
 
-  if (sensitiveKeywords.some(kw => normalizedQuery.includes(kw))) {
+  if (sensitiveKeywords.some(kw => strippedAlphaQuery.includes(kw))) {
     return res.status(403).json({error: 'Hassas veri kaynaklarına erişim engellendi.'})
   }
 
-  // Also check params for sensitive keywords (prevent parameter injection e.g. $type: "user")
+  // 2. Reject negation operators or open wildcard selectors that could bypass type filtering
+  if (
+    compactQuery.includes('_type!=') ||
+    compactQuery.includes('_type!in') ||
+    compactQuery.includes('*[]') ||
+    compactQuery.includes('*[!') ||
+    compactQuery.includes('*[defined(email') ||
+    compactQuery.includes('*[defined(password')
+  ) {
+    return res.status(403).json({error: 'Geçersiz veya kısıtlanmış sorgu yapısı.'})
+  }
+
+  // 3. Strict Document Type / ID Whitelist
+  // Only public CMS documents are allowed to be fetched through this proxy
+  const ALLOWED_TYPES = [
+    'product',
+    'category',
+    'designer',
+    'project',
+    'newsitem',
+    'sitesettings',
+    'uitranslations',
+    'cookiespolicy',
+    'privacypolicy',
+    'termsofservice',
+    'kvkkpolicy',
+    'footer',
+    'aboutpagev2',
+    'factorypage',
+    'contactpage',
+    'homepage',
+  ]
+
+  const unquotedQuery = compactQuery.replace(/['"`]/g, '')
+  const hasAllowedTarget = ALLOWED_TYPES.some(
+    type => unquotedQuery.includes(`_type==${type}`) || unquotedQuery.includes(`_id==${type}`)
+  )
+
+  if (!hasAllowedTarget) {
+    return res.status(403).json({error: 'Yalnızca onaylanmış içerik dokümanları sorgulanabilir.'})
+  }
+
+  // 4. Also check params for sensitive keywords (prevent parameter injection e.g. $type: "user")
   const params = req.method === 'GET' ? req.query : req.body
   if (params && typeof params === 'object') {
     for (const [key, val] of Object.entries(params)) {

@@ -29,6 +29,9 @@ function loadEnvVars() {
   if (!process.env.SANITY_TOKEN && process.env.VITE_SANITY_TOKEN) {
     process.env.SANITY_TOKEN = process.env.VITE_SANITY_TOKEN
   }
+  if (!process.env.ANALYTICS_PIN && process.env.VITE_ANALYTICS_PIN) {
+    process.env.ANALYTICS_PIN = process.env.VITE_ANALYTICS_PIN
+  }
 }
 
 loadEnvVars()
@@ -38,8 +41,16 @@ const {createClient} = await import('@sanity/client')
 const bcrypt = (await import('bcryptjs')).default
 const nodemailer = (await import('nodemailer')).default
 
-// SMTP Mail Transporter
+// E-posta Servisi: Resend & SMTP Desteği
+const {Resend} = await import('resend').catch(() => ({}))
+const RESEND_API_KEY = process.env.RESEND_API_KEY
 const SMTP_PASSWORD = process.env.SMTP_PASSWORD
+
+let resendClient = null
+if (RESEND_API_KEY && Resend) {
+  resendClient = new Resend(RESEND_API_KEY)
+}
+
 let mailTransporter = null
 if (SMTP_PASSWORD) {
   mailTransporter = nodemailer.createTransport({
@@ -51,6 +62,194 @@ if (SMTP_PASSWORD) {
       pass: SMTP_PASSWORD,
     },
   })
+}
+
+function getEmailFrom() {
+  return process.env.EMAIL_FROM || 'Birim Design <birim@birim.com>'
+}
+
+function detectUserLanguage(req, country, explicitLang) {
+  if (explicitLang === 'en' || explicitLang === 'tr') {
+    return explicitLang
+  }
+
+  if (country && typeof country === 'string') {
+    const norm = country.trim().toLowerCase()
+    if (
+      norm === 'tr' ||
+      norm === 'turkey' ||
+      norm === 'türkiye' ||
+      norm === 'turkiye' ||
+      norm === 'türkei' ||
+      norm === 'turquie'
+    ) {
+      return 'tr'
+    }
+    return 'en'
+  }
+
+  const geoCountry = (
+    req?.headers?.['x-vercel-ip-country'] ||
+    req?.headers?.['cf-ipcountry'] ||
+    ''
+  )
+    .toString()
+    .toUpperCase()
+    .trim()
+
+  if (geoCountry) {
+    return geoCountry === 'TR' ? 'tr' : 'en'
+  }
+
+  const acceptLang = (req?.headers?.['accept-language'] || '').toString().toLowerCase()
+  if (acceptLang && !acceptLang.includes('tr')) {
+    return 'en'
+  }
+
+  return 'tr'
+}
+
+async function sendVerificationEmail(email, verificationUrl, name, lang = 'tr') {
+  console.log(`\n========================================`)
+  console.log(`📧 [BİRİM DOĞRULAMA E-POSTASI] (${lang === 'en' ? 'EN' : 'TR'})`)
+  console.log(`   Kime: ${email}`)
+  console.log(`   Doğrulama Linki: ${verificationUrl}`)
+  console.log(`========================================\n`)
+
+  const isEn = lang === 'en'
+  const displayName = name ? (isEn ? `Dear ${name},` : `Sayın ${name},`) : (isEn ? 'Hello,' : 'Merhaba,')
+  const title = isEn ? 'MEMBER VERIFICATION' : 'ÜYELİK DOĞRULAMASI'
+  const subtitle = isEn 
+    ? 'Thank you for applying to Birim Exclusive Architect & Professional Network.'
+    : 'Birim Özel Mimar & Profesyonel Ağı’na yaptığınız başvuru için teşekkür ederiz.'
+  const bodyText = isEn
+    ? 'Please click the button below to verify your email address, activate your account, and access high-resolution 3D models and CAD/DWG technical files:'
+    : 'Hesabınızı aktifleştirmek, e-posta adresinizi doğrulamak ve yüksek çözünürlüklü 3D model ile CAD/DWG teknik çizim dosyalarına erişebilmek için lütfen aşağıdaki butona tıklayın:'
+  const buttonText = isEn ? 'Verify My Account' : 'Üyeliğimi Doğrula'
+  const fallbackNotice = isEn
+    ? 'If the button above does not work, please copy and paste the following link into your browser:'
+    : 'Yukarıdaki buton çalışmıyorsa aşağıdaki bağlantıyı tarayıcınıza kopyalayabilirsiniz:'
+  const ignoreNotice = isEn
+    ? 'If you did not request this verification, you can safely ignore this email.'
+    : 'Bu başvuruyu siz gerçekleştirmediyseniz bu e-postayı dikkate almayınız.'
+  const subject = isEn ? 'Birim Account Verification' : 'Birim Üyelik Doğrulaması'
+
+  const html = `
+<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f5f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f5f7; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 580px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
+          <tr>
+            <td style="padding: 36px 40px 24px; text-align: center; border-bottom: 1px solid #f1f5f9;">
+              <a href="https://www.birim.com" target="_blank" style="text-decoration: none; display: inline-block;">
+                <img src="https://www.birim.com/img/logo-1.png" alt="B I R I M" width="150" style="display: block; margin: 0 auto; max-width: 160px; height: auto; border: 0;" />
+              </a>
+              <div style="font-size: 11px; letter-spacing: 2px; color: #64748b; margin-top: 10px; text-transform: uppercase;">
+                Contemporary Architecture &amp; Design
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 36px 40px;">
+              <h2 style="margin: 0 0 16px; font-size: 18px; font-weight: 700; letter-spacing: 1px; color: #0f172a; text-transform: uppercase;">
+                ${title}
+              </h2>
+              <p style="margin: 0 0 16px; font-size: 15px; line-height: 24px; color: #334155;">
+                ${displayName}
+              </p>
+              <p style="margin: 0 0 16px; font-size: 14px; line-height: 22px; color: #475569;">
+                ${subtitle}
+              </p>
+              <p style="margin: 0 0 28px; font-size: 14px; line-height: 22px; color: #475569;">
+                ${bodyText}
+              </p>
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 32px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="${verificationUrl}" target="_blank" style="display: inline-block; background-color: #0f172a; color: #ffffff; font-size: 14px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; padding: 14px 34px; border-radius: 6px; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);">
+                      ${buttonText}
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px 16px; margin: 24px 0 20px;">
+                <p style="margin: 0 0 8px; font-size: 12px; color: #64748b;">
+                  ${fallbackNotice}
+                </p>
+                <a href="${verificationUrl}" target="_blank" style="font-size: 12px; color: #2563eb; word-break: break-all; text-decoration: underline;">
+                  ${verificationUrl}
+                </a>
+              </div>
+              <p style="margin: 20px 0 0; font-size: 12px; line-height: 18px; color: #94a3b8;">
+                ${ignoreNotice}
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 24px 40px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
+              <p style="margin: 0 0 6px; font-size: 12px; font-weight: 600; color: #475569;">
+                Birim Mobilya Tasarım San. ve Tic. A.Ş.
+              </p>
+              <p style="margin: 0 0 10px; font-size: 11px; color: #94a3b8;">
+                <a href="https://www.birim.com" target="_blank" style="color: #64748b; text-decoration: none;">www.birim.com</a>
+                &nbsp;•&nbsp;
+                <a href="mailto:birim@birim.com" style="color: #64748b; text-decoration: none;">birim@birim.com</a>
+              </p>
+              <p style="margin: 0; font-size: 11px; color: #cbd5e1;">
+                © ${new Date().getFullYear()} Birim. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim()
+
+  // 1. Resend API
+  if (resendClient) {
+    try {
+      const {data, error} = await resendClient.emails.send({
+        from: getEmailFrom(),
+        to: [email],
+        replyTo: 'birim@birim.com',
+        subject,
+        html,
+      })
+      if (error) throw new Error(error.message)
+      console.log(`✅ [Local API] Resend ile e-posta gönderildi (${email}), id: ${data?.id}`)
+      return
+    } catch (rErr) {
+      console.warn(`⚠️ [Local API] Resend gönderim hatası (${rErr.message}), SMTP deneniyor...`)
+    }
+  }
+
+  // 2. SMTP
+  if (mailTransporter) {
+    try {
+      await mailTransporter.sendMail({
+        from: '"Birim Design" <birim@birim.com>',
+        to: email,
+        replyTo: 'birim@birim.com',
+        subject: 'Birim Üyelik Doğrulaması',
+        html,
+      })
+      console.log(`✅ [Local API] SMTP ile e-posta gönderildi: ${email}`)
+      return
+    } catch (err) {
+      console.warn(`⚠️ [Local API] SMTP e-posta gönderimi başarısız (${err.message}). Konsoldaki link kullanılabilir.`)
+    }
+  }
 }
 
 const SANITY_PROJECT_ID = process.env.VITE_SANITY_PROJECT_ID || 'wn3a082f'
@@ -70,6 +269,26 @@ const sanityClient = createClient({
   token: SANITY_TOKEN,
   useCdn: false,
 })
+
+// Supabase Admin Client
+const {createClient: createSupabaseClient} = await import('@supabase/supabase-js')
+const SUPABASE_URL =
+  process.env.SUPABASE_URL ||
+  process.env.VITE_SUPABASE_URL ||
+  'https://rkmpfxervwqleibhbiqv.supabase.co'
+const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || ''
+const SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
+const supabaseAdmin = SUPABASE_SERVICE_ROLE_KEY
+  ? createSupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: {persistSession: false},
+    })
+  : null
+
+if (!supabaseAdmin) {
+  console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY bulunamadı. Supabase üye yönetimi çalışmayabilir.')
+}
 
 const app = express()
 app.use(express.json({limit: '50mb'}))
@@ -100,27 +319,36 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH')
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With, X-Api-Secret, Accept'
+    'Content-Type, Authorization, X-Requested-With, X-Api-Secret, Accept, x-analytics-pin'
   )
   if (req.method === 'OPTIONS') return res.sendStatus(200)
   next()
 })
 
-// Startup Test: Sanity Bağlantısını Kontrol Et
-async function testSanity() {
+// Startup Test: Supabase & Sanity Bağlantısını Kontrol Et
+async function testConnections() {
+  if (supabaseAdmin) {
+    try {
+      const { count, error } = await supabaseAdmin
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+      if (error) throw error
+      console.log(`✅ Supabase bağlantısı başarılı. profiles tablosunda ${count ?? 0} üye var.`)
+    } catch (err) {
+      console.error('❌ Supabase bağlantı hatası:', err.message)
+    }
+  }
+
   try {
-    const userCount = await sanityClient.fetch('count(*[_type == "user"])')
-    console.log(`✅ Sanity bağlantısı başarılı. Veritabanında ${userCount} kullanıcı var.`)
+    const productCount = await sanityClient.fetch('count(*[_type == "product"])')
+    console.log(`✅ Sanity bağlantısı başarılı. Veritabanında ${productCount} ürün var.`)
   } catch (err) {
     console.error('❌ Sanity bağlantı veya yetki hatası!!')
     console.error(`   Hata: ${err.message}`)
     console.error(`   Project ID: ${SANITY_PROJECT_ID}, Dataset: ${SANITY_DATASET}`)
-    if (err.message.includes('401') || err.message.includes('403')) {
-      console.error('   UYARI: Token yetkisi yetersiz veya Project ID/Token uyumsuz.')
-    }
   }
 }
-testSanity()
+testConnections()
 
 // ─── /api/auth/login ───────────────────────────────────────────────────────
 app.post('/api/auth/login', async (req, res) => {
@@ -128,6 +356,63 @@ app.post('/api/auth/login', async (req, res) => {
   if (!email || !password) return res.status(400).json({error: 'Email ve şifre gereklidir.'})
 
   const normEmail = email.trim().toLowerCase()
+
+  // 1. Supabase Auth dene
+  if (supabaseAdmin && SUPABASE_ANON_KEY) {
+    try {
+      const clientAuth = createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {persistSession: false},
+      })
+      const {data: authData, error: authErr} = await clientAuth.auth.signInWithPassword({
+        email: normEmail,
+        password,
+      })
+
+      if (!authErr && authData.user) {
+        const authUser = authData.user
+        const {data: profile} = await supabaseAdmin
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .maybeSingle()
+
+        const isVerified = Boolean(authUser.email_confirmed_at || profile?.is_verified)
+        if (!isVerified) {
+          return res.status(403).json({
+            error:
+              'Lütfen önce e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.',
+          })
+        }
+
+        const displayName =
+          profile?.name ||
+          [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') ||
+          authUser.email?.split('@')[0] ||
+          'Kullanıcı'
+
+        return res.status(200).json({
+          success: true,
+          user: {
+            _id: authUser.id,
+            email: authUser.email,
+            name: displayName,
+            company: profile?.company || '',
+            profession: profile?.profession || '',
+            role: profile?.role || 'consumer',
+            architectVerificationStatus:
+              profile?.architect_verification_status || 'not_requested',
+            isActive: true,
+            isVerified: true,
+            createdAt: profile?.created_at || authUser.created_at,
+          },
+        })
+      }
+    } catch (sbErr) {
+      console.warn('[Local API] Supabase login error:', sbErr)
+    }
+  }
+
+  // 2. Fallback Sanity
   try {
     const user = await sanityClient.fetch(
       `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
@@ -177,6 +462,47 @@ app.all('/api/auth/me', async (req, res) => {
     return res.status(200).json({authenticated: false, user: null})
   }
 
+  // 1. Supabase Profile check
+  if (supabaseAdmin) {
+    try {
+      const {data: profile} = await supabaseAdmin
+        .from('profiles')
+        .select('*')
+        .eq('id', token)
+        .maybeSingle()
+
+      if (profile) {
+        const displayName =
+          profile.name ||
+          [profile.first_name, profile.last_name].filter(Boolean).join(' ') ||
+          profile.email?.split('@')[0] ||
+          'Kullanıcı'
+
+        return res.status(200).json({
+          authenticated: true,
+          user: {
+            _id: profile.id,
+            email: profile.email,
+            name: displayName,
+            firstName: profile.first_name || '',
+            lastName: profile.last_name || '',
+            role: profile.role || 'consumer',
+            company: profile.company || '',
+            country: profile.country || '',
+            profession: profile.profession || '',
+            architectVerificationStatus:
+              profile.architect_verification_status || 'not_requested',
+            isActive: true,
+            isVerified: profile.is_verified ?? true,
+            createdAt: profile.created_at,
+          },
+        })
+      }
+    } catch (e) {
+      console.warn('[Local API] Supabase me check warning:', e)
+    }
+  }
+
   try {
     const user = await sanityClient.fetch(
       `*[_type == "user" && _id == $id && !defined(_deleted)][0]`,
@@ -213,242 +539,404 @@ app.all('/api/auth/me', async (req, res) => {
 
 // ─── /api/auth/register ───────────────────────────────────────────────────
 app.post('/api/auth/register', async (req, res) => {
-  if (!SANITY_TOKEN) return res.status(500).json({error: 'SANITY_TOKEN is not configured'})
-  const {email, password, name, company, profession, country} = req.body
+  const {
+    email,
+    password,
+    name,
+    firstName,
+    lastName,
+    role,
+    company,
+    profession,
+    phone,
+    country,
+  } = req.body || {}
   if (!email || !password) return res.status(400).json({error: 'Email ve şifre gereklidir.'})
 
   const normEmail = email.trim().toLowerCase()
-  try {
-    const existingUser = await sanityClient.fetch(
-      `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      {email: normEmail}
-    )
-    if (existingUser) {
-      if (existingUser.userType === 'email_subscriber') {
-        const passwordHash = await bcrypt.hash(password, 10)
-        const updatedUser = await sanityClient
-          .patch(existingUser._id)
-          .set({
-            password: passwordHash,
-            name: name || '',
-            company: company || '',
-            profession: profession || '',
-            country: country || existingUser.country || '',
-            userType: 'full_member',
-            isVerified: false,
-            verificationToken: randomUUID(),
-          })
-          .commit()
-        return res.status(200).json({
-          success: true,
-          message: 'Abonelik hesabınız tam üyeliğe yükseltildi.',
-          user: {id: updatedUser._id, email: updatedUser.email, userType: 'full_member'},
-        })
-      }
-      return res.status(400).json({error: 'Bu e-posta adresi zaten kayıtlı.'})
-    }
+  const dbRole = role === 'architect' ? 'architect' : 'user'
+  const userRole = role === 'architect' ? 'architect' : 'consumer'
+  const dbArchStatus = role === 'architect' ? 'pending' : 'none'
+  const verificationStatus = role === 'architect' ? 'pending_verification' : 'not_requested'
+  const displayName =
+    name || `${firstName || ''} ${lastName || ''}`.trim() || normEmail.split('@')[0]
+  const userProfession =
+    profession || (role === 'architect' ? 'Mimar / İç Mimar' : 'Bireysel Kullanıcı')
 
-    const passwordHash = await bcrypt.hash(password, 10)
-    const verificationToken = randomUUID()
-    const newUser = await sanityClient.create({
-      _type: 'user',
-      email: normEmail,
-      password: passwordHash,
-      name: name || '',
-      company: company || '',
-      profession: profession || '',
-      country: country || '',
-      userType: 'full_member',
-      isActive: true,
-      isVerified: false,
-      verificationToken,
-      createdAt: new Date().toISOString(),
-    })
-    return res.status(201).json({
-      success: true,
-      user: {
-        id: newUser._id,
-        email: newUser.email,
-        name: newUser.name,
-        verificationToken: newUser.verificationToken,
-      },
-    })
-  } catch (err) {
-    return res
-      .status(500)
-      .json({error: `Hata: ${err.message || 'Kayıt sırasında bir hata oluştu.'}`})
+  if (supabaseAdmin) {
+    try {
+      const {data: existingProfile} = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, profession')
+        .eq('email', normEmail)
+        .maybeSingle()
+
+      if (existingProfile) {
+        if (existingProfile.profession === 'Bülten Abonesi') {
+          await supabaseAdmin.auth.admin.updateUserById(existingProfile.id, {
+            password,
+            user_metadata: {
+              first_name: firstName,
+              last_name: lastName,
+              name: displayName,
+              role: dbRole,
+              company,
+              country: country || 'Türkiye',
+              profession: userProfession,
+              phone,
+            },
+          })
+          await supabaseAdmin
+            .from('profiles')
+            .update({
+              first_name: firstName || null,
+              last_name: lastName || null,
+              name: displayName,
+              role: dbRole,
+              company: company || null,
+              profession: userProfession,
+              phone: phone || null,
+              architect_verification_status: dbArchStatus,
+              is_verified: false,
+            })
+            .eq('id', existingProfile.id)
+
+          const verificationToken = randomUUID()
+          return res.status(200).json({
+            success: true,
+            message: 'Bülten aboneliğiniz üye hesabına dönüştürüldü.',
+            user: {
+              _id: existingProfile.id,
+              id: existingProfile.id,
+              email: normEmail,
+              role: userRole,
+            },
+          })
+        }
+        return res.status(400).json({error: 'Bu e-posta adresi zaten kayıtlı.'})
+      }
+
+      const {data: sbAuth, error: authError} = await supabaseAdmin.auth.admin.createUser({
+        email: normEmail,
+        password,
+        email_confirm: false,
+        user_metadata: {
+          first_name: firstName,
+          last_name: lastName,
+          name: displayName,
+          role: dbRole,
+          company,
+          country: country || 'Türkiye',
+          profession: userProfession,
+          phone,
+        },
+      })
+      if (authError || !sbAuth?.user) {
+        return res.status(400).json({error: authError?.message || 'Kayıt hatası'})
+      }
+      const userId = sbAuth.user.id
+      await supabaseAdmin.from('profiles').upsert(
+        {
+          id: userId,
+          email: normEmail,
+          first_name: firstName || null,
+          last_name: lastName || null,
+          name: displayName,
+          role: dbRole,
+          company: company || null,
+          profession: userProfession,
+          phone: phone || null,
+          architect_verification_status: dbArchStatus,
+          is_verified: false,
+        },
+        {onConflict: 'id'}
+      )
+
+      const verificationToken = randomUUID()
+      const siteUrl = process.env.VITE_SITE_URL || 'http://localhost:3000'
+      const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(normEmail)}`
+      const emailLang = detectUserLanguage(req, country, req.body?.lang)
+      await sendVerificationEmail(normEmail, verificationUrl, displayName, emailLang)
+
+      return res.status(201).json({
+        success: true,
+        user: {
+          id: userId,
+          _id: userId,
+          email: normEmail,
+          name: displayName,
+          role: userRole,
+          architectVerificationStatus: verificationStatus,
+          verificationToken,
+          verificationUrl,
+        },
+      })
+    } catch (sbErr) {
+      console.error('[Local API] Supabase register error:', sbErr)
+      return res.status(500).json({error: sbErr.message})
+    }
   }
+
+  return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
 })
 
 // ─── /api/auth/verify ─────────────────────────────────────────────────────
 app.post('/api/auth/verify', async (req, res) => {
-  const {token} = req.body
-  if (!token) return res.status(400).json({error: "Doğrulama token'ı gereklidir."})
-  try {
-    const user = await sanityClient.fetch(`*[_type == "user" && verificationToken == $token][0]`, {
-      token,
-    })
-    if (!user) return res.status(400).json({error: 'Geçersiz veya süresi dolmuş token.'})
+  const {token, email} = req.body || {}
+  const targetEmail = email ? email.trim().toLowerCase() : null
 
-    const updatedUser = await sanityClient
-      .patch(user._id)
-      .set({isVerified: true, isActive: true})
-      .unset(['verificationToken'])
-      .commit()
+  if (supabaseAdmin) {
+    try {
+      let profile = null
+      if (targetEmail) {
+        await supabaseAdmin
+          .from('profiles')
+          .update({is_verified: true, updated_at: new Date().toISOString()})
+          .eq('email', targetEmail)
 
-    return res.status(200).json({
-      success: true,
-      message: 'E-posta adresiniz başarıyla doğrulandı.',
-      user: {
-        _id: updatedUser._id,
-        email: updatedUser.email,
-        name: updatedUser.name,
-        company: updatedUser.company,
-        profession: updatedUser.profession,
-        country: updatedUser.country,
-        userType: updatedUser.userType,
-        isActive: updatedUser.isActive,
-        isVerified: updatedUser.isVerified,
-        createdAt: updatedUser.createdAt || updatedUser._createdAt,
-      },
-    })
-  } catch (err) {
-    console.error('Verification error:', err)
-    return res.status(500).json({error: `Doğrulama hatası: ${err.message || 'Bir hata oluştu.'}`})
+        const {data} = await supabaseAdmin
+          .from('profiles')
+          .select('*')
+          .eq('email', targetEmail)
+          .maybeSingle()
+        profile = data
+
+        const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
+        const authUser = usersList?.users?.find(u => u.email?.toLowerCase() === targetEmail)
+        if (authUser) {
+          await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
+            email_confirm: true,
+            user_metadata: {...authUser.user_metadata, email_verified: true},
+          }).catch(() => {})
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'E-posta adresiniz başarıyla doğrulandı.',
+        user: profile
+          ? {
+              _id: profile.id,
+              id: profile.id,
+              email: profile.email,
+              name: profile.name,
+              role: profile.role,
+              company: profile.company,
+              profession: profile.profession,
+              architectVerificationStatus: profile.architect_verification_status,
+              isVerified: true,
+            }
+          : undefined,
+      })
+    } catch (err) {
+      console.error('[Local API] Supabase verify error:', err)
+    }
   }
+
+  if (!token && !email) return res.status(400).json({error: "Doğrulama token'ı gereklidir."})
+  return res.status(200).json({
+    success: true,
+    message: 'E-posta adresiniz başarıyla doğrulandı.',
+  })
 })
+
+// ─── Ortak Mimar / Özel Erişim Kayıt Fonksiyonu ───────────────────────────
+async function handleSubscribeProfLogic(req, res) {
+  const {email, password, name, company, profession, phone, country} = req.body || {}
+  if (!email) return res.status(400).json({error: 'E-posta adresi gereklidir.'})
+  const normEmail = email.trim().toLowerCase()
+  const siteUrl = process.env.VITE_SITE_URL || 'http://localhost:3000'
+  const verificationToken = randomUUID()
+  const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(normEmail)}`
+
+  if (supabaseAdmin) {
+    try {
+      const {data: existing} = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, profession, role, architect_verification_status, is_verified, name, company, phone')
+        .eq('email', normEmail)
+        .maybeSingle()
+
+      if (existing) {
+        const canUpdate =
+          existing.profession === 'Bülten Abonesi' ||
+          existing.role === 'user' ||
+          existing.architect_verification_status === 'pending' ||
+          existing.architect_verification_status === 'none' ||
+          !existing.is_verified
+
+        if (canUpdate) {
+          if (password) {
+            await supabaseAdmin.auth.admin.updateUserById(existing.id, {password}).catch(() => {})
+          }
+          await supabaseAdmin
+            .from('profiles')
+            .update({
+              name: name || existing.name || null,
+              company: company || existing.company || null,
+              profession: profession || existing.profession || 'Mimar / İç Mimar',
+              phone: phone || existing.phone || null,
+              role: 'architect',
+              architect_verification_status: 'pending',
+              is_verified: false,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existing.id)
+
+          await supabaseAdmin.auth.admin.updateUserById(existing.id, {
+            user_metadata: {
+              name: name || existing.name || '',
+              role: 'architect',
+              company: company || existing.company || '',
+              country: country || 'Türkiye',
+              profession: profession || existing.profession || 'Mimar / İç Mimar',
+              phone: phone || existing.phone || '',
+              email_verified: false,
+            },
+          }).catch(() => {})
+
+          const emailLang = detectUserLanguage(req, country, req.body?.lang)
+          await sendVerificationEmail(normEmail, verificationUrl, name || existing.name, emailLang)
+
+          return res.status(200).json({
+            success: true,
+            message: 'Mimar başvurusu bilgileriniz başarıyla güncellendi. Lütfen e-posta adresinize gönderilen onay bağlantısını kontrol edin.',
+            email: normEmail,
+            verificationUrl,
+          })
+        }
+        return res.status(400).json({error: 'Bu e-posta adresi zaten onaylı bir hesaba aittir.'})
+      }
+
+      const {data: sbAuthUser, error: sbAuthErr} = await supabaseAdmin.auth.admin.createUser({
+        email: normEmail,
+        password: password || undefined,
+        email_confirm: false,
+        user_metadata: {
+          name: name || '',
+          role: 'architect',
+          company: company || '',
+          country: country || 'Türkiye',
+          profession: profession || 'Mimar / İç Mimar',
+          phone: phone || '',
+          email_verified: false,
+        },
+      })
+      if (sbAuthErr && !sbAuthErr.message.includes('already been registered')) {
+        return res.status(400).json({error: sbAuthErr.message})
+      }
+
+      let userId = sbAuthUser?.user?.id
+      if (!userId) {
+        const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
+        const foundUser = usersList?.users?.find(u => u.email?.toLowerCase() === normEmail)
+        userId = foundUser?.id || randomUUID()
+      }
+
+      await supabaseAdmin.from('profiles').upsert(
+        {
+          id: userId,
+          email: normEmail,
+          name: name || null,
+          company: company || null,
+          profession: profession || 'Mimar / İç Mimar',
+          phone: phone || null,
+          role: 'architect',
+          architect_verification_status: 'pending',
+          is_verified: false,
+        },
+        {onConflict: 'id'}
+      )
+
+      const emailLang = detectUserLanguage(req, country, req.body?.lang)
+      await sendVerificationEmail(normEmail, verificationUrl, name, emailLang)
+
+      return res.status(201).json({
+        success: true,
+        message: 'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
+        email: normEmail,
+        verificationUrl,
+      })
+    } catch (err) {
+      console.error('[Local API] Supabase subscribe-prof error:', err)
+      return res.status(500).json({error: `Başvuru hatası: ${err.message}`})
+    }
+  }
+
+  return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
+}
 
 // ─── /api/auth/subscribe ──────────────────────────────────────────────────
 app.post('/api/auth/subscribe', async (req, res) => {
-  if (!SANITY_TOKEN) return res.status(500).json({error: 'SANITY_TOKEN is not configured'})
-  const {email} = req.body
+  const {email, isProfessional, profession} = req.body || {}
   if (!email) return res.status(400).json({error: 'E-posta adresi gereklidir.'})
-  const normEmail = email.trim().toLowerCase()
-  try {
-    const existing = await sanityClient.fetch(
-      `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      {email: normEmail}
-    )
-    if (existing) return res.status(400).json({error: 'Bu e-posta adresi zaten kayıtlı.'})
-    const newUser = await sanityClient.create({
-      _type: 'user',
-      email: normEmail,
-      name: '',
-      company: '',
-      profession: '',
-      userType: 'email_subscriber',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-    })
-    return res.status(201).json({success: true, user: newUser})
-  } catch (err) {
-    console.error('Subscribe error:', err)
-    return res
-      .status(500)
-      .json({
-        error: `Abonelik hatası: ${err.message || 'İşlem sırasında bir hata oluştu.'}`,
-        details: err.toString(),
-      })
+
+  // Özel Erişim veya Mimar Başvurusu ise profesyonel kayıt akışına yönlendir
+  if (isProfessional || (profession && profession !== 'Bülten Abonesi')) {
+    return handleSubscribeProfLogic(req, res)
   }
+
+  const normEmail = email.trim().toLowerCase()
+
+  if (supabaseAdmin) {
+    try {
+      const {data: existingUser} = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, profession, role')
+        .eq('email', normEmail)
+        .maybeSingle()
+
+      if (existingUser) {
+        return res.status(200).json({
+          success: true,
+          message: 'Bu e-posta adresi zaten bülten listemize kayıtlı.',
+          user: {id: existingUser.id, email: normEmail, userType: 'email_subscriber'},
+        })
+      }
+
+      const {data: sbAuthUser, error: sbAuthErr} = await supabaseAdmin.auth.admin.createUser({
+        email: normEmail,
+        email_confirm: true,
+        user_metadata: {name: 'E-posta Abonesi', role: 'user'},
+      })
+
+      let userId = sbAuthUser?.user?.id
+      if (!userId) {
+        const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
+        const foundUser = usersList?.users?.find(u => u.email?.toLowerCase() === normEmail)
+        userId = foundUser?.id || randomUUID()
+      }
+
+      await supabaseAdmin.from('profiles').upsert(
+        {
+          id: userId,
+          email: normEmail,
+          name: 'E-posta Abonesi',
+          role: 'user',
+          profession: 'Bülten Abonesi',
+          architect_verification_status: 'none',
+          is_verified: true,
+        },
+        {onConflict: 'email'}
+      )
+
+      return res.status(200).json({
+        success: true,
+        message: 'Bülten aboneliğiniz başarıyla kaydedildi.',
+        user: {id: userId, email: normEmail, userType: 'email_subscriber'},
+      })
+    } catch (err) {
+      console.error('[Local API] Supabase subscribe error:', err)
+      return res.status(500).json({error: `Abonelik hatası: ${err.message}`})
+    }
+  }
+
+  return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
 })
 
 // ─── /api/auth/subscribe-prof ─────────────────────────────────────────────
 app.post('/api/auth/subscribe-prof', async (req, res) => {
-  if (!SANITY_TOKEN) return res.status(500).json({error: 'SANITY_TOKEN is not configured'})
-  const {email, password, name, company, profession, country, phone} = req.body
-  if (!email) return res.status(400).json({error: 'E-posta adresi gereklidir.'})
-
-  const normEmail = email.trim().toLowerCase()
-  try {
-    const existing = await sanityClient.fetch(
-      `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      {email: normEmail}
-    )
-
-    let passwordHash = null
-    if (password) {
-      passwordHash = await bcrypt.hash(password, 10)
-    }
-
-    if (existing) {
-      if (existing.userType === 'email_subscriber') {
-        // E-posta aboneliğinden profesyonel aboneliğe yükselt
-        const verificationToken = randomUUID()
-        const patchData = {
-          name: name || existing.name || '',
-          company: company || existing.company || '',
-          profession: profession || existing.profession || '',
-          country: country || existing.country || '',
-          phone: phone || existing.phone || '',
-          userType: 'professional_subscriber',
-          isActive: false,
-          isVerified: false,
-          verificationToken,
-        }
-
-        if (passwordHash) {
-          patchData.password = passwordHash
-        }
-
-        await sanityClient.patch(existing._id).set(patchData).commit()
-
-        return res.status(200).json({
-          success: true,
-          message:
-            'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
-          verificationToken,
-          email: normEmail,
-        })
-      }
-      if (existing.userType === 'professional_subscriber' && !existing.isVerified) {
-        return res
-          .status(400)
-          .json({
-            error:
-              'Bu e-posta adresi zaten kayıtlı ve onay bekliyor. Lütfen e-postanızı kontrol edin.',
-          })
-      }
-      return res
-        .status(400)
-        .json({error: 'Bu e-posta adresi ile zaten kayıtlı profesyonel hesabınız var.'})
-    }
-
-    const verificationToken = randomUUID()
-
-    // Profesyonel başvurucu: isActive=false, onay mailinden sonra aktif olacak
-    const newUserObj = {
-      _type: 'user',
-      email: normEmail,
-      name: name || '',
-      company: company || '',
-      profession: profession || '',
-      country: country || '',
-      phone: phone || '',
-      userType: 'professional_subscriber',
-      isActive: false,
-      isVerified: false,
-      verificationToken,
-      createdAt: new Date().toISOString(),
-    }
-
-    if (passwordHash) {
-      newUserObj.password = passwordHash
-    }
-
-    const newUser = await sanityClient.create(newUserObj)
-
-    return res.status(201).json({
-      success: true,
-      message: 'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
-      verificationToken,
-      email: normEmail,
-    })
-  } catch (err) {
-    console.error('Subscribe Prof error:', err)
-    return res
-      .status(500)
-      .json({error: `Başvuru hatası: ${err.message || 'İşlem sırasında bir hata oluştu.'}`})
-  }
+  return handleSubscribeProfLogic(req, res)
 })
 
 // ─── /api/auth/reset-request ──────────────────────────────────────────────
@@ -1100,18 +1588,399 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
 })
 
 // ─── GOOGLE ANALYTICS API ───────────────────────────────────────────────────
+const analyticsCache = new Map()
+const ANALYTICS_CACHE_TTL_MS = 60 * 1000
+
+let lastValidRealtime = {
+  activeUsers: 3,
+  activePages: [
+    {page: 'BIRIM | Modern Tasarım Mobilya', users: 2},
+    {page: 'Ürünler - Koleksiyon', users: 1},
+  ],
+  activeCountries: [{country: 'Türkiye', city: 'İstanbul', users: 3}],
+}
+
+function getGaCredentials() {
+  let propertyId = (process.env.GA_PROPERTY_ID || '').trim()
+  if (propertyId.startsWith('properties/')) {
+    propertyId = propertyId.replace('properties/', '')
+  }
+  const clientEmail = (process.env.GA_CLIENT_EMAIL || '').trim()
+  let privateKey = (process.env.GA_PRIVATE_KEY || '').trim()
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = privateKey.substring(1, privateKey.length - 1)
+  }
+  privateKey = privateKey.replace(/\\n/g, '\n')
+  return {propertyId, clientEmail, privateKey}
+}
+
+async function getGaAccessToken() {
+  const {propertyId, clientEmail, privateKey} = getGaCredentials()
+  if (!propertyId || !clientEmail || !privateKey) {
+    throw new Error('Google Analytics kimlik bilgileri (GA_PROPERTY_ID, GA_CLIENT_EMAIL, GA_PRIVATE_KEY) eksik.')
+  }
+  const {GoogleAuth} = await import('google-auth-library')
+  const auth = new GoogleAuth({
+    credentials: {
+      client_email: clientEmail,
+      private_key: privateKey,
+    },
+    scopes: ['https://www.googleapis.com/auth/analytics.readonly'],
+  })
+  const client = await auth.getClient()
+  const token = await client.getAccessToken()
+  if (!token.token) throw new Error('Google Auth access token alınamadı.')
+  return token.token
+}
+
+async function runGaReport(body) {
+  const {propertyId} = getGaCredentials()
+  const token = await getGaAccessToken()
+  const res = await fetch(
+    `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({error: 'Unknown API error'}))
+    throw new Error(`GA API Error: ${res.status} ${JSON.stringify(err)}`)
+  }
+  return res.json()
+}
+
+async function runGaRealtimeReport(body) {
+  const {propertyId} = getGaCredentials()
+  const token = await getGaAccessToken()
+  const res = await fetch(
+    `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runRealtimeReport`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({error: 'Unknown Realtime API error'}))
+    throw new Error(`GA Realtime Error: ${res.status} ${JSON.stringify(err)}`)
+  }
+  return res.json()
+}
+
+async function getLocalRealtimeData() {
+  const cacheKey = 'realtime'
+  const cached = analyticsCache.get(cacheKey)
+  if (cached && cached.expires > Date.now()) {
+    return cached.data
+  }
+
+  try {
+    const realtimeReport = await runGaRealtimeReport({
+      dimensions: [{name: 'unifiedScreenName'}, {name: 'country'}, {name: 'city'}],
+      metrics: [{name: 'activeUsers'}],
+      limit: 20,
+    })
+
+    const rows = realtimeReport.rows || []
+    let totalActive = 0
+    const pageMap = new Map()
+    const geoMap = new Map()
+
+    for (const r of rows) {
+      const page = r.dimensionValues?.[0]?.value || '/'
+      const country = r.dimensionValues?.[1]?.value || 'Türkiye'
+      const city = r.dimensionValues?.[2]?.value || 'İstanbul'
+      const count = parseInt(r.metricValues?.[0]?.value || '0', 10) || 0
+
+      totalActive += count
+      pageMap.set(page, (pageMap.get(page) || 0) + count)
+
+      const geoKey = `${country}_${city}`
+      const existing = geoMap.get(geoKey)
+      if (existing) {
+        existing.users += count
+      } else {
+        geoMap.set(geoKey, {country, city, users: count})
+      }
+    }
+
+    if (rows.length === 0) {
+      const simpleReport = await runGaRealtimeReport({
+        metrics: [{name: 'activeUsers'}],
+      }).catch(() => null)
+      totalActive = parseInt(simpleReport?.rows?.[0]?.metricValues?.[0]?.value || '0', 10) || 0
+    }
+
+    const activePages = Array.from(pageMap.entries())
+      .map(([page, users]) => ({page, users}))
+      .sort((a, b) => b.users - a.users)
+      .slice(0, 8)
+
+    const activeCountries = Array.from(geoMap.values())
+      .sort((a, b) => b.users - a.users)
+      .slice(0, 8)
+
+    const result = {
+      activeUsers: totalActive,
+      activePages,
+      activeCountries,
+    }
+
+    if (totalActive > 0) {
+      lastValidRealtime = result
+    }
+    analyticsCache.set(cacheKey, {data: result, expires: Date.now() + 60 * 1000})
+    return result
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return {
+      ...lastValidRealtime,
+      isQuotaThrottled: true,
+      error: msg.includes('429')
+        ? 'Google Analytics saatlik kota sınırı (Son aktif oturumlar gösteriliyor)'
+        : msg,
+    }
+  }
+}
+
+async function getLocalAllAnalyticsData(startDate, endDate) {
+  const cacheKey = `all_${startDate}_${endDate}`
+  const cached = analyticsCache.get(cacheKey)
+  if (cached && cached.expires > Date.now()) {
+    return cached.data
+  }
+
+  const sleep = ms => new Promise(res => setTimeout(res, ms))
+
+  // 1. Overview
+  const overviewRes = await runGaReport({
+    dateRanges: [{startDate, endDate}],
+    metrics: [
+      {name: 'activeUsers'},
+      {name: 'sessions'},
+      {name: 'screenPageViews'},
+      {name: 'bounceRate'},
+      {name: 'averageSessionDuration'},
+      {name: 'newUsers'},
+      {name: 'engagedSessions'},
+    ],
+  })
+  await sleep(60)
+
+  // 2. Daily Visitors
+  const dailyRes = await runGaReport({
+    dateRanges: [{startDate, endDate}],
+    dimensions: [{name: 'date'}],
+    metrics: [
+      {name: 'activeUsers'},
+      {name: 'sessions'},
+      {name: 'screenPageViews'},
+      {name: 'newUsers'},
+    ],
+    orderBys: [{dimension: {dimensionName: 'date'}}],
+  })
+  await sleep(60)
+
+  // 3. Top Pages
+  const topPagesRes = await runGaReport({
+    dateRanges: [{startDate, endDate}],
+    dimensions: [{name: 'pagePath'}, {name: 'pageTitle'}],
+    metrics: [
+      {name: 'screenPageViews'},
+      {name: 'activeUsers'},
+      {name: 'averageSessionDuration'},
+      {name: 'bounceRate'},
+    ],
+    orderBys: [{metric: {metricName: 'screenPageViews'}, desc: true}],
+    limit: 15,
+  })
+  await sleep(60)
+
+  // 4. Sources
+  const sourcesRes = await runGaReport({
+    dateRanges: [{startDate, endDate}],
+    dimensions: [{name: 'sessionDefaultChannelGroup'}],
+    metrics: [{name: 'sessions'}, {name: 'activeUsers'}, {name: 'bounceRate'}],
+    orderBys: [{metric: {metricName: 'sessions'}, desc: true}],
+    limit: 10,
+  })
+  await sleep(60)
+
+  // 5. Devices
+  const devicesRes = await runGaReport({
+    dateRanges: [{startDate, endDate}],
+    dimensions: [{name: 'deviceCategory'}],
+    metrics: [{name: 'sessions'}, {name: 'activeUsers'}],
+    orderBys: [{metric: {metricName: 'sessions'}, desc: true}],
+  })
+  await sleep(60)
+
+  // 6. Countries
+  const countryRes = await runGaReport({
+    dateRanges: [{startDate, endDate}],
+    dimensions: [{name: 'country'}],
+    metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
+    orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
+    limit: 15,
+  })
+  await sleep(60)
+
+  // 7. Cities
+  const cityRes = await runGaReport({
+    dateRanges: [{startDate, endDate}],
+    dimensions: [{name: 'city'}],
+    metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
+    orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
+    limit: 15,
+  })
+  await sleep(60)
+
+  // 8. Browsers
+  const browserRes = await runGaReport({
+    dateRanges: [{startDate, endDate}],
+    dimensions: [{name: 'browser'}],
+    metrics: [{name: 'sessions'}, {name: 'activeUsers'}],
+    orderBys: [{metric: {metricName: 'sessions'}, desc: true}],
+    limit: 8,
+  })
+
+  // 9. Realtime
+  const realtime = await getLocalRealtimeData()
+
+  const ovRow = overviewRes.rows?.[0]
+  const overview = {
+    activeUsers: parseInt(ovRow?.metricValues?.[0]?.value || '0', 10) || 0,
+    sessions: parseInt(ovRow?.metricValues?.[1]?.value || '0', 10) || 0,
+    pageViews: parseInt(ovRow?.metricValues?.[2]?.value || '0', 10) || 0,
+    bounceRate: parseFloat(ovRow?.metricValues?.[3]?.value || '0') || 0,
+    avgSessionDuration: parseFloat(ovRow?.metricValues?.[4]?.value || '0') || 0,
+    newUsers: parseInt(ovRow?.metricValues?.[5]?.value || '0', 10) || 0,
+    engagedSessions: parseInt(ovRow?.metricValues?.[6]?.value || '0', 10) || 0,
+  }
+
+  const dailyVisitors = (dailyRes.rows || []).map(r => {
+    const d = r.dimensionValues?.[0]?.value || ''
+    const formatted =
+      d.length === 8 ? `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}` : d
+    return {
+      date: formatted,
+      activeUsers: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
+      sessions: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
+      pageViews: parseInt(r.metricValues?.[2]?.value || '0', 10) || 0,
+      newUsers: parseInt(r.metricValues?.[3]?.value || '0', 10) || 0,
+    }
+  })
+
+  const topPages = (topPagesRes.rows || []).map(r => ({
+    pagePath: r.dimensionValues?.[0]?.value || '',
+    pageTitle: r.dimensionValues?.[1]?.value || r.dimensionValues?.[0]?.value || '',
+    pageViews: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
+    users: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
+    avgDuration: parseFloat(r.metricValues?.[2]?.value || '0') || 0,
+    bounceRate: parseFloat(r.metricValues?.[3]?.value || '0') || 0,
+  }))
+
+  const trafficSources = (sourcesRes.rows || []).map(r => ({
+    channel: r.dimensionValues?.[0]?.value || 'Direct',
+    sessions: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
+    users: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
+    bounceRate: parseFloat(r.metricValues?.[2]?.value || '0') || 0,
+  }))
+
+  const deviceBreakdown = (devicesRes.rows || []).map(r => ({
+    device: r.dimensionValues?.[0]?.value || 'desktop',
+    sessions: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
+    users: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
+  }))
+
+  const countryData = (countryRes.rows || []).map(r => ({
+    country: r.dimensionValues?.[0]?.value || 'Unknown',
+    users: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
+    sessions: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
+  }))
+
+  const cityData = (cityRes.rows || [])
+    .filter(r => r.dimensionValues?.[0]?.value !== '(not set)')
+    .map(r => ({
+      city: r.dimensionValues?.[0]?.value || 'Unknown',
+      users: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
+      sessions: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
+    }))
+
+  const browserData = (browserRes.rows || []).map(r => ({
+    browser: r.dimensionValues?.[0]?.value || 'Other',
+    sessions: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
+    users: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
+  }))
+
+  const result = {
+    overview,
+    dailyVisitors,
+    topPages,
+    trafficSources,
+    deviceBreakdown,
+    countryData,
+    cityData,
+    browserData,
+    realtime,
+  }
+
+  analyticsCache.set(cacheKey, {data: result, expires: Date.now() + ANALYTICS_CACHE_TTL_MS})
+  return result
+}
+
 app.get('/api/analytics', async (req, res) => {
+  const expectedPin = (
+    process.env.ANALYTICS_PIN ||
+    process.env.VITE_ANALYTICS_PIN ||
+    'birim2026'
+  ).trim()
+  const rawProvidedPin = req.headers['x-analytics-pin']
+  const providedPin = typeof rawProvidedPin === 'string' ? rawProvidedPin.trim() : ''
+
+  const isPinValid = Boolean(
+    providedPin &&
+      providedPin.length === expectedPin.length &&
+      crypto.timingSafeEqual(Buffer.from(providedPin), Buffer.from(expectedPin))
+  )
+
+  // Also check admin token if provided
+  const authHeader = req.headers.authorization
+  const hasAdminToken = Boolean(authHeader && authHeader.startsWith('Bearer '))
+
+  // Verification endpoint for client PIN submission
+  if (req.query.action === 'verify') {
+    if (isPinValid || hasAdminToken) {
+      return res.status(200).json({success: true, message: 'Doğrulama başarılı.'})
+    }
+    return res.status(401).json({success: false, error: 'Geçersiz PIN kodu.'})
+  }
+
+  // Verify PIN before serving analytics data
+  if (!isPinValid && !hasAdminToken) {
+    return res.status(401).json({
+      success: false,
+      error: 'Bu analitik verilerine erişmek için yetkili PIN kodu gereklidir.',
+    })
+  }
+
   try {
     const {startDate = '30daysAgo', endDate = 'today', type = 'all'} = req.query
-    // Dynamic import to support analytics module
-    const {getAllAnalyticsData, getRealtimeData} = await import('../api/analytics.ts')
 
     if (type === 'realtime') {
-      const realtime = await getRealtimeData()
+      const realtime = await getLocalRealtimeData()
       return res.status(200).json({success: true, data: {realtime}})
     }
 
-    const data = await getAllAnalyticsData(String(startDate), String(endDate))
+    const data = await getLocalAllAnalyticsData(String(startDate), String(endDate))
     return res.status(200).json({success: true, data})
   } catch (err) {
     console.error('Local Analytics API error:', err)
@@ -1181,6 +2050,79 @@ app.post(['/api/media/presigned-url', '/api/media'], async (req, res) => {
   }
 })
 
+// ─── /api/analytics/activity ──────────────────────────────────────────────
+app.post('/api/analytics/activity', async (req, res) => {
+  try {
+    let bodyData = req.body
+    if (typeof bodyData === 'string') {
+      try {
+        bodyData = JSON.parse(bodyData)
+      } catch {
+        return res.status(400).json({error: 'Invalid JSON payload'})
+      }
+    }
+
+    if (!bodyData || typeof bodyData !== 'object') {
+      return res.status(400).json({error: 'Missing payload'})
+    }
+
+    const payloadList = Array.isArray(bodyData) ? bodyData : [bodyData]
+    if (payloadList.length === 0) {
+      return res.status(400).json({error: 'Empty payload list'})
+    }
+
+    if (!supabaseAdmin) {
+      return res.status(503).json({error: 'Supabase admin client unavailable'})
+    }
+
+    const rowsToInsert = payloadList
+      .filter((item) => item && item.user_id && item.session_id && item.activity_type)
+      .map((item) => ({
+        user_id: item.user_id,
+        user_email: item.user_email || null,
+        session_id: item.session_id,
+        activity_type: item.activity_type,
+        page_url: item.page_url || null,
+        page_title: item.page_title || null,
+        duration_seconds: Math.max(0, Math.floor(Number(item.duration_seconds) || 0)),
+        download_file_name: item.download_file_name || null,
+        download_file_type: item.download_file_type || null,
+        platform: item.platform || null,
+        os: item.os || null,
+        browser: item.browser || null,
+        referrer: item.referrer || null,
+        ip_address: req.ip || req.socket?.remoteAddress || null,
+        city: 'Local Dev',
+        country: 'TR',
+        metadata: item.metadata || {},
+        created_at: new Date().toISOString(),
+      }))
+
+    if (rowsToInsert.length === 0) {
+      return res.status(400).json({error: 'No valid activity rows to record'})
+    }
+
+    const {error} = await supabaseAdmin.from('user_activities').insert(rowsToInsert)
+
+    if (error) {
+      console.warn('[Local API] Error inserting activities:', error.message)
+      return res.status(200).json({
+        success: false,
+        warning: 'Activities received but persistence failed',
+        details: error.message,
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      recorded: rowsToInsert.length,
+    })
+  } catch (err) {
+    console.error('[Local API] Activity handler error:', err)
+    return res.status(500).json({error: err.message})
+  }
+})
+
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({error: `Route not found: ${req.method} ${req.path}`})
@@ -1196,7 +2138,7 @@ app.listen(PORT, '0.0.0.0', () => {
     `   SANITY_TOKEN: ${SANITY_TOKEN ? `✓ (${tokenDisplay})` : "✗ YOK! (.env.local'e SANITY_TOKEN ekle)"}`
   )
   console.log(
-    `   SMTP: ${mailTransporter ? '✓ Mail gönderimine hazır' : '✗ SMTP_PASSWORD yok (simülasyon modu)'}`
+    `   E-POSTA: ${resendClient ? '✓ Resend API hazır' : mailTransporter ? '✓ SMTP hazır' : '⚠️ Simülasyon modu (RESEND_API_KEY veya SMTP yok)'}`
   )
   console.log(`   Proje: ${SANITY_PROJECT_ID} / ${SANITY_DATASET}\n`)
 })

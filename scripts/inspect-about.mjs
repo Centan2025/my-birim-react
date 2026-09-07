@@ -1,17 +1,17 @@
 import {createClient} from '@sanity/client'
 import dotenv from 'dotenv'
-dotenv.config()
+dotenv.config({path: '.env.local'})
 
 const client = createClient({
   projectId: 'wn3a082f',
   dataset: 'production',
   apiVersion: '2025-01-01',
   useCdn: false,
+  token: process.env.SANITY_TOKEN,
 })
 
-async function inspect() {
-  const doc = await client.fetch('*[_type == "aboutPage"][0]')
-  console.log('ABOUT PAGE DOC:', JSON.stringify(doc, null, 2))
+async function run() {
+  const drafts = await client.fetch('*[_id in path("drafts.**")]{ _id, _type, _updatedAt }')
+  console.log('ALL ACTIVE DRAFTS IN DATASET:', drafts)
 }
-
-inspect()
+run()

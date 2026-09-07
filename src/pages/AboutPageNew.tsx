@@ -384,7 +384,10 @@ export function AboutPageNew() {
               : {}
 
           return {
-            year: era.year || `${1970 + idx * 15}`,
+            year:
+              getPlainText(
+                typeof era.year === 'object' && era.year !== null ? t(era.year) : era.year
+              ) || `${1970 + idx * 15}`,
             title: getPlainText(t(era.title)),
             description: getPlainText(t(era.description)),
             image: getSanitizedImage(era.image, DEFAULT_IMAGES.history),
@@ -559,19 +562,32 @@ export function AboutPageNew() {
                     >
                       <button
                         onClick={() => setActiveEraIndex(isActive ? -1 : idx)}
-                        className="w-full p-4 text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-none"
+                        className="w-full p-4 text-left flex items-center justify-between gap-3 sm:gap-4 cursor-pointer focus:outline-none"
                       >
-                        <div className="flex items-center gap-4">
-                          <span className="font-outfit text-2xl font-light tracking-tight text-[var(--text-primary)] min-w-[65px]">
+                        <div className="flex items-center gap-3 sm:gap-4 min-h-[36px] min-w-0 flex-1 mr-2">
+                          {/* Yıl kısmı: Tıklanınca hafif animasyonla büyüyüp gri renk oluyor */}
+                          <motion.span
+                            layout="position"
+                            animate={{
+                              scale: isActive ? 1.15 : 1,
+                              color: isActive ? 'rgba(150, 150, 150, 0.65)' : 'var(--text-primary)',
+                            }}
+                            transition={{duration: 0.3, ease: [0.16, 1, 0.3, 1]}}
+                            className="font-outfit text-2xl font-light tracking-tight origin-left select-none flex-shrink-0 min-w-[65px]"
+                          >
                             {era.year}
-                          </span>
-                          {era.title ? (
-                            <span className="font-outfit text-xs font-light uppercase tracking-wider text-[var(--text-primary)]">
+                          </motion.span>
+                          {!isActive && era.title ? (
+                            <motion.span
+                              layoutId={`era-title-${idx}`}
+                              transition={{duration: 0.35, ease: [0.16, 1, 0.3, 1]}}
+                              className="font-outfit text-xs font-light uppercase tracking-wider text-[var(--text-secondary)] truncate min-w-0 flex-1 block"
+                            >
                               {era.title}
-                            </span>
+                            </motion.span>
                           ) : null}
                         </div>
-                        <div className="flex items-center justify-center w-7 h-7 text-[var(--text-primary)] flex-shrink-0">
+                        <div className="flex items-center justify-center w-7 h-7 text-[var(--text-primary)] flex-shrink-0 z-10">
                           <motion.div
                             animate={{rotate: isActive ? 45 : 0}}
                             transition={{duration: 0.3, ease: 'easeInOut'}}
@@ -593,22 +609,34 @@ export function AboutPageNew() {
                           >
                             <div className="p-4 pt-0 border-t border-neutral-500/20 space-y-4">
                               <div className="space-y-2 pt-3">
-                                <span className="font-outfit text-3xl font-extralight text-[var(--text-secondary)]/40 block">
-                                  {era.year}
-                                </span>
+                                {/* Başlık: Açılan kartın üst bölümünde başlık fontu ile çıksın (ayrıca yıl gözükmeyecek) */}
                                 {era.title ? (
-                                  <h3 className="font-outfit text-lg font-light text-[var(--text-primary)] uppercase">
+                                  <motion.h3
+                                    layoutId={`era-title-${idx}`}
+                                    transition={{duration: 0.35, ease: [0.16, 1, 0.3, 1]}}
+                                    className="font-outfit text-lg sm:text-xl font-light text-[var(--text-primary)] uppercase tracking-wide leading-snug"
+                                  >
                                     {era.title}
-                                  </h3>
+                                  </motion.h3>
                                 ) : null}
                                 {era.description ? (
-                                  <p className="text-[var(--text-secondary)] font-light text-xs leading-relaxed">
+                                  <motion.p
+                                    initial={{opacity: 0, y: 4}}
+                                    animate={{opacity: 1, y: 0}}
+                                    transition={{duration: 0.35, delay: 0.1, ease: 'easeOut'}}
+                                    className="text-[var(--text-secondary)] font-light text-xs sm:text-sm leading-relaxed"
+                                  >
                                     {era.description}
-                                  </p>
+                                  </motion.p>
                                 ) : null}
                               </div>
                               <div className="relative aspect-[16/10] overflow-hidden rounded-none">
-                                <ProductCardReveal direction="down" duration={1.2} delay={0.1}>
+                                <ProductCardReveal
+                                  direction="down"
+                                  duration={1.2}
+                                  delay={0.1}
+                                  className="w-full h-full"
+                                >
                                   <OptimizedImage
                                     key={`${era.year}-${era.image}`}
                                     src={era.image}
@@ -707,7 +735,12 @@ export function AboutPageNew() {
                           </div>
                           <div className="col-span-7">
                             <div className="relative aspect-[16/10] overflow-hidden rounded-none">
-                              <ProductCardReveal direction="down" duration={1.2} delay={0.1}>
+                              <ProductCardReveal
+                                direction="down"
+                                duration={1.2}
+                                delay={0.1}
+                                className="w-full h-full"
+                              >
                                 <OptimizedImage
                                   key={`${currentEra.year}-${currentEra.image}`}
                                   src={currentEra.image}
@@ -765,7 +798,12 @@ export function AboutPageNew() {
                 </div>
                 <div className="lg:col-span-7">
                   <div className="relative aspect-[4/3] overflow-hidden rounded-none">
-                    <ProductCardReveal direction="down" duration={1.3} delay={0.15}>
+                    <ProductCardReveal
+                      direction="down"
+                      duration={1.3}
+                      delay={0.15}
+                      className="w-full h-full"
+                    >
                       <OptimizedImage
                         src={identitySection.image}
                         srcMobile={identitySection.imageMobile || undefined}
@@ -799,7 +837,12 @@ export function AboutPageNew() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-16 items-start">
                 <div className="lg:col-span-7 order-2 lg:order-1">
                   <div className="relative aspect-[4/3] overflow-hidden rounded-none">
-                    <ProductCardReveal direction="down" duration={1.3} delay={0.15}>
+                    <ProductCardReveal
+                      direction="down"
+                      duration={1.3}
+                      delay={0.15}
+                      className="w-full h-full"
+                    >
                       <OptimizedImage
                         key={qualitySection.image}
                         src={qualitySection.image}
@@ -1149,7 +1192,12 @@ export function AboutPageNew() {
                               className="grid grid-cols-12 gap-8 items-center h-full"
                             >
                               <div className="col-span-6 relative aspect-[3/4] overflow-hidden rounded-none grayscale">
-                                <ProductCardReveal direction="down" duration={1.2} delay={0.1}>
+                                <ProductCardReveal
+                                  direction="down"
+                                  duration={1.2}
+                                  delay={0.1}
+                                  className="w-full h-full"
+                                >
                                   <OptimizedImage
                                     src={currentImgUrl}
                                     srcMobile={

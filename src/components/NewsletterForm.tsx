@@ -184,8 +184,8 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({variant = 'mobile', cla
           placeholder={capitalize(t('email_placeholder'))}
           className={
             isDesktop
-              ? 'w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left'
-              : 'w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-left'
+              ? 'w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-all duration-200 text-[14px] text-left'
+              : 'w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-all duration-200 text-[15px] text-left'
           }
           style={{outline: 'none', boxShadow: 'none'}}
         />

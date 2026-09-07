@@ -2,14 +2,14 @@ import crypto from 'crypto'
 import type {VercelRequest} from '@vercel/node'
 
 function getJwtSecret(): string {
-  const secret = process.env['JWT_SECRET'] || process.env['SANITY_TOKEN']
+  const secret = process.env['JWT_SECRET']
   if (!secret || secret.trim() === '') {
     if (process.env['NODE_ENV'] === 'production') {
       throw new Error('[Token Helper] Critical Error: JWT_SECRET environment variable is missing!')
     }
     return 'birim_dev_fallback_jwt_secret_key_2026_do_not_use_in_prod'
   }
-  return secret
+  return secret.trim()
 }
 
 function base64UrlEncode(str: string | Buffer): string {

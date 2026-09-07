@@ -132,11 +132,11 @@ export function HomePage() {
       const vw = document.documentElement.clientWidth || window.innerWidth
       const currentWidth = window.innerWidth
 
-      setIsMobile(mobile)
-      setViewportWidth(vw)
+      setIsMobile(prev => (prev !== mobile ? mobile : prev))
+      setViewportWidth(prev => (prev !== vw ? vw : prev))
 
       if (mobile) {
-        if (Math.abs(currentWidth - lastWidthRef.current) > 1 || !mobileHeroHeight) {
+        if (Math.abs(currentWidth - lastWidthRef.current) > 1) {
           setMobileHeroHeight(window.innerHeight)
           lastWidthRef.current = currentWidth
         }
@@ -145,10 +145,12 @@ export function HomePage() {
       }
     }
 
-    if (typeof window !== 'undefined' && !mobileHeroHeight) {
-      setMobileHeroHeight(window.innerHeight)
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth < 1024) {
+        setMobileHeroHeight(window.innerHeight)
+      }
+      checkMobile()
     }
-    checkMobile()
 
     let resizeTimeout: ReturnType<typeof setTimeout> | null = null
     const handleResize = () => {
@@ -163,7 +165,7 @@ export function HomePage() {
       window.removeEventListener('resize', handleResize)
       if (resizeTimeout) clearTimeout(resizeTimeout)
     }
-  }, [isMobile, viewportWidth, mobileHeroHeight])
+  }, [])
 
   // Desktop Home Page Section Snap & Smooth Navigation Controller
   useEffect(() => {
@@ -174,10 +176,15 @@ export function HomePage() {
     let accumulatedDelta = 0
     let resetTimer: ReturnType<typeof setTimeout> | null = null
     let safetyUnlockTimer: ReturnType<typeof setTimeout> | null = null
-    const INTENTIONAL_THRESHOLD = 50 // Belirgin kaydırmada tetikle
-    const COOLDOWN_MS = 400 // Kısa ve akıcı geçiş süresi
+    const INTENTIONAL_THRESHOLD = 35 // Belirgin kaydırmada tetikle
+    const COOLDOWN_MS = 450 // Adımlar arası kilit süresi
 
     const snapTo = (targetY: number) => {
+      const docHeight = document.documentElement.scrollHeight
+      const winHeight = window.innerHeight
+      const maxScroll = Math.max(0, docHeight - winHeight)
+      const clampedY = Math.max(0, Math.min(targetY, maxScroll))
+
       isSnapping = true
       lastSnapTime = Date.now()
 
@@ -190,24 +197,179 @@ export function HomePage() {
       }
 
       if (safetyUnlockTimer) clearTimeout(safetyUnlockTimer)
-      safetyUnlockTimer = setTimeout(unlock, 600)
+      safetyUnlockTimer = setTimeout(unlock, 800)
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const win = window as any
       if (win.lenis && typeof win.lenis.scrollTo === 'function') {
-        win.lenis.scrollTo(targetY, {
+        win.lenis.scrollTo(clampedY, {
           offset: 0,
-          duration: 0.6,
-          lock: false,
+          duration: 0.75,
+          lock: true,
           easing: (t: number) => 1 - Math.pow(1 - t, 3),
           onComplete: unlock,
         })
       } else {
         window.scrollTo({
-          top: targetY,
+          top: clampedY,
           behavior: 'smooth',
         })
-        setTimeout(unlock, 500)
+        setTimeout(unlock, 650)
+      }
+    }
+
+    const triggerStep = (direction: 'down' | 'up') => {
+      const winHeight = window.innerHeight
+      const scrollY = window.scrollY
+      const docHeight = document.documentElement.scrollHeight
+
+      const heroElem = document.getElementById('home-hero-section')
+      const heroHeight = heroElem ? heroElem.offsetHeight : winHeight
+
+      const bannerElem = document.getElementById('home-quick-banner')
+      const bannerHeight = bannerElem ? bannerElem.offsetHeight : 0
+      const bannerTop = bannerElem ? bannerElem.getBoundingClientRect().top + scrollY : heroHeight
+      const bannerBottomScrollY =
+        bannerElem && bannerHeight > 0 ? Math.max(0, bannerTop + bannerHeight - winHeight) : 0
+
+      // İçerik bloklarını ve interaktif vitrini hedefler olarak al
+      const blockElems = Array.from(
+        document.querySelectorAll<HTMLElement>('.home-content-block-snap')
+      ).filter(el => el && el.offsetHeight > 0)
+
+      const firstBlockTop = blockElems[0]
+        ? blockElems[0].getBoundingClientRect().top + scrollY
+        : bannerTop + bannerHeight
+
+      // --- AŞAĞI KAYDIRMA KADEMELERİ (STEP BY STEP DOWN) ---
+      if (direction === 'down') {
+        // En altta footer'a doğru serbest geçiş
+        if (winHeight + scrollY >= docHeight - 30) {
+          return
+        }
+
+        // Kademe 1: Hero tam ekrandayken önce Hero altındaki gri bant alttan çıksın
+        if (bannerBottomScrollY > 10 && scrollY < bannerBottomScrollY - 20) {
+          snapTo(bannerBottomScrollY)
+          return
+        }
+
+        // Kademe 2: Gri bant kademesindeyken bir sonraki scroll'da interaktif ürün görsellerine / ilk bloğa kay
+        if (scrollY < firstBlockTop - 35) {
+          snapTo(firstBlockTop)
+          return
+        }
+
+        // Kademe 3+: İçerik blokları tek tek ekrana yerleşsin
+        if (blockElems.length === 0) return
+
+        let currentIndex = 0
+        let closestDist = Infinity
+
+        for (let i = 0; i < blockElems.length; i++) {
+          const el = blockElems[i]
+          if (!el) continue
+          const top = el.getBoundingClientRect().top + scrollY
+          const height = el.offsetHeight
+
+          if (scrollY >= top - 45 && scrollY < top + height - 45) {
+            currentIndex = i
+            break
+          }
+          const dist = Math.abs(top - scrollY)
+          if (dist < closestDist) {
+            closestDist = dist
+            currentIndex = i
+          }
+        }
+
+        const currentElem = blockElems[currentIndex]
+        if (!currentElem) return
+        const currentRect = currentElem.getBoundingClientRect()
+        const remainingBelow = currentRect.bottom - winHeight
+
+        // Eğer mevcut bölüm ekrandan uzunsa ve altı henüz ekranda değilse kalan kısmı göster
+        if (remainingBelow > 70) {
+          snapTo(scrollY + Math.min(remainingBelow, winHeight * 0.85))
+        } else if (currentIndex < blockElems.length - 1) {
+          const nextElem = blockElems[currentIndex + 1]
+          if (nextElem) {
+            snapTo(nextElem.getBoundingClientRect().top + scrollY)
+          }
+        } else {
+          // Son bloğun altındayız -> Footer'ı göster
+          if (winHeight + scrollY < docHeight - 30) {
+            snapTo(docHeight - winHeight)
+          }
+        }
+      }
+
+      // --- YUKARI KAYDIRMA KADEMELERİ (STEP BY STEP UP) ---
+      if (direction === 'up') {
+        if (scrollY <= 15) return
+
+        // Gri bant kademesindeysek veya Hero'ya çok yakınsak doğrudan tam Hero'ya (0) dön
+        if (bannerBottomScrollY > 0) {
+          if (scrollY <= bannerBottomScrollY + 30) {
+            snapTo(0)
+            return
+          }
+          // İlk bloğun henüz üst kısmındaysak gri bant kademesine geri dön
+          if (scrollY <= firstBlockTop + 35) {
+            snapTo(bannerBottomScrollY)
+            return
+          }
+        } else {
+          if (scrollY <= 40) {
+            snapTo(0)
+            return
+          }
+        }
+
+        if (blockElems.length === 0) {
+          snapTo(0)
+          return
+        }
+
+        let currentIndex = 0
+        let closestDist = Infinity
+
+        for (let i = 0; i < blockElems.length; i++) {
+          const el = blockElems[i]
+          if (!el) continue
+          const top = el.getBoundingClientRect().top + scrollY
+          const height = el.offsetHeight
+
+          if (scrollY >= top - 45 && scrollY < top + height - 45) {
+            currentIndex = i
+            break
+          }
+          const dist = Math.abs(top - scrollY)
+          if (dist < closestDist) {
+            closestDist = dist
+            currentIndex = i
+          }
+        }
+
+        const currentElem = blockElems[currentIndex]
+        if (!currentElem) return
+        const currentRect = currentElem.getBoundingClientRect()
+        const hiddenAbove = -currentRect.top
+
+        // Eğer bu bölümün üst kısmı ekranın yukarısında kalmışsa önce orayı göster
+        if (hiddenAbove > 70) {
+          snapTo(scrollY - Math.min(hiddenAbove, winHeight * 0.85))
+        } else if (currentIndex > 0) {
+          const prevElem = blockElems[currentIndex - 1]
+          if (currentIndex - 1 === 0) {
+            snapTo(firstBlockTop)
+          } else if (prevElem) {
+            snapTo(prevElem.getBoundingClientRect().top + scrollY)
+          }
+        } else {
+          // İlk içerik bloğunun / interaktif vitrinin tepesindeyken yukarı kaydırıldığında gri bant kademesine git
+          snapTo(bannerBottomScrollY > 0 ? bannerBottomScrollY : 0)
+        }
       }
     }
 
@@ -223,175 +385,62 @@ export function HomePage() {
         return
       }
 
-      const now = Date.now()
-      if (isSnapping || now - lastSnapTime < COOLDOWN_MS) {
+      // Geçiş animasyonu devam ederken veya cooldown süresince atalet tekerlek hareketlerini engelle
+      if (isSnapping || Date.now() - lastSnapTime < COOLDOWN_MS) {
+        e.preventDefault()
         return
       }
 
       // Mikro titreşimleri yoksay
-      if (Math.abs(e.deltaY) < 15) return
+      if (Math.abs(e.deltaY) < 12) return
 
       accumulatedDelta += e.deltaY
 
       if (resetTimer) clearTimeout(resetTimer)
       resetTimer = setTimeout(() => {
         accumulatedDelta = 0
-      }, 120)
+      }, 140)
 
       if (Math.abs(accumulatedDelta) < INTENTIONAL_THRESHOLD) {
         return
       }
 
+      // İstemli adım geçişinde tarayıcının serbest akışını engelle
+      e.preventDefault()
+
       const direction = accumulatedDelta > 0 ? 'down' : 'up'
       accumulatedDelta = 0
 
-      const winHeight = window.innerHeight
-      const scrollY = window.scrollY
-      const docHeight = document.documentElement.scrollHeight
+      triggerStep(direction)
+    }
 
-      const heroElem = document.getElementById('home-hero-section')
-      const heroHeight = heroElem ? heroElem.offsetHeight : winHeight
-
-      const bannerElem = document.getElementById('home-quick-banner')
-      const bannerHeight = bannerElem ? bannerElem.offsetHeight : 0
-      const bannerTop = bannerElem ? bannerElem.getBoundingClientRect().top + scrollY : heroHeight
-      const bannerBottomScrollY =
-        bannerElem && bannerHeight > 0 ? Math.max(0, bannerTop + bannerHeight - winHeight) : 0
-
-      // En altta footer'a doğru serbest doğal geçiş
-      if (direction === 'down' && winHeight + scrollY >= docHeight - 60) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLElement &&
+        e.target.closest('input, textarea, select, [role="dialog"], .no-scroll-snap')
+      ) {
         return
       }
 
-      // İçerik bloklarını hedefler olarak al
-      const blockElems = Array.from(
-        document.querySelectorAll<HTMLElement>('.home-content-block-snap')
-      ).filter(el => el && el.offsetHeight > 0)
-
-      const firstBlockTop = blockElems[0]
-        ? blockElems[0].getBoundingClientRect().top + scrollY
-        : bannerTop + bannerHeight
-
-      // --- AŞAĞI KAYDIRMA KADEMELERİ ---
-      if (direction === 'down') {
-        // Kademe 0: Hero tam ekrandayken ilk kademede Hero altındaki gri bant çıksın
-        if (bannerBottomScrollY > 0 && scrollY < bannerBottomScrollY - 15) {
-          snapTo(bannerBottomScrollY)
-          return
-        }
-
-        // Kademe 1: Gri bant kademesindeyken bir sonraki scroll'da ilk içerik bloğuna kay
-        if (scrollY < firstBlockTop - 40) {
-          snapTo(firstBlockTop)
-          return
-        }
-      }
-
-      // --- YUKARI KAYDIRMA KADEMELERİ (TAM TERSİ) ---
-      if (direction === 'up') {
-        // En tepedeyken hiçbir şey yapma
-        if (scrollY <= 15) return
-
-        // Gri bant kademesindeysek veya Hero'ya çok yakınsak doğrudan tam Hero'ya (0) dön
-        if (bannerBottomScrollY > 0) {
-          if (scrollY <= bannerBottomScrollY + 25) {
-            snapTo(0)
-            return
-          }
-          // İlk bloğun henüz üst kısmındaysak gri bant kademesine geri dön
-          if (scrollY < firstBlockTop - 40) {
-            snapTo(bannerBottomScrollY)
-            return
-          }
-        } else {
-          if (scrollY <= 40) {
-            snapTo(0)
-            return
-          }
-        }
-      }
-
-      if (blockElems.length === 0) {
-        if (direction === 'up') snapTo(0)
+      if (isSnapping || Date.now() - lastSnapTime < COOLDOWN_MS) {
         return
       }
 
-      // Viewport merkezine göre aktif içerik bloğunu bul
-      const viewportCenter = scrollY + winHeight * 0.45
-      let currentIndex = 0
-      let closestDist = Infinity
-
-      for (let i = 0; i < blockElems.length; i++) {
-        const el = blockElems[i]
-        if (!el) continue
-        const top = el.getBoundingClientRect().top + scrollY
-        const height = el.offsetHeight
-
-        if (viewportCenter >= top && viewportCenter <= top + height) {
-          currentIndex = i
-          break
-        }
-        const dist = Math.abs(top - scrollY)
-        if (dist < closestDist) {
-          closestDist = dist
-          currentIndex = i
-        }
-      }
-
-      const currentElem = blockElems[currentIndex]
-      if (!currentElem) return
-      const currentRect = currentElem.getBoundingClientRect()
-
-      let targetScrollY: number | null = null
-
-      if (direction === 'down') {
-        const remainingBelow = currentRect.bottom - winHeight
-
-        // Eğer mevcut bölüm ekrandan uzunsa ve altı henüz ekranda değilse kalan kısmı göster
-        if (remainingBelow > 40) {
-          const step = Math.min(remainingBelow, winHeight * 0.8)
-          targetScrollY = scrollY + step
-        } else if (currentIndex < blockElems.length - 1) {
-          const nextElem = blockElems[currentIndex + 1]
-          if (nextElem) {
-            targetScrollY = scrollY + nextElem.getBoundingClientRect().top
-          }
-        }
-      } else {
-        // direction === 'up'
-        const hiddenAbove = -currentRect.top
-
-        // Eğer bu bölümün üst kısmı ekranın yukarısında kalmışsa önce orayı göster
-        if (hiddenAbove > 40) {
-          const step = Math.min(hiddenAbove, winHeight * 0.8)
-          targetScrollY = scrollY - step
-        } else if (currentIndex > 0) {
-          const prevElem = blockElems[currentIndex - 1]
-          if (currentIndex - 1 === 0) {
-            targetScrollY = firstBlockTop
-          } else if (prevElem) {
-            const prevRect = prevElem.getBoundingClientRect()
-            if (prevRect.height > winHeight) {
-              targetScrollY = scrollY + prevRect.bottom - winHeight
-            } else {
-              targetScrollY = scrollY + prevRect.top
-            }
-          }
-        } else {
-          // İlk içerik bloğunun tepesindeyken yukarı kaydırıldığında gri bant kademesine git
-          targetScrollY = bannerBottomScrollY > 0 ? bannerBottomScrollY : 0
-        }
-      }
-
-      if (targetScrollY !== null && Math.abs(targetScrollY - scrollY) > 15) {
-        snapTo(targetScrollY)
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) {
+        e.preventDefault()
+        triggerStep('down')
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) {
+        e.preventDefault()
+        triggerStep('up')
       }
     }
 
-    window.addEventListener('wheel', handleWheel, {passive: true})
+    window.addEventListener('wheel', handleWheel, {passive: false})
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
       window.removeEventListener('wheel', handleWheel)
+      window.removeEventListener('keydown', handleKeyDown)
       if (resetTimer) clearTimeout(resetTimer)
       if (safetyUnlockTimer) clearTimeout(safetyUnlockTimer)
     }

@@ -55,22 +55,25 @@ export async function isRateLimitedAsync(key: string, options: RateLimitOptions)
 
   if (redisUrl && redisToken) {
     try {
-      const res = await fetch(`${redisUrl}/incr/${encodeURIComponent(key)}`, {
-        headers: {Authorization: `Bearer ${redisToken}`},
+      const expireSec = Math.ceil(options.windowMs / 1000)
+      const res = await fetch(`${redisUrl}/pipeline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${redisToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+          ['INCR', key],
+          ['EXPIRE', key, expireSec, 'NX'],
+        ]),
       })
       if (res.ok) {
-        const data = (await res.json()) as {result?: number}
-        const count = data.result || 1
-        if (count === 1) {
-          const expireSec = Math.ceil(options.windowMs / 1000)
-          await fetch(`${redisUrl}/expire/${encodeURIComponent(key)}/${expireSec}`, {
-            headers: {Authorization: `Bearer ${redisToken}`},
-          })
-        }
+        const results = (await res.json()) as Array<{result?: number}>
+        const count = typeof results?.[0]?.result === 'number' ? results[0].result : 1
         return count > options.limit
       }
     } catch {
-      // Fallback
+      // Fallback to local in-memory store
     }
   }
 

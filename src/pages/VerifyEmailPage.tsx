@@ -14,6 +14,7 @@ export function VerifyEmailPage() {
   if (token.includes('#')) {
     token = token.split('#')[0] || ''
   }
+  const emailParam = searchParams.get('email') || ''
 
   useSEO({
     title: 'BIRIM - E-posta Doğrulama',
@@ -27,14 +28,14 @@ export function VerifyEmailPage() {
     let cancelled = false
 
     const run = async () => {
-      if (!token) {
+      if (!token && !emailParam) {
         setStatus('error')
         return
       }
 
       try {
         const {verifyUserByToken} = await import('../services/cms')
-        const user = await verifyUserByToken(token)
+        const user = await verifyUserByToken(token, emailParam)
         if (!user) {
           if (!cancelled) setStatus('error')
           return

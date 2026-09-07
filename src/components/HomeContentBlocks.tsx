@@ -10,6 +10,7 @@ import {YouTubeBackground} from './YouTubeBackground'
 import PortableTextLite from './PortableTextLite'
 import {useGoogleFonts} from '../hooks/useGoogleFont'
 import {InteractiveShowcase} from './InteractiveShowcase'
+import {toPlainText, resolvePortableTextOrString} from '../utils/portableText'
 
 interface HomeContentBlocksProps {
   blocks: ContentBlock[]
@@ -350,7 +351,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   interactiveShowcaseTitle,
   interactiveShowcaseBlockIndex,
 }) => {
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
 
   // Tüm bloklardaki fontları topla ve yükle (stabilize with useMemo)
   const allFonts = useMemo(() => {
@@ -385,22 +386,30 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   const targetIndex =
     interactiveShowcaseBlockIndex !== undefined && interactiveShowcaseBlockIndex !== null
       ? Math.max(0, interactiveShowcaseBlockIndex)
-      : 1
+      : 0
 
   return (
     <>
       {hasInteractiveShowcase && targetIndex === 0 && (
-        <InteractiveShowcase items={interactiveShowcase} sectionTitle={interactiveShowcaseTitle} />
+        <InteractiveShowcase
+          key="interactive-showcase-top"
+          items={interactiveShowcase}
+          sectionTitle={interactiveShowcaseTitle}
+        />
       )}
       {sortedBlocks.map((block, index) => {
         const titleContent = block.title ? t(block.title) : ''
-        const overlayTextContent = block.overlayText ? t(block.overlayText) : ''
-        const descriptionRaw = block.description ? t(block.description) : ''
-        const descriptionContent =
-          Array.isArray(descriptionRaw) && descriptionRaw.length === 0 ? '' : descriptionRaw
+        const overlayTextResolved = resolvePortableTextOrString(block.overlayText, locale)
+        const overlayTextContent = overlayTextResolved ?? ''
+        const descriptionResolved = resolvePortableTextOrString(block.description, locale)
+        const descriptionContent = descriptionResolved ?? ''
         const rawTitleStr = typeof titleContent === 'string' ? titleContent.trim() : ''
         const rawOverlayStr =
-          typeof overlayTextContent === 'string' ? overlayTextContent.trim() : ''
+          typeof overlayTextContent === 'string'
+            ? overlayTextContent.trim()
+            : Array.isArray(overlayTextContent)
+              ? toPlainText(overlayTextContent)
+              : ''
         const hasTitle =
           (rawTitleStr.length > 0 || !!titleContent) &&
           (!rawOverlayStr || rawTitleStr !== rawOverlayStr)
@@ -687,7 +696,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       style={!isNormalContentFont ? {fontWeight: 300} : {}}
                     >
                       <PortableTextLite
-                        value={desc}
+                        value={desc as Parameters<typeof PortableTextLite>[0]['value']}
                         removeTopMargin={isTopBody}
                         onMediaClick={onMediaClick}
                       />
@@ -1148,6 +1157,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               </section>
             </ContentBlockSnapWrapper>
             {hasInteractiveShowcase &&
+              targetIndex > 0 &&
               (index + 1 === targetIndex ||
                 (index === sortedBlocks.length - 1 && targetIndex > index + 1)) && (
                 <InteractiveShowcase

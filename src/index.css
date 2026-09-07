@@ -81,8 +81,25 @@ html.lenis body {
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid #c5a059 !important;
-  outline-offset: 1px !important;
+  outline: 2px solid #c5a059;
+  outline-offset: 1px;
+}
+
+/* Explicit outline-none overrides for inputs with custom focus styles */
+input:focus-visible.outline-none,
+input:focus.outline-none,
+input[class*='focus:outline-none']:focus,
+input[class*='focus-visible:outline-none']:focus-visible,
+textarea:focus-visible.outline-none,
+textarea:focus.outline-none,
+textarea[class*='focus:outline-none']:focus,
+textarea[class*='focus-visible:outline-none']:focus-visible,
+select:focus-visible.outline-none,
+select:focus.outline-none,
+select[class*='focus:outline-none']:focus,
+select[class*='focus-visible:outline-none']:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .font-arial-regular {
@@ -824,6 +841,7 @@ img.responsive-mirror {
 }
 .responsive-crop-wrapper.is-cover {
   height: 100% !important;
+  min-height: 100% !important;
   width: 100% !important;
   max-height: 100% !important;
 }

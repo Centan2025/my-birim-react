@@ -17,6 +17,7 @@ import {useHeaderTheme} from '../context/HeaderThemeContext'
 import PortableTextLite from '../components/PortableTextLite'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
 import {InteractiveShowcase} from '../components/InteractiveShowcase'
+import {resolvePortableTextOrString} from '../utils/portableText'
 import type {ContentBlock, R2ImageMetadata} from '../types'
 
 interface MediaItem {
@@ -49,7 +50,7 @@ export function ProjectDetailPageV1() {
     refetchOnMount: 'always',
   })
   const {data: allProjects = []} = useProjects()
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
   const {data: settings} = useSiteSettings()
   const {setFromPalette, reset} = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
@@ -925,18 +926,36 @@ export function ProjectDetailPageV1() {
       {(project.excerpt || project.body) && (
         <div className="w-full bg-[var(--bg-primary)] py-8 md:py-12">
           <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 space-y-6">
-            {project.excerpt && (
-              <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <PortableTextLite value={t(project.excerpt as never) as any} />
-              </div>
-            )}
-            {project.body && (
-              <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <PortableTextLite value={t(project.body as never) as any} />
-              </div>
-            )}
+            {(() => {
+              const excerptContent = resolvePortableTextOrString(project.excerpt, locale)
+              if (!excerptContent) return null
+              return (
+                <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
+                  {Array.isArray(excerptContent) ? (
+                    <PortableTextLite
+                      value={excerptContent as Parameters<typeof PortableTextLite>[0]['value']}
+                    />
+                  ) : (
+                    <p>{excerptContent}</p>
+                  )}
+                </div>
+              )
+            })()}
+            {(() => {
+              const bodyContent = resolvePortableTextOrString(project.body, locale)
+              if (!bodyContent) return null
+              return (
+                <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
+                  {Array.isArray(bodyContent) ? (
+                    <PortableTextLite
+                      value={bodyContent as Parameters<typeof PortableTextLite>[0]['value']}
+                    />
+                  ) : (
+                    <p>{bodyContent}</p>
+                  )}
+                </div>
+              )
+            })()}
           </div>
         </div>
       )}

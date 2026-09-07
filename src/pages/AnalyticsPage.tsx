@@ -45,9 +45,10 @@ export default function AnalyticsPage() {
       try {
         const headers: Record<string, string> = {}
         if (savedPin) headers['x-analytics-pin'] = savedPin
-        if (token) headers['Authorization'] = `Bearer ${token}`
-
-        const res = await fetch('/api/analytics?action=verify', {headers})
+        const res = await fetch('/api/analytics?action=verify', {
+          headers,
+          credentials: 'same-origin',
+        })
         if (res.ok) {
           setIsAuthenticated(true)
         } else {

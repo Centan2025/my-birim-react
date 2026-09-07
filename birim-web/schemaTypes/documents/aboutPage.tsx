@@ -87,7 +87,7 @@ export default defineType({
           name: 'eraItem',
           title: 'Dönem',
           fields: [
-            defineField({name: 'year', title: 'Yıl / Dönem', type: 'string'}),
+            defineField({name: 'year', title: 'Yıl / Dönem', type: 'localizedString'}),
             defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
             defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
             defineField({name: 'imageR2', title: 'Dönem Görseli (R2)', type: 'r2Asset'}),
@@ -95,9 +95,16 @@ export default defineType({
           preview: {
             select: {
               title: 'title.tr',
-              subtitle: 'year',
+              yearTr: 'year.tr',
+              yearRaw: 'year',
             },
-            prepare({title, subtitle}) {
+            prepare({title, yearTr, yearRaw}) {
+              const subtitle =
+                typeof yearTr === 'string' && yearTr
+                  ? yearTr
+                  : typeof yearRaw === 'string'
+                    ? yearRaw
+                    : ''
               return {
                 title: title || 'Dönem',
                 subtitle: subtitle || '',

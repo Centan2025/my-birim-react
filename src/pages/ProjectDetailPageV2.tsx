@@ -17,6 +17,7 @@ import {useHeaderTheme} from '../context/HeaderThemeContext'
 import PortableTextLite from '../components/PortableTextLite'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
 import {InteractiveShowcase} from '../components/InteractiveShowcase'
+import {resolvePortableTextOrString} from '../utils/portableText'
 import type {ContentBlock, R2ImageMetadata} from '../types'
 
 interface MediaItem {
@@ -628,19 +629,37 @@ export function ProjectDetailPageV2() {
 
               {/* Right Column (Keskin Köşeli Kutu) */}
               <div className="lg:col-span-7 space-y-8 text-neutral-700 font-light text-base md:text-lg leading-relaxed">
-                {project.excerpt && (
-                  <div className="p-6 md:p-8 rounded-none bg-neutral-50 border border-neutral-200 text-neutral-800 leading-relaxed font-normal shadow-sm">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <PortableTextLite value={t(project.excerpt as never) as any} />
-                  </div>
-                )}
+                {(() => {
+                  const excerptContent = resolvePortableTextOrString(project.excerpt, locale)
+                  if (!excerptContent) return null
+                  return (
+                    <div className="p-6 md:p-8 rounded-none bg-neutral-50 border border-neutral-200 text-neutral-800 leading-relaxed font-normal shadow-sm">
+                      {Array.isArray(excerptContent) ? (
+                        <PortableTextLite
+                          value={excerptContent as Parameters<typeof PortableTextLite>[0]['value']}
+                        />
+                      ) : (
+                        <p>{excerptContent}</p>
+                      )}
+                    </div>
+                  )
+                })()}
 
-                {project.body && (
-                  <div className="prose max-w-none prose-neutral prose-p:text-neutral-700 prose-p:leading-relaxed prose-headings:font-michroma prose-headings:text-neutral-900 prose-strong:text-neutral-900 prose-a:text-neutral-900 underline-offset-4">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <PortableTextLite value={t(project.body as never) as any} />
-                  </div>
-                )}
+                {(() => {
+                  const bodyContent = resolvePortableTextOrString(project.body, locale)
+                  if (!bodyContent) return null
+                  return (
+                    <div className="prose max-w-none prose-neutral prose-p:text-neutral-700 prose-p:leading-relaxed prose-headings:font-michroma prose-headings:text-neutral-900 prose-strong:text-neutral-900 prose-a:text-neutral-900 underline-offset-4">
+                      {Array.isArray(bodyContent) ? (
+                        <PortableTextLite
+                          value={bodyContent as Parameters<typeof PortableTextLite>[0]['value']}
+                        />
+                      ) : (
+                        <p>{bodyContent}</p>
+                      )}
+                    </div>
+                  )
+                })()}
               </div>
             </div>
           </ScrollReveal>

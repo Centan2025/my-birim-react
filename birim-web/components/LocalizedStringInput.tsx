@@ -107,8 +107,8 @@ export default function LocalizedStringInput(props: ObjectInputProps) {
       const translated = await translateText(trValue, targetLang)
 
       // Çeviriyi ilgili alana kaydet
-      const currentValue = value || {}
-      onChange(set({...currentValue, [targetLang]: translated}))
+      const currentValue = typeof value === 'object' && value !== null ? value : {}
+      onChange(set({...currentValue, _type: 'localizedString', [targetLang]: translated}))
 
       setStatus({
         type: 'success',
@@ -131,26 +131,6 @@ export default function LocalizedStringInput(props: ObjectInputProps) {
 
   return (
     <div>
-      {/* Label association fix: type="hidden" is not labelable, so we use a visually hidden text input */}
-      <input
-        type="text"
-        id={props.id}
-        name={props.id}
-        autoComplete="off"
-        readOnly
-        style={{
-          position: 'absolute',
-          width: '1px',
-          height: '1px',
-          padding: '0',
-          margin: '-1px',
-          overflow: 'hidden',
-          clip: 'rect(0, 0, 0, 0)',
-          whiteSpace: 'nowrap',
-          border: '0',
-        }}
-      />
-
       {/* Ürün adı değilse çeviri butonlarını göster */}
       {trValue && !isProductName && (
         <TranslateButtonsContainer>

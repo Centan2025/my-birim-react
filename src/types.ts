@@ -723,7 +723,7 @@ export interface AboutPageContent {
   timelineTitle?: LocalizedString
   timelineSubtitle?: LocalizedString
   eras?: {
-    year?: string
+    year?: string | LocalizedString
     title?: LocalizedString
     description?: LocalizedString
     image?:

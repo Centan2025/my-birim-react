@@ -336,6 +336,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
 
   return (
     <section
+      id="home-interactive-showcase"
       className="w-full relative bg-[var(--bg-primary)] py-0 my-0 overflow-hidden select-none leading-none scroll-snap-start home-content-block-snap"
       style={{scrollSnapAlign: 'start', scrollSnapStop: 'always'}}
     >

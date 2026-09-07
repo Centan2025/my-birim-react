@@ -159,16 +159,19 @@ export function LoginPage() {
         company,
       })
       registerRateLimiter.reset(rateLimitKey)
-      auth.login(user)
       analytics.trackUserAction('register', user._id)
-      if (user._id.startsWith('user_')) {
+      if (user.isVerified) {
+        auth.login(user)
         setSuccess('Kayıt başarılı! Hesabınız oluşturuldu.')
+        setTimeout(() => {
+          navigate('/profile')
+        }, 1000)
       } else {
         setSuccess('Kayıt başarılı! Lütfen e-posta kutunuzu kontrol edin ve üyeliğinizi onaylayın.')
+        setTimeout(() => {
+          setIsLoginMode(true)
+        }, 3000)
       }
-      setTimeout(() => {
-        navigate('/profile')
-      }, 1000)
     } catch (err: unknown) {
       let errorMessage = err instanceof Error ? err.message : 'Kayıt olurken bir hata oluştu'
       if (

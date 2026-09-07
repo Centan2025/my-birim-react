@@ -1,6 +1,5 @@
-import groq from 'groq'
 import type {User} from '../../types'
-import {sanity, useSanity} from './client'
+import {useSanity} from './client'
 import {getItem, setItem} from './settings'
 
 const KEYS = {USERS: 'birim_users'}
@@ -105,6 +104,7 @@ export const subscribeProfessional = async (data: {
   profession: string
   country: string
   phone: string
+  lang?: string
 }): Promise<{success: boolean; message: string}> => {
   const normEmail = normalizeEmail(data.email)
   if (!normEmail) throw new Error('Geçerli bir e-posta adresi girin')
@@ -153,6 +153,7 @@ export const registerUser = async (
     city?: string
     country?: string
     website?: string
+    lang?: string
   }
 ): Promise<User> => {
   const normEmail = normalizeEmail(email)
@@ -214,9 +215,9 @@ export const loginUser = async (email: string, password: string): Promise<User> 
   }
 
   const users = getItem<User[]>(KEYS.USERS) || []
-  const existingUser = users.find(u => normalizeEmail(u.email) === normEmail)
-  if (!existingUser) throw new Error('Kullanıcı bulunamadı')
-  return existingUser
+  const user = users.find(u => normalizeEmail(u.email) === normEmail)
+  if (!user) throw new Error('Kullanıcı bulunamadı')
+  return user
 }
 
 export const verifyEmail = async (token: string): Promise<boolean> => {
@@ -227,10 +228,10 @@ export const verifyEmail = async (token: string): Promise<boolean> => {
   return false
 }
 
-export const requestPasswordReset = async (email: string): Promise<void> => {
+export const requestPasswordReset = async (email: string, lang?: string): Promise<void> => {
   const normEmail = normalizeEmail(email)
   if (useSanity) {
-    await apiFetch('reset-password', {email: normEmail, action: 'request'})
+    await apiFetch('reset-password', {email: normEmail, action: 'request', lang})
     return
   }
   throw new Error('Sanity not configured.')
@@ -246,61 +247,39 @@ export const resetPassword = async (token: string, newPassword: string): Promise
 
 export const getUserByEmail = async (email: string): Promise<User | null> => {
   const normEmail = normalizeEmail(email)
-  if (useSanity && sanity)
-    return (
-      (await sanity.fetch(
-        groq`*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]{
-          _id,
-          name,
-          firstName,
-          lastName,
-          email,
-          role,
-          company,
-          profession,
-          country,
-          phone,
-          userType,
-          isVerified,
-          isActive,
-          createdAt
-        }`,
-        {email: normEmail}
-      )) || null
-    )
+  if (useSanity) {
+    try {
+      const current = await getCurrentSessionUser()
+      if (current && normalizeEmail(current.email) === normEmail) {
+        return current
+      }
+      return null
+    } catch {
+      return null
+    }
+  }
   return getItem<User[]>(KEYS.USERS)?.find(u => normalizeEmail(u.email) === normEmail) || null
 }
 
 export const getUserById = async (id: string): Promise<User | null> => {
-  if (useSanity && sanity)
-    return (
-      (await sanity.fetch(
-        groq`*[_type == "user" && _id == $id][0]{
-          _id,
-          name,
-          firstName,
-          lastName,
-          email,
-          role,
-          company,
-          profession,
-          country,
-          phone,
-          userType,
-          isVerified,
-          isActive,
-          createdAt
-        }`,
-        {id}
-      )) || null
-    )
+  if (useSanity) {
+    try {
+      const current = await getCurrentSessionUser()
+      if (current && current._id === id) {
+        return current
+      }
+      return null
+    } catch {
+      return null
+    }
+  }
   return getItem<User[]>(KEYS.USERS)?.find(u => u._id === id) || null
 }
 
-export const verifyUserByToken = async (token: string): Promise<User | null> => {
+export const verifyUserByToken = async (token: string, email?: string): Promise<User | null> => {
   if (useSanity) {
     try {
-      const data = await apiFetch('verify', {token})
+      const data = await apiFetch('verify', {token, email})
       if (data.success && data.user) {
         return data.user as User
       }
@@ -310,7 +289,9 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
   }
 
   const users = getItem<User[]>(KEYS.USERS) || []
-  const localUser = users.find(u => u.verificationToken === token || u._id === token)
+  const localUser = users.find(
+    u => u.verificationToken === token || u._id === token || (email && u.email === email)
+  )
   if (localUser) {
     localUser.isVerified = true
     setItem(KEYS.USERS, users)

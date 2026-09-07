@@ -16,7 +16,6 @@ vi.mock('./client', () => ({
   },
 }))
 
-import {sanity} from './client'
 import {loginUser, registerUser, getUserByEmail} from './auth'
 
 describe('sanity auth service', () => {
@@ -27,15 +26,20 @@ describe('sanity auth service', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: vi.fn().mockResolvedValue({success: true, user: {_id: 'u-1', email: 'test@ex.com'}}),
+        json: vi.fn().mockResolvedValue({
+          authenticated: true,
+          success: true,
+          user: {_id: 'u-1', email: 'test@ex.com'},
+        }),
       })
     )
   })
 
   it('getUserByEmail doğru kullanıcıyı döner', async () => {
-    vi.mocked(sanity.fetch).mockResolvedValue({_id: 'u1', email: 'test@ex.com'})
+    localStorage.setItem('birim_token', 'mock_token')
     const user = await getUserByEmail('test@ex.com')
     expect(user?.email).toBe('test@ex.com')
+    localStorage.removeItem('birim_token')
   })
 
   it('loginUser başarılı login durumunda kullanıcı döner', async () => {

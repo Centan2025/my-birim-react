@@ -634,12 +634,25 @@ export function Header() {
         className={`fixed top-0 left-0 right-0 z-50 header-scroll-transition ${
           // Overlay mobil menü açıkken header ile panelin tam aynı renkte görünmesi için özel sınıf
           isOverlayMobileMenu && isMobileMenuOpen ? 'overlay-menu-open' : ''
+        } ${
+          headerBgColor === 'transparent' && !isProductsOpen
+            ? ''
+            : 'header-frosted-glass backdrop-blur-sm backdrop-saturate-110 border-b border-black/[0.06] dark:border-white/[0.08]'
         }`}
         style={{
-          transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
+          transform: isHeaderVisible ? 'none' : 'translateY(-100%)',
           transition: isMobile
-            ? 'transform 0.2s ease-out'
-            : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            ? 'transform 0.2s ease-out, background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+            : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          backgroundColor: headerBgColor,
+          backdropFilter:
+            headerBgColor === 'transparent' && !isProductsOpen
+              ? 'none'
+              : 'blur(8px) saturate(110%)',
+          WebkitBackdropFilter:
+            headerBgColor === 'transparent' && !isProductsOpen
+              ? 'none'
+              : 'blur(8px) saturate(110%)',
         }}
       >
         <div
@@ -648,25 +661,13 @@ export function Header() {
             isMobile
               ? 'h-[3.5rem] min-h-[3.5rem] max-h-[3.5rem]'
               : 'h-[5rem] min-h-[5rem] max-h-[5rem]'
-          } ${
-            // Arka plan buz efekti: şeffafken blur yok, yarı şeffaf beyaz/siyahken buz efekti aktif
-            headerBgColor === 'transparent' && !isProductsOpen
-              ? ''
-              : 'header-frosted-glass backdrop-blur-xl backdrop-saturate-150'
           } transition-all duration-500 ease-in-out`}
           style={{
-            backgroundColor: headerBgColor,
-            WebkitBackdropFilter:
-              headerBgColor === 'transparent' && !isProductsOpen
-                ? 'none'
-                : 'blur(24px) saturate(180%)',
             minHeight: isMobile ? '3.5rem' : '5rem',
             maxHeight:
               isMobileMenuOpen && !isOverlayMobileMenu ? '40rem' : isMobile ? '3.5rem' : '5rem',
             // Products dropdown için overflow visible
             overflow: !isMobile ? 'visible' : undefined,
-            transition:
-              'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
           ref={headerContainerRef}
         >

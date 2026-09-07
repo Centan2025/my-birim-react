@@ -41,20 +41,11 @@ class ErrorReporter {
           environment: (import.meta.env.MODE as string | undefined) || 'development',
           // Sentry'nin kendi tunnel seçeneği — adblocker bypass için monkey-patch gerekmez
           // tunnel: '/api/sentry-tunnel',  // Opsiyonel: Vercel API route ise aktif edilebilir
-          // Disable default integrations and only include what we need
+          // Disable default integrations and only include lightweight tracing
           defaultIntegrations: false,
-          integrations: [
-            Sentry.browserTracingIntegration(),
-            Sentry.replayIntegration({
-              maskAllText: true,
-              blockAllMedia: true,
-            }),
-          ].filter(Boolean),
+          integrations: [Sentry.browserTracingIntegration()].filter(Boolean),
           // Performance Monitoring
-          tracesSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0,
-          // Session Replay
-          replaysSessionSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0,
-          replaysOnErrorSampleRate: 1.0,
+          tracesSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.05 : 1.0,
           // Ignore known non-critical errors
           ignoreErrors: [
             'Could not fetch session',

@@ -308,6 +308,8 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
             </PageBoundary>
           }
         />
+        <Route path="/site-analitiği" element={<Navigate to="/site-analitigi" replace />} />
+        <Route path="/site-analiti%C4%9Fi" element={<Navigate to="/site-analitigi" replace />} />
         <Route
           path="/analytics"
           element={
@@ -316,6 +318,8 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
             </PageBoundary>
           }
         />
+        {/* Catch-all unknown routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   )

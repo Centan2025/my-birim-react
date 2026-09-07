@@ -22,6 +22,7 @@ import {MediaCropDebugOverlay} from './components/debug/MediaCropDebugOverlay'
 import {MainLayout} from './layouts/MainLayout'
 
 import {lazyWithRetry} from './utils/lazyWithRetry'
+import {useUserActivityTracking} from './hooks/useUserActivityTracking'
 
 // Lazy load pages for code splitting
 const ComingSoonPage = lazyWithRetry(() =>
@@ -117,6 +118,7 @@ const AppContent = () => {
   const location = useLocation()
   const {pathname} = location
   const {reset: resetHeaderTheme} = useHeaderTheme()
+  useUserActivityTracking()
 
   // Ultra-Soft & Butter-Smooth Lenis Momentum Scroll Integration for Desktop and Laptop devices
   useEffect(() => {
@@ -233,6 +235,7 @@ const AppContent = () => {
   const isMaintenanceMode = isProduction && maintenanceModeEnabled && !hasBypass
 
   const debugInfo =
+    import.meta.env.DEV &&
     typeof window !== 'undefined' &&
     (window.location.search.includes('bypass') ||
       window.location.hash.includes('bypass') ||
@@ -242,8 +245,7 @@ const AppContent = () => {
           maintenanceModeFromCMS,
           maintenanceModeFromEnv,
           maintenanceModeEnabled,
-          allowedBypassSecrets,
-          bypassParam,
+          hasBypass,
           isMaintenanceMode,
         }
       : null
@@ -284,13 +286,7 @@ const AppContent = () => {
       {import.meta.env.DEV && debugInfo && (
         <div className="fixed bottom-2 left-2 z-50 rounded bg-black/70 text-white text-[10px] px-2 py-1 font-mono text-left">
           <div>MAINT DEBUG</div>
-          <div>bypassParam: {String(debugInfo.bypassParam)}</div>
-          <div>
-            allowedSecrets:
-            {debugInfo.allowedBypassSecrets.map((s, i) => (
-              <span key={i}> {String(s)}</span>
-            ))}
-          </div>
+          <div>hasBypass: {String(debugInfo.hasBypass)}</div>
           <div>isMaintenanceMode: {String(debugInfo.isMaintenanceMode)}</div>
         </div>
       )}

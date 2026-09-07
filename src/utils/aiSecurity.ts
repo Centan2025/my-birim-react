@@ -60,6 +60,7 @@ export function sanitizePrompt(input?: unknown, maxLength = 150): string {
 
   // Remove potential script tags, HTML tags and prompt injection keywords
   sanitized = sanitized
+    .replace(/[\r\n]+/g, ' ')
     .replace(/<[^>]*>?/gm, '')
     .replace(/javascript:/gi, '')
     .replace(/data:/gi, '')

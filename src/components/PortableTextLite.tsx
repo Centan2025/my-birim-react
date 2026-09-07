@@ -2,7 +2,7 @@ import {ReactNode, Fragment} from 'react'
 import {sanitizeText, sanitizeUrl} from '../lib/sanitize'
 import {OptimizedImage} from './OptimizedImage'
 import {urlFor} from '../lib/imageUrl'
-import {mapR2Metadata} from '../services/sanity/client'
+import {mapR2Metadata, mapImage, type SanityImageLike} from '../services/sanity/client'
 
 type Span = {_type: 'span'; text: string; marks?: string[]}
 type MarkDef = {
@@ -356,13 +356,17 @@ export default function PortableTextLite({
 
     // Handle Image Pairing Logic (Side by Side for consecutive left/right images)
     const isImageBlock = (b: Block) =>
-      (b._type === 'image' && b.asset) || (b._type === 'portableTextImage' && b.imageR2?.url)
-    const getImageSrc = (b: Block) =>
-      b._type === 'portableTextImage' && b.imageR2?.url
-        ? b.imageR2.url
-        : b.asset
-          ? urlFor(b).url() || ''
-          : ''
+      (b._type === 'image' && b.asset) ||
+      (b._type === 'portableTextImage' && Boolean(b.imageR2?.url || b.imageR2?.path || b.url))
+    const getImageSrc = (b: Block) => {
+      if (b._type === 'portableTextImage') {
+        const mapped = mapImage((b.imageR2 || b) as SanityImageLike)
+        if (mapped) return mapped
+        if (b.imageR2?.url) return b.imageR2.url
+        if (b.url) return b.url
+      }
+      return b.asset ? urlFor(b).url() || '' : ''
+    }
     const getImageAlt = (b: Block) => b.alt || b.imageR2?.alt || ''
 
     const getImageCrop = (b: Block) => mapR2Metadata(b.imageR2 || b).crop
@@ -1109,7 +1113,15 @@ export default function PortableTextLite({
     }
 
     // Handle Custom Objects - R2 portableTextImage (new)
-    if (block._type === 'portableTextImage' && block.imageR2?.url) {
+    const r2Src =
+      block._type === 'portableTextImage'
+        ? mapImage((block.imageR2 || block) as SanityImageLike) ||
+          block.imageR2?.url ||
+          block.url ||
+          ''
+        : ''
+
+    if (block._type === 'portableTextImage' && r2Src) {
       const isSideBySide = block.layout === 'left' || block.layout === 'right'
       const vAlignClass =
         block.verticalAlign === 'center'
@@ -1138,14 +1150,14 @@ export default function PortableTextLite({
           className={`${marginClassForFigure} ${isSideBySide && block.verticalAlign !== 'bottom' && block.verticalAlign !== 'center' ? '' : 'clear-both'} ${vAlignClass} ${layoutClass}`}
         >
           <OptimizedImage
-            src={block.imageR2.url}
-            alt={block.alt || block.imageR2.alt || ''}
+            src={r2Src}
+            alt={block.alt || block.imageR2?.alt || ''}
             className="w-full h-auto shadow-sm cursor-pointer"
             crop={getImageCrop(block)}
             hotspot={getImageHotspot(block)}
             origWidth={getImageOrigWidth(block)}
             origHeight={getImageOrigHeight(block)}
-            onClick={() => onMediaClick?.(block.imageR2!.url!)}
+            onClick={() => onMediaClick?.(r2Src)}
           />
           {block.caption && (
             <figcaption className="mt-3 text-sm text-gray-500 text-center italic">

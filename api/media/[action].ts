@@ -8,7 +8,8 @@ import {
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
-import {handleCors, isOriginAllowed} from '../../lib/server/cors.js'
+import {handleCors} from '../../lib/server/cors.js'
+import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 
 const R2_ACCOUNT_ID = (
   process.env['R2_ACCOUNT_ID'] ||
@@ -50,6 +51,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
+  const clientIp = getClientIp(req)
+  if (await isRateLimitedAsync(`media_action_${clientIp}`, {limit: 45, windowMs: 60000})) {
+    return res.status(429).json({error: 'Çok fazla istek yapıldı. Lütfen 1 dakika bekleyin.'})
+  }
+
   const rawAction = req.query['action']
   const action = Array.isArray(rawAction)
     ? rawAction[0]
@@ -79,7 +85,6 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-  const reqOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
 
   const isAdminSecretMatch = Boolean(
     adminSecret &&
@@ -88,12 +93,8 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
       crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(adminSecret))
   )
   const isUserAdmin = Boolean(payload && payload.role === 'admin')
-  const isDevLocal =
-    process.env['NODE_ENV'] !== 'production' &&
-    isOriginAllowed(reqOrigin) &&
-    /^http:\/\/(localhost|127\.0\.0\.1)/.test(reqOrigin)
 
-  if (!isUserAdmin && !isAdminSecretMatch && !isDevLocal) {
+  if (!isUserAdmin && !isAdminSecretMatch) {
     return res
       .status(401)
       .json({error: 'Dosya yükleme bileti almak için yönetici yetkisi gereklidir.'})
@@ -140,14 +141,18 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
   try {
     const safeFolder = typeof folder === 'string' && folder.trim() ? folder.trim() : 'uploads'
     const cleanFileName = filename.trim().replace(/[^a-zA-Z0-9_.-]/g, '_')
+    const uniquePrefix = `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`
+    const finalFileName = `${uniquePrefix}_${cleanFileName}`
     const key = safeFolder.endsWith('/')
-      ? `${safeFolder}${cleanFileName}`
-      : `${safeFolder}/${cleanFileName}`
+      ? `${safeFolder}${finalFileName}`
+      : `${safeFolder}/${finalFileName}`
 
+    const isSvg = contentType.toLowerCase() === 'image/svg+xml'
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET_NAME,
       Key: key,
       ContentType: contentType,
+      ...(isSvg ? {ContentDisposition: `attachment; filename="${cleanFileName}"`} : {}),
     })
 
     const url = await getSignedUrl(
@@ -246,7 +251,6 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-  const reqOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
 
   const isAdminSecretMatch = Boolean(
     adminSecret &&
@@ -255,12 +259,8 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
       crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(adminSecret))
   )
   const isUserAdmin = Boolean(payload && payload.role === 'admin')
-  const isDevLocal =
-    process.env['NODE_ENV'] !== 'production' &&
-    isOriginAllowed(reqOrigin) &&
-    /^http:\/\/(localhost|127\.0\.0\.1)/.test(reqOrigin)
 
-  if (!isAdminSecretMatch && !isUserAdmin && !isDevLocal) {
+  if (!isAdminSecretMatch && !isUserAdmin) {
     return res.status(401).json({error: 'Dosya listesini görüntüleme yetkiniz yok.'})
   }
 

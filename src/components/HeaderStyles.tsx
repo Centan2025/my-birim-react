@@ -10,10 +10,9 @@ export function HeaderStyles() {
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .header-scroll-transition {
-          transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
-                      opacity 0.6s ease-out, 
-                      scale 0.7s cubic-bezier(0.16, 1, 0.3, 1) !important;
-          will-change: transform, opacity, scale;
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                      opacity 0.4s ease-out !important;
+          will-change: auto !important;
         }
 
         .header-layout-transition {
@@ -163,10 +162,10 @@ export function HeaderStyles() {
           -webkit-tap-highlight-color: rgba(255, 255, 255, 0.08);
         }
 
-        /* Frosted Glass (Buz Efekti) with high-definition blur and saturation */
+        /* Frosted Glass (Buz Efekti) - Subtle & Clean */
         .header-frosted-glass {
-          backdrop-filter: blur(24px) saturate(180%) !important;
-          -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+          backdrop-filter: blur(8px) saturate(110%) !important;
+          -webkit-backdrop-filter: blur(8px) saturate(110%) !important;
         }
 
         /* Neutral gray focus outlines for mobile menu */

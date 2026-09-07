@@ -1,5 +1,13 @@
 /* eslint-disable react-refresh/only-export-components */
-import {useState, useContext, createContext, PropsWithChildren, useEffect} from 'react'
+import {
+  useState,
+  useContext,
+  createContext,
+  PropsWithChildren,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react'
 import type {User} from '../types'
 import {errorReporter} from '../lib/errorReporting'
 import {analytics} from '../lib/analytics'
@@ -8,7 +16,7 @@ import {getCurrentSessionUser} from '../services/cms'
 interface AuthContextType {
   isLoggedIn: boolean
   user: User | null
-  login: (user: User) => void
+  login: (user: User & {token?: string}) => void
   logout: () => void
 }
 
@@ -63,10 +71,17 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
                 userType: serverUser.userType,
               })
             }
+          } else {
+            // Sunucu oturumu sonlanmışsa veya geçersizse zombi oturumu temizle
+            setUser(null)
+            if (typeof window !== 'undefined' && window.localStorage) {
+              localStorage.removeItem('birim_user')
+              localStorage.removeItem('birim_token')
+            }
           }
         }
       } catch {
-        // Fallback to local session state
+        // Ağ hatası veya offline durumunda yerel oturumu koru
       }
     }
 
@@ -77,13 +92,12 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
     }
   }, [])
 
-  const login = (userData: User & {token?: string}) => {
+  const login = useCallback((userData: User & {token?: string}) => {
     setUser(userData)
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        if (userData.token) {
-          localStorage.setItem('birim_token', userData.token)
-        }
+        // HttpOnly cookie used as primary secure storage; clean any legacy localStorage token
+        localStorage.removeItem('birim_token')
         const {token: _, ...cleanUser} = userData
         localStorage.setItem('birim_user', JSON.stringify(cleanUser))
       }
@@ -101,9 +115,9 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
       userType: userData.userType,
     })
     analytics.trackUserAction('login', userData._id)
-  }
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null)
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
@@ -116,14 +130,17 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
     }
     errorReporter.clearUser()
     analytics.resetUser()
-  }
+  }, [])
 
-  const value = {
-    isLoggedIn: !!user,
-    user,
-    login,
-    logout,
-  }
+  const value = useMemo<AuthContextType>(
+    () => ({
+      isLoggedIn: !!user,
+      user,
+      login,
+      logout,
+    }),
+    [user, login, logout]
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

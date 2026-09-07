@@ -38,9 +38,9 @@
       if (isLink && isStyle) {
         // Sonsuz döngüyü engelle: Sadece bir kere yenile
         if (!sessionStorage.getItem('__birim_css_retry')) {
-          console.warn('CSS load failed, forcing hard reload to clear cache')
+          console.warn('CSS load failed, forcing reload to refresh assets')
           sessionStorage.setItem('__birim_css_retry', 'true')
-          window.location.reload(true)
+          window.location.reload()
         }
       }
     },

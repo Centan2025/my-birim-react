@@ -19,14 +19,12 @@ const cache = new Map<string, {data: unknown; expires: number}>()
 const CACHE_TTL_MS = 60 * 1000 // 1 minute
 
 function getCredentials() {
-  let propertyId = process.env['GA_PROPERTY_ID']?.trim() || '514459801'
+  let propertyId = process.env['GA_PROPERTY_ID']?.trim() || ''
   if (propertyId.startsWith('properties/')) {
     propertyId = propertyId.replace('properties/', '')
   }
 
-  const clientEmail =
-    process.env['GA_CLIENT_EMAIL']?.trim() ||
-    'analiz-botu@birim-mobilya-analitik.iam.gserviceaccount.com'
+  const clientEmail = process.env['GA_CLIENT_EMAIL']?.trim() || ''
 
   let privateKey = process.env['GA_PRIVATE_KEY']?.trim()
   if (privateKey) {
@@ -40,9 +38,9 @@ function getCredentials() {
 }
 
 function getAuth() {
-  const {clientEmail, privateKey} = getCredentials()
-  if (!clientEmail || !privateKey) {
-    throw new Error('Google Analytics credentials (email or private key) are missing')
+  const {propertyId, clientEmail, privateKey} = getCredentials()
+  if (!propertyId || !clientEmail || !privateKey) {
+    throw new Error('Google Analytics credentials (propertyId, email or private key) are missing')
   }
   return new GoogleAuth({
     credentials: {
@@ -389,7 +387,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Server-side authentication: valid PIN or valid Admin JWT
-  const rawExpectedPin = process.env['ANALYTICS_PIN']?.trim()
+  const rawExpectedPin =
+    process.env['ANALYTICS_PIN']?.trim() ||
+    process.env['VITE_ANALYTICS_PIN']?.trim() ||
+    (process.env['NODE_ENV'] !== 'production' ? 'birim2026' : '')
   if (!rawExpectedPin) {
     console.error('[Analytics Security] ANALYTICS_PIN environment variable is not configured!')
     return res.status(500).json({
@@ -399,7 +400,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const expectedPin = rawExpectedPin
 
-  const rawProvidedPin = req.headers['x-analytics-pin'] || req.query['pin']
+  const clientIp = getClientIp(req)
+
+  // Rate limit incoming requests to prevent brute force
+  if (await isRateLimitedAsync(`analytics_req_${clientIp}`, {limit: 30, windowMs: 60000})) {
+    return res.status(429).json({
+      success: false,
+      error: 'Çok fazla istek gönderildi. Lütfen 1 dakika sonra tekrar deneyin.',
+    })
+  }
+
+  // Strictly accept PIN via header only (never accept via URL query params)
+  const rawProvidedPin = req.headers['x-analytics-pin']
   const providedPin = typeof rawProvidedPin === 'string' ? rawProvidedPin.trim() : ''
 
   const isPinValid = Boolean(
@@ -414,7 +426,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Verification endpoint for client PIN submission (Rate limited)
   if (req.query['action'] === 'verify') {
-    const clientIp = getClientIp(req)
     if (await isRateLimitedAsync(`analytics_verify_${clientIp}`, {limit: 5, windowMs: 60000})) {
       return res.status(429).json({
         success: false,
@@ -429,6 +440,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (!isPinValid && !isUserAdmin) {
+    if (await isRateLimitedAsync(`analytics_fail_${clientIp}`, {limit: 5, windowMs: 60000})) {
+      return res.status(429).json({
+        success: false,
+        error: 'Çok fazla hatalı PIN denemesi yaptınız. Lütfen 1 dakika sonra tekrar deneyin.',
+      })
+    }
     return res.status(401).json({
       success: false,
       error:

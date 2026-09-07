@@ -592,7 +592,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           }
         }
         if (data.interactiveShowcaseBlockIndex === undefined) {
-          data.interactiveShowcaseBlockIndex = 1
+          data.interactiveShowcaseBlockIndex = 0
         }
       }
       if (data?.contentBlocks) {
@@ -1002,7 +1002,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
       }
     }
     if (data.interactiveShowcaseBlockIndex === undefined) {
-      data.interactiveShowcaseBlockIndex = 1
+      data.interactiveShowcaseBlockIndex = 0
     }
   }
   return data

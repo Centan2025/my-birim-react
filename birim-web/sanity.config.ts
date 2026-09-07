@@ -50,6 +50,7 @@ import {excelImportTool} from './tools/excelImport'
 import {mediaImportTool} from './tools/mediaImport'
 import {mediaExportTool} from './tools/mediaExport'
 import {emailExportTool} from './tools/emailExport'
+import {supabaseUsersTool} from './tools/supabaseUsers'
 import {colorInput} from '@sanity/color-input'
 import {CategoryProductsView} from './components/CategoryProductsView'
 import {PreviewView} from './components/PreviewView'
@@ -113,6 +114,7 @@ export default defineConfig({
     mediaImportTool(),
     mediaExportTool(),
     emailExportTool(),
+    supabaseUsersTool(),
     colorInput(),
   ],
 

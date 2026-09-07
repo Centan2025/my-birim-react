@@ -167,6 +167,8 @@ export default {
   profession_placeholder: 'Your Profession',
   country: 'Country',
   country_placeholder: 'Your Country',
+  search_country: 'Search country...',
+  no_country_found: 'No country found',
   phone: 'Phone',
   phone_placeholder: 'Your Phone Number',
   logging_in: 'Logging in...',

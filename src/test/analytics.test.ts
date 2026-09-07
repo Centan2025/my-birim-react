@@ -20,6 +20,8 @@ describe('analytics', () => {
     ;(analytics as unknown as Record<string, unknown>)['isInitialized'] = true
     // Mock window.location for safe side effects
     vi.stubGlobal('location', {origin: 'http://localhost'})
+    // Default mock user consent granted for general tracking tests
+    localStorage.setItem('cookie_consent_v2', JSON.stringify({analytics: true, rejected: false}))
   })
 
   it('pageview tetiklendiğinde ReactGA.send çağrılmalı', () => {
@@ -43,5 +45,21 @@ describe('analytics', () => {
         value: 10,
       })
     )
+  })
+
+  it('KVKK/GDPR: çerez onayı yokken takip kapalı olmalı', () => {
+    localStorage.removeItem('cookie_consent_v2')
+    const isConsentGranted = (analytics as unknown as {isConsentGranted: () => boolean})[
+      'isConsentGranted'
+    ].bind(analytics)
+    expect(isConsentGranted()).toBe(false)
+  })
+
+  it('KVKK/GDPR: kullanıcı açık rıza verdiğinde takip aktif olmalı', () => {
+    localStorage.setItem('cookie_consent_v2', JSON.stringify({analytics: true, rejected: false}))
+    const isConsentGranted = (analytics as unknown as {isConsentGranted: () => boolean})[
+      'isConsentGranted'
+    ].bind(analytics)
+    expect(isConsentGranted()).toBe(true)
   })
 })

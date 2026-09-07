@@ -99,7 +99,7 @@ interface User {
   company?: string
   profession?: string
   country?: string
-  userType?: 'email_subscriber' | 'full_member'
+  userType?: 'email_subscriber' | 'full_member' | 'professional_subscriber'
   isVerified?: boolean
   isActive?: boolean
   createdAt?: string
@@ -112,6 +112,40 @@ export function EmailExportTool() {
   const [lastCount, setLastCount] = useState<number | null>(null)
 
   const fetchAllUsers = async (): Promise<User[]> => {
+    try {
+      const {createClient: createSupabaseClient} = await import('@supabase/supabase-js')
+      const sbUrl = 'https://rkmpfxervwqleibhbiqv.supabase.co'
+      const sbKey =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrbXBmeGVydndxbGVpYmhiaXF2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODc5MzU4NCwiZXhwIjoyMTA0MzY5NTg0fQ.4Bglk8zupMO9ooUDL0u4-9TpRZg7kMDM0MxwqALlVa8'
+      const sb = createSupabaseClient(sbUrl, sbKey, {auth: {persistSession: false}})
+      const {data, error} = await sb
+        .from('profiles')
+        .select('*')
+        .order('created_at', {ascending: false})
+
+      if (!error && data && data.length > 0) {
+        return data.map((p) => ({
+          _id: p.id,
+          email: p.email,
+          name: p.name || [p.first_name, p.last_name].filter(Boolean).join(' ') || '',
+          company: p.company || '',
+          profession: p.profession || '',
+          country: '',
+          userType:
+            p.role === 'architect'
+              ? 'professional_subscriber'
+              : p.profession === 'Bülten Abonesi'
+                ? 'email_subscriber'
+                : 'full_member',
+          isVerified: p.is_verified ?? false,
+          isActive: true,
+          createdAt: p.created_at || '',
+        }))
+      }
+    } catch {
+      // Supabase bağlanamazsa Sanity sorgusu ile devam et
+    }
+
     const query = `*[_type == "user"]{
       _id,
       email,

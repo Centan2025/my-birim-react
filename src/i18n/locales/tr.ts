@@ -134,6 +134,8 @@ export default {
   profession_placeholder: 'Mesleğiniz',
   country: 'Ülke',
   country_placeholder: 'Ülkeniz',
+  search_country: 'Ülke ara...',
+  no_country_found: 'Sonuç bulunamadı',
   phone: 'Telefon',
   phone_placeholder: 'Telefon Numaranız',
   logging_in: 'Giriş yapılıyor...',
@@ -202,7 +204,7 @@ export default {
     "BİRİM'in en yeni koleksiyonları, tasarım hikayeleri ve özel videolarından ilk siz haberdar olun.",
   newsletter_prompt:
     "BİRİM'in en yeni koleksiyonları, tasarım hikayeleri ve özel videolarından ilk siz haberdar olun.",
-  join_us: 'Bültenimize abone olun',
+  join_us: 'Bültenimize üye olun',
   waiting: 'Bekleyin',
   complete_application: 'Başvuruyu tamamla',
   professional_disclaimer: '* Üyeliğiniz onaylandıktan sonra tam erişim sağlayabileceksiniz.',

@@ -4,11 +4,12 @@ import {ChevronDown, X, ArrowUpRight} from 'lucide-react'
 import {subscribeEmail, subscribeProfessional} from '../services/cms'
 import {analytics} from '../lib/analytics'
 import {useTranslation} from '../i18n'
+import {CountrySelect} from './CountrySelect'
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
 
 export const HomeNewsletter: FC = () => {
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'newsletter' | 'professional'>('newsletter')
   const [email, setEmail] = useState('')
@@ -27,30 +28,53 @@ export const HomeNewsletter: FC = () => {
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const scrollToNewsletter = () => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const el = document.getElementById('home-newsletter')
+        if (!el) return
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const win = window as any
+        if (win.lenis && typeof win.lenis.scrollTo === 'function') {
+          win.lenis.scrollTo(el, {
+            offset: -15,
+            duration: 0.8,
+            easing: (t: number) => 1 - Math.pow(1 - t, 3),
+          })
+        } else {
+          el.scrollIntoView({behavior: 'smooth', block: 'start'})
+        }
+      }, 80)
+    })
+  }
+
+  const handleToggle = () => {
+    const next = !isExpanded
+    setIsExpanded(next)
+    if (next) {
+      scrollToNewsletter()
+    }
+  }
+
+  const handleTabChange = (tab: 'newsletter' | 'professional') => {
+    setActiveTab(tab)
+    if (!isExpanded) {
+      setIsExpanded(true)
+    }
+    scrollToNewsletter()
+  }
+
   // Listen for external 'openNewsletter' event (e.g. from FloatingAuthPanel) and URL hash
   useEffect(() => {
     const handleOpen = () => {
       setIsExpanded(true)
+      scrollToNewsletter()
     }
     window.addEventListener('openNewsletter', handleOpen)
 
     if (typeof window !== 'undefined' && window.location.hash === '#home-newsletter') {
       setIsExpanded(true)
-      const el = document.getElementById('home-newsletter')
-      if (el) {
-        setTimeout(() => {
-          const lenis = (
-            window as unknown as {
-              lenis?: {scrollTo: (target: HTMLElement | number, opts?: unknown) => void}
-            }
-          ).lenis
-          if (lenis && typeof lenis.scrollTo === 'function') {
-            lenis.scrollTo(el, {offset: -80, duration: 1.2})
-          } else {
-            el.scrollIntoView({behavior: 'smooth'})
-          }
-        }, 500)
-      }
+      scrollToNewsletter()
     }
 
     return () => {
@@ -121,7 +145,7 @@ export const HomeNewsletter: FC = () => {
     setStatus('loading')
 
     try {
-      const result = await subscribeProfessional(profData)
+      const result = await subscribeProfessional({...profData, lang: locale})
       analytics.event({
         action: 'sign_up_professional',
         category: 'Newsletter',
@@ -179,12 +203,14 @@ export const HomeNewsletter: FC = () => {
   return (
     <section
       id="home-newsletter"
-      className="bg-[#484d54] w-full relative overflow-hidden text-white leading-none font-inter"
+      className="bg-[#484d54] w-full relative overflow-hidden text-white leading-none font-inter no-scroll-snap"
     >
       {/* Collapse Trigger Button - Band Style */}
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="block w-full bg-[#555a62] transition-colors group z-30 relative border-t border-white/10 font-inter"
+        onClick={handleToggle}
+        type="button"
+        aria-expanded={isExpanded}
+        className="block w-full bg-[#555a62] transition-colors group z-30 relative border-t border-white/10 font-inter text-left cursor-pointer"
       >
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6 md:py-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
           <div className="flex-1 flex flex-col items-center text-center md:items-start md:text-left justify-center">
@@ -195,19 +221,60 @@ export const HomeNewsletter: FC = () => {
               {t('professional_access_desc')}
             </span>
           </div>
-          <div className="flex-shrink-0 md:ml-4 w-full md:w-auto">
-            <div
-              className={`flex items-center justify-center gap-3 bg-transparent text-white border border-gray-400 px-6 py-3 transition-all duration-500 font-inter hover:bg-white/5`}
+          <div className="flex-shrink-0 md:ml-4 w-full md:w-auto flex justify-center md:justify-end">
+            <motion.div
+              layout
+              transition={{duration: 0.35, ease: [0.16, 1, 0.3, 1]}}
+              className="flex items-center justify-center bg-transparent text-white border border-gray-400 px-6 py-3 font-inter hover:bg-white/10 hover:border-white transition-colors duration-300 shadow-sm rounded-none overflow-hidden min-w-[150px] md:min-w-[170px]"
             >
-              <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium">
-                {isExpanded ? t('close') : t('join_us')}
-              </span>
-              {isExpanded ? (
-                <X className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5 transition-transform duration-500" />
-              )}
-            </div>
+              <AnimatePresence mode="wait" initial={false}>
+                {isExpanded ? (
+                  <motion.div
+                    key="state-close"
+                    initial={{opacity: 0, y: 7, scale: 0.95}}
+                    animate={{opacity: 1, y: 0, scale: 1}}
+                    exit={{opacity: 0, y: -7, scale: 0.95}}
+                    transition={{duration: 0.25, ease: [0.16, 1, 0.3, 1]}}
+                    className="flex items-center justify-center gap-2.5"
+                  >
+                    <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium whitespace-nowrap">
+                      {t('close')}
+                    </span>
+                    <motion.span
+                      initial={{rotate: -90, scale: 0.6}}
+                      animate={{rotate: 0, scale: 1}}
+                      exit={{rotate: 90, scale: 0.6}}
+                      transition={{duration: 0.25, ease: 'easeOut'}}
+                      className="inline-flex items-center justify-center"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </motion.span>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="state-join"
+                    initial={{opacity: 0, y: -7, scale: 0.95}}
+                    animate={{opacity: 1, y: 0, scale: 1}}
+                    exit={{opacity: 0, y: 7, scale: 0.95}}
+                    transition={{duration: 0.25, ease: [0.16, 1, 0.3, 1]}}
+                    className="flex items-center justify-center gap-2.5"
+                  >
+                    <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium whitespace-nowrap">
+                      {t('join_us')}
+                    </span>
+                    <motion.span
+                      initial={{rotate: 180, scale: 0.6}}
+                      animate={{rotate: 0, scale: 1}}
+                      exit={{rotate: -180, scale: 0.6}}
+                      transition={{duration: 0.25, ease: 'easeOut'}}
+                      className="inline-flex items-center justify-center"
+                    >
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </motion.span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           </div>
         </div>
       </button>
@@ -230,7 +297,7 @@ export const HomeNewsletter: FC = () => {
                   <button
                     role="tab"
                     aria-selected={activeTab === 'newsletter'}
-                    onClick={() => setActiveTab('newsletter')}
+                    onClick={() => handleTabChange('newsletter')}
                     className={`relative pb-4 px-6 text-[11px] md:text-xs font-medium uppercase tracking-[0.15em] transition-all duration-500 font-inter ${activeTab === 'newsletter' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
                     {t('join_us')}
@@ -245,7 +312,7 @@ export const HomeNewsletter: FC = () => {
                   <button
                     role="tab"
                     aria-selected={activeTab === 'professional'}
-                    onClick={() => setActiveTab('professional')}
+                    onClick={() => handleTabChange('professional')}
                     className={`relative pb-4 px-6 text-[11px] md:text-xs font-medium uppercase tracking-[0.15em] transition-all duration-500 font-inter ${activeTab === 'professional' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
                     {t('professional_access')}
@@ -283,7 +350,7 @@ export const HomeNewsletter: FC = () => {
                             onChange={e => setEmail(e.target.value)}
                             required
                             placeholder={capitalize(t('email_placeholder'))}
-                            className="w-full bg-transparent py-4 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 text-sm md:text-base tracking-widest font-semibold font-inter"
+                            className="w-full bg-transparent py-4 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 text-sm md:text-base tracking-widest font-semibold font-inter"
                             style={{outline: 'none', boxShadow: 'none'}}
                           />
                         </div>
@@ -337,7 +404,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, name: e.target.value})}
                               required
                               placeholder={capitalize(t('full_name'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                               style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
@@ -348,7 +415,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, company: e.target.value})}
                               required
                               placeholder={capitalize(t('company'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                               style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
@@ -365,19 +432,16 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, profession: e.target.value})}
                               required
                               placeholder={capitalize(t('profession'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                               style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
                           <div className="relative group">
-                            <input
-                              type="text"
+                            <CountrySelect
                               value={profData.country}
-                              onChange={e => setProfData({...profData, country: e.target.value})}
+                              onChange={country => setProfData({...profData, country})}
                               required
                               placeholder={capitalize(t('country'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
-                              style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
                           <div className="relative group">
@@ -387,7 +451,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, phone: e.target.value})}
                               required
                               placeholder={capitalize(t('phone'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                               style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
@@ -404,7 +468,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, email: e.target.value})}
                               required
                               placeholder={capitalize(t('email'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                               style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
@@ -415,7 +479,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, password: e.target.value})}
                               required
                               placeholder={capitalize(t('set_password'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                               style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>

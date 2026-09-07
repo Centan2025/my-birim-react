@@ -2,6 +2,7 @@ import type {NavigateFunction} from 'react-router-dom'
 import ScrollReveal from './ScrollReveal'
 import {TextMaskReveal} from './TextMaskReveal'
 import type {LocalizedString, User} from '../types'
+import {userActivityTracker} from '../lib/userActivityTracker'
 
 interface ExclusiveDownloadItem {
   url: string
@@ -31,7 +32,7 @@ const DownloadIcon = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -71,8 +72,10 @@ export function ProductExclusiveContentSection({
 
   const handleDownloadClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    _url: string,
-    isProAsset: boolean = false
+    url: string,
+    isProAsset: boolean = false,
+    fileName?: string,
+    fileType: 'cad_2d' | '3d_model' | 'image' = 'cad_2d'
   ) => {
     if (!isLoggedIn) {
       e.preventDefault()
@@ -99,6 +102,13 @@ export function ProductExclusiveContentSection({
       }
       return
     }
+
+    // Record activity
+    const cleanFileName = fileName || url.split('/').pop()?.split('?')[0] || 'file'
+    userActivityTracker.trackDownload({
+      fileName: cleanFileName,
+      fileType: isProAsset ? '3d_model' : fileType,
+    })
   }
 
   const handleImageClick = (e: React.MouseEvent, _url: string, idx: number) => {
@@ -215,7 +225,7 @@ export function ProductExclusiveContentSection({
                     <a
                       href={doc.url}
                       download
-                      onClick={e => handleDownloadClick(e, doc.url)}
+                      onClick={e => handleDownloadClick(e, doc.url, false, t(doc.name), 'cad_2d')}
                       className="flex items-center gap-2 px-3 py-2 rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                     >
                       <span className="shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
@@ -244,7 +254,9 @@ export function ProductExclusiveContentSection({
                     <a
                       href={model.url}
                       download
-                      onClick={e => handleDownloadClick(e, model.url, true)}
+                      onClick={e =>
+                        handleDownloadClick(e, model.url, true, t(model.name), '3d_model')
+                      }
                       className="flex items-center gap-2 px-3 py-2 rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                     >
                       <span className="shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">

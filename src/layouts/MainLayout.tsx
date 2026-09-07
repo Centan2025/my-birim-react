@@ -11,7 +11,8 @@ import {AppRoutes} from '../routes/AppRoutes'
 
 export const MainLayout: React.FC = () => {
   const location = useLocation()
-  const isAnalytics = location.pathname === '/site-analitigi' || location.pathname === '/analytics'
+  const isAnalytics =
+    location.pathname.startsWith('/site-analiti') || location.pathname === '/analytics'
 
   return (
     <>

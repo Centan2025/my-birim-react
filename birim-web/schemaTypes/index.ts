@@ -11,7 +11,6 @@ import factoryPage from './documents/factoryPage'
 import footer from './documents/footer'
 import materialGroup from './documents/materialGroup'
 import project from './documents/project'
-import user from './documents/user'
 import cookiesPolicy from './documents/cookiesPolicy'
 import privacyPolicy from './documents/privacyPolicy'
 import termsOfService from './documents/termsOfService'
@@ -62,7 +61,6 @@ export const schemaTypes = [
   footer,
   materialGroup,
   project,
-  user,
   cookiesPolicy,
   privacyPolicy,
   termsOfService,
