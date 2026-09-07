@@ -406,48 +406,39 @@ app.post('/api/auth/login', async (req, res) => {
             createdAt: profile?.created_at || authUser.created_at,
           },
         })
+      } else if (authErr) {
+        const {data: profile} = await supabaseAdmin
+          .from('profiles')
+          .select('*')
+          .eq('email', normEmail)
+          .maybeSingle()
+
+        if (profile) {
+          if (authErr.message?.toLowerCase().includes('email not confirmed')) {
+            return res.status(403).json({
+              error:
+                'Lütfen önce e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.',
+            })
+          }
+          if (profile.profession === 'Bülten Abonesi') {
+            return res.status(403).json({
+              error:
+                'Bu e-posta sadece bülten abonesi olarak kayıtlıdır. Lütfen üye ol sekmesinden şifre belirleyerek tam üyelik oluşturun.',
+            })
+          }
+          if (authErr.message?.toLowerCase().includes('invalid login credentials')) {
+            return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
+          }
+        }
+        return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
       }
     } catch (sbErr) {
       console.warn('[Local API] Supabase login error:', sbErr)
+      return res.status(500).json({error: `Giriş hatası: ${sbErr.message || 'Teknik bir hata oluştu.'}`})
     }
   }
 
-  // 2. Fallback Sanity
-  try {
-    const user = await sanityClient.fetch(
-      `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      {email: normEmail}
-    )
-    if (!user) return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
-    if (user.userType === 'email_subscriber')
-      return res.status(403).json({error: 'Bu sadece abonelik kaydı, lütfen tam üyelik alın.'})
-    if (!user.isActive) return res.status(403).json({error: 'Hesabınız aktif değil.'})
-
-    const isPasswordCorrect = await bcrypt.compare(password, user.password || '')
-    if (!isPasswordCorrect)
-      return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
-
-    return res.status(200).json({
-      success: true,
-      user: {
-        _id: user._id,
-        email: user.email,
-        name: user.name,
-        company: user.company,
-        profession: user.profession,
-        country: user.country,
-        userType: user.userType,
-        isActive: user.isActive,
-        isVerified: user.isVerified,
-        createdAt: user.createdAt || user._createdAt,
-      },
-    })
-  } catch (err) {
-    console.error('Login error:', err)
-    return res
-      .status(500)
-      .json({error: `Giriş hatası: ${err.message || 'Teknik bir hata oluştu.'}`})
-  }
+  return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
 })
 
 // ─── /api/auth/me ──────────────────────────────────────────────────────────
@@ -503,38 +494,7 @@ app.all('/api/auth/me', async (req, res) => {
     }
   }
 
-  try {
-    const user = await sanityClient.fetch(
-      `*[_type == "user" && _id == $id && !defined(_deleted)][0]`,
-      {id: token}
-    )
-
-    if (!user || !user.isActive) {
-      return res.status(200).json({authenticated: false, user: null})
-    }
-
-    return res.status(200).json({
-      authenticated: true,
-      user: {
-        _id: user._id,
-        email: user.email,
-        name: user.name,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        company: user.company,
-        profession: user.profession,
-        country: user.country,
-        userType: user.userType,
-        isActive: user.isActive,
-        isVerified: user.isVerified,
-        createdAt: user.createdAt || user._createdAt,
-      },
-    })
-  } catch (err) {
-    console.error('Me endpoint error:', err)
-    return res.status(500).json({authenticated: false, error: 'Sunucu hatası.'})
-  }
+  return res.status(200).json({authenticated: false, user: null})
 })
 
 // ─── /api/auth/register ───────────────────────────────────────────────────
@@ -701,14 +661,22 @@ app.post('/api/auth/verify', async (req, res) => {
           .maybeSingle()
         profile = data
 
+        if (profile?.id) {
+          await supabaseAdmin.auth.admin.updateUserById(profile.id, {
+            email_confirm: true,
+            user_metadata: {email_verified: true},
+          }).catch(() => {})
+        }
+
         const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
         const authUser = usersList?.users?.find(u => u.email?.toLowerCase() === targetEmail)
-        if (authUser) {
+        if (authUser && authUser.id !== profile?.id) {
           await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
             email_confirm: true,
             user_metadata: {...authUser.user_metadata, email_verified: true},
           }).catch(() => {})
         }
+
       }
 
       return res.status(200).json({
@@ -766,12 +734,52 @@ async function handleSubscribeProfLogic(req, res) {
           !existing.is_verified
 
         if (canUpdate) {
-          if (password) {
-            await supabaseAdmin.auth.admin.updateUserById(existing.id, {password}).catch(() => {})
+          let hasAuthAccount = false
+          try {
+            const {data: usr} = await supabaseAdmin.auth.admin.getUserById(existing.id)
+            if (usr?.user) hasAuthAccount = true
+          } catch {}
+
+          if (hasAuthAccount) {
+            if (password) {
+              await supabaseAdmin.auth.admin.updateUserById(existing.id, {password}).catch(() => {})
+            }
+            await supabaseAdmin.auth.admin.updateUserById(existing.id, {
+              user_metadata: {
+                name: name || existing.name || '',
+                role: 'architect',
+                company: company || existing.company || '',
+                country: country || 'Türkiye',
+                profession: profession || existing.profession || 'Mimar / İç Mimar',
+                phone: phone || existing.phone || '',
+                email_verified: false,
+              },
+            }).catch(() => {})
+          } else {
+            const {data: newAuth} = await supabaseAdmin.auth.admin.createUser({
+              email: normEmail,
+              password: password || undefined,
+              email_confirm: false,
+              user_metadata: {
+                name: name || existing.name || '',
+                role: 'architect',
+                company: company || existing.company || '',
+                country: country || 'Türkiye',
+                profession: profession || existing.profession || 'Mimar / İç Mimar',
+                phone: phone || '',
+              },
+            })
+            if (newAuth?.user?.id) {
+              await supabaseAdmin.from('profiles').delete().eq('id', existing.id)
+              existing.id = newAuth.user.id
+            }
           }
+
           await supabaseAdmin
             .from('profiles')
-            .update({
+            .upsert({
+              id: existing.id,
+              email: normEmail,
               name: name || existing.name || null,
               company: company || existing.company || null,
               profession: profession || existing.profession || 'Mimar / İç Mimar',
@@ -781,19 +789,6 @@ async function handleSubscribeProfLogic(req, res) {
               is_verified: false,
               updated_at: new Date().toISOString(),
             })
-            .eq('id', existing.id)
-
-          await supabaseAdmin.auth.admin.updateUserById(existing.id, {
-            user_metadata: {
-              name: name || existing.name || '',
-              role: 'architect',
-              company: company || existing.company || '',
-              country: country || 'Türkiye',
-              profession: profession || existing.profession || 'Mimar / İç Mimar',
-              phone: phone || existing.phone || '',
-              email_verified: false,
-            },
-          }).catch(() => {})
 
           const emailLang = detectUserLanguage(req, country, req.body?.lang)
           await sendVerificationEmail(normEmail, verificationUrl, name || existing.name, emailLang)
@@ -941,34 +936,40 @@ app.post('/api/auth/subscribe-prof', async (req, res) => {
 
 // ─── /api/auth/reset-request ──────────────────────────────────────────────
 app.post('/api/auth/reset-request', async (req, res) => {
-  if (!SANITY_TOKEN) return res.status(500).json({error: 'SANITY_TOKEN yapılandırılmamış.'})
   const {email} = req.body
   if (!email) return res.status(400).json({error: 'E-posta adresi gereklidir.'})
   const normEmail = email.trim().toLowerCase()
-  try {
-    const user = await sanityClient.fetch(
-      `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      {email: normEmail}
-    )
-    if (!user) return res.status(404).json({error: 'Kullanıcı bulunamadı.'})
-    const resetToken = randomUUID()
-    const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-    await sanityClient
-      .patch(user._id)
-      .set({resetPasswordToken: resetToken, resetPasswordExpires})
-      .commit()
-    return res
-      .status(200)
-      .json({success: true, resetToken, message: 'Şifre sıfırlama kodu oluşturuldu.'})
-  } catch (err) {
-    console.error('Reset request error:', err)
-    return res
-      .status(500)
-      .json({
-        error: `Hata: ${err.message || 'Süreç sırasında bir hata oluştu.'}`,
-        details: err.toString(),
-      })
+
+  if (supabaseAdmin) {
+    try {
+      const {data: profile} = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, name')
+        .eq('email', normEmail)
+        .maybeSingle()
+
+      if (profile) {
+        const resetToken = randomUUID()
+        const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        await supabaseAdmin.auth.admin.updateUserById(profile.id, {
+          user_metadata: {
+            reset_password_token: resetToken,
+            reset_password_expires: resetPasswordExpires,
+          },
+        }).catch(() => {})
+
+        const siteUrl = process.env.VITE_SITE_URL || 'http://localhost:3000'
+        const resetUrl = `${siteUrl}/reset-password?token=${resetToken}`
+        console.log(`[Local API] Password reset link created: ${resetUrl}`)
+        return res.status(200).json({success: true, resetToken, message: 'Şifre sıfırlama kodu oluşturuldu.'})
+      }
+      return res.status(200).json({success: true, message: 'Şifre sıfırlama kodu oluşturuldu.'})
+    } catch (err) {
+      console.error('Reset request error:', err)
+      return res.status(500).json({error: `Hata: ${err.message || 'Süreç sırasında bir hata oluştu.'}`})
+    }
   }
+  return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
 })
 
 // ─── /api/auth/reset-password ─────────────────────────────────────────────
@@ -976,38 +977,56 @@ app.post('/api/auth/reset-password', async (req, res) => {
   const {token, newPassword} = req.body
   if (!token || !newPassword)
     return res.status(400).json({error: 'Token ve yeni şifre gereklidir.'})
-  try {
-    const user = await sanityClient.fetch(
-      `*[_type == "user" && resetPasswordToken == $token && resetPasswordExpires > $now][0]`,
-      {token, now: new Date().toISOString()}
-    )
-    if (!user) return res.status(400).json({error: 'Geçersiz veya süresi dolmuş token.'})
-    const passwordHash = await bcrypt.hash(newPassword, 10)
-    await sanityClient
-      .patch(user._id)
-      .set({password: passwordHash})
-      .unset(['resetPasswordToken', 'resetPasswordExpires'])
-      .commit()
-    return res.status(200).json({success: true, message: 'Şifreniz başarıyla değiştirildi.'})
-  } catch (err) {
-    console.error('Reset password error:', err)
-    return res
-      .status(500)
-      .json({error: `Şifre değiştirme hatası: ${err.message || 'Bir hata oluştu.'}`})
+
+  if (supabaseAdmin) {
+    try {
+      const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
+      const now = new Date()
+      const matchedUser = usersList?.users?.find(u => {
+        const uToken = u.user_metadata?.reset_password_token
+        const uExp = u.user_metadata?.reset_password_expires
+        return uToken === token && uExp && new Date(uExp) > now
+      })
+
+      if (!matchedUser) {
+        return res.status(400).json({error: 'Geçersiz veya süresi dolmuş token.'})
+      }
+
+      const {error: updateErr} = await supabaseAdmin.auth.admin.updateUserById(matchedUser.id, {
+        password: newPassword,
+        user_metadata: {
+          ...matchedUser.user_metadata,
+          reset_password_token: null,
+          reset_password_expires: null,
+        },
+      })
+
+      if (updateErr) return res.status(400).json({error: updateErr.message})
+      return res.status(200).json({success: true, message: 'Şifreniz başarıyla değiştirildi.'})
+    } catch (err) {
+      console.error('Reset password error:', err)
+      return res.status(500).json({error: `Şifre değiştirme hatası: ${err.message || 'Bir hata oluştu.'}`})
+    }
   }
+  return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
 })
 
 // ─── /api/auth/delete-account ─────────────────────────────────────────────
 app.post('/api/auth/delete-account', async (req, res) => {
   const {id} = req.body
   if (!id) return res.status(400).json({error: 'Kullanıcı ID gereklidir.'})
-  try {
-    await sanityClient.delete(id)
-    return res.status(200).json({success: true})
-  } catch (err) {
-    console.error('Delete account error:', err)
-    return res.status(500).json({error: 'Hesap silinirken bir hata oluştu.'})
+
+  if (supabaseAdmin) {
+    try {
+      await supabaseAdmin.from('profiles').delete().eq('id', id)
+      await supabaseAdmin.auth.admin.deleteUser(id).catch(() => {})
+      return res.status(200).json({success: true})
+    } catch (err) {
+      console.error('Delete account error:', err)
+      return res.status(500).json({error: 'Hesap silinirken bir hata oluştu.'})
+    }
   }
+  return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
 })
 
 // ─── /api/send-verification ───────────────────────────────────────────────

@@ -142,24 +142,12 @@ export function EmailExportTool() {
           createdAt: p.created_at || '',
         }))
       }
-    } catch {
-      // Supabase bağlanamazsa Sanity sorgusu ile devam et
+    } catch (err) {
+      console.error('Supabase fetch error:', err)
+      return []
     }
 
-    const query = `*[_type == "user"]{
-      _id,
-      email,
-      name,
-      company,
-      profession,
-      country,
-      userType,
-      isVerified,
-      isActive,
-      createdAt
-    } | order(createdAt desc)`
-
-    return client.fetch(query)
+    return []
   }
 
   const exportToExcel = async () => {

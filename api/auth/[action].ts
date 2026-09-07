@@ -1,5 +1,3 @@
-import {createClient} from '@sanity/client'
-import bcrypt from 'bcryptjs'
 import {randomUUID} from 'crypto'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
@@ -12,42 +10,6 @@ import {
 } from '../../lib/server/token.js'
 import {handleCors} from '../../lib/server/cors.js'
 import {getSafeSupabaseAdmin} from '../../lib/server/supabaseAdmin.js'
-
-const SANITY_PROJECT_ID =
-  process.env['SANITY_PROJECT_ID'] || process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
-const SANITY_DATASET =
-  process.env['SANITY_DATASET'] || process.env['VITE_SANITY_DATASET'] || 'production'
-const SANITY_API_VERSION =
-  process.env['SANITY_API_VERSION'] || process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
-const SANITY_TOKEN = process.env['SANITY_TOKEN']
-
-const client = createClient({
-  projectId: SANITY_PROJECT_ID,
-  dataset: SANITY_DATASET,
-  apiVersion: SANITY_API_VERSION,
-  token: SANITY_TOKEN,
-  useCdn: false,
-})
-
-export interface SanityUserRecord {
-  _id: string
-  _createdAt?: string
-  email?: string
-  firstName?: string
-  lastName?: string
-  name?: string
-  role?: string
-  company?: string
-  profession?: string
-  country?: string
-  userType?: string
-  isActive?: boolean
-  isVerified?: boolean
-  createdAt?: string
-  architectVerificationStatus?: string
-  [key: string]: unknown
-}
-
 import {
   sendVerificationEmail as sendServiceVerificationEmail,
   sendPasswordResetEmail as sendServicePasswordResetEmail,
@@ -58,7 +20,7 @@ async function sendServerVerificationEmail(
   verificationUrl: string,
   name?: string,
   lang: 'tr' | 'en' = 'tr'
-) {
+): Promise<boolean> {
   return sendServiceVerificationEmail({to: email, verificationUrl, name, lang})
 }
 
@@ -67,7 +29,7 @@ async function sendServerPasswordResetEmail(
   resetUrl: string,
   name?: string,
   lang: 'tr' | 'en' = 'tr'
-) {
+): Promise<boolean> {
   return sendServicePasswordResetEmail({to: email, resetUrl, name, lang})
 }
 
@@ -76,7 +38,7 @@ function detectUserLanguage(
   country?: string,
   explicitLang?: string
 ): 'tr' | 'en' {
-  if (explicitLang === 'en' || explicitLang === 'tr') {
+  if (explicitLang === 'tr' || explicitLang === 'en') {
     return explicitLang
   }
 
@@ -170,139 +132,106 @@ async function handleLogin(req: VercelRequest, res: VercelResponse) {
   const normEmail = (email as string).trim().toLowerCase()
 
   try {
-    // 1. Try Supabase Auth first if configured
-    try {
-      const supabaseAdmin = getSafeSupabaseAdmin()
-      const anonKey =
-        process.env['VITE_SUPABASE_ANON_KEY'] ||
-        process.env['SUPABASE_ANON_KEY'] ||
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrbXBmeGVydndxbGVpYmhiaXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3OTM1ODQsImV4cCI6MjEwNDM2OTU4NH0.nQJwhU1hxIjem6pxdJSQ8PNfmahd-bn9Z2CEkwf1Yi0'
-      const supabaseUrl =
-        process.env['SUPABASE_URL'] ||
-        process.env['VITE_SUPABASE_URL'] ||
-        'https://rkmpfxervwqleibhbiqv.supabase.co'
+    const supabaseAdmin = getSafeSupabaseAdmin()
+    const anonKey =
+      process.env['VITE_SUPABASE_ANON_KEY'] ||
+      process.env['SUPABASE_ANON_KEY'] ||
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrbXBmeGVydndxbGVpYmhiaXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3OTM1ODQsImV4cCI6MjEwNDM2OTU4NH0.nQJwhU1hxIjem6pxdJSQ8PNfmahd-bn9Z2CEkwf1Yi0'
+    const supabaseUrl =
+      process.env['SUPABASE_URL'] ||
+      process.env['VITE_SUPABASE_URL'] ||
+      'https://rkmpfxervwqleibhbiqv.supabase.co'
 
-      if (supabaseAdmin && anonKey) {
-        const {createClient} = await import('@supabase/supabase-js')
-        const clientAuth = createClient(supabaseUrl, anonKey, {
-          auth: {persistSession: false},
-        })
-
-        const {data: authData, error: authErr} = await clientAuth.auth.signInWithPassword({
-          email: normEmail,
-          password,
-        })
-
-        if (!authErr && authData.user) {
-          const authUser = authData.user
-          const {data: profile} = await supabaseAdmin
-            .from('profiles')
-            .select('*')
-            .eq('id', authUser.id)
-            .maybeSingle()
-
-          const isVerified = Boolean(authUser.email_confirmed_at || profile?.is_verified)
-          if (!isVerified) {
-            return res.status(403).json({
-              error:
-                'Lütfen önce e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.',
-            })
-          }
-
-          const token = createToken({
-            sub: authUser.id,
-            email: authUser.email || normEmail,
-            role: profile?.role || 'consumer',
-          })
-
-          setAuthCookie(res, token)
-
-          const displayName =
-            profile?.name ||
-            [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') ||
-            authUser.email?.split('@')[0] ||
-            'Kullanıcı'
-
-          return res.status(200).json({
-            success: true,
-            token,
-            user: {
-              _id: authUser.id,
-              email: authUser.email,
-              name: displayName,
-              company: profile?.company || '',
-              profession: profile?.profession || '',
-              role: profile?.role || 'consumer',
-              architectVerificationStatus:
-                profile?.architect_verification_status || 'not_requested',
-              isActive: true,
-              isVerified: true,
-              createdAt: profile?.created_at || authUser.created_at,
-            },
-          })
-        }
-      }
-    } catch (sbErr) {
-      console.warn('[Supabase Auth] Login attempt fallback to Sanity:', sbErr)
+    if (!supabaseAdmin || !anonKey) {
+      return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
     }
 
-    const user = (await client.fetch(
-      `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      {email: normEmail}
-    )) as SanityUserRecord | null
+    const {createClient} = await import('@supabase/supabase-js')
+    const clientAuth = createClient(supabaseUrl, anonKey, {
+      auth: {persistSession: false},
+    })
 
-    if (!user) {
+    const {data: authData, error: authErr} = await clientAuth.auth.signInWithPassword({
+      email: normEmail,
+      password,
+    })
+
+    if (authErr) {
+      const {data: profile} = await supabaseAdmin
+        .from('profiles')
+        .select('*')
+        .eq('email', normEmail)
+        .maybeSingle()
+
+      if (profile && authErr.message?.toLowerCase().includes('email not confirmed')) {
+        return res.status(403).json({
+          error:
+            'Lütfen önce e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.',
+        })
+      }
+
+      if (profile && profile.profession === 'Bülten Abonesi') {
+        return res.status(403).json({
+          error:
+            'Bu e-posta sadece bülten abonesi olarak kayıtlıdır. Lütfen üye ol sekmesinden şifre belirleyerek tam üyelik oluşturun.',
+        })
+      }
+
       return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
     }
 
-    if (user.userType === 'email_subscriber') {
-      return res.status(403).json({error: 'Bu sadece abonelik kaydı, lütfen tam üyelik alın.'})
+    if (!authData.user) {
+      return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
     }
 
-    if (!user.isActive) {
-      return res.status(403).json({error: 'Hesabınız aktif değil.'})
-    }
+    const authUser = authData.user
+    const {data: profile} = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .maybeSingle()
 
-    if (user.isVerified === false && user['verificationToken']) {
+    const isVerified = Boolean(authUser.email_confirmed_at || profile?.is_verified)
+    if (!isVerified) {
       return res.status(403).json({
         error:
           'Lütfen önce e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.',
       })
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, (user['password'] as string) || '')
-    if (!isPasswordCorrect) {
-      return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
-    }
-
     const token = createToken({
-      sub: user._id,
-      email: user.email || normEmail,
-      role: user.role || 'consumer',
+      sub: authUser.id,
+      email: authUser.email || normEmail,
+      role: profile?.role || 'consumer',
     })
 
     setAuthCookie(res, token)
+
+    const displayName =
+      profile?.name ||
+      [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') ||
+      authUser.email?.split('@')[0] ||
+      'Kullanıcı'
 
     return res.status(200).json({
       success: true,
       token,
       user: {
-        _id: user._id,
-        email: user.email,
-        name: user.name,
-        company: user.company,
-        profession: user.profession,
-        country: user.country,
-        role: user.role,
-        userType: user.userType,
-        isActive: user.isActive,
-        isVerified: user.isVerified,
-        createdAt: user.createdAt || user._createdAt,
+        _id: authUser.id,
+        email: authUser.email,
+        name: displayName,
+        company: profile?.company || '',
+        profession: profile?.profession || '',
+        role: profile?.role || 'consumer',
+        architectVerificationStatus: profile?.architect_verification_status || 'not_requested',
+        isActive: true,
+        isVerified: true,
+        createdAt: profile?.created_at || authUser.created_at,
       },
     })
   } catch (error: unknown) {
     console.error('Login error:', error)
-    return res.status(500).json({error: 'Giriş sırasında bir teknik hata oluştu.'})
+    return res.status(500).json({error: 'Giriş sırasında bir hata oluştu.'})
   }
 }
 
@@ -318,23 +247,11 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
       .json({error: 'Çok fazla kayıt denemesi yaptınız. Lütfen daha sonra tekrar deneyin.'})
   }
 
-  const {
-    email,
-    password,
-    firstName,
-    lastName,
-    name,
-    role,
-    company,
-    profession,
-    country,
-    phone,
-    city,
-    website,
-  } = req.body || {}
+  const {email, password, firstName, lastName, name, role, company, country, profession, phone} =
+    req.body || {}
 
   if (!email || !password) {
-    return res.status(400).json({error: 'Email ve şifre gereklidir.'})
+    return res.status(400).json({error: 'Email ve şifre zorunludur.'})
   }
 
   const normEmail = (email as string).trim().toLowerCase()
@@ -363,45 +280,79 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
     if (existingProfile) {
       if (existingProfile.profession === 'Bülten Abonesi') {
         // Upgrade newsletter subscriber to full member
-        const {error: updateAuthErr} = await supabaseAdmin.auth.admin.updateUserById(
-          existingProfile.id,
-          {
-            password,
-            user_metadata: {
-              first_name: firstName,
-              last_name: lastName,
-              name: displayName,
-              role: dbRole,
-              company,
-              country: country || 'Türkiye',
-              profession: userProfession,
-              phone,
-            },
-          }
-        )
-
-        if (updateAuthErr) {
-          return res.status(400).json({error: updateAuthErr.message})
+        let hasAuth = false
+        try {
+          const {data: chk} = await supabaseAdmin.auth.admin.getUserById(existingProfile.id)
+          if (chk?.user) hasAuth = true
+        } catch {
+          hasAuth = false
         }
 
-        await supabaseAdmin
-          .from('profiles')
-          .update({
-            first_name: firstName || null,
-            last_name: lastName || null,
-            name: displayName,
-            role: dbRole,
-            company: company || null,
-            profession: userProfession,
-            phone: phone || null,
-            architect_verification_status: dbArchStatus,
-            is_verified: false,
-          })
-          .eq('id', existingProfile.id)
+        if (hasAuth) {
+          const {error: updateAuthErr} = await supabaseAdmin.auth.admin.updateUserById(
+            existingProfile.id,
+            {
+              password,
+              user_metadata: {
+                first_name: firstName,
+                last_name: lastName,
+                name: displayName,
+                role: dbRole,
+                company,
+                country: country || 'Türkiye',
+                profession: userProfession,
+                phone,
+              },
+            }
+          )
+          if (updateAuthErr) {
+            return res.status(400).json({error: updateAuthErr.message})
+          }
+        } else {
+          const {data: newSbAuth, error: createAuthErr} = await supabaseAdmin.auth.admin.createUser(
+            {
+              email: normEmail,
+              password,
+              email_confirm: false,
+              user_metadata: {
+                first_name: firstName,
+                last_name: lastName,
+                name: displayName,
+                role: dbRole,
+                company,
+                country: country || 'Türkiye',
+                profession: userProfession,
+                phone,
+              },
+            }
+          )
+          if (createAuthErr) {
+            return res.status(400).json({error: createAuthErr.message})
+          }
+          if (newSbAuth?.user?.id) {
+            await supabaseAdmin.from('profiles').delete().eq('id', existingProfile.id)
+            existingProfile.id = newSbAuth.user.id
+          }
+        }
+
+        await supabaseAdmin.from('profiles').upsert({
+          id: existingProfile.id,
+          email: normEmail,
+          first_name: firstName || null,
+          last_name: lastName || null,
+          name: displayName,
+          role: dbRole,
+          company: company || null,
+          profession: userProfession,
+          phone: phone || null,
+          architect_verification_status: dbArchStatus,
+          is_verified: false,
+          updated_at: new Date().toISOString(),
+        })
 
         const verificationToken = randomUUID()
         const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
-        const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}`
+        const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(normEmail)}`
         const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
         sendServerVerificationEmail(normEmail, verificationUrl, displayName, emailLang).catch(err =>
           console.error('Verification email error:', err)
@@ -411,7 +362,7 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
           success: true,
           requireVerification: true,
           message:
-            'Bülten aboneliğiniz üye hesabına dönüştürüldü. Lütfen e-posta adresinize gönderilen bağlantı ile üyeliğinizi doğrulayın.',
+            'Üyeliğiniz başarıyla oluşturuldu! Lütfen e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.',
           user: {
             _id: existingProfile.id,
             id: existingProfile.id,
@@ -427,10 +378,9 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
         })
       }
 
-      return res.status(400).json({error: 'Bu e-posta adresi zaten kayıtlı.'})
+      return res.status(400).json({error: 'Bu e-posta adresi zaten kayıtlıdır.'})
     }
 
-    // Create new Supabase user
     const {data: sbAuth, error: authError} = await supabaseAdmin.auth.admin.createUser({
       email: normEmail,
       password,
@@ -471,7 +421,7 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
 
     const verificationToken = randomUUID()
     const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
-    const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}`
+    const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(normEmail)}`
     const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
     sendServerVerificationEmail(normEmail, verificationUrl, displayName, emailLang).catch(err =>
       console.error('Verification email error:', err)
@@ -519,69 +469,42 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
 
   try {
     const supabaseAdmin = getSafeSupabaseAdmin()
-    if (supabaseAdmin) {
-      try {
-        const {data: profile} = await supabaseAdmin
-          .from('profiles')
-          .select('*')
-          .eq('id', payload.sub)
-          .maybeSingle()
-
-        if (profile) {
-          const displayName =
-            profile.name ||
-            [profile.first_name, profile.last_name].filter(Boolean).join(' ') ||
-            profile.email?.split('@')[0] ||
-            'Kullanıcı'
-
-          return res.status(200).json({
-            authenticated: true,
-            user: {
-              _id: profile.id,
-              email: profile.email,
-              name: displayName,
-              firstName: profile.first_name || '',
-              lastName: profile.last_name || '',
-              role: profile.role || 'consumer',
-              company: profile.company || '',
-              country: profile.country || '',
-              profession: profile.profession || '',
-              architectVerificationStatus: profile.architect_verification_status || 'not_requested',
-              isActive: true,
-              isVerified: profile.is_verified ?? true,
-              createdAt: profile.created_at,
-            },
-          })
-        }
-      } catch (sbErr) {
-        console.warn('[Supabase Me] Error querying Supabase profile:', sbErr)
-      }
-    }
-
-    const user = (await client.fetch(`*[_type == "user" && _id == $id && !defined(_deleted)][0]`, {
-      id: payload.sub,
-    })) as SanityUserRecord | null
-
-    if (!user || !user.isActive) {
+    if (!supabaseAdmin) {
       return res.status(200).json({authenticated: false, user: null})
     }
+
+    const {data: profile} = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', payload.sub)
+      .maybeSingle()
+
+    if (!profile) {
+      return res.status(200).json({authenticated: false, user: null})
+    }
+
+    const displayName =
+      profile.name ||
+      [profile.first_name, profile.last_name].filter(Boolean).join(' ') ||
+      profile.email?.split('@')[0] ||
+      'Kullanıcı'
 
     return res.status(200).json({
       authenticated: true,
       user: {
-        _id: user._id,
-        email: user.email,
-        name: user.name,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        company: user.company,
-        profession: user.profession,
-        country: user.country,
-        userType: user.userType,
-        isActive: user.isActive,
-        isVerified: user.isVerified,
-        createdAt: user.createdAt || user._createdAt,
+        _id: profile.id,
+        email: profile.email,
+        name: displayName,
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || '',
+        role: profile.role || 'consumer',
+        company: profile.company || '',
+        country: profile.country || '',
+        profession: profile.profession || '',
+        architectVerificationStatus: profile.architect_verification_status || 'not_requested',
+        isActive: true,
+        isVerified: profile.is_verified ?? true,
+        createdAt: profile.created_at,
       },
     })
   } catch (error: unknown) {
@@ -610,23 +533,41 @@ async function handleVerify(req: VercelRequest, res: VercelResponse) {
   }
 
   const supabaseAdmin = getSafeSupabaseAdmin()
-  if (supabaseAdmin && email) {
-    const targetEmail = (email as string).trim().toLowerCase()
-    try {
+  if (!supabaseAdmin) {
+    return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
+  }
+
+  const targetEmail = email ? (email as string).trim().toLowerCase() : null
+
+  try {
+    let profile = null
+
+    if (targetEmail) {
       await supabaseAdmin
         .from('profiles')
         .update({is_verified: true, updated_at: new Date().toISOString()})
         .eq('email', targetEmail)
 
-      const {data: profile} = await supabaseAdmin
+      const {data} = await supabaseAdmin
         .from('profiles')
         .select('*')
         .eq('email', targetEmail)
         .maybeSingle()
 
+      profile = data
+
+      if (profile?.id) {
+        await supabaseAdmin.auth.admin
+          .updateUserById(profile.id, {
+            email_confirm: true,
+            user_metadata: {email_verified: true},
+          })
+          .catch(() => {})
+      }
+
       const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
       const authUser = usersList?.users?.find(u => u.email?.toLowerCase() === targetEmail)
-      if (authUser) {
+      if (authUser && authUser.id !== profile?.id) {
         await supabaseAdmin.auth.admin
           .updateUserById(authUser.id, {
             email_confirm: true,
@@ -634,94 +575,32 @@ async function handleVerify(req: VercelRequest, res: VercelResponse) {
           })
           .catch(() => {})
       }
-
-      if (profile) {
-        return res.status(200).json({
-          success: true,
-          message: 'E-posta adresiniz başarıyla doğrulandı.',
-          user: {
-            _id: profile.id,
-            id: profile.id,
-            email: profile.email,
-            name: profile.name,
-            role: profile.role,
-            company: profile.company,
-            profession: profile.profession,
-            architectVerificationStatus: profile.architect_verification_status,
-            isVerified: true,
-          },
-        })
-      }
-    } catch (sbErr) {
-      console.warn('[Supabase Verify Warning]:', sbErr)
-    }
-  }
-
-  try {
-    const user = (await client.fetch(`*[_type == "user" && verificationToken == $token][0]`, {
-      token: token || '',
-    })) as SanityUserRecord | null
-
-    if (!user) {
-      return res.status(400).json({error: 'Geçersiz veya süresi dolmuş token.'})
     }
 
-    if (user.isVerified && user.isActive) {
+    if (profile) {
       return res.status(200).json({
         success: true,
-        message: 'E-posta zaten doğrulanmış.',
+        message: 'E-posta adresiniz başarıyla doğrulandı.',
         user: {
-          _id: user._id,
-          email: user.email,
-          name: user.name,
-          company: user.company,
-          profession: user.profession,
-          country: user.country,
-          userType: user.userType,
-          isActive: true,
+          _id: profile.id,
+          id: profile.id,
+          email: profile.email,
+          name: profile.name,
+          role: profile.role,
+          company: profile.company,
+          profession: profile.profession,
+          architectVerificationStatus: profile.architect_verification_status,
           isVerified: true,
-          createdAt: user.createdAt || user._createdAt,
         },
       })
-    }
-
-    const updatedUser = (await client
-      .patch(user._id)
-      .set({isVerified: true, isActive: true})
-      .unset(['verificationToken'])
-      .commit()) as SanityUserRecord
-
-    // Sync verification status to Supabase if configured
-    try {
-      const supabaseAdmin = getSafeSupabaseAdmin()
-      if (supabaseAdmin && updatedUser.email) {
-        await supabaseAdmin
-          .from('profiles')
-          .update({is_verified: true})
-          .eq('email', updatedUser.email.toLowerCase())
-      }
-    } catch (sbErr) {
-      console.warn('[Supabase Sync] Doğrulama Supabase senkronizasyon uyarısı:', sbErr)
     }
 
     return res.status(200).json({
       success: true,
       message: 'E-posta adresiniz başarıyla doğrulandı.',
-      user: {
-        _id: updatedUser._id,
-        email: updatedUser.email,
-        name: updatedUser.name,
-        company: updatedUser.company,
-        profession: updatedUser.profession,
-        country: updatedUser.country,
-        userType: updatedUser.userType,
-        isActive: updatedUser.isActive,
-        isVerified: updatedUser.isVerified,
-        createdAt: updatedUser.createdAt || updatedUser._createdAt,
-      },
     })
-  } catch (error: unknown) {
-    console.error('Verification error:', error)
+  } catch (sbErr) {
+    console.error('[Supabase Verify Error]:', sbErr)
     return res.status(500).json({error: 'Doğrulama sırasında bir hata oluştu.'})
   }
 }
@@ -732,6 +611,10 @@ async function handleResetPassword(req: VercelRequest, res: VercelResponse) {
   }
 
   const {token, newPassword, email, action} = req.body || {}
+  const supabaseAdmin = getSafeSupabaseAdmin()
+  if (!supabaseAdmin) {
+    return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
+  }
 
   if (action === 'request' || (email && !newPassword && !token)) {
     if (!email) {
@@ -741,29 +624,34 @@ async function handleResetPassword(req: VercelRequest, res: VercelResponse) {
     const normEmail = (email as string).trim().toLowerCase()
 
     try {
-      const user = (await client.fetch(
-        `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-        {email: normEmail}
-      )) as SanityUserRecord | null
+      const {data: profile} = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, name')
+        .eq('email', normEmail)
+        .maybeSingle()
 
-      if (user) {
+      if (profile) {
         const resetToken = randomUUID()
         const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
-        await client
-          .patch(user._id)
-          .set({
-            resetPasswordToken: resetToken,
-            resetPasswordExpires,
+        await supabaseAdmin.auth.admin
+          .updateUserById(profile.id, {
+            user_metadata: {
+              reset_password_token: resetToken,
+              reset_password_expires: resetPasswordExpires,
+            },
           })
-          .commit()
+          .catch(() => {})
 
         const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
         const resetUrl = `${siteUrl}/reset-password?token=${resetToken}`
         const emailLang = detectUserLanguage(req, undefined, req.body?.['lang'])
-        sendServerPasswordResetEmail(normEmail, resetUrl, user?.name, emailLang).catch(err =>
-          console.error('Password reset email error:', err)
-        )
+        sendServerPasswordResetEmail(
+          normEmail,
+          resetUrl,
+          profile.name || undefined,
+          emailLang
+        ).catch(err => console.error('Password reset email error:', err))
       }
 
       return res.status(200).json({
@@ -782,22 +670,30 @@ async function handleResetPassword(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const user = (await client.fetch(
-      `*[_type == "user" && resetPasswordToken == $token && resetPasswordExpires > now()][0]`,
-      {token}
-    )) as SanityUserRecord | null
+    const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
+    const now = new Date()
+    const matchedUser = usersList?.users?.find(u => {
+      const uToken = u.user_metadata?.['reset_password_token']
+      const uExp = u.user_metadata?.['reset_password_expires']
+      return uToken === token && uExp && new Date(uExp) > now
+    })
 
-    if (!user) {
+    if (!matchedUser) {
       return res.status(400).json({error: 'Geçersiz veya süresi dolmuş token.'})
     }
 
-    const passwordHash = await bcrypt.hash(newPassword, 10)
+    const {error: updateErr} = await supabaseAdmin.auth.admin.updateUserById(matchedUser.id, {
+      password: newPassword,
+      user_metadata: {
+        ...matchedUser.user_metadata,
+        reset_password_token: null,
+        reset_password_expires: null,
+      },
+    })
 
-    await client
-      .patch(user._id)
-      .set({password: passwordHash})
-      .unset(['resetPasswordToken', 'resetPasswordExpires'])
-      .commit()
+    if (updateErr) {
+      return res.status(400).json({error: updateErr.message})
+    }
 
     return res.status(200).json({
       success: true,
@@ -825,7 +721,6 @@ async function handleDeleteAccount(req: VercelRequest, res: VercelResponse) {
   }
 
   const {id} = req.body || {}
-
   if (!id || typeof id !== 'string' || id.trim().length === 0) {
     return res.status(400).json({error: "Kullanıcı ID'si gereklidir."})
   }
@@ -834,33 +729,18 @@ async function handleDeleteAccount(req: VercelRequest, res: VercelResponse) {
     return res.status(403).json({error: 'Bu hesabı silme yetkiniz bulunmamaktadır.'})
   }
 
-  if (id.startsWith('_') || id.includes('..') || id.includes('drafts.')) {
-    return res.status(400).json({error: "Geçersiz kullanıcı ID'si."})
-  }
-
   try {
     const supabaseAdmin = getSafeSupabaseAdmin()
-    if (supabaseAdmin) {
-      try {
-        const {error: sbErr} = await supabaseAdmin.auth.admin.deleteUser(id)
-        if (!sbErr) {
-          return res.status(200).json({success: true, message: 'Hesap başarıyla silindi.'})
-        }
-      } catch (sbErr) {
-        console.warn('[Supabase Delete] Error deleting from Supabase:', sbErr)
-      }
+    if (!supabaseAdmin) {
+      return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
     }
 
-    const existing = (await client.fetch(
-      `*[_type == "user" && _id == $id && !defined(_deleted)][0]._id`,
-      {id}
-    )) as string | null
-
-    if (!existing) {
-      return res.status(404).json({error: 'Kullanıcı bulunamadı.'})
+    await supabaseAdmin.from('profiles').delete().eq('id', id)
+    const {error: sbErr} = await supabaseAdmin.auth.admin.deleteUser(id)
+    if (sbErr && !sbErr.message.includes('User not found')) {
+      return res.status(400).json({error: sbErr.message})
     }
 
-    await client.delete(id)
     return res.status(200).json({success: true, message: 'Hesap başarıyla silindi.'})
   } catch (error: unknown) {
     console.error('Delete account error:', error)
@@ -883,11 +763,11 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
   const normEmail = (email as string).trim().toLowerCase()
   const supabaseAdmin = getSafeSupabaseAdmin()
 
-  if (!supabaseAdmin && (isProfessional || profession)) {
+  if (!supabaseAdmin) {
     return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
   }
 
-  // 1. Professional / Architect Application
+  // 1. Professional / Architect Application (Özel Erişim)
   if (isProfessional || profession) {
     try {
       const {data: existing} = await supabaseAdmin
@@ -907,36 +787,63 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
           !existing.is_verified
 
         if (canUpdate) {
-          if (password) {
-            await supabaseAdmin.auth.admin.updateUserById(existing.id, {password}).catch(() => {})
+          let hasAuthAccount = false
+          try {
+            const {data: usr} = await supabaseAdmin.auth.admin.getUserById(existing.id)
+            if (usr?.user) hasAuthAccount = true
+          } catch {
+            hasAuthAccount = false
           }
-          await supabaseAdmin
-            .from('profiles')
-            .update({
-              name: name || existing.name || null,
-              company: company || existing.company || null,
-              profession: profession || existing.profession || 'Mimar / İç Mimar',
-              phone: phone || existing.phone || null,
-              role: 'architect',
-              architect_verification_status: 'pending',
-              is_verified: false,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', existing.id)
 
-          await supabaseAdmin.auth.admin
-            .updateUserById(existing.id, {
+          if (hasAuthAccount) {
+            if (password) {
+              await supabaseAdmin.auth.admin.updateUserById(existing.id, {password}).catch(() => {})
+            }
+            await supabaseAdmin.auth.admin
+              .updateUserById(existing.id, {
+                user_metadata: {
+                  name: name || existing.name || '',
+                  role: 'architect',
+                  company: company || existing.company || '',
+                  country: country || 'Türkiye',
+                  profession: profession || existing.profession || 'Mimar / İç Mimar',
+                  phone: phone || existing.phone || '',
+                  email_verified: false,
+                },
+              })
+              .catch(() => {})
+          } else {
+            const {data: newAuth} = await supabaseAdmin.auth.admin.createUser({
+              email: normEmail,
+              password: password || undefined,
+              email_confirm: false,
               user_metadata: {
                 name: name || existing.name || '',
                 role: 'architect',
                 company: company || existing.company || '',
                 country: country || 'Türkiye',
                 profession: profession || existing.profession || 'Mimar / İç Mimar',
-                phone: phone || existing.phone || '',
-                email_verified: false,
+                phone: phone || '',
               },
             })
-            .catch(() => {})
+            if (newAuth?.user?.id) {
+              await supabaseAdmin.from('profiles').delete().eq('id', existing.id)
+              existing.id = newAuth.user.id
+            }
+          }
+
+          await supabaseAdmin.from('profiles').upsert({
+            id: existing.id,
+            email: normEmail,
+            name: name || existing.name || null,
+            company: company || existing.company || null,
+            profession: profession || existing.profession || 'Mimar / İç Mimar',
+            phone: phone || existing.phone || null,
+            role: 'architect',
+            architect_verification_status: 'pending',
+            is_verified: false,
+            updated_at: new Date().toISOString(),
+          })
 
           const verificationToken = randomUUID()
           const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
@@ -1016,129 +923,70 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // 2. Newsletter / Email Subscriber
+  // 2. Newsletter / Email Subscriber (Sadece E-posta Bülteni)
   try {
-    if (supabaseAdmin) {
-      const {data: existingUser} = await supabaseAdmin
-        .from('profiles')
-        .select('id, email, profession, role')
-        .eq('email', normEmail)
-        .maybeSingle()
+    const {data: existingUser} = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, profession, role')
+      .eq('email', normEmail)
+      .maybeSingle()
 
-      if (existingUser) {
-        return res.status(200).json({
-          success: true,
-          message: 'Bu e-posta adresi zaten bülten listemize kayıtlı.',
-          user: {
-            id: existingUser.id,
-            email: normEmail,
-            userType: 'email_subscriber',
-          },
-        })
-      }
-
-      const {data: sbAuthUser, error: sbAuthErr} = await supabaseAdmin.auth.admin.createUser({
-        email: normEmail,
-        email_confirm: true,
-        user_metadata: {
-          name: 'E-posta Abonesi',
-          role: 'user',
-        },
-      })
-
-      if (sbAuthErr && !sbAuthErr.message.includes('already been registered')) {
-        console.warn('Supabase createUser warning:', sbAuthErr.message)
-      }
-
-      let userId = sbAuthUser?.user?.id
-      if (!userId) {
-        const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
-        const foundUser = usersList?.users?.find(u => u.email?.toLowerCase() === normEmail)
-        userId = foundUser?.id || randomUUID()
-      }
-
-      await supabaseAdmin.from('profiles').upsert(
-        {
-          id: userId,
-          email: normEmail,
-          name: 'E-posta Abonesi',
-          role: 'user',
-          profession: 'Bülten Abonesi',
-          architect_verification_status: 'none',
-          is_verified: true,
-        },
-        {onConflict: 'email'}
-      )
-
-      return res.status(200).json({
-        success: true,
-        message: 'Bülten aboneliğiniz başarıyla kaydedildi.',
-        user: {
-          id: userId,
-          email: normEmail,
-          userType: 'email_subscriber',
-        },
-      })
-    }
-  } catch (supabaseErr) {
-    console.warn('[Supabase Auth] Subscribe attempt fallback to Sanity/graceful:', supabaseErr)
-  }
-
-  // Fallback to Sanity or graceful confirmation
-  try {
-    const existingSanity = await client.fetch(
-      `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      {email: normEmail}
-    )
-    if (existingSanity) {
+    if (existingUser) {
       return res.status(200).json({
         success: true,
         message: 'Bu e-posta adresi zaten bülten listemize kayıtlı.',
         user: {
-          id: existingSanity._id,
+          id: existingUser.id,
           email: normEmail,
           userType: 'email_subscriber',
         },
       })
     }
 
-    let createdId = randomUUID()
-    if (client.config().token) {
-      try {
-        const doc = await client.create({
-          _type: 'user',
-          email: normEmail,
-          name: name || 'E-posta Abonesi',
-          role: 'consumer',
-          userType: 'email_subscriber',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        })
-        if (doc?._id) createdId = doc._id
-      } catch (sanityWriteErr) {
-        console.warn('Sanity client.create warning:', sanityWriteErr)
-      }
+    const {data: sbAuthUser, error: sbAuthErr} = await supabaseAdmin.auth.admin.createUser({
+      email: normEmail,
+      email_confirm: true,
+      user_metadata: {
+        name: 'E-posta Abonesi',
+        role: 'user',
+      },
+    })
+
+    if (sbAuthErr && !sbAuthErr.message.includes('already been registered')) {
+      console.warn('Supabase createUser warning:', sbAuthErr.message)
     }
+
+    let userId = sbAuthUser?.user?.id
+    if (!userId) {
+      const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
+      const foundUser = usersList?.users?.find(u => u.email?.toLowerCase() === normEmail)
+      userId = foundUser?.id || randomUUID()
+    }
+
+    await supabaseAdmin.from('profiles').upsert(
+      {
+        id: userId,
+        email: normEmail,
+        name: 'E-posta Abonesi',
+        role: 'user',
+        profession: 'Bülten Abonesi',
+        architect_verification_status: 'none',
+        is_verified: true,
+      },
+      {onConflict: 'email'}
+    )
 
     return res.status(200).json({
       success: true,
       message: 'Bülten aboneliğiniz başarıyla kaydedildi.',
       user: {
-        id: createdId,
+        id: userId,
         email: normEmail,
         userType: 'email_subscriber',
       },
     })
   } catch (error: unknown) {
     console.error('Subscription error:', error)
-    return res.status(200).json({
-      success: true,
-      message: 'Bülten aboneliğiniz başarıyla kaydedildi.',
-      user: {
-        id: randomUUID(),
-        email: normEmail,
-        userType: 'email_subscriber',
-      },
-    })
+    return res.status(500).json({error: 'Abonelik sırasında bir hata oluştu.'})
   }
 }
