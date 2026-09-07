@@ -26,6 +26,7 @@ import {useCardTransition} from '../context/CardTransitionContext'
 import {useSiteSettings} from '../context/SiteSettingsContext'
 import {AiRoomPlannerModal} from '../components/AiRoomPlannerModal'
 import {TextMaskReveal} from '../components/TextMaskReveal'
+import {DetailSelectionCTA} from '../components/seckim/DetailSelectionCTA'
 
 export function ProductDetailPage() {
   const {productId: liveId} = useParams<{productId: string}>()
@@ -341,6 +342,8 @@ export function ProductDetailPage() {
             nextProduct={nextProduct}
             showProductPrevNext={showProductPrevNext}
           />
+
+          <DetailSelectionCTA product={product} />
 
           {settings?.enableAiRoomPlanner !== false && (
             <div className="mt-8 pt-6 border-t border-[var(--border-color,rgba(255,255,255,0.1))]">

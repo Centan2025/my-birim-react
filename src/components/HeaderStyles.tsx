@@ -93,16 +93,16 @@ export function HeaderStyles() {
           text-shadow: 0.25px 0 0.1px currentColor !important;
         }
 
-        /* Underline animation - smooth expansion from center to left & right with uniform thickness */
+        /* Underline animation - smooth expansion from center to left & right with delicate hairline thickness */
         .header-nav-underline {
           position: absolute;
-          bottom: -4px;
+          bottom: -3px;
           left: 0;
           width: 100%;
-          height: 1.5px;
+          height: 1px;
           transform: scaleX(0);
           transform-origin: center center;
-          transition: transform 350ms cubic-bezier(0.25, 1, 0.5, 1), background-color 400ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+          transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1), background-color 400ms cubic-bezier(0.25, 1, 0.5, 1) !important;
           pointer-events: none;
           backface-visibility: hidden;
           -webkit-backface-visibility: hidden;

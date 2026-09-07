@@ -27,6 +27,7 @@ import {useHeaderBackgroundColor} from '../hooks/useHeaderBackgroundColor'
 import {useBodyScrollLock} from '../hooks/useBodyScrollLock'
 import {MenuIcon, ChevronDownIcon, SearchIcon, CloseIcon, ShoppingBagIcon} from './HeaderIcons'
 import {useDarkMode} from '../context/DarkModeContext'
+import {useSelection} from '../context/SelectionContext'
 
 export function Header() {
   const {t, setLocale, locale, supportedLocales} = useTranslation()
@@ -58,6 +59,7 @@ export function Header() {
   const {isDarkMode} = useDarkMode()
   const {isLoggedIn} = useAuth()
   const {cartCount, toggleCart} = useCart()
+  const {selectionCount, openDrawer, isSelectionEnabled} = useSelection()
   const [headerOpacity, setHeaderOpacity] = useState(() =>
     isDarkHeroPageUtil(location.pathname) ? 0 : 0.7
   )
@@ -498,6 +500,17 @@ export function Header() {
   const mobileMenuLinks: {to: string; label: string}[] = [
     {to: '/designers', label: (t('designers') || '').toLocaleUpperCase('en')},
     {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase('en')},
+    ...(isSelectionEnabled
+      ? [
+          {
+            to: '/seckim',
+            label:
+              selectionCount > 0
+                ? `${(t('seckim') || 'Seçkim').toLocaleUpperCase('tr')} (${selectionCount})`
+                : (t('seckim') || 'Seçkim').toLocaleUpperCase('tr'),
+          },
+        ]
+      : []),
     ...(settings?.isFactoryVisible
       ? [{to: '/factory', label: (t('factory') || 'Fabrika').toLocaleUpperCase('en')}]
       : []),
@@ -921,7 +934,76 @@ export function Header() {
                   </NavItem>
                 </div>
 
-                <div className="hidden lg:flex items-end space-x-4">
+                <div className="hidden lg:flex items-end space-x-5">
+                  {isSelectionEnabled && (
+                    <>
+                      <span
+                        aria-hidden="true"
+                        className="select-none pointer-events-none pb-0 pt-2"
+                        style={{
+                          fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
+                          fontWeight: 300,
+                          fontFamily: "'Inter', sans-serif",
+                          lineHeight: '1.25rem',
+                          color: `${headerForegroundColor}40`,
+                          transition: colorTransition,
+                        }}
+                      >
+                        |
+                      </span>
+                      <button
+                        type="button"
+                        onClick={openDrawer}
+                        className="group relative flex items-end pb-0 pt-2 cursor-pointer"
+                        style={{
+                          fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
+                          fontWeight: 500,
+                          letterSpacing: '0.05em',
+                          fontFamily: "'Inter', sans-serif",
+                          lineHeight: '1.25rem',
+                          color: headerForegroundColor,
+                          transition: colorTransition,
+                        }}
+                        aria-label={`${t('seckim') || 'Seçkim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
+                      >
+                        <span className="relative flex items-center">
+                          <span className="relative inline-block uppercase header-nav-text">
+                            {t('seckim') || 'SEÇKİM'}
+                            <span
+                              className="header-nav-underline"
+                              style={{
+                                backgroundColor: headerForegroundColor,
+                              }}
+                            />
+                          </span>
+                          {selectionCount > 0 && (
+                            <span
+                              className="ml-2 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full select-none pointer-events-none"
+                              style={{
+                                backgroundColor: headerForegroundColor,
+                                color: isLightMode ? '#ffffff' : '#000000',
+                                transition: colorTransition,
+                                letterSpacing: 0,
+                              }}
+                            >
+                              <span
+                                className="flex items-center justify-center text-[10px] font-bold"
+                                style={{
+                                  lineHeight: 1,
+                                  transform: 'translateY(0.4px)',
+                                  letterSpacing: 0,
+                                  fontVariantNumeric: 'tabular-nums',
+                                }}
+                              >
+                                {selectionCount}
+                              </span>
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    </>
+                  )}
+
                   <div
                     className="flex items-center"
                     style={{fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)'}}
@@ -984,7 +1066,45 @@ export function Header() {
                     </button>
                   )}
                 </div>
-                <div className="lg:hidden flex items-center">
+                <div className="lg:hidden flex items-center gap-1">
+                  {isSelectionEnabled && (
+                    <button
+                      type="button"
+                      onClick={openDrawer}
+                      className="group relative p-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer"
+                      style={{color: headerForegroundColor, transition: colorTransition}}
+                      aria-label={`${t('seckim') || 'Seçkim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        viewBox="0 0 24 24"
+                        fill={selectionCount > 0 ? 'currentColor' : 'none'}
+                        stroke="currentColor"
+                        strokeWidth={selectionCount > 0 ? '1.4' : '1.2'}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M6.5 3.5H17.5V20.5L12 16.75L6.5 20.5V3.5Z" />
+                      </svg>
+                      {selectionCount > 0 && (
+                        <span
+                          className="absolute top-0.5 right-0.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 text-[9px] font-bold select-none pointer-events-none"
+                          aria-hidden="true"
+                        >
+                          <span
+                            className="flex items-center justify-center"
+                            style={{
+                              lineHeight: 1,
+                              transform: 'translateY(0.35px)',
+                              fontVariantNumeric: 'tabular-nums',
+                            }}
+                          >
+                            {selectionCount}
+                          </span>
+                        </span>
+                      )}
+                    </button>
+                  )}
                   {isOverlayMobileMenu ? (
                     // Overlay modunda: hamburger → X animasyonu
                     <button

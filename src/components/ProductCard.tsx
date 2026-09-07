@@ -6,6 +6,7 @@ import {useTranslation} from '../i18n'
 import {useSiteSettings} from '../context/SiteSettingsContext'
 import {analytics} from '../lib/analytics'
 import {useDesigners} from '../hooks/useDesigners'
+import {SelectionButton} from './seckim/SelectionButton'
 
 export const ProductCard: React.FC<{
   product: Product
@@ -113,6 +114,9 @@ export const ProductCard: React.FC<{
             isMirroredDesktop={mainImageIsMirroredDesktop}
             fitAuto={true}
           />
+          <div className="absolute top-2.5 right-2.5 z-20">
+            <SelectionButton product={product} />
+          </div>
         </div>
         <div className="px-2.5 py-2 sm:px-3 sm:py-2 transition-colors duration-500">
           <h3

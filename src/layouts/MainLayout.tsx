@@ -5,6 +5,8 @@ import {Header} from '../components/Header'
 import {PageTransition} from '../components/PageTransition'
 import {CartSidebar} from '../components/CartSidebar'
 import {FloatingAuthPanel} from '../components/FloatingAuthPanel'
+import {SelectionDrawer} from '../components/seckim/SelectionDrawer'
+import {SelectionToast} from '../components/seckim/SelectionToast'
 import CookieBanner from '../components/CookieBanner'
 import {SkipLink} from '../components/SkipLink'
 import {AppRoutes} from '../routes/AppRoutes'
@@ -19,7 +21,9 @@ export const MainLayout: React.FC = () => {
       <SkipLink />
       {!isAnalytics && <Header />}
       {!isAnalytics && <CartSidebar />}
+      {!isAnalytics && <SelectionDrawer />}
       {!isAnalytics && <FloatingAuthPanel />}
+      {!isAnalytics && <SelectionToast />}
       <main id="main-content" className="flex flex-col flex-grow relative overflow-x-clip">
         <AnimatePresence mode="sync" initial={true}>
           <PageTransitionWrapper key={location.pathname} location={location} />

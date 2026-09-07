@@ -76,6 +76,8 @@ export interface SiteSettings {
   isFactoryVisible?: boolean
   /** Whether the AI Room Planner (Oda Planlayıcı) feature is enabled. */
   enableAiRoomPlanner?: boolean
+  /** Whether the Selection / Projects (Seçkim / Projelerim) feature is enabled. */
+  enableSelections?: boolean
 }
 
 // --- Core Data Models ---

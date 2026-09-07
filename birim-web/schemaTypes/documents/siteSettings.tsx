@@ -162,6 +162,15 @@ export default defineType({
       description:
         'Pasif edildiğinde ürün detay sayfalarındaki "AI ile Odamda Gör" butonu ve AI oda tasarımı modülü gizlenir.',
     }),
+    defineField({
+      name: 'enableSelections',
+      title: 'Seçkim / Projelerim Özelliğini Etkinleştir',
+      type: 'boolean',
+      fieldset: 'features',
+      initialValue: true,
+      description:
+        'Pasif edildiğinde sitedeki Seçkim butonu, Seçkim çekmecesi ve /seckim sayfaları gizlenir/devre dışı kalır.',
+    }),
   ],
   preview: {
     select: {r2Url: 'logoR2.url'},

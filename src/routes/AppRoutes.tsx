@@ -67,6 +67,9 @@ const AiRoomPlannerPage = lazyWithRetry(() =>
   import('../pages/AiRoomPlannerPage').then(m => ({default: m.AiRoomPlannerPage}))
 )
 const AnalyticsPage = lazyWithRetry(() => import('../pages/AnalyticsPage'))
+const SeckimPage = lazyWithRetry(() => import('../pages/SeckimPage'))
+const SeckimProjectDetailPage = lazyWithRetry(() => import('../pages/SeckimProjectDetailPage'))
+const SharedProjectPage = lazyWithRetry(() => import('../pages/SharedProjectPage'))
 
 interface PageBoundaryProps {
   children: React.ReactNode
@@ -316,6 +319,30 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           element={
             <PageBoundary pageName="Site Analitiği" hideFooter>
               <AnalyticsPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/seckim"
+          element={
+            <PageBoundary pageName="Seçkim">
+              <SeckimPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/seckim/proje/:projectId"
+          element={
+            <PageBoundary pageName="Proje Seçkisi">
+              <SeckimProjectDetailPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/seckim/paylas/:shareToken"
+          element={
+            <PageBoundary pageName="Paylaşılan Seçki">
+              <SharedProjectPage />
             </PageBoundary>
           }
         />

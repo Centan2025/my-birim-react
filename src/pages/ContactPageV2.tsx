@@ -1,5 +1,5 @@
 import {useState, useEffect, useMemo} from 'react'
-import {motion} from 'framer-motion'
+import {motion, AnimatePresence} from 'framer-motion'
 import {getContactPageContent, mapImage} from '../services/cms'
 import type {ContactPageContent, ContactLocation, NewsMedia} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -430,23 +430,40 @@ export function ContactPageV2() {
               <span className="text-xs font-mono uppercase tracking-widest text-[var(--text-secondary)]">
                 {isTr ? 'Konum' : 'Location'}
               </span>
-              <h2 className="text-2xl md:text-3xl font-light text-[var(--text-primary)] mt-1.5 tracking-tight">
-                {t(activeLocation.title)}
-              </h2>
-              <p className="text-xs text-[var(--text-secondary)] mt-1 font-light">
-                {activeLocation.address}
-              </p>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedLocationIndex}
+                  initial={{opacity: 0, y: 4}}
+                  animate={{opacity: 1, y: 0}}
+                  exit={{opacity: 0, y: -4}}
+                  transition={{duration: 0.22, ease: 'easeOut'}}
+                >
+                  <h2 className="text-2xl md:text-3xl font-light text-[var(--text-primary)] mt-1.5 tracking-tight">
+                    {t(activeLocation.title)}
+                  </h2>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1 font-light">
+                    {activeLocation.address}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
 
             {/* Location Switcher Buttons */}
-            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            <div
+              role="tablist"
+              aria-label={isTr ? 'Harita Konum Seçici' : 'Map Location Switcher'}
+              className="inline-flex flex-wrap items-center p-1 bg-[var(--bg-secondary)] border border-[var(--border-primary)] self-start sm:self-auto gap-1 relative select-none"
+            >
               {locations.map((loc, idx) => {
                 const isSelected = selectedLocationIndex === idx
                 const addressTitle = getLocationTitle(loc, idx)
                 return (
-                  <button
+                  <motion.button
                     key={idx}
+                    role="tab"
+                    aria-selected={isSelected}
                     type="button"
+                    whileTap={{scale: 0.98}}
                     onClick={() => {
                       setSelectedLocationIndex(idx)
                       analytics.event({
@@ -455,14 +472,38 @@ export function ContactPageV2() {
                         label: addressTitle,
                       })
                     }}
-                    className={`relative px-4 sm:px-5 py-2 sm:py-2.5 text-xs font-mono tracking-wider transition-all cursor-pointer border ${
+                    className={`relative px-4 sm:px-5 py-2 sm:py-2.5 text-xs font-mono tracking-wider cursor-pointer transition-colors duration-300 outline-none focus-visible:ring-1 focus-visible:ring-[var(--text-primary)] ${
                       isSelected
-                        ? 'border-[var(--text-primary)] bg-[var(--text-primary)] text-[var(--bg-primary)] font-medium shadow-sm'
-                        : 'border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-secondary)]/50'
+                        ? 'text-[var(--bg-primary)] font-medium'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    {addressTitle}
-                  </button>
+                    {isSelected && (
+                      <motion.div
+                        layoutId="activeLocationTabIndicator"
+                        className="absolute inset-0 bg-[var(--text-primary)] shadow-sm"
+                        transition={{
+                          type: 'spring',
+                          stiffness: 450,
+                          damping: 34,
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                      {isSelected && (
+                        <motion.span
+                          layoutId="activeLocationTabDot"
+                          className="w-1.5 h-1.5 rounded-full bg-[var(--bg-primary)]"
+                          transition={{
+                            type: 'spring',
+                            stiffness: 450,
+                            damping: 34,
+                          }}
+                        />
+                      )}
+                      <span>{addressTitle}</span>
+                    </span>
+                  </motion.button>
                 )
               })}
             </div>
@@ -470,17 +511,28 @@ export function ContactPageV2() {
 
           {activeLocation.mapEmbedUrl && (
             <div className="relative aspect-[16/9] md:aspect-[21/9] w-full border border-[var(--border-primary)] bg-[var(--bg-secondary)] overflow-hidden shadow-sm">
-              <iframe
-                src={convertGoogleMapsUrlToEmbed(activeLocation.mapEmbedUrl)}
-                width="100%"
-                height="100%"
-                style={{border: 0}}
-                className="w-full h-full"
-                allow="fullscreen"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title={t(activeLocation.title)}
-              />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedLocationIndex}
+                  initial={{opacity: 0}}
+                  animate={{opacity: 1}}
+                  exit={{opacity: 0}}
+                  transition={{duration: 0.3}}
+                  className="w-full h-full"
+                >
+                  <iframe
+                    src={convertGoogleMapsUrlToEmbed(activeLocation.mapEmbedUrl)}
+                    width="100%"
+                    height="100%"
+                    style={{border: 0}}
+                    className="w-full h-full"
+                    allow="fullscreen"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={t(activeLocation.title)}
+                  />
+                </motion.div>
+              </AnimatePresence>
             </div>
           )}
         </div>

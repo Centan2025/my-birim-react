@@ -136,6 +136,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
             false
         ),
         enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
+        enableSelections: s?.enableSelections !== false,
       }
     } catch {
       // Ignore
@@ -165,6 +166,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         false
     ),
     enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
+    enableSelections: s?.enableSelections !== false,
   }
 }
 

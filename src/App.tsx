@@ -320,6 +320,8 @@ function HashRedirector() {
   return null
 }
 
+import {SelectionProvider} from './context/SelectionContext'
+
 export default function App() {
   return (
     <BrowserRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
@@ -332,9 +334,11 @@ export default function App() {
                 <DarkModeProvider>
                   <HeaderThemeProvider>
                     <SiteSettingsProvider>
-                      <CardTransitionProvider>
-                        <AppContent />
-                      </CardTransitionProvider>
+                      <SelectionProvider>
+                        <CardTransitionProvider>
+                          <AppContent />
+                        </CardTransitionProvider>
+                      </SelectionProvider>
                     </SiteSettingsProvider>
                   </HeaderThemeProvider>
                 </DarkModeProvider>
