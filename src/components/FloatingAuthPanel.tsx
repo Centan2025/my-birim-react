@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
 import {User, X, LogOut, ArrowRight} from 'lucide-react'
 import {useAuth} from '../context/AuthContext'
@@ -13,7 +13,8 @@ export const FloatingAuthPanel: React.FC = () => {
   const {isLoggedIn, user, login, logout} = useAuth()
   const {t} = useTranslation()
   const navigate = useNavigate()
-  const focusTrapRef = useFocusTrap(isOpen, () => setIsOpen(false))
+  const handleClose = useCallback(() => setIsOpen(false), [])
+  const focusTrapRef = useFocusTrap(isOpen, handleClose)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

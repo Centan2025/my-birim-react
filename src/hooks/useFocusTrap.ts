@@ -8,6 +8,11 @@ import {useEffect, useRef} from 'react'
 export function useFocusTrap(isActive: boolean, onClose?: () => void) {
   const containerRef = useRef<HTMLElement>(null)
   const previousActiveElementRef = useRef<HTMLElement | null>(null)
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     if (!isActive) return
@@ -26,8 +31,13 @@ export function useFocusTrap(isActive: boolean, onClose?: () => void) {
     const firstElement = focusableElements[0]
     const lastElement = focusableElements[focusableElements.length - 1]
 
-    // Focus first element when trap activates, without disturbing scroll
-    if (firstElement && typeof firstElement.focus === 'function') {
+    // Focus first element when trap activates, only if focus is not already inside container
+    if (
+      firstElement &&
+      typeof firstElement.focus === 'function' &&
+      typeof document !== 'undefined' &&
+      !container.contains(document.activeElement)
+    ) {
       try {
         firstElement.focus({preventScroll: true})
       } catch {
@@ -36,10 +46,10 @@ export function useFocusTrap(isActive: boolean, onClose?: () => void) {
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && onClose) {
+      if (e.key === 'Escape' && onCloseRef.current) {
         e.preventDefault()
         e.stopPropagation()
-        onClose()
+        onCloseRef.current()
         return
       }
 
@@ -77,7 +87,7 @@ export function useFocusTrap(isActive: boolean, onClose?: () => void) {
         }
       }
     }
-  }, [isActive, onClose])
+  }, [isActive])
 
   return containerRef
 }
