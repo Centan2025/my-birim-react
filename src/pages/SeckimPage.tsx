@@ -1,4 +1,4 @@
-import {useState, useMemo} from 'react'
+import {useState, useMemo, useEffect} from 'react'
 import {Link, useNavigate, useSearchParams} from 'react-router-dom'
 import {useSelection} from '../context/SelectionContext'
 import {useProducts} from '../hooks/useProducts'
@@ -36,10 +36,11 @@ export function SeckimPage() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
 
   // Redirect if feature is turned off in CMS
-  if (!isSelectionEnabled) {
-    navigate('/', {replace: true})
-    return null
-  }
+  useEffect(() => {
+    if (!isSelectionEnabled) {
+      navigate('/', {replace: true})
+    }
+  }, [isSelectionEnabled, navigate])
 
   useSEO({
     title: 'Seçtiklerim & Projelerim • Birim Mobilya',
@@ -93,6 +94,10 @@ export function SeckimPage() {
     } finally {
       setIsGeneratingPdf(false)
     }
+  }
+
+  if (!isSelectionEnabled) {
+    return null
   }
 
   return (

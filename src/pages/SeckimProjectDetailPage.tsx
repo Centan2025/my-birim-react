@@ -1,4 +1,4 @@
-import {useState, useMemo} from 'react'
+import {useState, useMemo, useEffect} from 'react'
 import {useParams, Link, useNavigate} from 'react-router-dom'
 import {useSelection} from '../context/SelectionContext'
 import {useProducts} from '../hooks/useProducts'
@@ -30,10 +30,11 @@ export function SeckimProjectDetailPage() {
   const [copiedShare, setCopiedShare] = useState(false)
 
   // Redirect if feature is turned off in CMS
-  if (!isSelectionEnabled) {
-    navigate('/', {replace: true})
-    return null
-  }
+  useEffect(() => {
+    if (!isSelectionEnabled) {
+      navigate('/', {replace: true})
+    }
+  }, [isSelectionEnabled, navigate])
 
   const project = useMemo(() => {
     return projects.find((p: UserProject) => p.id === projectId)
@@ -65,6 +66,10 @@ export function SeckimProjectDetailPage() {
     const set = new Set(project.productIds)
     return (allProducts as Product[]).filter(p => set.has(p.id))
   }, [allProducts, project])
+
+  if (!isSelectionEnabled) {
+    return null
+  }
 
   if (!project) {
     return (

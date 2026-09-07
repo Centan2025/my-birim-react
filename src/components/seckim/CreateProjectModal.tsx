@@ -102,7 +102,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 <input
                   type="text"
                   required
-                  autoFocus
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="Örn: İstanbul Villa, Bodrum Residence"

@@ -195,7 +195,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   {/* Selected Products Preview Box */}
                   <div>
                     <label className="block text-[11px] font-mono uppercase tracking-widest text-neutral-400 mb-2">
-                      SEÇKİDEKİ ÜRÜNLER ({selectedProducts.length})
+                      SEÇİLEN ÜRÜNLER ({selectedProducts.length})
                     </label>
                     <div className="p-3 bg-neutral-50 dark:bg-neutral-900/70 border border-neutral-200/80 dark:border-neutral-800 flex flex-wrap gap-2 max-h-28 overflow-y-auto">
                       {selectedProducts.map(p => (

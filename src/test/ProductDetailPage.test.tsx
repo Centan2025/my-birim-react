@@ -11,6 +11,7 @@ import {SiteSettingsProvider} from '../context/SiteSettingsContext'
 import {HelmetProvider} from 'react-helmet-async'
 import {CartProvider} from '../context/CartContext'
 import {AuthProvider} from '../context/AuthContext'
+import {SelectionProvider} from '../context/SelectionContext'
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 
 const mockProduct = {
@@ -91,6 +92,9 @@ vi.mock('../components/product/ProductMediaPanels', () => ({
 vi.mock('../components/FullscreenMediaViewer', () => ({
   FullscreenMediaViewer: () => null,
 }))
+vi.mock('../components/seckim/DetailSelectionCTA', () => ({
+  DetailSelectionCTA: () => null,
+}))
 
 vi.mock('../components/product/ProductMaterials', () => ({
   ProductMaterials: ({
@@ -124,9 +128,11 @@ describe('ProductDetailPage', () => {
                   <SiteSettingsProvider>
                     <HeaderThemeProvider>
                       <CartProvider>
-                        <Routes>
-                          <Route path="/product/:id" element={<ProductDetailPage />} />
-                        </Routes>
+                        <SelectionProvider>
+                          <Routes>
+                            <Route path="/product/:id" element={<ProductDetailPage />} />
+                          </Routes>
+                        </SelectionProvider>
                       </CartProvider>
                     </HeaderThemeProvider>
                   </SiteSettingsProvider>
