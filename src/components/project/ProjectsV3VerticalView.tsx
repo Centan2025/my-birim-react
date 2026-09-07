@@ -1,13 +1,6 @@
 import React, {useState, useMemo, useRef, useEffect} from 'react'
 import {Link} from 'react-router-dom'
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  useVelocity,
-  useScroll,
-} from 'framer-motion'
+import {motion, useSpring, useTransform, useScroll} from 'framer-motion'
 import type {Project} from '../../types'
 import {OptimizedImage} from '../OptimizedImage'
 import {Breadcrumbs} from '../Breadcrumbs'
@@ -21,7 +14,7 @@ interface ProjectsV3VerticalViewProps {
   projects: Project[]
 }
 
-type ViewMode = 'stack' | 'runway' | 'matrix'
+type ViewMode = 'stack' | 'matrix'
 type SortOrder = 'default' | 'newest' | 'oldest' | 'alphabetical'
 
 /**
@@ -112,8 +105,7 @@ const ArchitecturalScrollRuler: React.FC<{
               <span>ELV: {String(percent).padStart(2, '0')}%</span>
             </div>
             <div className="font-mono text-[8px] tracking-wider text-neutral-400">
-              CASE: [{String(activeProjectNum).padStart(2, '0')}/
-              {String(totalProjects).padStart(2, '0')}]
+              [{String(activeProjectNum).padStart(2, '0')}/{String(totalProjects).padStart(2, '0')}]
             </div>
           </div>
           <span className="w-3.5 h-0.5 bg-neutral-900 dark:bg-white" />
@@ -131,8 +123,7 @@ const ArchitecturalScrollRuler: React.FC<{
 const StackingMonolithCard: React.FC<{
   project: Project
   index: number
-  total: number
-}> = ({project, index, total}) => {
+}> = ({project, index}) => {
   const {t, locale} = useTranslation()
   const isTr = locale === 'tr'
   const cardRef = useRef<HTMLDivElement>(null)
@@ -187,13 +178,7 @@ const StackingMonolithCard: React.FC<{
             {/* Üst Mimari Aks Strip */}
             <div className="space-y-4">
               <TextMaskReveal delay={80} amount={0.05}>
-                <div className="flex items-center justify-between font-mono text-xs text-neutral-500 uppercase tracking-widest pb-4 border-b border-neutral-200">
-                  <div className="flex items-center gap-2 font-semibold text-neutral-900">
-                    <span className="w-2 h-2 bg-neutral-900 inline-block" />
-                    <span>
-                      CASE [{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}]
-                    </span>
-                  </div>
+                <div className="flex items-center justify-end font-mono text-xs text-neutral-500 uppercase tracking-widest pb-4 border-b border-neutral-200">
                   <span>{year || '2024'}</span>
                 </div>
               </TextMaskReveal>
@@ -253,7 +238,7 @@ const StackingMonolithCard: React.FC<{
                   to={`/projects/${project.id}`}
                   className="w-full inline-flex items-center justify-between px-6 py-4 bg-neutral-900 text-white hover:bg-neutral-800 font-mono text-xs uppercase tracking-[0.25em] transition-all rounded-none font-semibold shadow-md group"
                 >
-                  <span>{isTr ? 'PROJEYİ DETAYLI İNCELE' : 'EXPLORE CASE STUDY'}</span>
+                  <span>{isTr ? 'PROJEYİ DETAYLI İNCELE' : 'EXPLORE PROJECT'}</span>
                   <span className="transition-transform duration-300 group-hover:translate-x-2 font-bold">
                     →
                   </span>
@@ -284,15 +269,10 @@ const StackingMonolithCard: React.FC<{
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
 
               {/* Görsel İçi Canlı Etiket */}
-              <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between text-white font-mono text-xs z-10 pointer-events-none">
+              <div className="absolute bottom-6 right-6 flex items-center justify-end text-white font-mono text-xs z-10 pointer-events-none">
                 <TextMaskReveal delay={180} amount={0.05} display="inline-block">
-                  <span className="px-3 py-1 bg-black/60 backdrop-blur-sm border border-white/20 uppercase tracking-widest text-[10px]">
-                    VIEWPORT // {String(index + 1).padStart(2, '0')}
-                  </span>
-                </TextMaskReveal>
-                <TextMaskReveal delay={220} amount={0.05} display="inline-block">
                   <span className="tracking-widest uppercase text-[10px] text-white/80">
-                    CLICK TO VIEW ↗
+                    {isTr ? 'GÖRÜNTÜLEMEK İÇİN TIKLAYIN ↗' : 'CLICK TO VIEW ↗'}
                   </span>
                 </TextMaskReveal>
               </div>
@@ -305,128 +285,7 @@ const StackingMonolithCard: React.FC<{
 }
 
 /**
- * 2. KINETIC MOMENTUM RUNWAY (Hıza Duyarlı Yatay Skew)
- */
-const KineticRunwaySlider: React.FC<{
-  projects: Project[]
-}> = ({projects}) => {
-  const {t, locale} = useTranslation()
-  const isTr = locale === 'tr'
-  const runwayRef = useRef<HTMLDivElement>(null)
-
-  const x = useMotionValue(0)
-  const xVelocity = useVelocity(x)
-  const skewX = useTransform(xVelocity, [-1500, 1500], [-10, 10])
-
-  return (
-    <div className="relative w-full overflow-hidden py-4">
-      <div className="flex items-center justify-between pb-4 font-mono text-xs text-neutral-500 uppercase tracking-widest border-b border-neutral-200 mb-6">
-        <span>← {isTr ? 'SÜRÜKLE VEYA KAYDIR' : 'DRAG TO NAVIGATE'} →</span>
-        <span>VELOCITY SKEW // 60FPS</span>
-      </div>
-
-      <div className="cursor-grab active:cursor-grabbing overflow-hidden">
-        <motion.div
-          ref={runwayRef}
-          drag="x"
-          dragConstraints={{
-            right: 0,
-            left: -(
-              projects.length * 440 -
-              (typeof window !== 'undefined' ? window.innerWidth : 1200) +
-              100
-            ),
-          }}
-          style={{x, skewX}}
-          className="flex gap-6 sm:gap-8 will-change-transform py-2"
-        >
-          {projects.map((project, idx) => {
-            const title = toPlainText(t(project.title))
-            const category = project.projectCategory ? toPlainText(t(project.projectCategory)) : ''
-            const pObj = project as unknown as Record<string, unknown>
-            const location = toPlainText(pObj['location'] ? t(pObj['location'] as never) : '')
-            const pDate =
-              typeof project.date === 'string'
-                ? project.date
-                : toPlainText(project.date ? t(project.date as never) : '')
-            const year = typeof pDate === 'string' ? pDate.match(/\d{4}/)?.[0] || pDate : ''
-            const coverUrl =
-              typeof project.cover === 'string' ? project.cover : project.cover?.url || ''
-
-            return (
-              <div
-                key={project.id}
-                className="w-[310px] sm:w-[380px] md:w-[440px] flex-shrink-0 select-none"
-              >
-                <ScrollReveal
-                  delay={Math.min((idx % 4) * 80, 240)}
-                  distance={25}
-                  duration={0.75}
-                  threshold={0.05}
-                  initialScale={0.96}
-                >
-                  <Link
-                    to={`/projects/${project.id}`}
-                    className="group block bg-white border border-neutral-200 hover:border-neutral-900 transition-colors p-4 relative shadow-sm hover:shadow-xl"
-                  >
-                    <CrosshairMark position="top-left" />
-                    <CrosshairMark position="top-right" />
-                    <CrosshairMark position="bottom-left" />
-                    <CrosshairMark position="bottom-right" />
-
-                    <TextMaskReveal delay={60} amount={0.05}>
-                      <div className="flex items-center justify-between pb-3 border-b border-neutral-200 text-xs font-mono text-neutral-500 uppercase tracking-widest">
-                        <span>PRJ-{String(idx + 1).padStart(2, '0')}</span>
-                        <span>{year || '2024'}</span>
-                      </div>
-                    </TextMaskReveal>
-
-                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100 border border-neutral-200 mt-3">
-                      {coverUrl && (
-                        <OptimizedImage
-                          src={coverUrl}
-                          alt={title}
-                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-106"
-                          quality={90}
-                          loading="lazy"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-30 group-hover:opacity-10 transition-opacity" />
-                    </div>
-
-                    <div className="pt-4 space-y-2">
-                      <TextMaskReveal delay={100} amount={0.05}>
-                        <div className="text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
-                          {category || 'ARCHITECTURAL CASE'}
-                        </div>
-                      </TextMaskReveal>
-                      <TextMaskReveal delay={140} amount={0.05}>
-                        <h3 className="text-xl sm:text-2xl font-light font-michroma uppercase text-neutral-900 tracking-tight leading-tight truncate">
-                          {title}
-                        </h3>
-                      </TextMaskReveal>
-                      <TextMaskReveal delay={180} amount={0.05}>
-                        <div className="pt-2 border-t border-neutral-200 flex items-center justify-between text-xs font-mono text-neutral-500">
-                          <span>{location || 'İSTANBUL, TR'}</span>
-                          <span className="font-semibold text-neutral-900 group-hover:translate-x-1 transition-transform">
-                            {isTr ? 'İNCELE ↗' : 'EXPLORE ↗'}
-                          </span>
-                        </div>
-                      </TextMaskReveal>
-                    </div>
-                  </Link>
-                </ScrollReveal>
-              </div>
-            )
-          })}
-        </motion.div>
-      </div>
-    </div>
-  )
-}
-
-/**
- * 3. MONOLITHIC MATRIX (Asimetrik 12-col mimari grid)
+ * 2. MONOLITHIC MATRIX (Asimetrik 12-col mimari grid)
  */
 const MonolithicMatrixGrid: React.FC<{
   projects: Project[]
@@ -532,7 +391,7 @@ const MonolithicMatrixGrid: React.FC<{
                     <div className="pt-4 border-t border-neutral-200 flex items-center justify-between text-xs font-mono text-neutral-500">
                       <span className="tracking-wider">{location || 'İSTANBUL, TR'}</span>
                       <span className="font-semibold text-neutral-900 group-hover:translate-x-1.5 transition-transform">
-                        {isTr ? 'PROJEYİ AÇ ↗' : 'VIEW CASE ↗'}
+                        {isTr ? 'PROJEYİ AÇ ↗' : 'VIEW PROJECT ↗'}
                       </span>
                     </div>
                   </TextMaskReveal>
@@ -557,38 +416,10 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [viewMode, setViewMode] = useState<ViewMode>('stack')
   const [sortOrder, setSortOrder] = useState<SortOrder>('default')
-  const [liveTime, setLiveTime] = useState<string>('')
 
-  // Scroll Progress & Velocity
-  const {scrollY, scrollYProgress} = useScroll()
-  const scrollVelocity = useVelocity(scrollY)
+  // Scroll Progress
+  const {scrollYProgress} = useScroll()
   const smoothProgress = useSpring(scrollYProgress, {stiffness: 280, damping: 28})
-  const [currentSpeed, setCurrentSpeed] = useState('0')
-
-  useEffect(() => {
-    return scrollVelocity.on('change', latest => {
-      const spd = Math.abs(Math.round(latest))
-      setCurrentSpeed(spd > 10 ? `${spd} PX/S` : 'IDLE')
-    })
-  }, [scrollVelocity])
-
-  // Live Architectural Telemetry Clock (UTC / Istanbul)
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date()
-      const timeStr = now.toLocaleTimeString('tr-TR', {
-        timeZone: 'Europe/Istanbul',
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      })
-      setLiveTime(timeStr)
-    }
-    updateTime()
-    const timer = setInterval(updateTime, 1000)
-    return () => clearInterval(timer)
-  }, [])
 
   // Extract distinct categories
   const categories = useMemo(() => {
@@ -656,30 +487,10 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
         />
       </div>
 
-      {/* Awwwards Architectural Header & Telemetry Strip */}
+      {/* Awwwards Architectural Header */}
       <header className="relative z-10 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-2 pb-6">
-        {/* Canlı Mimari Telemetri Barı */}
-        <div className="flex flex-wrap items-center justify-between py-2.5 border-b border-neutral-200 text-[11px] font-mono text-neutral-500 uppercase tracking-widest gap-2">
-          <div className="flex items-center gap-3">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full bg-neutral-900 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 bg-neutral-900" />
-            </span>
-            <span>INDEX ARCHIVES // BIRIM STUDIO</span>
-          </div>
-
-          <div className="flex items-center gap-4 sm:gap-6">
-            <span className="hidden sm:inline">LAT: 41.0082° N / LONG: 28.9784° E</span>
-            <span>IST: {liveTime || '12:00:00'}</span>
-            <span className="hidden lg:inline">VELOCITY: {currentSpeed}</span>
-            <span>
-              TOPLAM: <strong className="text-neutral-900 font-semibold">{projects.length}</strong>
-            </span>
-          </div>
-        </div>
-
         {/* Ana Tipografik Sahne: Masked Reveal Animasyonu */}
-        <div className="pt-8 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="pt-4 md:pt-6 pb-6">
           <div>
             <TextMaskReveal delay={40} amount={0.05}>
               <span className="text-xs font-mono tracking-[0.3em] uppercase text-neutral-500 block mb-2">
@@ -689,20 +500,10 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
             <TextLineReveal
               as="h1"
               text={t('projects') || 'Projeler'}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-neutral-900 tracking-tight uppercase font-michroma"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-neutral-900 tracking-tight uppercase font-sans"
               delay={80}
               stagger={65}
             />
-          </div>
-
-          <div className="max-w-md">
-            <TextMaskReveal delay={160} amount={0.05}>
-              <p className="text-xs sm:text-sm font-light text-neutral-600 leading-relaxed font-mono">
-                {isTr
-                  ? 'Mekân ve mobilya arasındaki mimari diyaloğu şekillendiren seçkin projeler ve referans uygulamalar.'
-                  : 'Curated architectural projects and bespoke interior applications defining the dialogue between space and form.'}
-              </p>
-            </TextMaskReveal>
           </div>
         </div>
 
@@ -715,7 +516,10 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
           />
 
           {/* Kategori Filtre Butonları */}
-          <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto scrollbar-none pb-1 md:pb-0">
+          <div
+            className="flex-1 min-w-0 flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar scrollbar-hide scrollbar-none pb-1 md:pb-0 pr-6 sm:pr-8"
+            style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}
+          >
             {categories.map(cat => {
               const isActive = selectedCategory === cat
               const label = cat === 'all' ? (isTr ? 'TÜMÜ' : 'ALL') : cat.toUpperCase()
@@ -725,7 +529,7 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`text-xs font-mono tracking-[0.2em] uppercase transition-all duration-200 whitespace-nowrap relative py-1.5 cursor-pointer rounded-none ${
+                  className={`text-xs font-mono tracking-[0.2em] uppercase transition-colors duration-200 whitespace-nowrap relative py-1.5 cursor-pointer rounded-none font-medium ${
                     isActive
                       ? 'text-neutral-900 font-semibold'
                       : 'text-neutral-400 hover:text-neutral-900'
@@ -735,8 +539,8 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                   {isActive && (
                     <motion.div
                       layoutId="activeAwwwardsTab"
-                      transition={{type: 'spring', stiffness: 380, damping: 28}}
-                      className="absolute bottom-0 left-0 right-0 h-[2px] bg-neutral-900"
+                      transition={{type: 'spring', stiffness: 400, damping: 35, bounce: 0}}
+                      className="absolute bottom-0 left-0 right-0 h-[2px] bg-neutral-900 pointer-events-none"
                     />
                   )}
                 </button>
@@ -744,9 +548,9 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
             })}
           </div>
 
-          {/* Sağ Kumandalar: 3'lü Görünüm Modu, Sıralama, Arama */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            {/* 3 Görünüm Modu Switcher */}
+          {/* Sağ Kumandalar: 2'li Görünüm Modu, Sıralama, Arama */}
+          <div className="flex-shrink-0 flex flex-wrap items-center gap-3 sm:gap-4">
+            {/* 2 Görünüm Modu Switcher */}
             <div className="flex items-center border border-neutral-300 bg-white p-0.5 rounded-none shadow-2xs">
               <button
                 type="button"
@@ -759,18 +563,6 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                 title="Scroll Stacking Monoliths"
               >
                 ▼ {isTr ? 'KATMAN' : 'STACK'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('runway')}
-                className={`px-3 py-1 text-[10px] font-mono tracking-wider uppercase transition-colors cursor-pointer rounded-none ${
-                  viewMode === 'runway'
-                    ? 'bg-neutral-900 text-white font-semibold'
-                    : 'text-neutral-600 hover:text-black'
-                }`}
-                title="Kinetic Momentum Runway"
-              >
-                ⇄ {isTr ? 'RUNWAY' : 'RUNWAY'}
               </button>
               <button
                 type="button"
@@ -842,20 +634,12 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
             {viewMode === 'stack' && (
               <div className="relative">
                 {filteredProjects.map((project, idx) => (
-                  <StackingMonolithCard
-                    key={project.id}
-                    project={project}
-                    index={idx}
-                    total={filteredProjects.length}
-                  />
+                  <StackingMonolithCard key={project.id} project={project} index={idx} />
                 ))}
               </div>
             )}
 
-            {/* VIEW MODE 2: KINETIC MOMENTUM RUNWAY */}
-            {viewMode === 'runway' && <KineticRunwaySlider projects={filteredProjects} />}
-
-            {/* VIEW MODE 3: MONOLITHIC MATRIX */}
+            {/* VIEW MODE 2: MONOLITHIC MATRIX */}
             {viewMode === 'matrix' && <MonolithicMatrixGrid projects={filteredProjects} />}
           </div>
         ) : (

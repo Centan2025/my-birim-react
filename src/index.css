@@ -49,6 +49,22 @@ html.lenis body {
   height: auto;
 }
 
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 @media (max-width: 1023px) {
   .scroll-snap-start {
     scroll-snap-align: start !important;
@@ -124,13 +140,19 @@ select:focus-visible {
   color: transparent;
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.no-scrollbar,
+.scrollbar-none,
+.scrollbar-hide {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 .designer-name-link {
@@ -745,5 +767,153 @@ footer input:-webkit-autofill:active {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   OptimizedImage Global Responsive Crop & Mirror Styles
+   (Extracted from component-level inline styles to eliminate DOM thrashing)
+   ========================================================================== */
+img.responsive-mirror {
+  transform: scaleX(var(--is-mirrored-general, 1)) !important;
+}
+@media (max-width: 768px) {
+  img.responsive-mirror {
+    transform: scaleX(var(--is-mirrored-mobile, var(--is-mirrored-general, 1))) !important;
+  }
+}
+@media (min-width: 769px) {
+  img.responsive-mirror {
+    transform: scaleX(var(--is-mirrored-desktop, var(--is-mirrored-general, 1))) !important;
+  }
+}
+@media (min-width: 1024px) {
+  img.responsive-crop-pos,
+  picture.responsive-crop-pos img {
+    object-fit: var(--img-object-fit-desktop, var(--img-object-fit, cover)) !important;
+    object-position: var(--obj-pos-desktop, center) !important;
+    clip-path: var(--clip-desktop, none) !important;
+    transform: var(
+      --transform-desktop,
+      scaleX(var(--is-mirrored-desktop, var(--is-mirrored-general, 1)))
+    ) !important;
+    transform-origin: var(--transform-origin-desktop, center) !important;
+  }
+  .responsive-crop-inner img,
+  .responsive-crop-inner picture img {
+    object-fit: cover !important;
+    object-position: var(--obj-pos-desktop, center) !important;
+    clip-path: var(--clip-desktop, none) !important;
+    transform: var(
+      --transform-desktop,
+      scaleX(var(--is-mirrored-desktop, var(--is-mirrored-general, 1)))
+    ) !important;
+    transform-origin: var(--transform-origin-desktop, center) !important;
+  }
+}
+.responsive-crop-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  align-self: center;
+  overflow: hidden;
+  display: block !important;
+  line-height: 0 !important;
+}
+.responsive-crop-wrapper.is-cover {
+  height: 100% !important;
+  width: 100% !important;
+  max-height: 100% !important;
+}
+.responsive-crop-wrapper.has-aspect {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+  align-self: center !important;
+  aspect-ratio: var(--crop-aspect-desktop, auto);
+}
+.responsive-crop-wrapper.is-bottom-aligned {
+  margin-top: auto !important;
+  margin-bottom: 0 !important;
+  align-self: flex-end !important;
+}
+
+.responsive-crop-inner {
+  position: absolute !important;
+  width: calc(var(--crop-scale-x-desktop, 100%) + 1px) !important;
+  height: calc(var(--crop-scale-y-desktop, 100%) + 2px) !important;
+  left: var(--crop-left-desktop, 0%) !important;
+  top: var(--crop-top-desktop, 0%) !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+.responsive-crop-inner img,
+.responsive-crop-inner picture,
+.responsive-crop-inner picture img {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: var(--obj-pos-desktop, center) !important;
+  display: block !important;
+}
+
+@media (max-width: 1023px) {
+  img.responsive-crop-pos,
+  picture.responsive-crop-pos img {
+    object-fit: var(--img-object-fit-mobile, var(--img-object-fit, cover)) !important;
+    object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
+  }
+  .responsive-crop-inner img,
+  .responsive-crop-inner picture img {
+    object-fit: var(--img-object-fit-mobile, cover) !important;
+    object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
+  }
+  .responsive-crop-wrapper.is-contain-mobile {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    align-self: center !important;
+    aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
+  }
+  .responsive-crop-wrapper.has-aspect:not(.is-contain-mobile) {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    height: auto !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    align-self: center !important;
+    aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
+  }
+  .responsive-crop-wrapper.is-cover:not(.is-contain-mobile) {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    aspect-ratio: unset !important;
+  }
+  .responsive-crop-inner {
+    width: calc(var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) + 1px) !important;
+    height: calc(var(--crop-scale-y-mobile, var(--crop-scale-y-desktop, 100%)) + 2px) !important;
+    left: var(--crop-left-mobile, var(--crop-left-desktop, 0%)) !important;
+    top: var(--crop-top-mobile, var(--crop-top-desktop, 0%)) !important;
   }
 }

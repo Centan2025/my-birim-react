@@ -45,7 +45,7 @@ export function getProductCardStaggerDelay(index: number, columns = 4, randomize
 export const ProductCardReveal: React.FC<ProductCardRevealProps> = ({
   children,
   delay = 0,
-  duration = 0.75,
+  duration = 1.15,
   direction = 'down',
   className = '',
 }) => {

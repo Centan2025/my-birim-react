@@ -134,8 +134,8 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
               (b: any) =>
                 b?._type === 'block' &&
                 Array.isArray(b?.children) &&
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 b.children.every(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   (c: any) => c?._type === 'span' && (!c.marks || c.marks.length === 0)
                 )
             )

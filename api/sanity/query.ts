@@ -60,6 +60,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(403).json({error: 'Hassas veri kaynaklarına erişim engellendi.'})
   }
 
+  // Also check params for sensitive keywords (prevent parameter injection e.g. $type: "user")
+  const params = req.method === 'GET' ? req.query : req.body
+  if (params && typeof params === 'object') {
+    for (const [key, val] of Object.entries(params)) {
+      if (typeof val === 'string') {
+        const normVal = val.toLowerCase().replace(/[\s\r\n\t'"`+=_]/g, '')
+        const normKey = key.toLowerCase().replace(/[\s\r\n\t'"`+=_]/g, '')
+        if (sensitiveKeywords.some(kw => normVal.includes(kw) || normKey.includes(kw))) {
+          return res.status(403).json({error: 'Hassas parametre içeren sorgular engellendi.'})
+        }
+      }
+    }
+  }
+
   const sanityUrl = new URL(
     `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VERSION}/data/query/${SANITY_DATASET}`
   )
@@ -67,7 +81,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   sanityUrl.searchParams.set('returnQuery', 'false')
 
   // Forward GROQ params ($param)
-  const params = req.method === 'GET' ? req.query : req.body
   if (params && typeof params === 'object') {
     for (const [key, val] of Object.entries(params)) {
       if (key.startsWith('$') && typeof val === 'string') {

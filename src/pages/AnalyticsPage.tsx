@@ -5,8 +5,6 @@ import {Lock, KeyRound, ShieldAlert, ArrowRight, ArrowLeft} from 'lucide-react'
 import {AnalyticsDashboard} from '../components/analytics/AnalyticsDashboard'
 import {useSEO} from '../hooks/useSEO'
 
-const CORRECT_PIN = import.meta.env['VITE_ANALYTICS_PIN'] || 'birim2026'
-
 export default function AnalyticsPage() {
   useSEO({
     title: 'Site Analitiği | Birim',
@@ -16,16 +14,10 @@ export default function AnalyticsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [pinInput, setPinInput] = useState('')
   const [error, setError] = useState(false)
+  const [isVerifying, setIsVerifying] = useState<boolean>(false)
 
-  const isStudioBypass = useMemo(() => {
-    if (typeof window === 'undefined') return false
-    const params = new URLSearchParams(window.location.search)
-    return (
-      params.get('bypass') === 'birim-dev-2025' ||
-      params.get('bypass') === 'birim2025' ||
-      params.get('studioAuth') === '1' ||
-      window.self !== window.top
-    )
+  const isStudioEmbedded = useMemo(() => {
+    return typeof window !== 'undefined' && window.self !== window.top
   }, [])
 
   useEffect(() => {
@@ -42,35 +34,75 @@ export default function AnalyticsPage() {
     }
   }, [])
 
+  // Check saved session PIN or admin session on mount
   useEffect(() => {
-    // Check session or URL bypass parameters (e.g. from Sanity Studio)
-    const params = new URLSearchParams(window.location.search)
-    const bypass = params.get('bypass')
-    if (bypass === 'birim-dev-2025' || bypass === 'birim2025' || params.get('studioAuth') === '1') {
-      sessionStorage.setItem('birim_analytics_auth', '1')
-      setIsAuthenticated(true)
-      return
+    const savedPin = sessionStorage.getItem('birim_analytics_pin')
+    const token = localStorage.getItem('birim_token')
+
+    if (!savedPin && !token) return
+
+    const verifyExisting = async () => {
+      try {
+        const headers: Record<string, string> = {}
+        if (savedPin) headers['x-analytics-pin'] = savedPin
+        if (token) headers['Authorization'] = `Bearer ${token}`
+
+        const res = await fetch('/api/analytics?action=verify', {headers})
+        if (res.ok) {
+          setIsAuthenticated(true)
+        } else {
+          sessionStorage.removeItem('birim_analytics_pin')
+          sessionStorage.removeItem('birim_analytics_auth')
+          setIsAuthenticated(false)
+        }
+      } catch {
+        // network error, fallback to saved session
+        if (sessionStorage.getItem('birim_analytics_auth') === '1') {
+          setIsAuthenticated(true)
+        }
+      }
     }
 
-    const isAuth = sessionStorage.getItem('birim_analytics_auth') === '1'
-    if (isAuth) {
-      setIsAuthenticated(true)
-    }
+    verifyExisting()
   }, [])
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (pinInput === CORRECT_PIN || pinInput === 'birim-dev-2025' || pinInput === 'birim2025') {
-      sessionStorage.setItem('birim_analytics_auth', '1')
-      setIsAuthenticated(true)
-      setError(false)
-    } else {
+    if (!pinInput.trim()) return
+
+    setIsVerifying(true)
+    setError(false)
+
+    try {
+      const token = localStorage.getItem('birim_token')
+      const headers: Record<string, string> = {
+        'x-analytics-pin': pinInput.trim(),
+      }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
+      const res = await fetch('/api/analytics?action=verify', {
+        headers,
+        credentials: 'same-origin',
+      })
+
+      if (res.ok) {
+        sessionStorage.setItem('birim_analytics_pin', pinInput.trim())
+        sessionStorage.setItem('birim_analytics_auth', '1')
+        setIsAuthenticated(true)
+        setError(false)
+      } else {
+        setError(true)
+        setPinInput('')
+      }
+    } catch {
       setError(true)
-      setPinInput('')
+    } finally {
+      setIsVerifying(false)
     }
   }
 
   const handleLogout = () => {
+    sessionStorage.removeItem('birim_analytics_pin')
     sessionStorage.removeItem('birim_analytics_auth')
     setIsAuthenticated(false)
   }
@@ -127,9 +159,10 @@ export default function AnalyticsPage() {
 
             <button
               type="submit"
-              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isVerifying}
+              className="w-full py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-600 text-white text-xs font-semibold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Panele Giriş Yap</span>
+              <span>{isVerifying ? 'Doğrulanıyor...' : 'Panele Giriş Yap'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -145,11 +178,11 @@ export default function AnalyticsPage() {
   return (
     <div
       className={`min-h-screen bg-slate-50 text-slate-900 ${
-        isStudioBypass ? 'p-4 sm:p-6' : 'pt-6 pb-16 px-4 sm:px-6 md:px-8 lg:px-12'
+        isStudioEmbedded ? 'p-4 sm:p-6' : 'pt-6 pb-16 px-4 sm:px-6 md:px-8 lg:px-12'
       } transition-colors w-full`}
     >
       <div className="w-full">
-        {!isStudioBypass && (
+        {!isStudioEmbedded && (
           <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
             <Link
               to="/"

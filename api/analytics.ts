@@ -1,6 +1,8 @@
+import crypto from 'crypto'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {GoogleAuth} from 'google-auth-library'
 import dotenv from 'dotenv'
+import {getAuthTokenFromReq, verifyToken} from '../lib/server/token.js'
 
 dotenv.config({path: '.env.local'})
 dotenv.config()
@@ -375,12 +377,64 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
+  const ALLOWED_ORIGINS = [
+    'https://www.birim.com',
+    'https://birim.com',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3333',
+    'http://localhost:5173',
+  ]
+  const isAllowedOrigin =
+    ALLOWED_ORIGINS.includes(requestOrigin) ||
+    requestOrigin.endsWith('.birim.com') ||
+    requestOrigin.endsWith('.vercel.app') ||
+    requestOrigin.endsWith('.sanity.studio')
+
+  if (requestOrigin && isAllowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', requestOrigin)
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'https://www.birim.com')
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-analytics-pin')
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end()
+  }
+
+  // Server-side authentication: valid PIN or valid Admin JWT
+  const expectedPin = (process.env['ANALYTICS_PIN'] || 'birim2026').trim()
+  const rawProvidedPin = req.headers['x-analytics-pin'] || req.query['pin']
+  const providedPin = typeof rawProvidedPin === 'string' ? rawProvidedPin.trim() : ''
+
+  const isPinValid = Boolean(
+    providedPin &&
+      providedPin.length === expectedPin.length &&
+      crypto.timingSafeEqual(Buffer.from(providedPin), Buffer.from(expectedPin))
+  )
+
+  const token = getAuthTokenFromReq(req)
+  const payload = token ? verifyToken(token) : null
+  const isUserAdmin = Boolean(payload && payload.role === 'admin')
+
+  // Verification endpoint for client PIN submission
+  if (req.query['action'] === 'verify') {
+    if (isPinValid || isUserAdmin) {
+      return res.status(200).json({success: true, message: 'Doğrulama başarılı.'})
+    }
+    return res.status(401).json({success: false, error: 'Geçersiz PIN kodu.'})
+  }
+
+  if (!isPinValid && !isUserAdmin) {
+    return res.status(401).json({
+      success: false,
+      error:
+        'Bu analitik verilerine erişmek için yetkili PIN kodu veya yönetici oturumu gereklidir.',
+    })
   }
 
   try {

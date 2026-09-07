@@ -47,12 +47,39 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
-        // Uygulama kabuğu (HTML, JS, CSS, Font) — stale-while-revalidate
+        // Uygulama kabuğu (HTML, kritik JS, CSS, Font) — stale-while-revalidate
         navigateFallback: '/index.html',
-        globPatterns: ['**/*.{js,css,html,woff2,svg}', 'manifest.webmanifest'],
-        globIgnores: ['img/**', '**/img/**', '**/*.png', '**/*.jpg', '**/*.jpeg'],
-        // Sanity CDN ve R2 görsellerini önbelleğe al (30 gün)
+        globPatterns: [
+          'index.html',
+          'manifest.webmanifest',
+          'assets/index-*.{js,css}',
+          'assets/react-vendor-*.js',
+          'assets/HomePage-*.js',
+          'assets/HomeContentBlocks-*.js',
+          'assets/icons-vendor-*.js',
+          'assets/query-vendor-*.js',
+        ],
+        globIgnores: [
+          '**/AnalyticsPage*',
+          '**/sentry-vendor*',
+          '**/posthog-vendor*',
+          'img/**',
+          '**/img/**',
+          '**/*.png',
+          '**/*.jpg',
+          '**/*.jpeg',
+        ],
+        // Sayfa içi dinamik chunk'lar ve CDN görsellerini önbelleğe al
         runtimeCaching: [
+          {
+            urlPattern: /\/assets\/.*\.js$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'app-dynamic-chunks',
+              expiration: {maxEntries: 60, maxAgeSeconds: 7 * 24 * 60 * 60},
+              cacheableResponse: {statuses: [0, 200]},
+            },
+          },
           {
             urlPattern: /\.(?:png|jpg|jpeg|svg|webp|avif)$/i,
             handler: 'StaleWhileRevalidate',

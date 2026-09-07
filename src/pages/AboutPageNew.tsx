@@ -10,6 +10,9 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
+import {TextMaskReveal} from '../components/TextMaskReveal'
+import {TextLineReveal} from '../components/TextLineReveal'
+import {ProductCardReveal} from '../components/ProductCardReveal'
 import PortableTextLite from '../components/PortableTextLite'
 import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer/FullscreenMediaViewer'
 
@@ -113,7 +116,13 @@ const MediaGallery = ({media, alt}: MediaGalleryProps) => {
       <div className="mt-12 w-full overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           {galleryItems.map((m, idx) => (
-            <ScrollReveal key={idx} delay={idx * 80} distance={10} threshold={0.1}>
+            <ProductCardReveal
+              key={idx}
+              direction="down"
+              duration={1.2}
+              delay={0.08 * (idx % 3)}
+              className="w-full h-full"
+            >
               <div
                 className="relative aspect-video overflow-hidden bg-[var(--bg-secondary)] cursor-pointer group"
                 onClick={() => openViewer(idx)}
@@ -160,7 +169,7 @@ const MediaGallery = ({media, alt}: MediaGalleryProps) => {
                   </div>
                 )}
               </div>
-            </ScrollReveal>
+            </ProductCardReveal>
           ))}
         </div>
       </div>
@@ -453,31 +462,26 @@ export function AboutPageNew() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/50" />
         </div>
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
-          <motion.div
-            initial={{opacity: 0, y: 30}}
-            animate={{opacity: 1, y: 0}}
-            transition={{duration: 1}}
-          >
-            {heroBadgeText ? (
+          {heroBadgeText ? (
+            <TextMaskReveal delay={80} display="inline-block">
               <span className="font-outfit text-[10px] sm:text-xs md:text-sm uppercase tracking-[0.25em] sm:tracking-[0.35em] text-gray-300 mb-3 sm:mb-6 inline-block font-light">
                 {heroBadgeText}
               </span>
-            ) : null}
-            {heroTitleText ? (
+            </TextMaskReveal>
+          ) : null}
+          {heroTitleText ? (
+            <TextMaskReveal delay={160}>
               <h1 className="font-outfit text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white break-words">
                 {heroTitleText}
               </h1>
-            ) : null}
-          </motion.div>
+            </TextMaskReveal>
+          ) : null}
           {heroSubtitleText ? (
-            <motion.p
-              initial={{opacity: 0, y: 20}}
-              animate={{opacity: 1, y: 0}}
-              transition={{duration: 1, delay: 0.3}}
-              className="font-outfit mt-4 sm:mt-8 text-sm sm:text-base md:text-xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2 sm:px-0"
-            >
-              {heroSubtitleText}
-            </motion.p>
+            <TextMaskReveal delay={280}>
+              <p className="font-outfit mt-4 sm:mt-8 text-sm sm:text-base md:text-xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2 sm:px-0">
+                {heroSubtitleText}
+              </p>
+            </TextMaskReveal>
           ) : null}
         </div>
       </div>
@@ -485,25 +489,31 @@ export function AboutPageNew() {
       {/* Main Page Layout */}
       <div className="bg-[var(--bg-primary)] pb-16 sm:pb-32">
         <div className={containerClass + ' py-3 sm:py-4 text-[11px] sm:text-[12px]'}>
-          <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('about')}]} />
+          <TextMaskReveal delay={50}>
+            <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('about')}]} />
+          </TextMaskReveal>
         </div>
 
         {/* SECTION 1: ARCHITECTURAL MANIFESTO QUOTE */}
         {manifestoQuote ? (
-          <section className="py-12 sm:py-20 border-b border-[var(--border-primary,#e5e7eb)]/30">
-            <div className={containerClass}>
-              <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6 px-2 sm:px-0">
-                {manifestoLabel ? (
-                  <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[var(--text-secondary)] font-light">
-                    {manifestoLabel}
-                  </span>
-                ) : null}
-                <blockquote className="font-outfit text-xl sm:text-3xl md:text-5xl lg:text-6xl font-extralight text-[var(--text-primary)] leading-snug sm:leading-tight tracking-tight uppercase">
-                  {manifestoQuote}
-                </blockquote>
+          <ScrollReveal delay={100} threshold={0.08}>
+            <section className="py-12 sm:py-20 border-b border-[var(--border-primary,#e5e7eb)]/30">
+              <div className={containerClass}>
+                <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6 px-2 sm:px-0">
+                  {manifestoLabel ? (
+                    <TextMaskReveal delay={80} display="inline-block">
+                      <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[var(--text-secondary)] font-light">
+                        {manifestoLabel}
+                      </span>
+                    </TextMaskReveal>
+                  ) : null}
+                  <blockquote className="font-outfit text-xl sm:text-3xl md:text-5xl lg:text-6xl font-extralight text-[var(--text-primary)] leading-snug sm:leading-tight tracking-tight uppercase">
+                    <TextLineReveal as="p" text={manifestoQuote} delay={160} stagger={80} />
+                  </blockquote>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </ScrollReveal>
         ) : null}
 
         {/* SECTION 2: INTERACTIVE HISTORICAL ERA TIMELINE */}
@@ -511,194 +521,216 @@ export function AboutPageNew() {
           <div className={containerClass}>
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-16 gap-3 sm:gap-4">
               <div>
-                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)] font-light">
-                  TARİHÇE
-                </span>
+                <TextMaskReveal delay={60}>
+                  <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)] font-light">
+                    TARİHÇE
+                  </span>
+                </TextMaskReveal>
                 {timelineTitle ? (
-                  <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2">
-                    {timelineTitle}
-                  </h2>
+                  <TextMaskReveal delay={120}>
+                    <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2">
+                      {timelineTitle}
+                    </h2>
+                  </TextMaskReveal>
                 ) : null}
               </div>
               {timelineSubtitle ? (
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-light max-w-sm">
-                  {timelineSubtitle}
-                </p>
+                <TextMaskReveal delay={180}>
+                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-light max-w-sm">
+                    {timelineSubtitle}
+                  </p>
+                </TextMaskReveal>
               ) : null}
             </div>
 
             {/* MOBILE ONLY: Inline Accordion Expansion Flow (lg:hidden) */}
-            <div className="space-y-3 lg:hidden">
-              {eras.map((era, idx) => {
-                const isActive = activeEraIndex === idx
-                return (
-                  <div
-                    key={idx}
-                    className={`border transition-all duration-300 rounded-none overflow-hidden ${
-                      isActive
-                        ? 'border-[var(--text-primary)]/12 bg-[var(--bg-secondary)]'
-                        : 'border-neutral-500/20 hover:border-[var(--text-primary)]/10'
-                    }`}
-                  >
-                    <button
-                      onClick={() => setActiveEraIndex(isActive ? -1 : idx)}
-                      className="w-full p-4 text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-none"
+            <ScrollReveal delay={150} threshold={0.05}>
+              <div className="space-y-3 lg:hidden">
+                {eras.map((era, idx) => {
+                  const isActive = activeEraIndex === idx
+                  return (
+                    <div
+                      key={idx}
+                      className={`border transition-all duration-300 rounded-none overflow-hidden ${
+                        isActive
+                          ? 'border-[var(--text-primary)]/12 bg-[var(--bg-secondary)]'
+                          : 'border-neutral-500/20 hover:border-[var(--text-primary)]/10'
+                      }`}
                     >
-                      <div className="flex items-center gap-4">
-                        <span className="font-outfit text-2xl font-light tracking-tight text-[var(--text-primary)] min-w-[65px]">
-                          {era.year}
-                        </span>
-                        {era.title ? (
-                          <span className="font-outfit text-xs font-light uppercase tracking-wider text-[var(--text-primary)]">
-                            {era.title}
+                      <button
+                        onClick={() => setActiveEraIndex(isActive ? -1 : idx)}
+                        className="w-full p-4 text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-none"
+                      >
+                        <div className="flex items-center gap-4">
+                          <span className="font-outfit text-2xl font-light tracking-tight text-[var(--text-primary)] min-w-[65px]">
+                            {era.year}
                           </span>
-                        ) : null}
-                      </div>
-                      <div className="flex items-center justify-center w-7 h-7 text-[var(--text-primary)] flex-shrink-0">
-                        <motion.div
-                          animate={{rotate: isActive ? 45 : 0}}
-                          transition={{duration: 0.3, ease: 'easeInOut'}}
-                          className="relative w-4 h-4 flex items-center justify-center"
-                        >
-                          <span className="absolute w-3.5 h-[1.5px] bg-current" />
-                          <span className="absolute h-3.5 w-[1.5px] bg-current" />
-                        </motion.div>
-                      </div>
-                    </button>
+                          {era.title ? (
+                            <span className="font-outfit text-xs font-light uppercase tracking-wider text-[var(--text-primary)]">
+                              {era.title}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center justify-center w-7 h-7 text-[var(--text-primary)] flex-shrink-0">
+                          <motion.div
+                            animate={{rotate: isActive ? 45 : 0}}
+                            transition={{duration: 0.3, ease: 'easeInOut'}}
+                            className="relative w-4 h-4 flex items-center justify-center"
+                          >
+                            <span className="absolute w-3.5 h-[1.5px] bg-current" />
+                            <span className="absolute h-3.5 w-[1.5px] bg-current" />
+                          </motion.div>
+                        </div>
+                      </button>
 
-                    <AnimatePresence initial={false}>
-                      {isActive && (
-                        <motion.div
-                          initial={{height: 0, opacity: 0}}
-                          animate={{height: 'auto', opacity: 1}}
-                          exit={{height: 0, opacity: 0}}
-                          transition={{duration: 0.35, ease: 'easeInOut'}}
-                        >
-                          <div className="p-4 pt-0 border-t border-neutral-500/20 space-y-4">
-                            <div className="space-y-2 pt-3">
-                              <span className="font-outfit text-3xl font-extralight text-[var(--text-secondary)]/40 block">
-                                {era.year}
-                              </span>
-                              {era.title ? (
-                                <h3 className="font-outfit text-lg font-light text-[var(--text-primary)] uppercase">
-                                  {era.title}
-                                </h3>
-                              ) : null}
-                              {era.description ? (
-                                <p className="text-[var(--text-secondary)] font-light text-xs leading-relaxed">
-                                  {era.description}
-                                </p>
-                              ) : null}
+                      <AnimatePresence initial={false}>
+                        {isActive && (
+                          <motion.div
+                            initial={{height: 0, opacity: 0}}
+                            animate={{height: 'auto', opacity: 1}}
+                            exit={{height: 0, opacity: 0}}
+                            transition={{duration: 0.35, ease: 'easeInOut'}}
+                          >
+                            <div className="p-4 pt-0 border-t border-neutral-500/20 space-y-4">
+                              <div className="space-y-2 pt-3">
+                                <span className="font-outfit text-3xl font-extralight text-[var(--text-secondary)]/40 block">
+                                  {era.year}
+                                </span>
+                                {era.title ? (
+                                  <h3 className="font-outfit text-lg font-light text-[var(--text-primary)] uppercase">
+                                    {era.title}
+                                  </h3>
+                                ) : null}
+                                {era.description ? (
+                                  <p className="text-[var(--text-secondary)] font-light text-xs leading-relaxed">
+                                    {era.description}
+                                  </p>
+                                ) : null}
+                              </div>
+                              <div className="relative aspect-[16/10] overflow-hidden rounded-none">
+                                <ProductCardReveal direction="down" duration={1.2} delay={0.1}>
+                                  <OptimizedImage
+                                    key={`${era.year}-${era.image}`}
+                                    src={era.image}
+                                    srcMobile={era.imageMobile || undefined}
+                                    fallbackSrc={DEFAULT_IMAGES.history}
+                                    alt="Era History"
+                                    className="w-full h-full object-cover"
+                                    crop={era.crop}
+                                    hotspot={era.hotspot}
+                                    origWidth={era.origWidth}
+                                    origHeight={era.origHeight}
+                                    cropMobile={era.cropMobile}
+                                    hotspotMobile={era.hotspotMobile}
+                                    origWidthMobile={era.origWidthMobile}
+                                    origHeightMobile={era.origHeightMobile}
+                                  />
+                                </ProductCardReveal>
+                              </div>
                             </div>
-                            <div className="relative aspect-[16/10] overflow-hidden rounded-none">
-                              <OptimizedImage
-                                key={`${era.year}-${era.image}`}
-                                src={era.image}
-                                srcMobile={era.imageMobile || undefined}
-                                fallbackSrc={DEFAULT_IMAGES.history}
-                                alt="Era History"
-                                className="w-full h-full object-cover"
-                                crop={era.crop}
-                                hotspot={era.hotspot}
-                                origWidth={era.origWidth}
-                                origHeight={era.origHeight}
-                                cropMobile={era.cropMobile}
-                                hotspotMobile={era.hotspotMobile}
-                                origWidthMobile={era.origWidthMobile}
-                                origHeightMobile={era.origHeightMobile}
-                              />
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )
-              })}
-            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )
+                })}
+              </div>
+            </ScrollReveal>
 
             {/* DESKTOP ONLY: Classic Grid & Showcase Box (hidden lg:block) */}
             <div className="hidden lg:block">
               {/* Timeline Era Selector Grid */}
-              <div
-                className="grid gap-3 lg:gap-4 mb-12"
-                style={{gridTemplateColumns: `repeat(${eras.length}, minmax(0, 1fr))`}}
-              >
-                {eras.map((era, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveEraIndex(idx)}
-                    className={`p-4 lg:p-5 text-left border rounded-none transition-all duration-300 ${
-                      activeEraIndex === idx || (activeEraIndex === -1 && idx === 0)
-                        ? 'border-[var(--text-primary)]/12 bg-[var(--bg-secondary)]'
-                        : 'border-neutral-500/20 hover:border-[var(--text-primary)]/10'
-                    }`}
-                  >
-                    <span className="font-outfit text-2xl lg:text-3xl xl:text-4xl font-light tracking-tight block text-[var(--text-primary)]">
-                      {era.year}
-                    </span>
-                    {era.title ? (
-                      <span className="text-[11px] lg:text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-1.5 block font-normal truncate">
-                        {era.title}
+              <ScrollReveal delay={150} threshold={0.05}>
+                <div
+                  className="grid gap-3 lg:gap-4 mb-12"
+                  style={{gridTemplateColumns: `repeat(${eras.length}, minmax(0, 1fr))`}}
+                >
+                  {eras.map((era, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveEraIndex(idx)}
+                      className={`p-4 lg:p-5 text-left border rounded-none transition-all duration-300 ${
+                        activeEraIndex === idx || (activeEraIndex === -1 && idx === 0)
+                          ? 'border-[var(--text-primary)]/12 bg-[var(--bg-secondary)]'
+                          : 'border-neutral-500/20 hover:border-[var(--text-primary)]/10'
+                      }`}
+                    >
+                      <span className="font-outfit text-2xl lg:text-3xl xl:text-4xl font-light tracking-tight block text-[var(--text-primary)]">
+                        {era.year}
                       </span>
-                    ) : null}
-                  </button>
-                ))}
-              </div>
+                      {era.title ? (
+                        <span className="text-[11px] lg:text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-1.5 block font-normal truncate">
+                          {era.title}
+                        </span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              </ScrollReveal>
 
               {/* Selected Era Content Box */}
               {(() => {
                 const currentIdx = activeEraIndex === -1 ? 0 : activeEraIndex
                 const currentEra = eras[currentIdx] ?? eras[0]!
                 return (
-                  <div className="p-12 bg-[var(--bg-secondary)] border border-neutral-500/20 rounded-none">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentIdx}
-                        initial={{opacity: 0, x: 20}}
-                        animate={{opacity: 1, x: 0}}
-                        exit={{opacity: 0, x: -20}}
-                        transition={{duration: 0.4}}
-                        className="grid grid-cols-12 gap-8 items-center"
-                      >
-                        <div className="col-span-5 space-y-4">
-                          <span className="font-outfit text-7xl font-extralight text-[var(--text-secondary)]/50 block">
-                            {currentEra.year}
-                          </span>
-                          {currentEra.title ? (
-                            <h3 className="font-outfit text-3xl font-light text-[var(--text-primary)] uppercase">
-                              {currentEra.title}
-                            </h3>
-                          ) : null}
-                          {currentEra.description ? (
-                            <p className="text-[var(--text-secondary)] font-light text-base lg:text-lg leading-relaxed">
-                              {currentEra.description}
-                            </p>
-                          ) : null}
-                        </div>
-                        <div className="col-span-7">
-                          <div className="relative aspect-[16/10] overflow-hidden rounded-none">
-                            <OptimizedImage
-                              key={`${currentEra.year}-${currentEra.image}`}
-                              src={currentEra.image}
-                              srcMobile={currentEra.imageMobile || undefined}
-                              fallbackSrc={DEFAULT_IMAGES.history}
-                              alt="Era History"
-                              className="w-full h-full object-cover"
-                              crop={currentEra.crop}
-                              hotspot={currentEra.hotspot}
-                              origWidth={currentEra.origWidth}
-                              origHeight={currentEra.origHeight}
-                              cropMobile={currentEra.cropMobile}
-                              hotspotMobile={currentEra.hotspotMobile}
-                              origWidthMobile={currentEra.origWidthMobile}
-                              origHeightMobile={currentEra.origHeightMobile}
-                            />
+                  <ScrollReveal delay={250} threshold={0.05}>
+                    <div className="p-12 bg-[var(--bg-secondary)] border border-neutral-500/20 rounded-none">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={currentIdx}
+                          initial={{opacity: 0, x: 20}}
+                          animate={{opacity: 1, x: 0}}
+                          exit={{opacity: 0, x: -20}}
+                          transition={{duration: 0.4}}
+                          className="grid grid-cols-12 gap-8 items-center"
+                        >
+                          <div className="col-span-5 space-y-4">
+                            <TextMaskReveal delay={80}>
+                              <span className="font-outfit text-7xl font-extralight text-[var(--text-secondary)]/50 block">
+                                {currentEra.year}
+                              </span>
+                            </TextMaskReveal>
+                            {currentEra.title ? (
+                              <TextMaskReveal delay={140}>
+                                <h3 className="font-outfit text-3xl font-light text-[var(--text-primary)] uppercase">
+                                  {currentEra.title}
+                                </h3>
+                              </TextMaskReveal>
+                            ) : null}
+                            {currentEra.description ? (
+                              <TextMaskReveal delay={200}>
+                                <p className="text-[var(--text-secondary)] font-light text-base lg:text-lg leading-relaxed">
+                                  {currentEra.description}
+                                </p>
+                              </TextMaskReveal>
+                            ) : null}
                           </div>
-                        </div>
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
+                          <div className="col-span-7">
+                            <div className="relative aspect-[16/10] overflow-hidden rounded-none">
+                              <ProductCardReveal direction="down" duration={1.2} delay={0.1}>
+                                <OptimizedImage
+                                  key={`${currentEra.year}-${currentEra.image}`}
+                                  src={currentEra.image}
+                                  srcMobile={currentEra.imageMobile || undefined}
+                                  fallbackSrc={DEFAULT_IMAGES.history}
+                                  alt="Era History"
+                                  className="w-full h-full object-cover"
+                                  crop={currentEra.crop}
+                                  hotspot={currentEra.hotspot}
+                                  origWidth={currentEra.origWidth}
+                                  origHeight={currentEra.origHeight}
+                                  cropMobile={currentEra.cropMobile}
+                                  hotspotMobile={currentEra.hotspotMobile}
+                                  origWidthMobile={currentEra.origWidthMobile}
+                                  origHeightMobile={currentEra.origHeightMobile}
+                                />
+                              </ProductCardReveal>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  </ScrollReveal>
                 )
               })()}
             </div>
@@ -706,492 +738,552 @@ export function AboutPageNew() {
         </section>
 
         {/* SECTION 3: IDENTITY & QUALITY ASYMMETRIC GRID */}
-        <section className="py-12 sm:py-24 border-b border-[var(--border-primary,#e5e7eb)]/30">
-          <div className={containerClass}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-16 items-start">
-              <div className="lg:col-span-5 space-y-4 sm:space-y-8">
-                <div>
-                  <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)]">
-                    KİMLİK & MİMARİ
-                  </span>
-                  {getPlainText(t(identitySection.title)) ? (
-                    <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2 leading-tight">
-                      {getPlainText(t(identitySection.title))}
-                    </h2>
-                  ) : null}
-                </div>
-                <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-base sm:text-lg md:text-xl">
-                  {renderContentText(identitySection.content)}
-                </div>
-              </div>
-              <div className="lg:col-span-7">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-none">
-                  <OptimizedImage
-                    src={identitySection.image}
-                    srcMobile={identitySection.imageMobile || undefined}
-                    fallbackSrc={DEFAULT_IMAGES.identity}
-                    alt="Identity"
-                    className="w-full h-full object-cover"
-                    crop={identitySection.crop}
-                    hotspot={identitySection.hotspot}
-                    origWidth={identitySection.origWidth}
-                    origHeight={identitySection.origHeight}
-                    cropMobile={identitySection.cropMobile}
-                    hotspotMobile={identitySection.hotspotMobile}
-                    origWidthMobile={identitySection.origWidthMobile}
-                    origHeightMobile={identitySection.origHeightMobile}
-                  />
-                </div>
-              </div>
-              <div className="lg:col-span-12">
-                <MediaGallery media={identitySection.media} alt="Identity" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 4: CRAFTSMANSHIP & QUALITY */}
-        <section className="py-12 sm:py-24 border-b border-[var(--border-primary,#e5e7eb)]/30">
-          <div className={containerClass}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-16 items-start">
-              <div className="lg:col-span-7 order-2 lg:order-1">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-none">
-                  <OptimizedImage
-                    key={qualitySection.image}
-                    src={qualitySection.image}
-                    srcMobile={qualitySection.imageMobile || undefined}
-                    fallbackSrc={DEFAULT_IMAGES.quality}
-                    alt="Quality"
-                    className="w-full h-full object-cover"
-                    crop={qualitySection.crop}
-                    hotspot={qualitySection.hotspot}
-                    origWidth={qualitySection.origWidth}
-                    origHeight={qualitySection.origHeight}
-                    cropMobile={qualitySection.cropMobile}
-                    hotspotMobile={qualitySection.hotspotMobile}
-                    origWidthMobile={qualitySection.origWidthMobile}
-                    origHeightMobile={qualitySection.origHeightMobile}
-                  />
-                </div>
-              </div>
-              <div className="lg:col-span-5 order-1 lg:order-2 space-y-4 sm:space-y-8">
-                <div>
-                  <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)]">
-                    ZANAAT & KALİTE
-                  </span>
-                  {getPlainText(t(qualitySection.title)) ? (
-                    <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2 leading-tight">
-                      {getPlainText(t(qualitySection.title))}
-                    </h2>
-                  ) : null}
-                </div>
-                <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-base sm:text-lg md:text-xl">
-                  {renderContentText(qualitySection.content)}
-                </div>
-              </div>
-              <div className="lg:col-span-12 order-3">
-                <MediaGallery media={qualitySection.media} alt="Quality" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 5: INTERACTIVE DESIGNER EXHIBITION */}
-        {designersWithImage.length > 0 && (
-          <section className="py-12 sm:py-24 border-t border-[var(--border-primary,#e5e7eb)]/30">
+        <ScrollReveal delay={150} threshold={0.05}>
+          <section className="py-12 sm:py-24 border-b border-[var(--border-primary,#e5e7eb)]/30">
             <div className={containerClass}>
-              <div className="mb-8 sm:mb-16">
-                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)]">
-                  İŞBİRLİKLERİ
-                </span>
-                <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2">
-                  Tasarımcı Ortaklarımız
-                </h2>
-              </div>
-
-              {/* MOBILE ONLY: Horizontal Swipeable Designer Cards Carousel (lg:hidden) */}
-              <div className="lg:hidden">
-                <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-1 scrollbar-none -mx-4 px-4 sm:-mx-6 sm:px-6">
-                  {designersWithImage.slice(0, 5).map((designer, idx) => {
-                    const dName = getPlainText(t(designer.name))
-                    const dRoleText = getPlainText(t(designer.role))
-                    const dBioText = getPlainText(t(designer.bio))
-                    const dImgUrl =
-                      typeof designer.image === 'string'
-                        ? designer.image
-                        : (designer.image as {url: string}).url
-
-                    return (
-                      <div
-                        key={designer.id || idx}
-                        className="w-[82vw] max-w-[310px] flex-shrink-0 snap-center border border-neutral-500/40 bg-[var(--bg-secondary)] p-5 rounded-none flex flex-col justify-between shadow-sm"
-                      >
-                        <div className="space-y-4">
-                          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-none grayscale">
-                            <OptimizedImage
-                              src={dImgUrl}
-                              srcMobile={
-                                typeof designer.image === 'object'
-                                  ? designer.image.urlMobile
-                                  : undefined
-                              }
-                              srcDesktop={
-                                typeof designer.image === 'object'
-                                  ? designer.image.urlDesktop
-                                  : undefined
-                              }
-                              fallbackSrc={DEFAULT_IMAGES.identity}
-                              alt={dName}
-                              className="w-full h-full object-cover grayscale"
-                              crop={
-                                typeof designer.image === 'object' ? designer.image.crop : undefined
-                              }
-                              hotspot={
-                                typeof designer.image === 'object'
-                                  ? designer.image.hotspot
-                                  : undefined
-                              }
-                              origWidth={
-                                typeof designer.image === 'object'
-                                  ? designer.image.origWidth
-                                  : undefined
-                              }
-                              origHeight={
-                                typeof designer.image === 'object'
-                                  ? designer.image.origHeight
-                                  : undefined
-                              }
-                              cropMobile={
-                                typeof designer.image === 'object'
-                                  ? designer.image.cropMobile
-                                  : undefined
-                              }
-                              hotspotMobile={
-                                typeof designer.image === 'object'
-                                  ? designer.image.hotspotMobile
-                                  : undefined
-                              }
-                              origWidthMobile={
-                                typeof designer.image === 'object'
-                                  ? designer.image.origWidthMobile
-                                  : undefined
-                              }
-                              origHeightMobile={
-                                typeof designer.image === 'object'
-                                  ? designer.image.origHeightMobile
-                                  : undefined
-                              }
-                              cropDesktop={
-                                typeof designer.image === 'object'
-                                  ? designer.image.cropDesktop
-                                  : undefined
-                              }
-                              hotspotDesktop={
-                                typeof designer.image === 'object'
-                                  ? designer.image.hotspotDesktop
-                                  : undefined
-                              }
-                              origWidthDesktop={
-                                typeof designer.image === 'object'
-                                  ? designer.image.origWidthDesktop
-                                  : undefined
-                              }
-                              origHeightDesktop={
-                                typeof designer.image === 'object'
-                                  ? designer.image.origHeightDesktop
-                                  : undefined
-                              }
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            {dRoleText && (
-                              <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] block font-light">
-                                {dRoleText}
-                              </span>
-                            )}
-                            <h3 className="font-outfit text-xl font-light uppercase tracking-tight text-[var(--text-primary)]">
-                              {dName}
-                            </h3>
-                            {dBioText && (
-                              <p className="text-xs text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3">
-                                {dBioText}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        <Link
-                          to={`/designer/${designer.id}`}
-                          className="group inline-flex items-center justify-between text-[11px] uppercase tracking-widest text-[var(--text-primary)] bg-[var(--bg-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] px-4 py-3 transition-all font-light w-full shadow-sm mt-5"
-                        >
-                          <span>Tasarımcı Koleksiyonu</span>
-                          <svg
-                            className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="1.2"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                            />
-                          </svg>
-                        </Link>
-                      </div>
-                    )
-                  })}
-                </div>
-                <div className="flex items-center justify-between mt-4 px-1">
-                  <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-light opacity-60">
-                    Kaydırın &rarr;
-                  </span>
-                  <Link
-                    to="/designers"
-                    className="text-xs uppercase tracking-widest text-[var(--text-primary)] hover:opacity-75 transition-opacity underline underline-offset-4"
-                  >
-                    Tüm Tasarımcılar
-                  </Link>
-                </div>
-              </div>
-
-              {/* DESKTOP ONLY: Classic Split Exhibition Showcase (hidden lg:block) */}
-              <div className="hidden lg:block">
-                {(() => {
-                  const currentDesigner =
-                    designersWithImage[activeDesignerIndex === -1 ? 0 : activeDesignerIndex] ??
-                    designersWithImage[0]!
-                  const currentImgUrl =
-                    typeof currentDesigner.image === 'string'
-                      ? currentDesigner.image
-                      : (currentDesigner.image as {url: string}).url
-                  const currentBioText = getPlainText(t(currentDesigner.bio))
-
-                  return (
-                    <div className="grid grid-cols-12 gap-8 items-stretch">
-                      {/* Left Column: Interactive Designer List */}
-                      <div className="col-span-5 flex flex-col justify-between">
-                        <div className="space-y-3">
-                          {designersWithImage.slice(0, 5).map((designer, idx) => {
-                            const isActive =
-                              (activeDesignerIndex === -1 ? 0 : activeDesignerIndex) === idx
-                            const dName = getPlainText(t(designer.name))
-                            const dRoleText = getPlainText(t(designer.role))
-                            const dBioText = getPlainText(t(designer.bio))
-                            const dSubtext =
-                              dRoleText || (dBioText ? dBioText.slice(0, 45) + '...' : '')
-
-                            return (
-                              <div
-                                key={designer.id || idx}
-                                onMouseEnter={() => setActiveDesignerIndex(idx)}
-                                onClick={() => setActiveDesignerIndex(idx)}
-                                onKeyDown={e => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault()
-                                    setActiveDesignerIndex(idx)
-                                  }
-                                }}
-                                role="button"
-                                tabIndex={0}
-                                className={`p-6 border rounded-none transition-all duration-300 cursor-pointer group ${
-                                  isActive
-                                    ? 'bg-[var(--bg-secondary)] border-[var(--text-primary)] translate-x-2 shadow-sm'
-                                    : 'border-neutral-500/40 hover:border-[var(--text-primary)]/40'
-                                }`}
-                              >
-                                <div className="flex items-center justify-between gap-4">
-                                  <div>
-                                    <h3 className="text-xl md:text-2xl font-light uppercase tracking-tight text-[var(--text-primary)] mt-1">
-                                      {dName}
-                                    </h3>
-                                    {dSubtext && (
-                                      <span className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-0.5 block font-light truncate max-w-xs">
-                                        {dSubtext}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <svg
-                                    className={`w-5 h-5 ml-auto flex-shrink-0 transition-all duration-300 ${
-                                      isActive
-                                        ? 'text-[var(--text-primary)] translate-x-1 opacity-100'
-                                        : 'text-[var(--text-secondary)] opacity-30 group-hover:opacity-70 group-hover:translate-x-0.5'
-                                    }`}
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="1.2"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M3 12h18L13.5 4.5"
-                                    />
-                                  </svg>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-
-                        <Link
-                          to="/designers"
-                          className="group inline-flex items-center justify-between text-xs uppercase tracking-widest text-[var(--text-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] bg-[var(--bg-secondary)] px-6 py-4 transition-all font-light w-full shadow-sm"
-                        >
-                          <span>Tüm Tasarımcılar</span>
-                          <svg
-                            className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="1.2"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M3 12h18L13.5 4.5"
-                            />
-                          </svg>
-                        </Link>
-                      </div>
-
-                      {/* Right Column: Featured Active Designer Exhibition Card */}
-                      <div className="col-span-7 bg-[var(--bg-secondary)] border border-neutral-500/40 rounded-none p-8 md:p-12 flex flex-col justify-between">
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={activeDesignerIndex === -1 ? 0 : activeDesignerIndex}
-                            initial={{opacity: 0, y: 15}}
-                            animate={{opacity: 1, y: 0}}
-                            exit={{opacity: 0, y: -15}}
-                            transition={{duration: 0.3}}
-                            className="grid grid-cols-12 gap-8 items-center h-full"
-                          >
-                            <div className="col-span-6 relative aspect-[3/4] overflow-hidden rounded-none grayscale">
-                              <OptimizedImage
-                                src={currentImgUrl}
-                                srcMobile={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.urlMobile
-                                    : undefined
-                                }
-                                srcDesktop={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.urlDesktop
-                                    : undefined
-                                }
-                                fallbackSrc={DEFAULT_IMAGES.identity}
-                                alt={getPlainText(t(currentDesigner.name))}
-                                className="w-full h-full object-cover grayscale"
-                                crop={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.crop
-                                    : undefined
-                                }
-                                hotspot={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.hotspot
-                                    : undefined
-                                }
-                                origWidth={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.origWidth
-                                    : undefined
-                                }
-                                origHeight={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.origHeight
-                                    : undefined
-                                }
-                                cropMobile={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.cropMobile
-                                    : undefined
-                                }
-                                hotspotMobile={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.hotspotMobile
-                                    : undefined
-                                }
-                                origWidthMobile={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.origWidthMobile
-                                    : undefined
-                                }
-                                origHeightMobile={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.origHeightMobile
-                                    : undefined
-                                }
-                                cropDesktop={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.cropDesktop
-                                    : undefined
-                                }
-                                hotspotDesktop={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.hotspotDesktop
-                                    : undefined
-                                }
-                                origWidthDesktop={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.origWidthDesktop
-                                    : undefined
-                                }
-                                origHeightDesktop={
-                                  typeof currentDesigner.image === 'object'
-                                    ? currentDesigner.image.origHeightDesktop
-                                    : undefined
-                                }
-                              />
-                            </div>
-
-                            <div className="col-span-6 flex flex-col justify-between h-full space-y-6">
-                              <div className="space-y-4">
-                                {currentDesigner.role && (
-                                  <span className="text-xs uppercase tracking-widest text-[var(--text-secondary)]">
-                                    {getPlainText(t(currentDesigner.role))}
-                                  </span>
-                                )}
-                                <h3 className="text-3xl font-light uppercase tracking-tight text-[var(--text-primary)]">
-                                  {getPlainText(t(currentDesigner.name))}
-                                </h3>
-                                {currentBioText && (
-                                  <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed line-clamp-6">
-                                    {currentBioText}
-                                  </p>
-                                )}
-                              </div>
-
-                              <Link
-                                to={`/designer/${currentDesigner.id}`}
-                                className="group inline-flex items-center gap-3 text-xs uppercase tracking-widest text-[var(--text-primary)] bg-[var(--bg-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] px-6 py-3.5 transition-all font-light w-fit shadow-sm"
-                              >
-                                <span>Tasarımcı Koleksiyonu</span>
-                                <svg
-                                  className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth="1.2"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                                  />
-                                </svg>
-                              </Link>
-                            </div>
-                          </motion.div>
-                        </AnimatePresence>
-                      </div>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-16 items-start">
+                <div className="lg:col-span-5 space-y-4 sm:space-y-8">
+                  <div>
+                    <TextMaskReveal delay={80}>
+                      <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)]">
+                        KİMLİK & MİMARİ
+                      </span>
+                    </TextMaskReveal>
+                    {getPlainText(t(identitySection.title)) ? (
+                      <TextMaskReveal delay={140}>
+                        <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2 leading-tight">
+                          {getPlainText(t(identitySection.title))}
+                        </h2>
+                      </TextMaskReveal>
+                    ) : null}
+                  </div>
+                  <TextMaskReveal delay={200}>
+                    <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-base sm:text-lg md:text-xl">
+                      {renderContentText(identitySection.content)}
                     </div>
-                  )
-                })()}
+                  </TextMaskReveal>
+                </div>
+                <div className="lg:col-span-7">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-none">
+                    <ProductCardReveal direction="down" duration={1.3} delay={0.15}>
+                      <OptimizedImage
+                        src={identitySection.image}
+                        srcMobile={identitySection.imageMobile || undefined}
+                        fallbackSrc={DEFAULT_IMAGES.identity}
+                        alt="Identity"
+                        className="w-full h-full object-cover"
+                        crop={identitySection.crop}
+                        hotspot={identitySection.hotspot}
+                        origWidth={identitySection.origWidth}
+                        origHeight={identitySection.origHeight}
+                        cropMobile={identitySection.cropMobile}
+                        hotspotMobile={identitySection.hotspotMobile}
+                        origWidthMobile={identitySection.origWidthMobile}
+                        origHeightMobile={identitySection.origHeightMobile}
+                      />
+                    </ProductCardReveal>
+                  </div>
+                </div>
+                <div className="lg:col-span-12">
+                  <MediaGallery media={identitySection.media} alt="Identity" />
+                </div>
               </div>
             </div>
           </section>
+        </ScrollReveal>
+
+        {/* SECTION 4: CRAFTSMANSHIP & QUALITY */}
+        <ScrollReveal delay={150} threshold={0.05}>
+          <section className="py-12 sm:py-24 border-b border-[var(--border-primary,#e5e7eb)]/30">
+            <div className={containerClass}>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-16 items-start">
+                <div className="lg:col-span-7 order-2 lg:order-1">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-none">
+                    <ProductCardReveal direction="down" duration={1.3} delay={0.15}>
+                      <OptimizedImage
+                        key={qualitySection.image}
+                        src={qualitySection.image}
+                        srcMobile={qualitySection.imageMobile || undefined}
+                        fallbackSrc={DEFAULT_IMAGES.quality}
+                        alt="Quality"
+                        className="w-full h-full object-cover"
+                        crop={qualitySection.crop}
+                        hotspot={qualitySection.hotspot}
+                        origWidth={qualitySection.origWidth}
+                        origHeight={qualitySection.origHeight}
+                        cropMobile={qualitySection.cropMobile}
+                        hotspotMobile={qualitySection.hotspotMobile}
+                        origWidthMobile={qualitySection.origWidthMobile}
+                        origHeightMobile={qualitySection.origHeightMobile}
+                      />
+                    </ProductCardReveal>
+                  </div>
+                </div>
+                <div className="lg:col-span-5 order-1 lg:order-2 space-y-4 sm:space-y-8">
+                  <div>
+                    <TextMaskReveal delay={80}>
+                      <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)]">
+                        ZANAAT & KALİTE
+                      </span>
+                    </TextMaskReveal>
+                    {getPlainText(t(qualitySection.title)) ? (
+                      <TextMaskReveal delay={140}>
+                        <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2 leading-tight">
+                          {getPlainText(t(qualitySection.title))}
+                        </h2>
+                      </TextMaskReveal>
+                    ) : null}
+                  </div>
+                  <TextMaskReveal delay={200}>
+                    <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-base sm:text-lg md:text-xl">
+                      {renderContentText(qualitySection.content)}
+                    </div>
+                  </TextMaskReveal>
+                </div>
+                <div className="lg:col-span-12 order-3">
+                  <MediaGallery media={qualitySection.media} alt="Quality" />
+                </div>
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* SECTION 5: INTERACTIVE DESIGNER EXHIBITION */}
+        {designersWithImage.length > 0 && (
+          <ScrollReveal delay={150} threshold={0.05}>
+            <section className="py-12 sm:py-24 border-t border-[var(--border-primary,#e5e7eb)]/30">
+              <div className={containerClass}>
+                <div className="mb-8 sm:mb-16">
+                  <TextMaskReveal delay={80}>
+                    <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)]">
+                      İŞBİRLİKLERİ
+                    </span>
+                  </TextMaskReveal>
+                  <TextMaskReveal delay={140}>
+                    <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2">
+                      Tasarımcı Ortaklarımız
+                    </h2>
+                  </TextMaskReveal>
+                </div>
+
+                {/* MOBILE ONLY: Horizontal Swipeable Designer Cards Carousel (lg:hidden) */}
+                <div className="lg:hidden">
+                  <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-1 scrollbar-none -mx-4 px-4 sm:-mx-6 sm:px-6">
+                    {designersWithImage.slice(0, 5).map((designer, idx) => {
+                      const dName = getPlainText(t(designer.name))
+                      const dRoleText = getPlainText(t(designer.role))
+                      const dBioText = getPlainText(t(designer.bio))
+                      const dImgUrl =
+                        typeof designer.image === 'string'
+                          ? designer.image
+                          : (designer.image as {url: string}).url
+
+                      return (
+                        <div
+                          key={designer.id || idx}
+                          className="w-[82vw] max-w-[310px] flex-shrink-0 snap-center border border-neutral-500/40 bg-[var(--bg-secondary)] p-5 rounded-none flex flex-col justify-between shadow-sm"
+                        >
+                          <div className="space-y-4">
+                            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-none grayscale">
+                              <ProductCardReveal
+                                direction="down"
+                                duration={1.2}
+                                delay={0.08 + idx * 0.05}
+                              >
+                                <OptimizedImage
+                                  src={dImgUrl}
+                                  srcMobile={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.urlMobile
+                                      : undefined
+                                  }
+                                  srcDesktop={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.urlDesktop
+                                      : undefined
+                                  }
+                                  fallbackSrc={DEFAULT_IMAGES.identity}
+                                  alt={dName}
+                                  className="w-full h-full object-cover grayscale"
+                                  crop={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.crop
+                                      : undefined
+                                  }
+                                  hotspot={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.hotspot
+                                      : undefined
+                                  }
+                                  origWidth={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.origWidth
+                                      : undefined
+                                  }
+                                  origHeight={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.origHeight
+                                      : undefined
+                                  }
+                                  cropMobile={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.cropMobile
+                                      : undefined
+                                  }
+                                  hotspotMobile={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.hotspotMobile
+                                      : undefined
+                                  }
+                                  origWidthMobile={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.origWidthMobile
+                                      : undefined
+                                  }
+                                  origHeightMobile={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.origHeightMobile
+                                      : undefined
+                                  }
+                                  cropDesktop={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.cropDesktop
+                                      : undefined
+                                  }
+                                  hotspotDesktop={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.hotspotDesktop
+                                      : undefined
+                                  }
+                                  origWidthDesktop={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.origWidthDesktop
+                                      : undefined
+                                  }
+                                  origHeightDesktop={
+                                    typeof designer.image === 'object'
+                                      ? designer.image.origHeightDesktop
+                                      : undefined
+                                  }
+                                />
+                              </ProductCardReveal>
+                            </div>
+                            <div className="space-y-2">
+                              {dRoleText && (
+                                <TextMaskReveal delay={80}>
+                                  <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] block font-light">
+                                    {dRoleText}
+                                  </span>
+                                </TextMaskReveal>
+                              )}
+                              <TextMaskReveal delay={120}>
+                                <h3 className="font-outfit text-xl font-light uppercase tracking-tight text-[var(--text-primary)]">
+                                  {dName}
+                                </h3>
+                              </TextMaskReveal>
+                              {dBioText && (
+                                <TextMaskReveal delay={160}>
+                                  <p className="text-xs text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3">
+                                    {dBioText}
+                                  </p>
+                                </TextMaskReveal>
+                              )}
+                            </div>
+                          </div>
+
+                          <TextMaskReveal delay={200}>
+                            <Link
+                              to={`/designer/${designer.id}`}
+                              className="group inline-flex items-center justify-between text-[11px] uppercase tracking-widest text-[var(--text-primary)] bg-[var(--bg-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] px-4 py-3 transition-all font-light w-full shadow-sm mt-5"
+                            >
+                              <span>Tasarımcı Koleksiyonu</span>
+                              <svg
+                                className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="1.2"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                                />
+                              </svg>
+                            </Link>
+                          </TextMaskReveal>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="flex items-center justify-between mt-4 px-1">
+                    <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-light opacity-60">
+                      Kaydırın &rarr;
+                    </span>
+                    <Link
+                      to="/designers"
+                      className="text-xs uppercase tracking-widest text-[var(--text-primary)] hover:opacity-75 transition-opacity underline underline-offset-4"
+                    >
+                      Tüm Tasarımcılar
+                    </Link>
+                  </div>
+                </div>
+
+                {/* DESKTOP ONLY: Classic Split Exhibition Showcase (hidden lg:block) */}
+                <div className="hidden lg:block">
+                  {(() => {
+                    const currentDesigner =
+                      designersWithImage[activeDesignerIndex === -1 ? 0 : activeDesignerIndex] ??
+                      designersWithImage[0]!
+                    const currentImgUrl =
+                      typeof currentDesigner.image === 'string'
+                        ? currentDesigner.image
+                        : (currentDesigner.image as {url: string}).url
+                    const currentBioText = getPlainText(t(currentDesigner.bio))
+
+                    return (
+                      <div className="grid grid-cols-12 gap-8 items-stretch">
+                        {/* Left Column: Interactive Designer List */}
+                        <div className="col-span-5 flex flex-col justify-between">
+                          <div className="space-y-3">
+                            {designersWithImage.slice(0, 5).map((designer, idx) => {
+                              const isActive =
+                                (activeDesignerIndex === -1 ? 0 : activeDesignerIndex) === idx
+                              const dName = getPlainText(t(designer.name))
+                              const dRoleText = getPlainText(t(designer.role))
+                              const dBioText = getPlainText(t(designer.bio))
+                              const dSubtext =
+                                dRoleText || (dBioText ? dBioText.slice(0, 45) + '...' : '')
+
+                              return (
+                                <ScrollReveal
+                                  key={designer.id || idx}
+                                  delay={idx * 70}
+                                  distance={15}
+                                  threshold={0.05}
+                                >
+                                  <div
+                                    onMouseEnter={() => setActiveDesignerIndex(idx)}
+                                    onClick={() => setActiveDesignerIndex(idx)}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault()
+                                        setActiveDesignerIndex(idx)
+                                      }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    className={`p-6 border rounded-none transition-all duration-300 cursor-pointer group ${
+                                      isActive
+                                        ? 'bg-[var(--bg-secondary)] border-[var(--text-primary)] translate-x-2 shadow-sm'
+                                        : 'border-neutral-500/40 hover:border-[var(--text-primary)]/40'
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between gap-4">
+                                      <div>
+                                        <h3 className="text-xl md:text-2xl font-light uppercase tracking-tight text-[var(--text-primary)] mt-1">
+                                          {dName}
+                                        </h3>
+                                        {dSubtext && (
+                                          <span className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-0.5 block font-light truncate max-w-xs">
+                                            {dSubtext}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <svg
+                                        className={`w-5 h-5 ml-auto flex-shrink-0 transition-all duration-300 ${
+                                          isActive
+                                            ? 'text-[var(--text-primary)] translate-x-1 opacity-100'
+                                            : 'text-[var(--text-secondary)] opacity-30 group-hover:opacity-70 group-hover:translate-x-0.5'
+                                        }`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="1.2"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M3 12h18L13.5 4.5"
+                                        />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </ScrollReveal>
+                              )
+                            })}
+                          </div>
+
+                          <ScrollReveal delay={380} distance={10} threshold={0.05}>
+                            <Link
+                              to="/designers"
+                              className="group inline-flex items-center justify-between text-xs uppercase tracking-widest text-[var(--text-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] bg-[var(--bg-secondary)] px-6 py-4 transition-all font-light w-full shadow-sm"
+                            >
+                              <span>Tüm Tasarımcılar</span>
+                              <svg
+                                className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="1.2"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M3 12h18L13.5 4.5"
+                                />
+                              </svg>
+                            </Link>
+                          </ScrollReveal>
+                        </div>
+
+                        {/* Right Column: Featured Active Designer Exhibition Card */}
+                        <div className="col-span-7 bg-[var(--bg-secondary)] border border-neutral-500/40 rounded-none p-8 md:p-12 flex flex-col justify-between">
+                          <AnimatePresence mode="wait">
+                            <motion.div
+                              key={activeDesignerIndex === -1 ? 0 : activeDesignerIndex}
+                              initial={{opacity: 0, y: 15}}
+                              animate={{opacity: 1, y: 0}}
+                              exit={{opacity: 0, y: -15}}
+                              transition={{duration: 0.3}}
+                              className="grid grid-cols-12 gap-8 items-center h-full"
+                            >
+                              <div className="col-span-6 relative aspect-[3/4] overflow-hidden rounded-none grayscale">
+                                <ProductCardReveal direction="down" duration={1.2} delay={0.1}>
+                                  <OptimizedImage
+                                    src={currentImgUrl}
+                                    srcMobile={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.urlMobile
+                                        : undefined
+                                    }
+                                    srcDesktop={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.urlDesktop
+                                        : undefined
+                                    }
+                                    fallbackSrc={DEFAULT_IMAGES.identity}
+                                    alt={getPlainText(t(currentDesigner.name))}
+                                    className="w-full h-full object-cover grayscale"
+                                    crop={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.crop
+                                        : undefined
+                                    }
+                                    hotspot={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.hotspot
+                                        : undefined
+                                    }
+                                    origWidth={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.origWidth
+                                        : undefined
+                                    }
+                                    origHeight={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.origHeight
+                                        : undefined
+                                    }
+                                    cropMobile={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.cropMobile
+                                        : undefined
+                                    }
+                                    hotspotMobile={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.hotspotMobile
+                                        : undefined
+                                    }
+                                    origWidthMobile={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.origWidthMobile
+                                        : undefined
+                                    }
+                                    origHeightMobile={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.origHeightMobile
+                                        : undefined
+                                    }
+                                    cropDesktop={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.cropDesktop
+                                        : undefined
+                                    }
+                                    hotspotDesktop={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.hotspotDesktop
+                                        : undefined
+                                    }
+                                    origWidthDesktop={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.origWidthDesktop
+                                        : undefined
+                                    }
+                                    origHeightDesktop={
+                                      typeof currentDesigner.image === 'object'
+                                        ? currentDesigner.image.origHeightDesktop
+                                        : undefined
+                                    }
+                                  />
+                                </ProductCardReveal>
+                              </div>
+
+                              <div className="col-span-6 flex flex-col justify-between h-full space-y-6">
+                                <div className="space-y-4">
+                                  {currentDesigner.role && (
+                                    <TextMaskReveal delay={80}>
+                                      <span className="text-xs uppercase tracking-widest text-[var(--text-secondary)]">
+                                        {getPlainText(t(currentDesigner.role))}
+                                      </span>
+                                    </TextMaskReveal>
+                                  )}
+                                  <TextMaskReveal delay={140}>
+                                    <h3 className="text-3xl font-light uppercase tracking-tight text-[var(--text-primary)]">
+                                      {getPlainText(t(currentDesigner.name))}
+                                    </h3>
+                                  </TextMaskReveal>
+                                  {currentBioText && (
+                                    <TextMaskReveal delay={200}>
+                                      <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed line-clamp-6">
+                                        {currentBioText}
+                                      </p>
+                                    </TextMaskReveal>
+                                  )}
+                                </div>
+
+                                <TextMaskReveal delay={260} display="inline-block">
+                                  <Link
+                                    to={`/designer/${currentDesigner.id}`}
+                                    className="group inline-flex items-center gap-3 text-xs uppercase tracking-widest text-[var(--text-primary)] bg-[var(--bg-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] px-6 py-3.5 transition-all font-light w-fit shadow-sm"
+                                  >
+                                    <span>Tasarımcı Koleksiyonu</span>
+                                    <svg
+                                      className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth="1.2"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                                      />
+                                    </svg>
+                                  </Link>
+                                </TextMaskReveal>
+                              </div>
+                            </motion.div>
+                          </AnimatePresence>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              </div>
+            </section>
+          </ScrollReveal>
         )}
       </div>
     </div>

@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
@@ -75,26 +76,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  // Auth check: require valid admin JWT session, valid admin secret token, or trusted Sanity Studio origin
+  // Auth check: require valid admin JWT session or valid admin secret token
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
   const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-  const reqReferer = typeof req.headers.referer === 'string' ? req.headers.referer : ''
-  const isStudioOrigin =
-    isAllowedOrigin ||
-    requestOrigin.includes('sanity.studio') ||
-    requestOrigin.includes('localhost') ||
-    reqReferer.includes('sanity.studio') ||
-    reqReferer.includes('localhost') ||
-    reqReferer.includes('.vercel.app')
-  const isAdminAuthorized =
-    Boolean(adminSecret && headerToken && headerToken === adminSecret) || isStudioOrigin
-  const isUserAdmin = Boolean(payload && payload.role === 'admin')
 
-  if (!isUserAdmin && !isAdminAuthorized) {
+  const isAdminSecretMatch = Boolean(
+    adminSecret &&
+      headerToken &&
+      headerToken.length === adminSecret.length &&
+      crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(adminSecret))
+  )
+  const isUserAdmin = Boolean(payload && payload.role === 'admin')
+  const isDevLocal = process.env['NODE_ENV'] !== 'production' && requestOrigin.includes('localhost')
+
+  if (!isUserAdmin && !isAdminSecretMatch && !isDevLocal) {
     return res.status(401).json({
       error: 'Dosya yükleme bileti almak için yönetici yetkisi gereklidir.',
     })

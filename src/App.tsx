@@ -118,20 +118,27 @@ const AppContent = () => {
   const {pathname} = location
   const {reset: resetHeaderTheme} = useHeaderTheme()
 
-  // Ultra-Soft & Butter-Smooth Lenis Momentum Scroll Integration for Desktop only
+  // Ultra-Soft & Butter-Smooth Lenis Momentum Scroll Integration for Desktop and Laptop devices
   useEffect(() => {
-    const isTouchDevice =
+    // Mobil dar ekranlarda ve hareket azaltma tercihi olan kullanıcılarda native kaydırmayı koru
+    const isSmallMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    const prefersReducedMotion =
       typeof window !== 'undefined' &&
-      ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768)
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    if (isTouchDevice) {
+    if (isSmallMobile || prefersReducedMotion) {
       return undefined
     }
 
     const lenis = new Lenis({
-      lerp: 0.065, // Masaüstünde ipeksi kayma
-      wheelMultiplier: 1.0,
+      duration: 1.2, // İpeksi ve pürüzsüz kayma süresi (saniye)
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Doğal üstel yavaşlama
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
       smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
     })
 
     const win = window as unknown as {lenis: unknown}
@@ -153,6 +160,23 @@ const AppContent = () => {
     }
   }, [])
 
+  // Sayfa rotası değiştikçe Lenis scroll sınırlarını güncelle
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const win = window as any
+    if (win.lenis && typeof win.lenis.resize === 'function') {
+      // Sayfa DOM'u yerleştikten hemen sonra ve kısa bir süre sonra yeniden hesapla
+      win.lenis.resize()
+      const timer = setTimeout(() => {
+        if (win.lenis && typeof win.lenis.resize === 'function') {
+          win.lenis.resize()
+        }
+      }, 150)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [pathname])
+
   // Sayfa değişimlerinde header temasını sıfırla (beyaz sayfalarda header'ın beyaz kalma sorununu çözer)
   useEffect(() => {
     resetHeaderTheme()
@@ -170,10 +194,7 @@ const AppContent = () => {
   const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET']
   const allowedBypassSecrets = [
     ...(envBypassSecret ? [envBypassSecret] : []),
-    'birim-dev-2025',
-    'birim2025',
-    'birim-preview',
-    ...(import.meta.env.DEV ? ['birim-dev-local'] : []),
+    ...(import.meta.env.DEV ? ['birim-dev-local', 'birim-dev-2025'] : []),
   ]
 
   const searchParams = new URLSearchParams(window.location.search || location.search)

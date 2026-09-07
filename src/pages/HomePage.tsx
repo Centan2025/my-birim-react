@@ -252,40 +252,79 @@ export function HomePage() {
       const heroElem = document.getElementById('home-hero-section')
       const heroHeight = heroElem ? heroElem.offsetHeight : winHeight
 
-      // Yukarı kaydırırken Hero bölgesine yakınsak DOĞRUDAN Hero'ya git (0)
-      if (direction === 'up') {
-        if (scrollY <= 10) return
-        if (scrollY <= heroHeight + 120) {
-          snapTo(0)
-          return
-        }
-      }
+      const bannerElem = document.getElementById('home-quick-banner')
+      const bannerHeight = bannerElem ? bannerElem.offsetHeight : 0
+      const bannerTop = bannerElem ? bannerElem.getBoundingClientRect().top + scrollY : heroHeight
+      const bannerBottomScrollY =
+        bannerElem && bannerHeight > 0 ? Math.max(0, bannerTop + bannerHeight - winHeight) : 0
 
       // En altta footer'a doğru serbest doğal geçiş
       if (direction === 'down' && winHeight + scrollY >= docHeight - 60) {
         return
       }
 
-      // Hero ve içerik bloklarını hedefler olarak al
+      // İçerik bloklarını hedefler olarak al
       const blockElems = Array.from(
         document.querySelectorAll<HTMLElement>('.home-content-block-snap')
       ).filter(el => el && el.offsetHeight > 0)
 
-      const targets: HTMLElement[] = []
-      if (heroElem) targets.push(heroElem)
-      targets.push(...blockElems)
+      const firstBlockTop = blockElems[0]
+        ? blockElems[0].getBoundingClientRect().top + scrollY
+        : bannerTop + bannerHeight
 
-      if (targets.length === 0) return
+      // --- AŞAĞI KAYDIRMA KADEMELERİ ---
+      if (direction === 'down') {
+        // Kademe 0: Hero tam ekrandayken ilk kademede Hero altındaki gri bant çıksın
+        if (bannerBottomScrollY > 0 && scrollY < bannerBottomScrollY - 15) {
+          snapTo(bannerBottomScrollY)
+          return
+        }
 
-      // Viewport merkezine göre aktif bloğu bul
+        // Kademe 1: Gri bant kademesindeyken bir sonraki scroll'da ilk içerik bloğuna kay
+        if (scrollY < firstBlockTop - 40) {
+          snapTo(firstBlockTop)
+          return
+        }
+      }
+
+      // --- YUKARI KAYDIRMA KADEMELERİ (TAM TERSİ) ---
+      if (direction === 'up') {
+        // En tepedeyken hiçbir şey yapma
+        if (scrollY <= 15) return
+
+        // Gri bant kademesindeysek veya Hero'ya çok yakınsak doğrudan tam Hero'ya (0) dön
+        if (bannerBottomScrollY > 0) {
+          if (scrollY <= bannerBottomScrollY + 25) {
+            snapTo(0)
+            return
+          }
+          // İlk bloğun henüz üst kısmındaysak gri bant kademesine geri dön
+          if (scrollY < firstBlockTop - 40) {
+            snapTo(bannerBottomScrollY)
+            return
+          }
+        } else {
+          if (scrollY <= 40) {
+            snapTo(0)
+            return
+          }
+        }
+      }
+
+      if (blockElems.length === 0) {
+        if (direction === 'up') snapTo(0)
+        return
+      }
+
+      // Viewport merkezine göre aktif içerik bloğunu bul
       const viewportCenter = scrollY + winHeight * 0.45
       let currentIndex = 0
       let closestDist = Infinity
 
-      for (let i = 0; i < targets.length; i++) {
-        const el = targets[i]
+      for (let i = 0; i < blockElems.length; i++) {
+        const el = blockElems[i]
         if (!el) continue
-        const top = el.offsetTop
+        const top = el.getBoundingClientRect().top + scrollY
         const height = el.offsetHeight
 
         if (viewportCenter >= top && viewportCenter <= top + height) {
@@ -299,7 +338,7 @@ export function HomePage() {
         }
       }
 
-      const currentElem = targets[currentIndex]
+      const currentElem = blockElems[currentIndex]
       if (!currentElem) return
       const currentRect = currentElem.getBoundingClientRect()
 
@@ -312,8 +351,8 @@ export function HomePage() {
         if (remainingBelow > 40) {
           const step = Math.min(remainingBelow, winHeight * 0.8)
           targetScrollY = scrollY + step
-        } else if (currentIndex < targets.length - 1) {
-          const nextElem = targets[currentIndex + 1]
+        } else if (currentIndex < blockElems.length - 1) {
+          const nextElem = blockElems[currentIndex + 1]
           if (nextElem) {
             targetScrollY = scrollY + nextElem.getBoundingClientRect().top
           }
@@ -327,10 +366,9 @@ export function HomePage() {
           const step = Math.min(hiddenAbove, winHeight * 0.8)
           targetScrollY = scrollY - step
         } else if (currentIndex > 0) {
-          const prevElem = targets[currentIndex - 1]
+          const prevElem = blockElems[currentIndex - 1]
           if (currentIndex - 1 === 0) {
-            // Önceki hedef Hero ise doğrudan en tepeye git
-            targetScrollY = 0
+            targetScrollY = firstBlockTop
           } else if (prevElem) {
             const prevRect = prevElem.getBoundingClientRect()
             if (prevRect.height > winHeight) {
@@ -340,7 +378,8 @@ export function HomePage() {
             }
           }
         } else {
-          targetScrollY = 0
+          // İlk içerik bloğunun tepesindeyken yukarı kaydırıldığında gri bant kademesine git
+          targetScrollY = bannerBottomScrollY > 0 ? bannerBottomScrollY : 0
         }
       }
 

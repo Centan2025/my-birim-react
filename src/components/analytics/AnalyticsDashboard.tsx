@@ -28,8 +28,9 @@ import {
   Search,
   ExternalLink,
 } from 'lucide-react'
-import TurkeyMapChart from './TurkeyMapChart'
-import WorldMapChart from './WorldMapChart'
+
+const TurkeyMapChart = React.lazy(() => import('./TurkeyMapChart'))
+const WorldMapChart = React.lazy(() => import('./WorldMapChart'))
 
 export interface AnalyticsData {
   overview: {
@@ -179,13 +180,30 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     }))
   }, [data?.cityData])
 
+  const getAuthHeaders = useCallback(() => {
+    const headers: Record<string, string> = {}
+    if (typeof window !== 'undefined') {
+      const pin = sessionStorage.getItem('birim_analytics_pin')
+      if (pin) headers['x-analytics-pin'] = pin
+      const token = localStorage.getItem('birim_token')
+      if (token) headers['Authorization'] = `Bearer ${token}`
+    }
+    return headers
+  }, [])
+
   const fetchData = useCallback(
     async (range: string, isSilent = false) => {
       try {
         if (!isSilent) setLoading(true)
         setError(null)
 
-        const res = await fetch(`${apiBaseUrl}/analytics?startDate=${range}&endDate=today&type=all`)
+        const res = await fetch(
+          `${apiBaseUrl}/analytics?startDate=${range}&endDate=today&type=all`,
+          {
+            headers: getAuthHeaders(),
+            credentials: 'same-origin',
+          }
+        )
         if (!res.ok) {
           throw new Error(`API hatası: ${res.status}`)
         }
@@ -208,12 +226,15 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         setRefreshing(false)
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl, getAuthHeaders]
   )
 
   const fetchRealtime = useCallback(async () => {
     try {
-      const res = await fetch(`${apiBaseUrl}/analytics?type=realtime`)
+      const res = await fetch(`${apiBaseUrl}/analytics?type=realtime`, {
+        headers: getAuthHeaders(),
+        credentials: 'same-origin',
+      })
       if (res.ok) {
         const json = await res.json()
         if (json.success && json.data?.realtime) {
@@ -223,7 +244,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     } catch {
       // ignore
     }
-  }, [apiBaseUrl])
+  }, [apiBaseUrl, getAuthHeaders])
 
   useEffect(() => {
     fetchData(dateRange)
@@ -656,12 +677,20 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
             </div>
 
-            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden">
-              {mapSubTab === 'turkey' ? (
-                <TurkeyMapChart turkishCities={turkishCitiesForMap} />
-              ) : (
-                <WorldMapChart countries={data?.countryData || []} />
-              )}
+            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden min-h-[300px] flex items-center justify-center">
+              <React.Suspense
+                fallback={
+                  <div className="h-64 flex items-center justify-center text-slate-400 text-xs">
+                    Harita yükleniyor...
+                  </div>
+                }
+              >
+                {mapSubTab === 'turkey' ? (
+                  <TurkeyMapChart turkishCities={turkishCitiesForMap} />
+                ) : (
+                  <WorldMapChart countries={data?.countryData || []} />
+                )}
+              </React.Suspense>
             </div>
           </div>
 
@@ -964,8 +993,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
             </div>
 
-            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden">
-              <TurkeyMapChart turkishCities={turkishCitiesForMap} />
+            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden min-h-[300px]">
+              <React.Suspense
+                fallback={
+                  <div className="h-64 flex items-center justify-center text-slate-400 text-xs">
+                    Türkiye Haritası yükleniyor...
+                  </div>
+                }
+              >
+                <TurkeyMapChart turkishCities={turkishCitiesForMap} />
+              </React.Suspense>
             </div>
           </div>
 
@@ -984,8 +1021,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
             </div>
 
-            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden">
-              <WorldMapChart countries={data?.countryData || []} />
+            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden min-h-[300px]">
+              <React.Suspense
+                fallback={
+                  <div className="h-64 flex items-center justify-center text-slate-400 text-xs">
+                    Dünya Haritası yükleniyor...
+                  </div>
+                }
+              >
+                <WorldMapChart countries={data?.countryData || []} />
+              </React.Suspense>
             </div>
           </div>
 
