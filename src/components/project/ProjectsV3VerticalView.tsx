@@ -11,6 +11,9 @@ import {
 import type {Project} from '../../types'
 import {OptimizedImage} from '../OptimizedImage'
 import {Breadcrumbs} from '../Breadcrumbs'
+import ScrollReveal from '../ScrollReveal'
+import {TextMaskReveal} from '../TextMaskReveal'
+import {TextLineReveal} from '../TextLineReveal'
 import {useTranslation} from '../../i18n'
 import {toPlainText} from '../../utils/portableText'
 
@@ -183,67 +186,79 @@ const StackingMonolithCard: React.FC<{
           <div className="lg:col-span-6 p-6 sm:p-10 lg:p-14 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-neutral-200">
             {/* Üst Mimari Aks Strip */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between font-mono text-xs text-neutral-500 uppercase tracking-widest pb-4 border-b border-neutral-200">
-                <div className="flex items-center gap-2 font-semibold text-neutral-900">
-                  <span className="w-2 h-2 bg-neutral-900 inline-block" />
-                  <span>
-                    CASE [{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}]
-                  </span>
+              <TextMaskReveal delay={80} amount={0.05}>
+                <div className="flex items-center justify-between font-mono text-xs text-neutral-500 uppercase tracking-widest pb-4 border-b border-neutral-200">
+                  <div className="flex items-center gap-2 font-semibold text-neutral-900">
+                    <span className="w-2 h-2 bg-neutral-900 inline-block" />
+                    <span>
+                      CASE [{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}]
+                    </span>
+                  </div>
+                  <span>{year || '2024'}</span>
                 </div>
-                <span>{year || '2024'}</span>
-              </div>
+              </TextMaskReveal>
 
               {category && (
-                <div className="text-xs font-mono tracking-[0.25em] text-neutral-400 uppercase">
-                  TYPOLOGY // {category}
-                </div>
+                <TextMaskReveal delay={120} amount={0.05}>
+                  <div className="text-xs font-mono tracking-[0.25em] text-neutral-400 uppercase">
+                    TYPOLOGY // {category}
+                  </div>
+                </TextMaskReveal>
               )}
 
               {/* Devasa Brutalist Başlık */}
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-light font-michroma uppercase text-neutral-900 tracking-tight leading-[1.08] pt-2">
-                <Link
-                  to={`/projects/${project.id}`}
-                  className="hover:opacity-80 transition-opacity"
-                >
-                  {title}
-                </Link>
-              </h2>
+              <TextMaskReveal delay={160} amount={0.05}>
+                <h2 className="text-3xl sm:text-5xl lg:text-6xl font-light font-michroma uppercase text-neutral-900 tracking-tight leading-[1.08] pt-2">
+                  <Link
+                    to={`/projects/${project.id}`}
+                    className="hover:opacity-80 transition-opacity"
+                  >
+                    {title}
+                  </Link>
+                </h2>
+              </TextMaskReveal>
 
               {excerpt && (
-                <p className="text-xs sm:text-sm font-light text-neutral-600 leading-relaxed font-mono pt-4 line-clamp-3 max-w-lg">
-                  {excerpt}
-                </p>
+                <TextMaskReveal delay={200} amount={0.05}>
+                  <p className="text-xs sm:text-sm font-light text-neutral-600 leading-relaxed font-mono pt-4 line-clamp-3 max-w-lg">
+                    {excerpt}
+                  </p>
+                </TextMaskReveal>
               )}
             </div>
 
             {/* Alt Mimari Detaylar & Aksiyon */}
             <div className="pt-8 mt-6 border-t border-neutral-200 space-y-6">
-              <div className="grid grid-cols-2 gap-4 font-mono text-xs">
-                <div>
-                  <span className="text-[10px] text-neutral-400 block uppercase tracking-widest">
-                    LOKASYON
-                  </span>
-                  <span className="text-neutral-900 font-medium block mt-1">
-                    {location || 'İSTANBUL, TR'}
-                  </span>
+              <TextMaskReveal delay={240} amount={0.05}>
+                <div className="grid grid-cols-2 gap-4 font-mono text-xs">
+                  <div>
+                    <span className="text-[10px] text-neutral-400 block uppercase tracking-widest">
+                      LOKASYON
+                    </span>
+                    <span className="text-neutral-900 font-medium block mt-1">
+                      {location || 'İSTANBUL, TR'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-neutral-400 block uppercase tracking-widest">
+                      DURUM
+                    </span>
+                    <span className="text-neutral-900 font-medium block mt-1">TAMAMLANDI</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] text-neutral-400 block uppercase tracking-widest">
-                    DURUM
-                  </span>
-                  <span className="text-neutral-900 font-medium block mt-1">TAMAMLANDI</span>
-                </div>
-              </div>
+              </TextMaskReveal>
 
-              <Link
-                to={`/projects/${project.id}`}
-                className="w-full inline-flex items-center justify-between px-6 py-4 bg-neutral-900 text-white hover:bg-neutral-800 font-mono text-xs uppercase tracking-[0.25em] transition-all rounded-none font-semibold shadow-md group"
-              >
-                <span>{isTr ? 'PROJEYİ DETAYLI İNCELE' : 'EXPLORE CASE STUDY'}</span>
-                <span className="transition-transform duration-300 group-hover:translate-x-2 font-bold">
-                  →
-                </span>
-              </Link>
+              <TextMaskReveal delay={280} amount={0.05}>
+                <Link
+                  to={`/projects/${project.id}`}
+                  className="w-full inline-flex items-center justify-between px-6 py-4 bg-neutral-900 text-white hover:bg-neutral-800 font-mono text-xs uppercase tracking-[0.25em] transition-all rounded-none font-semibold shadow-md group"
+                >
+                  <span>{isTr ? 'PROJEYİ DETAYLI İNCELE' : 'EXPLORE CASE STUDY'}</span>
+                  <span className="transition-transform duration-300 group-hover:translate-x-2 font-bold">
+                    →
+                  </span>
+                </Link>
+              </TextMaskReveal>
             </div>
           </div>
 
@@ -270,12 +285,16 @@ const StackingMonolithCard: React.FC<{
 
               {/* Görsel İçi Canlı Etiket */}
               <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between text-white font-mono text-xs z-10 pointer-events-none">
-                <span className="px-3 py-1 bg-black/60 backdrop-blur-sm border border-white/20 uppercase tracking-widest text-[10px]">
-                  VIEWPORT // {String(index + 1).padStart(2, '0')}
-                </span>
-                <span className="tracking-widest uppercase text-[10px] text-white/80">
-                  CLICK TO VIEW ↗
-                </span>
+                <TextMaskReveal delay={180} amount={0.05} display="inline-block">
+                  <span className="px-3 py-1 bg-black/60 backdrop-blur-sm border border-white/20 uppercase tracking-widest text-[10px]">
+                    VIEWPORT // {String(index + 1).padStart(2, '0')}
+                  </span>
+                </TextMaskReveal>
+                <TextMaskReveal delay={220} amount={0.05} display="inline-block">
+                  <span className="tracking-widest uppercase text-[10px] text-white/80">
+                    CLICK TO VIEW ↗
+                  </span>
+                </TextMaskReveal>
               </div>
             </Link>
           </div>
@@ -339,48 +358,64 @@ const KineticRunwaySlider: React.FC<{
                 key={project.id}
                 className="w-[310px] sm:w-[380px] md:w-[440px] flex-shrink-0 select-none"
               >
-                <Link
-                  to={`/projects/${project.id}`}
-                  className="group block bg-white border border-neutral-200 hover:border-neutral-900 transition-colors p-4 relative shadow-sm hover:shadow-xl"
+                <ScrollReveal
+                  delay={Math.min((idx % 4) * 80, 240)}
+                  distance={25}
+                  duration={0.75}
+                  threshold={0.05}
+                  initialScale={0.96}
                 >
-                  <CrosshairMark position="top-left" />
-                  <CrosshairMark position="top-right" />
-                  <CrosshairMark position="bottom-left" />
-                  <CrosshairMark position="bottom-right" />
+                  <Link
+                    to={`/projects/${project.id}`}
+                    className="group block bg-white border border-neutral-200 hover:border-neutral-900 transition-colors p-4 relative shadow-sm hover:shadow-xl"
+                  >
+                    <CrosshairMark position="top-left" />
+                    <CrosshairMark position="top-right" />
+                    <CrosshairMark position="bottom-left" />
+                    <CrosshairMark position="bottom-right" />
 
-                  <div className="flex items-center justify-between pb-3 border-b border-neutral-200 text-xs font-mono text-neutral-500 uppercase tracking-widest">
-                    <span>PRJ-{String(idx + 1).padStart(2, '0')}</span>
-                    <span>{year || '2024'}</span>
-                  </div>
+                    <TextMaskReveal delay={60} amount={0.05}>
+                      <div className="flex items-center justify-between pb-3 border-b border-neutral-200 text-xs font-mono text-neutral-500 uppercase tracking-widest">
+                        <span>PRJ-{String(idx + 1).padStart(2, '0')}</span>
+                        <span>{year || '2024'}</span>
+                      </div>
+                    </TextMaskReveal>
 
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100 border border-neutral-200 mt-3">
-                    {coverUrl && (
-                      <OptimizedImage
-                        src={coverUrl}
-                        alt={title}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-106"
-                        quality={90}
-                        loading="lazy"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-30 group-hover:opacity-10 transition-opacity" />
-                  </div>
-
-                  <div className="pt-4 space-y-2">
-                    <div className="text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
-                      {category || 'ARCHITECTURAL CASE'}
+                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100 border border-neutral-200 mt-3">
+                      {coverUrl && (
+                        <OptimizedImage
+                          src={coverUrl}
+                          alt={title}
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-106"
+                          quality={90}
+                          loading="lazy"
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-30 group-hover:opacity-10 transition-opacity" />
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-light font-michroma uppercase text-neutral-900 tracking-tight leading-tight truncate">
-                      {title}
-                    </h3>
-                    <div className="pt-2 border-t border-neutral-200 flex items-center justify-between text-xs font-mono text-neutral-500">
-                      <span>{location || 'İSTANBUL, TR'}</span>
-                      <span className="font-semibold text-neutral-900 group-hover:translate-x-1 transition-transform">
-                        {isTr ? 'İNCELE ↗' : 'EXPLORE ↗'}
-                      </span>
+
+                    <div className="pt-4 space-y-2">
+                      <TextMaskReveal delay={100} amount={0.05}>
+                        <div className="text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
+                          {category || 'ARCHITECTURAL CASE'}
+                        </div>
+                      </TextMaskReveal>
+                      <TextMaskReveal delay={140} amount={0.05}>
+                        <h3 className="text-xl sm:text-2xl font-light font-michroma uppercase text-neutral-900 tracking-tight leading-tight truncate">
+                          {title}
+                        </h3>
+                      </TextMaskReveal>
+                      <TextMaskReveal delay={180} amount={0.05}>
+                        <div className="pt-2 border-t border-neutral-200 flex items-center justify-between text-xs font-mono text-neutral-500">
+                          <span>{location || 'İSTANBUL, TR'}</span>
+                          <span className="font-semibold text-neutral-900 group-hover:translate-x-1 transition-transform">
+                            {isTr ? 'İNCELE ↗' : 'EXPLORE ↗'}
+                          </span>
+                        </div>
+                      </TextMaskReveal>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </ScrollReveal>
               </div>
             )
           })}
@@ -424,78 +459,87 @@ const MonolithicMatrixGrid: React.FC<{
             : 'col-span-12 lg:col-span-5'
 
         return (
-          <motion.div
-            key={project.id}
-            initial={{opacity: 0, y: 30}}
-            whileInView={{opacity: 1, y: 0}}
-            viewport={{once: true, margin: '-50px'}}
-            transition={{duration: 0.7, delay: (idx % 3) * 0.08, ease: [0.16, 1, 0.3, 1]}}
-            className={colSpanClass}
-          >
-            <Link
-              to={`/projects/${project.id}`}
-              className="group flex flex-col justify-between h-full bg-white border border-neutral-200 hover:border-neutral-900 transition-all p-5 sm:p-6 relative shadow-xs hover:shadow-2xl"
+          <div key={project.id} className={colSpanClass}>
+            <ScrollReveal
+              delay={Math.min((idx % 3) * 80, 240)}
+              threshold={0.05}
+              distance={30}
+              duration={0.8}
+              initialScale={0.96}
             >
-              <CrosshairMark position="top-left" />
-              <CrosshairMark position="top-right" />
-              <CrosshairMark position="bottom-left" />
-              <CrosshairMark position="bottom-right" />
-
-              <div className="flex items-center justify-between pb-3 border-b border-neutral-200 text-xs font-mono text-neutral-500 uppercase tracking-widest">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-neutral-900" />
-                  <span>PRJ-{String(idx + 1).padStart(2, '0')}</span>
-                  {category && (
-                    <>
-                      <span>/</span>
-                      <span className="text-neutral-900 font-medium">{category}</span>
-                    </>
-                  )}
-                </div>
-                <span>{year || '2024'}</span>
-              </div>
-
-              <div
-                className={`relative w-full overflow-hidden bg-neutral-100 border border-neutral-200 my-4 ${
-                  isFull
-                    ? 'aspect-[21/9] min-h-[320px] sm:min-h-[440px]'
-                    : isWide
-                      ? 'aspect-[16/10] min-h-[280px] sm:min-h-[350px]'
-                      : 'aspect-[4/3] min-h-[260px] sm:min-h-[300px]'
-                }`}
+              <Link
+                to={`/projects/${project.id}`}
+                className="group flex flex-col justify-between h-full bg-white border border-neutral-200 hover:border-neutral-900 transition-all p-5 sm:p-6 relative shadow-xs hover:shadow-2xl"
               >
-                {coverUrl && (
-                  <OptimizedImage
-                    src={coverUrl}
-                    alt={title}
-                    className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-106"
-                    quality={90}
-                    loading="lazy"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-30 group-hover:opacity-10 transition-opacity" />
-              </div>
+                <CrosshairMark position="top-left" />
+                <CrosshairMark position="top-right" />
+                <CrosshairMark position="bottom-left" />
+                <CrosshairMark position="bottom-right" />
 
-              <div className="space-y-2 pt-2">
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-light font-michroma uppercase text-neutral-900 tracking-tight leading-tight group-hover:opacity-80 transition-opacity">
-                  {title}
-                </h3>
+                <TextMaskReveal delay={60} amount={0.05}>
+                  <div className="flex items-center justify-between pb-3 border-b border-neutral-200 text-xs font-mono text-neutral-500 uppercase tracking-widest">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-neutral-900" />
+                      <span>PRJ-{String(idx + 1).padStart(2, '0')}</span>
+                      {category && (
+                        <>
+                          <span>/</span>
+                          <span className="text-neutral-900 font-medium">{category}</span>
+                        </>
+                      )}
+                    </div>
+                    <span>{year || '2024'}</span>
+                  </div>
+                </TextMaskReveal>
 
-                {excerpt && (
-                  <p className="text-xs text-neutral-600 font-light leading-relaxed line-clamp-2">
-                    {excerpt}
-                  </p>
-                )}
-
-                <div className="pt-4 border-t border-neutral-200 flex items-center justify-between text-xs font-mono text-neutral-500">
-                  <span className="tracking-wider">{location || 'İSTANBUL, TR'}</span>
-                  <span className="font-semibold text-neutral-900 group-hover:translate-x-1.5 transition-transform">
-                    {isTr ? 'PROJEYİ AÇ ↗' : 'VIEW CASE ↗'}
-                  </span>
+                <div
+                  className={`relative w-full overflow-hidden bg-neutral-100 border border-neutral-200 my-4 ${
+                    isFull
+                      ? 'aspect-[21/9] min-h-[320px] sm:min-h-[440px]'
+                      : isWide
+                        ? 'aspect-[16/10] min-h-[280px] sm:min-h-[350px]'
+                        : 'aspect-[4/3] min-h-[260px] sm:min-h-[300px]'
+                  }`}
+                >
+                  {coverUrl && (
+                    <OptimizedImage
+                      src={coverUrl}
+                      alt={title}
+                      className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-106"
+                      quality={90}
+                      loading="lazy"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-30 group-hover:opacity-10 transition-opacity" />
                 </div>
-              </div>
-            </Link>
-          </motion.div>
+
+                <div className="space-y-2 pt-2">
+                  <TextMaskReveal delay={120} amount={0.05}>
+                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-light font-michroma uppercase text-neutral-900 tracking-tight leading-tight group-hover:opacity-80 transition-opacity">
+                      {title}
+                    </h3>
+                  </TextMaskReveal>
+
+                  {excerpt && (
+                    <TextMaskReveal delay={160} amount={0.05}>
+                      <p className="text-xs text-neutral-600 font-light leading-relaxed line-clamp-2">
+                        {excerpt}
+                      </p>
+                    </TextMaskReveal>
+                  )}
+
+                  <TextMaskReveal delay={200} amount={0.05}>
+                    <div className="pt-4 border-t border-neutral-200 flex items-center justify-between text-xs font-mono text-neutral-500">
+                      <span className="tracking-wider">{location || 'İSTANBUL, TR'}</span>
+                      <span className="font-semibold text-neutral-900 group-hover:translate-x-1.5 transition-transform">
+                        {isTr ? 'PROJEYİ AÇ ↗' : 'VIEW CASE ↗'}
+                      </span>
+                    </div>
+                  </TextMaskReveal>
+                </div>
+              </Link>
+            </ScrollReveal>
+          </div>
         )
       })}
     </div>
@@ -637,39 +681,28 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
         {/* Ana Tipografik Sahne: Masked Reveal Animasyonu */}
         <div className="pt-8 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="overflow-hidden">
-              <motion.span
-                initial={{y: '100%'}}
-                animate={{y: '0%'}}
-                transition={{duration: 0.6, ease: [0.16, 1, 0.3, 1]}}
-                className="text-xs font-mono tracking-[0.3em] uppercase text-neutral-500 block mb-2"
-              >
+            <TextMaskReveal delay={40} amount={0.05}>
+              <span className="text-xs font-mono tracking-[0.3em] uppercase text-neutral-500 block mb-2">
                 CURATED ARCHITECTURAL ARCHIVES
-              </motion.span>
-            </div>
-            <div className="overflow-hidden">
-              <motion.h1
-                initial={{y: '100%'}}
-                animate={{y: '0%'}}
-                transition={{duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1]}}
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-neutral-900 tracking-tight uppercase font-michroma"
-              >
-                {t('projects') || 'Projeler'}
-              </motion.h1>
-            </div>
+              </span>
+            </TextMaskReveal>
+            <TextLineReveal
+              as="h1"
+              text={t('projects') || 'Projeler'}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-neutral-900 tracking-tight uppercase font-michroma"
+              delay={80}
+              stagger={65}
+            />
           </div>
 
-          <div className="overflow-hidden max-w-md">
-            <motion.p
-              initial={{y: '100%'}}
-              animate={{y: '0%'}}
-              transition={{duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1]}}
-              className="text-xs sm:text-sm font-light text-neutral-600 leading-relaxed font-mono"
-            >
-              {isTr
-                ? 'Mekân ve mobilya arasındaki mimari diyaloğu şekillendiren seçkin projeler ve referans uygulamalar.'
-                : 'Curated architectural projects and bespoke interior applications defining the dialogue between space and form.'}
-            </motion.p>
+          <div className="max-w-md">
+            <TextMaskReveal delay={160} amount={0.05}>
+              <p className="text-xs sm:text-sm font-light text-neutral-600 leading-relaxed font-mono">
+                {isTr
+                  ? 'Mekân ve mobilya arasındaki mimari diyaloğu şekillendiren seçkin projeler ve referans uygulamalar.'
+                  : 'Curated architectural projects and bespoke interior applications defining the dialogue between space and form.'}
+              </p>
+            </TextMaskReveal>
           </div>
         </div>
 

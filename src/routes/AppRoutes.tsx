@@ -1,5 +1,5 @@
 import React, {Suspense} from 'react'
-import {Routes, Route, Location} from 'react-router-dom'
+import {Routes, Route, Navigate, type Location} from 'react-router-dom'
 import {PageLoading} from '../components/LoadingSpinner'
 import {ErrorBoundary} from '../components/ErrorBoundary'
 import {Footer} from '../components/Footer'
@@ -191,7 +191,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           path="/factory"
           element={
             <PageBoundary pageName="Fabrika">
-              <FactoryPage defaultVersion="v2" />
+              <FactoryPage />
             </PageBoundary>
           }
         />
@@ -199,7 +199,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           path="/factory-v2"
           element={
             <PageBoundary pageName="Fabrika">
-              <FactoryPage defaultVersion="v2" />
+              <FactoryPage />
             </PageBoundary>
           }
         />
@@ -207,26 +207,19 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           path="/contact"
           element={
             <PageBoundary pageName="İletişim">
-              <ContactPage defaultVersion="v2" />
+              <ContactPage />
             </PageBoundary>
           }
         />
         <Route
           path="/contact-v2"
           element={
-            <PageBoundary pageName="İletişim V2">
-              <ContactPage defaultVersion="v2" />
+            <PageBoundary pageName="İletişim">
+              <ContactPage />
             </PageBoundary>
           }
         />
-        <Route
-          path="/contact-v1"
-          element={
-            <PageBoundary pageName="İletişim V1">
-              <ContactPage defaultVersion="v1" />
-            </PageBoundary>
-          }
-        />
+        <Route path="/contact-v1" element={<Navigate to="/contact" replace />} />
         <Route
           path="/login"
           element={

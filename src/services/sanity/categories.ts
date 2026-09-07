@@ -2,6 +2,7 @@ import groq from 'groq'
 import type {Category, Designer, LocalizedString} from '../../types'
 import {sanity, useSanity, mapImage, mapR2Metadata, type SanityImageLike} from './client'
 import {getItem} from './settings'
+import {isBirimDesignStudio} from '../../utils/designerUtils'
 
 const SIMULATED_DELAY = 200
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
@@ -69,6 +70,59 @@ export const getCategories = async (): Promise<Category[]> => {
   return getItem<Category[]>(KEYS.CATEGORIES) || []
 }
 
+function formatDesigner(r: SanityDesignerRow): Designer {
+  const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
+  const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url']
+    ? mapImage(r.imageMobileR2)
+    : undefined
+  const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url']
+    ? mapImage(r.imageDesktopR2)
+    : undefined
+  const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : r.image ? mapR2Metadata(r.image) : {}
+  const mobMetadata = r.imageMobileR2 ? mapR2Metadata(r.imageMobileR2) : {}
+  const deskMetadata = r.imageDesktopR2 ? mapR2Metadata(r.imageDesktopR2) : {}
+
+  const isStudio = isBirimDesignStudio({id: r.id, name: r.name})
+  const defaultStudioLogo = '/img/logo.png'
+  // Stüdyo için firma logosu önceliklidir veya görsel yoksa varsayılan firma logosudur
+  const finalUrl =
+    isStudio && (!imageFinal || imageFinal.includes('logo'))
+      ? defaultStudioLogo
+      : imageFinal || (isStudio ? defaultStudioLogo : '')
+
+  return {
+    id: r.id,
+    name: r.name,
+    role: r.role || (isStudio ? {tr: 'Tasarım Stüdyosu', en: 'Design Studio'} : undefined),
+    bio:
+      r.bio ||
+      (isStudio
+        ? {
+            tr: "Birim'in yenilikçi ve zamansız tasarım vizyonunu yansıtan iç tasarım stüdyosu.",
+            en: "Birim's in-house design studio reflecting innovative and timeless design philosophy.",
+          }
+        : ''),
+    isCompanyLogo: isStudio,
+    image: {
+      url: finalUrl,
+      urlMobile: imageMobile && imageMobile !== finalUrl ? imageMobile : undefined,
+      urlDesktop: imageDesktop && imageDesktop !== finalUrl ? imageDesktop : undefined,
+      ...metadata,
+      cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
+      hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
+      origWidthMobile: mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+      origHeightMobile: mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
+      cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
+      hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
+      origWidthDesktop: deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
+      origHeightDesktop:
+        deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
+    },
+    imageMobile: imageMobile && imageMobile !== finalUrl ? imageMobile : undefined,
+    imageDesktop: imageDesktop && imageDesktop !== finalUrl ? imageDesktop : undefined,
+  }
+}
+
 export const getDesigners = async (): Promise<Designer[]> => {
   if (useSanity && sanity) {
     const query = groq`*[_type == "designer"] | order(orderRank asc){
@@ -82,47 +136,19 @@ export const getDesigners = async (): Promise<Designer[]> => {
           imageDesktopR2
         }`
     const rows = await sanity.fetch(query)
-    return rows.map((r: SanityDesignerRow) => {
-      const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
-      const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url']
-        ? mapImage(r.imageMobileR2)
-        : undefined
-      const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url']
-        ? mapImage(r.imageDesktopR2)
-        : undefined
-      const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : r.image ? mapR2Metadata(r.image) : {}
-      const mobMetadata = r.imageMobileR2 ? mapR2Metadata(r.imageMobileR2) : {}
-      const deskMetadata = r.imageDesktopR2 ? mapR2Metadata(r.imageDesktopR2) : {}
-
-      return {
-        id: r.id,
-        name: r.name,
-        role: r.role,
-        bio: r.bio,
-        image: {
-          url: imageFinal,
-          urlMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
-          urlDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
-          ...metadata,
-          cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
-          hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
-          origWidthMobile: mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
-          origHeightMobile:
-            mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
-          cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
-          hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
-          origWidthDesktop:
-            deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
-          origHeightDesktop:
-            deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
-        },
-        imageMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
-        imageDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
-      }
-    })
+    return rows.map(formatDesigner)
   }
   await delay(SIMULATED_DELAY)
-  return getItem<Designer[]>(KEYS.DESIGNERS) || []
+  return (getItem<Designer[]>(KEYS.DESIGNERS) || []).map(d => {
+    if (isBirimDesignStudio(d)) {
+      return {
+        ...d,
+        isCompanyLogo: true,
+        role: d.role || {tr: 'Tasarım Stüdyosu', en: 'Design Studio'},
+      }
+    }
+    return d
+  })
 }
 
 export const getDesignerById = async (id: string): Promise<Designer | undefined> => {
@@ -132,43 +158,12 @@ export const getDesignerById = async (id: string): Promise<Designer | undefined>
     }`
     const r = await sanity.fetch(query, {id})
     if (!r) return undefined
-    const image = mapImage(r.imageR2) || mapImage(r.image) || ''
-    const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url'] as string | undefined
-    const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] as
-      | string
-      | undefined
-    const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : r.image ? mapR2Metadata(r.image) : {}
-    const mobMetadata = r.imageMobileR2 ? mapR2Metadata(r.imageMobileR2) : {}
-    const deskMetadata = r.imageDesktopR2 ? mapR2Metadata(r.imageDesktopR2) : {}
-
-    return {
-      id: r.id,
-      name: r.name,
-      role: r.role,
-      bio: r.bio,
-      image: {
-        url: image,
-        urlMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
-        urlDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
-        ...metadata,
-        cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
-        hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
-        origWidthMobile: mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
-        origHeightMobile:
-          mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
-        cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
-        hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
-        origWidthDesktop: deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
-        origHeightDesktop:
-          deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
-      },
-      imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
-      imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
-    }
+    return formatDesigner(r)
   }
   const designers = await getDesigners()
   return designers.find(d => d.id === id)
 }
+
 export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
   if (!ids || ids.length === 0) return []
   if (useSanity && sanity) {
@@ -183,43 +178,7 @@ export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
           imageDesktopR2
         }`
     const rows = await sanity.fetch(query, {ids})
-    return rows.map((r: SanityDesignerRow) => {
-      const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
-      const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url']
-        ? mapImage(r.imageMobileR2)
-        : undefined
-      const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url']
-        ? mapImage(r.imageDesktopR2)
-        : undefined
-      const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : r.image ? mapR2Metadata(r.image) : {}
-      const mobMetadata = r.imageMobileR2 ? mapR2Metadata(r.imageMobileR2) : {}
-      const deskMetadata = r.imageDesktopR2 ? mapR2Metadata(r.imageDesktopR2) : {}
-      return {
-        id: r.id,
-        name: r.name,
-        role: r.role,
-        bio: r.bio,
-        image: {
-          url: imageFinal,
-          urlMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
-          urlDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
-          ...metadata,
-          cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
-          hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
-          origWidthMobile: mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
-          origHeightMobile:
-            mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
-          cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
-          hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
-          origWidthDesktop:
-            deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
-          origHeightDesktop:
-            deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
-        },
-        imageMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
-        imageDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
-      }
-    })
+    return rows.map(formatDesigner)
   }
   const all = await getDesigners()
   return all.filter(d => ids.includes(d.id))

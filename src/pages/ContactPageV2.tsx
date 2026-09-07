@@ -163,59 +163,8 @@ export function ContactPageV2() {
     ]
   }, [content?.locations])
 
-  const getLocationBadgeName = (loc: ContactLocation, idx: number): string => {
-    const typeStr = t(loc.type)
-    if (typeStr && !/^(Showroom|Fabrika|Mağaza|Ofis|Genel|Diğer)/i.test(typeStr.trim())) {
-      return typeStr.toUpperCase()
-    }
-
-    const titleStr = t(loc.title)
-    const addrStr = loc.address || ''
-
-    const districts = [
-      'Nişantaşı',
-      'Fenerbahçe',
-      'Sancaktepe',
-      'Levent',
-      'Dilovası',
-      'Maslak',
-      'Kalamış',
-      'Bağdat Caddesi',
-      'Etiler',
-      'Kadıköy',
-      'Beşiktaş',
-      'Şişli',
-      'Ataşehir',
-      'Ümraniye',
-      'Tuzla',
-      'Kartal',
-      'Maltepe',
-      'Sarıyer',
-      'Beyoğlu',
-      'Kocaeli',
-    ]
-
-    for (const d of districts) {
-      if (new RegExp(d, 'i').test(titleStr) || new RegExp(d, 'i').test(addrStr)) {
-        return d.toUpperCase()
-      }
-    }
-
-    const cleaned = titleStr
-      .replace(
-        /Showroom|Mağaza|Tasarım Stüdyosu|Entegre Üretim Tesisi|Fabrika|Deneyim Alanı|&/gi,
-        ''
-      )
-      .trim()
-    if (cleaned.length > 1 && cleaned.length < 20) {
-      return cleaned.toUpperCase()
-    }
-
-    return titleStr
-      ? (titleStr.split(' ')[0] || (idx === 0 ? 'NİŞANTAŞI' : 'FENERBAHÇE')).toUpperCase()
-      : idx === 0
-        ? 'NİŞANTAŞI'
-        : 'FENERBAHÇE'
+  const getLocationTitle = (loc: ContactLocation, idx: number): string => {
+    return t(loc.title) || t(loc.type) || (isTr ? `Konum ${idx + 1}` : `Location ${idx + 1}`)
   }
 
   const gridClass = useMemo(() => {
@@ -489,11 +438,11 @@ export function ContactPageV2() {
               </p>
             </div>
 
-            {/* Redesigned Location Switcher Buttons (Nişantaşı, Fenerbahçe etc.) */}
-            <div className="flex items-center gap-2 self-start sm:self-auto">
+            {/* Location Switcher Buttons */}
+            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
               {locations.map((loc, idx) => {
                 const isSelected = selectedLocationIndex === idx
-                const labelName = getLocationBadgeName(loc, idx)
+                const addressTitle = getLocationTitle(loc, idx)
                 return (
                   <button
                     key={idx}
@@ -503,16 +452,16 @@ export function ContactPageV2() {
                       analytics.event({
                         category: 'Contact',
                         action: 'map_tab_switch',
-                        label: labelName,
+                        label: addressTitle,
                       })
                     }}
-                    className={`relative px-5 py-2.5 text-xs font-mono uppercase tracking-widest transition-all cursor-pointer border ${
+                    className={`relative px-4 sm:px-5 py-2 sm:py-2.5 text-xs font-mono tracking-wider transition-all cursor-pointer border ${
                       isSelected
                         ? 'border-[var(--text-primary)] bg-[var(--text-primary)] text-[var(--bg-primary)] font-medium shadow-sm'
                         : 'border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-secondary)]/50'
                     }`}
                   >
-                    {labelName}
+                    {addressTitle}
                   </button>
                 )
               })}

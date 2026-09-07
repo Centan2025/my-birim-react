@@ -6,10 +6,14 @@ import {useDesigners} from '../hooks/useDesigners'
 import {useSEO} from '../hooks/useSEO'
 import {PageLoading} from '../components/LoadingSpinner'
 import {OptimizedImage} from '../components/OptimizedImage'
+import {SiteLogo} from '../components/SiteLogo'
 import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {isBirimDesignStudio} from '../utils/designerUtils'
 
 export function DesignersPage() {
   const {data: designers = [], isLoading: loading} = useDesigners()
+  const {data: settings} = useSiteSettings()
   const {t} = useTranslation()
   const navigate = useNavigate()
   const shouldReduceMotion = useReducedMotion()
@@ -172,114 +176,145 @@ export function DesignersPage() {
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-          {designers.map(designer => (
-            <motion.div
-              key={designer.id}
-              variants={cardVariants}
-              whileHover={shouldReduceMotion ? undefined : {y: -8}}
-              onClick={() => navigate(`/designer/${designer.id}`)}
-              className="group relative cursor-pointer overflow-hidden aspect-[4/5] bg-[var(--bg-secondary)] border border-[var(--border-primary)]/20"
-              style={{willChange: 'clip-path, transform'}}
-            >
-              {/* Image Container */}
-              <div className="w-full h-full overflow-hidden relative">
-                <motion.div variants={imageVariants} className="w-full h-full">
-                  <OptimizedImage
-                    alt={t(designer.name)}
-                    className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0 brightness-[1.08] contrast-[1.02]"
-                    src={getImageUrl(designer)}
-                    srcMobile={
-                      typeof designer.image === 'object' ? designer.image.urlMobile : undefined
-                    }
-                    srcDesktop={
-                      typeof designer.image === 'object' ? designer.image.urlDesktop : undefined
-                    }
-                    crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
-                    hotspot={
-                      typeof designer.image === 'object' ? designer.image.hotspot : undefined
-                    }
-                    origWidth={
-                      typeof designer.image === 'object' ? designer.image.origWidth : undefined
-                    }
-                    origHeight={
-                      typeof designer.image === 'object' ? designer.image.origHeight : undefined
-                    }
-                    cropMobile={
-                      typeof designer.image === 'object' ? designer.image.cropMobile : undefined
-                    }
-                    hotspotMobile={
-                      typeof designer.image === 'object' ? designer.image.hotspotMobile : undefined
-                    }
-                    origWidthMobile={
-                      typeof designer.image === 'object'
-                        ? designer.image.origWidthMobile
-                        : undefined
-                    }
-                    origHeightMobile={
-                      typeof designer.image === 'object'
-                        ? designer.image.origHeightMobile
-                        : undefined
-                    }
-                    cropDesktop={
-                      typeof designer.image === 'object' ? designer.image.cropDesktop : undefined
-                    }
-                    hotspotDesktop={
-                      typeof designer.image === 'object' ? designer.image.hotspotDesktop : undefined
-                    }
-                    origWidthDesktop={
-                      typeof designer.image === 'object'
-                        ? designer.image.origWidthDesktop
-                        : undefined
-                    }
-                    origHeightDesktop={
-                      typeof designer.image === 'object'
-                        ? designer.image.origHeightDesktop
-                        : undefined
-                    }
-                  />
-                </motion.div>
+          {designers.map(designer => {
+            const isBirimStudio = isBirimDesignStudio(designer) || Boolean(designer.isCompanyLogo)
 
-                {/* Refined Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-50 group-hover:opacity-25 transition-opacity duration-700"></div>
-                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-              </div>
+            return (
+              <motion.div
+                key={designer.id}
+                variants={cardVariants}
+                whileHover={shouldReduceMotion ? undefined : {y: -8}}
+                onClick={() => navigate(`/designer/${designer.id}`)}
+                className="group relative cursor-pointer overflow-hidden aspect-[4/5] bg-[var(--bg-secondary)] border border-[var(--border-primary)]/20"
+                style={{willChange: 'clip-path, transform'}}
+              >
+                {/* Image Container */}
+                <div className="w-full h-full overflow-hidden relative">
+                  {isBirimStudio ? (
+                    <motion.div
+                      variants={imageVariants}
+                      className="w-full h-full flex flex-col items-center justify-center p-8 sm:p-12 relative bg-gradient-to-b from-neutral-900/90 via-neutral-950 to-neutral-900 select-none"
+                    >
+                      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/[0.08] via-transparent to-transparent pointer-events-none" />
+                      <div className="relative z-10 w-full flex items-center justify-center px-4 transition-transform duration-1000 ease-out group-hover:scale-105">
+                        <SiteLogo
+                          logoUrl={settings?.logoUrl}
+                          className="w-full max-w-[200px] sm:max-w-[240px] h-auto object-contain brightness-100"
+                        />
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div variants={imageVariants} className="w-full h-full">
+                      <OptimizedImage
+                        alt={t(designer.name)}
+                        className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0 brightness-[1.08] contrast-[1.02]"
+                        src={getImageUrl(designer)}
+                        srcMobile={
+                          typeof designer.image === 'object' ? designer.image.urlMobile : undefined
+                        }
+                        srcDesktop={
+                          typeof designer.image === 'object' ? designer.image.urlDesktop : undefined
+                        }
+                        crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
+                        hotspot={
+                          typeof designer.image === 'object' ? designer.image.hotspot : undefined
+                        }
+                        origWidth={
+                          typeof designer.image === 'object' ? designer.image.origWidth : undefined
+                        }
+                        origHeight={
+                          typeof designer.image === 'object' ? designer.image.origHeight : undefined
+                        }
+                        cropMobile={
+                          typeof designer.image === 'object' ? designer.image.cropMobile : undefined
+                        }
+                        hotspotMobile={
+                          typeof designer.image === 'object'
+                            ? designer.image.hotspotMobile
+                            : undefined
+                        }
+                        origWidthMobile={
+                          typeof designer.image === 'object'
+                            ? designer.image.origWidthMobile
+                            : undefined
+                        }
+                        origHeightMobile={
+                          typeof designer.image === 'object'
+                            ? designer.image.origHeightMobile
+                            : undefined
+                        }
+                        cropDesktop={
+                          typeof designer.image === 'object'
+                            ? designer.image.cropDesktop
+                            : undefined
+                        }
+                        hotspotDesktop={
+                          typeof designer.image === 'object'
+                            ? designer.image.hotspotDesktop
+                            : undefined
+                        }
+                        origWidthDesktop={
+                          typeof designer.image === 'object'
+                            ? designer.image.origWidthDesktop
+                            : undefined
+                        }
+                        origHeightDesktop={
+                          typeof designer.image === 'object'
+                            ? designer.image.origHeightDesktop
+                            : undefined
+                        }
+                      />
+                    </motion.div>
+                  )}
 
-              {/* Information Panel - Simplified & Modern */}
-              <div className="absolute bottom-0 left-0 w-full p-8 lg:p-10 translate-y-[calc(100%-110px)] group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)]">
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 border-t border-white/10"></div>
+                  {/* Refined Overlays */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-50 group-hover:opacity-25 transition-opacity duration-700"></div>
+                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                </div>
 
-                <motion.div variants={contentVariants} className="relative z-10">
-                  <div className="overflow-hidden mb-2">
-                    <p className="text-[9px] tracking-[0.5em] font-medium text-white/40 uppercase group-hover:text-white/60 transition-colors duration-500">
-                      {t('designer') || 'Tasarımcı'}
-                    </p>
-                  </div>
+                {/* Information Panel - Simplified & Modern */}
+                <div className="absolute bottom-0 left-0 w-full p-8 lg:p-10 translate-y-[calc(100%-110px)] group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)]">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 border-t border-white/10"></div>
 
-                  <h3 className="text-xl md:text-2xl font-light text-white uppercase mb-4 tracking-widest leading-none">
-                    {t(designer.name)}
-                  </h3>
+                  <motion.div variants={contentVariants} className="relative z-10">
+                    <div className="overflow-hidden mb-2">
+                      <p className="text-[9px] tracking-[0.5em] font-medium text-white/40 uppercase group-hover:text-white/60 transition-colors duration-500">
+                        {isBirimStudio
+                          ? t('design_studio') || 'Tasarım Stüdyosu'
+                          : t('designer') || 'Tasarımcı'}
+                      </p>
+                    </div>
 
-                  <div className="h-px w-8 bg-white/20 mb-8 group-hover:w-full transition-all duration-700 ease-in-out"></div>
+                    <h3 className="text-xl md:text-2xl font-light text-white uppercase mb-4 tracking-widest leading-none">
+                      {t(designer.name)}
+                    </h3>
 
-                  <div className="text-[11px] text-white/40 font-light line-clamp-3 uppercase tracking-widest opacity-0 group-hover:opacity-100 group-hover:text-white/70 transition-all duration-700 delay-100 leading-relaxed">
-                    {getBioText(designer.bio)}
-                  </div>
+                    <div className="h-px w-8 bg-white/20 mb-8 group-hover:w-full transition-all duration-700 ease-in-out"></div>
 
-                  <div className="mt-8 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 delay-200">
-                    <span className="text-[9px] font-medium tracking-[0.4em] text-white/30 group-hover:text-white border-b border-white/10 group-hover:border-white/30 pb-2 transition-all duration-500 uppercase">
-                      {t('explore_designer') || 'View Profile'}
-                    </span>
-                  </div>
-                </motion.div>
-              </div>
+                    <div className="text-[11px] text-white/40 font-light line-clamp-3 uppercase tracking-widest opacity-0 group-hover:opacity-100 group-hover:text-white/70 transition-all duration-700 delay-100 leading-relaxed">
+                      {getBioText(designer.bio) ||
+                        (isBirimStudio
+                          ? t('birim_studio_bio_short') ||
+                            "Birim'in yenilikçi ve zamansız tasarım vizyonunu yansıtan iç tasarım stüdyosu."
+                          : '')}
+                    </div>
 
-              {/* Decorative Linear Accents */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
-                <div className="absolute top-0 left-8 right-8 h-px bg-white/5"></div>
-                <div className="absolute bottom-0 left-8 right-8 h-px bg-white/5"></div>
-              </div>
-            </motion.div>
-          ))}
+                    <div className="mt-8 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 delay-200">
+                      <span className="text-[9px] font-medium tracking-[0.4em] text-white/30 group-hover:text-white border-b border-white/10 group-hover:border-white/30 pb-2 transition-all duration-500 uppercase">
+                        {t('explore_designer') || 'View Profile'}
+                      </span>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Decorative Linear Accents */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+                  <div className="absolute top-0 left-8 right-8 h-px bg-white/5"></div>
+                  <div className="absolute bottom-0 left-8 right-8 h-px bg-white/5"></div>
+                </div>
+              </motion.div>
+            )
+          })}
         </motion.div>
       </main>
 

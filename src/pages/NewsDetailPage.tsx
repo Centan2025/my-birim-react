@@ -13,6 +13,9 @@ import {useSiteSettings} from '../hooks/useSiteData'
 import {analytics} from '../lib/analytics'
 import {useSEO} from '../hooks/useSEO'
 import PortableTextLite from '../components/PortableTextLite'
+import ScrollReveal from '../components/ScrollReveal'
+import {TextMaskReveal} from '../components/TextMaskReveal'
+import {ProductCardReveal} from '../components/ProductCardReveal'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -64,28 +67,30 @@ const MediaComponent: FC<{media: NewsMedia; onImageClick?: (url: string) => void
           className="cursor-zoom-in overflow-hidden relative group"
           onClick={() => onImageClick && onImageClick(media.url)}
         >
-          <OptimizedImage
-            src={media.url}
-            srcMobile={media.urlMobile}
-            srcDesktop={media.urlDesktop}
-            alt={t(media.caption) || ''}
-            className={`w-full h-auto object-cover transition-transform duration-700 group-hover:scale-102 ${imageBorderClass}`}
-            width={1920}
-            loading="lazy"
-            quality={95}
-            crop={media.crop}
-            hotspot={media.hotspot}
-            origWidth={media.origWidth}
-            origHeight={media.origHeight}
-            cropMobile={media.cropMobile}
-            hotspotMobile={media.hotspotMobile}
-            origWidthMobile={media.origWidthMobile}
-            origHeightMobile={media.origHeightMobile}
-            cropDesktop={media.cropDesktop}
-            hotspotDesktop={media.hotspotDesktop}
-            origWidthDesktop={media.origWidthDesktop}
-            origHeightDesktop={media.origHeightDesktop}
-          />
+          <ProductCardReveal direction="down" duration={1.1} className="w-full">
+            <OptimizedImage
+              src={media.url}
+              srcMobile={media.urlMobile}
+              srcDesktop={media.urlDesktop}
+              alt={t(media.caption) || ''}
+              className={`w-full h-auto object-cover transition-transform duration-700 group-hover:scale-102 ${imageBorderClass}`}
+              width={1920}
+              loading="lazy"
+              quality={95}
+              crop={media.crop}
+              hotspot={media.hotspot}
+              origWidth={media.origWidth}
+              origHeight={media.origHeight}
+              cropMobile={media.cropMobile}
+              hotspotMobile={media.hotspotMobile}
+              origWidthMobile={media.origWidthMobile}
+              origHeightMobile={media.origHeightMobile}
+              cropDesktop={media.cropDesktop}
+              hotspotDesktop={media.hotspotDesktop}
+              origWidthDesktop={media.origWidthDesktop}
+              origHeightDesktop={media.origHeightDesktop}
+            />
+          </ProductCardReveal>
         </div>
       )
     }
@@ -146,9 +151,11 @@ const MediaComponent: FC<{media: NewsMedia; onImageClick?: (url: string) => void
     <figure className="my-8">
       {renderMedia()}
       {media.caption && (
-        <figcaption className="mt-2 text-center text-xs font-mono text-[var(--text-secondary)]">
-          {t(media.caption)}
-        </figcaption>
+        <TextMaskReveal delay={80}>
+          <figcaption className="mt-2 text-center text-xs font-mono text-[var(--text-secondary)]">
+            {t(media.caption)}
+          </figcaption>
+        </TextMaskReveal>
       )}
     </figure>
   )
@@ -355,43 +362,51 @@ export function NewsDetailPage() {
 
       <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-8 pb-24">
         {/* Article Meta Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-primary)] pb-6 mb-8 md:mb-12">
-          <div className="flex items-center gap-4 text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider">
-            <span>{formatDate(item.date, locale)}</span>
-            {item.category && (
-              <>
-                <span>•</span>
-                <span>{getCategoryLabel(item.category, t)}</span>
-              </>
-            )}
-          </div>
+        <ScrollReveal delay={50} threshold={0.05} direction="up" distance={15}>
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-primary)] pb-6 mb-8 md:mb-12">
+            <TextMaskReveal delay={80}>
+              <div className="flex items-center gap-4 text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider">
+                <span>{formatDate(item.date, locale)}</span>
+                {item.category && (
+                  <>
+                    <span>•</span>
+                    <span>{getCategoryLabel(item.category, t)}</span>
+                  </>
+                )}
+              </div>
+            </TextMaskReveal>
 
-          {/* Social Share & Press Kit Actions */}
-          <div className="flex items-center gap-4 text-xs font-mono tracking-widest uppercase">
-            <button
-              onClick={handleCopyLink}
-              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors relative"
-            >
-              {copiedLink ? t('link_copied') || 'KOPYALANDI ✓' : t('share_article') || 'PAYLAŞ'}
-            </button>
+            {/* Social Share & Press Kit Actions */}
+            <TextMaskReveal delay={120} display="inline-block">
+              <div className="flex items-center gap-4 text-xs font-mono tracking-widest uppercase">
+                <button
+                  onClick={handleCopyLink}
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors relative"
+                >
+                  {copiedLink ? t('link_copied') || 'KOPYALANDI ✓' : t('share_article') || 'PAYLAŞ'}
+                </button>
 
-            {item.pressKitUrl && (
-              <a
-                href={item.pressKitUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="border border-[var(--border-primary)] px-3 py-1 text-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all"
-              >
-                {t('download_press_kit') || 'BASIN KİTİ'} ↓
-              </a>
-            )}
+                {item.pressKitUrl && (
+                  <a
+                    href={item.pressKitUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-[var(--border-primary)] px-3 py-1 text-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all"
+                  >
+                    {t('download_press_kit') || 'BASIN KİTİ'} ↓
+                  </a>
+                )}
+              </div>
+            </TextMaskReveal>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Title */}
-        <h1 className="text-3xl md:text-5xl lg:text-6xl font-light text-[var(--text-primary)] uppercase tracking-tight leading-tight mb-10 md:mb-16">
-          {t(item.title)}
-        </h1>
+        <TextMaskReveal delay={100} duration={1.15}>
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-light text-[var(--text-primary)] uppercase tracking-tight leading-tight mb-10 md:mb-16">
+            {t(item.title)}
+          </h1>
+        </TextMaskReveal>
 
         {/* Main Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
@@ -403,207 +418,242 @@ export function NewsDetailPage() {
                 className="cursor-zoom-in overflow-hidden mb-8 border border-[var(--border-primary)]/40"
                 onClick={() => openFullscreenViewer(mainImageUrl)}
               >
-                <OptimizedImage
-                  src={mainImageUrl || ''}
-                  srcMobile={mainImageObj?.urlMobile}
-                  srcDesktop={mainImageObj?.urlDesktop}
-                  alt={t(item.title)}
-                  className="w-full h-auto object-cover transition-transform duration-700 hover:scale-102"
-                  width={1920}
-                  height={1080}
-                  loading="eager"
-                  quality={95}
-                  crop={mainImageObj?.crop}
-                  hotspot={mainImageObj?.hotspot}
-                  origWidth={mainImageObj?.origWidth}
-                  origHeight={mainImageObj?.origHeight}
-                  cropMobile={mainImageObj?.cropMobile}
-                  hotspotMobile={mainImageObj?.hotspotMobile}
-                  origWidthMobile={mainImageObj?.origWidthMobile}
-                  origHeightMobile={mainImageObj?.origHeightMobile}
-                  cropDesktop={mainImageObj?.cropDesktop}
-                  hotspotDesktop={mainImageObj?.hotspotDesktop}
-                  origWidthDesktop={mainImageObj?.origWidthDesktop}
-                  origHeightDesktop={mainImageObj?.origHeightDesktop}
-                />
+                <ProductCardReveal direction="down" duration={1.2} delay={0.1} className="w-full">
+                  <OptimizedImage
+                    src={mainImageUrl || ''}
+                    srcMobile={mainImageObj?.urlMobile}
+                    srcDesktop={mainImageObj?.urlDesktop}
+                    alt={t(item.title)}
+                    className="w-full h-auto object-cover transition-transform duration-700 hover:scale-102"
+                    width={1920}
+                    height={1080}
+                    loading="eager"
+                    quality={95}
+                    crop={mainImageObj?.crop}
+                    hotspot={mainImageObj?.hotspot}
+                    origWidth={mainImageObj?.origWidth}
+                    origHeight={mainImageObj?.origHeight}
+                    cropMobile={mainImageObj?.cropMobile}
+                    hotspotMobile={mainImageObj?.hotspotMobile}
+                    origWidthMobile={mainImageObj?.origWidthMobile}
+                    origHeightMobile={mainImageObj?.origHeightMobile}
+                    cropDesktop={mainImageObj?.cropDesktop}
+                    hotspotDesktop={mainImageObj?.hotspotDesktop}
+                    origWidthDesktop={mainImageObj?.origWidthDesktop}
+                    origHeightDesktop={mainImageObj?.origHeightDesktop}
+                  />
+                </ProductCardReveal>
               </div>
             )}
 
             {additionalMedia.map((media, index) => (
-              <MediaComponent
+              <ScrollReveal
                 key={index}
-                media={media}
-                onImageClick={url => openFullscreenViewer(url)}
-              />
+                delay={index * 100}
+                threshold={0.05}
+                direction="up"
+                distance={20}
+              >
+                <MediaComponent media={media} onImageClick={url => openFullscreenViewer(url)} />
+              </ScrollReveal>
             ))}
           </div>
 
           {/* Article Text Content */}
           <div className="lg:col-span-5 lg:sticky lg:top-28 flex flex-col w-full">
-            <div className="text-[var(--text-primary)] leading-relaxed font-light text-base md:text-lg space-y-6">
-              {(() => {
-                const rawContent = item.content as Record<string, unknown> | unknown[] | undefined
-                let blocks: unknown[] | null = null
+            <ScrollReveal delay={150} threshold={0.05} direction="up" distance={20}>
+              <div className="text-[var(--text-primary)] leading-relaxed font-light text-base md:text-lg space-y-6">
+                {(() => {
+                  const rawContent = item.content as Record<string, unknown> | unknown[] | undefined
+                  let blocks: unknown[] | null = null
 
-                if (Array.isArray(rawContent)) {
-                  blocks = rawContent
-                } else if (rawContent && typeof rawContent === 'object') {
-                  const localizedMap = rawContent as Record<string, unknown[]>
-                  if (Array.isArray(localizedMap[locale])) {
-                    blocks = localizedMap[locale]
-                  } else if (Array.isArray(localizedMap['tr'])) {
-                    blocks = localizedMap['tr']
-                  } else if (Array.isArray(localizedMap['en'])) {
-                    blocks = localizedMap['en']
+                  if (Array.isArray(rawContent)) {
+                    blocks = rawContent
+                  } else if (rawContent && typeof rawContent === 'object') {
+                    const localizedMap = rawContent as Record<string, unknown[]>
+                    if (Array.isArray(localizedMap[locale])) {
+                      blocks = localizedMap[locale]
+                    } else if (Array.isArray(localizedMap['tr'])) {
+                      blocks = localizedMap['tr']
+                    } else if (Array.isArray(localizedMap['en'])) {
+                      blocks = localizedMap['en']
+                    }
                   }
-                }
 
-                if (blocks && Array.isArray(blocks) && blocks.length > 0) {
-                  return (
-                    <PortableTextLite
-                      value={blocks as Parameters<typeof PortableTextLite>[0]['value']}
-                    />
-                  )
-                }
+                  if (blocks && Array.isArray(blocks) && blocks.length > 0) {
+                    return (
+                      <PortableTextLite
+                        value={blocks as Parameters<typeof PortableTextLite>[0]['value']}
+                      />
+                    )
+                  }
 
-                const fallbackText = t(item.content)
-                if (fallbackText) {
-                  return (
-                    <p className="text-[var(--text-primary)] leading-relaxed font-light text-base md:text-lg whitespace-pre-line">
-                      {fallbackText}
-                    </p>
-                  )
-                }
+                  const fallbackText = t(item.content)
+                  if (fallbackText) {
+                    return (
+                      <p className="text-[var(--text-primary)] leading-relaxed font-light text-base md:text-lg whitespace-pre-line">
+                        {fallbackText}
+                      </p>
+                    )
+                  }
 
-                return null
-              })()}
-            </div>
-
-            {/* Related Designer or Product Tag Link if present */}
-            {(item.relatedDesignerId || item.relatedProductId) && (
-              <div className="mt-12 pt-6 border-t border-[var(--border-primary)] flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-[var(--text-secondary)]">
-                {item.relatedDesignerId && (
-                  <Link
-                    to={`/designers/${item.relatedDesignerId}`}
-                    className="hover:text-[var(--text-primary)] transition-colors"
-                  >
-                    → {t('view_designer') || 'Tasarımcıyı Gör'}
-                  </Link>
-                )}
-                {item.relatedProductId && (
-                  <Link
-                    to={`/products/${item.relatedProductId}`}
-                    className="hover:text-[var(--text-primary)] transition-colors"
-                  >
-                    → {t('view_product') || 'Ürünü İncele'}
-                  </Link>
-                )}
+                  return null
+                })()}
               </div>
-            )}
+
+              {/* Related Designer or Product Tag Link if present */}
+              {(item.relatedDesignerId || item.relatedProductId) && (
+                <TextMaskReveal delay={200}>
+                  <div className="mt-12 pt-6 border-t border-[var(--border-primary)] flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-[var(--text-secondary)]">
+                    {item.relatedDesignerId && (
+                      <Link
+                        to={`/designers/${item.relatedDesignerId}`}
+                        className="hover:text-[var(--text-primary)] transition-colors"
+                      >
+                        → {t('view_designer') || 'Tasarımcıyı Gör'}
+                      </Link>
+                    )}
+                    {item.relatedProductId && (
+                      <Link
+                        to={`/products/${item.relatedProductId}`}
+                        className="hover:text-[var(--text-primary)] transition-colors"
+                      >
+                        → {t('view_product') || 'Ürünü İncele'}
+                      </Link>
+                    )}
+                  </div>
+                </TextMaskReveal>
+              )}
+            </ScrollReveal>
           </div>
         </div>
 
         {/* Prev / Next Article Navigation */}
         {(prevNews || nextNews) && (
-          <div className="mt-20 md:mt-32 pt-10 border-t border-[var(--border-primary)] grid grid-cols-1 md:grid-cols-2 gap-8">
-            {prevNews ? (
-              <Link
-                to={`/news/${prevNews.id}`}
-                className="group flex items-center gap-4 p-4 border border-[var(--border-primary)] hover:border-[var(--text-primary)]/50 transition-colors"
-              >
-                <div className="w-20 h-16 overflow-hidden flex-shrink-0">
-                  <OptimizedImage
-                    src={
-                      typeof prevNews.mainImage === 'string'
-                        ? prevNews.mainImage
-                        : prevNews.mainImage?.url || ''
-                    }
-                    alt={t(prevNews.title)}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    width={160}
-                    height={120}
-                  />
-                </div>
-                <div>
-                  <span className="text-[9px] font-mono uppercase text-[var(--text-secondary)] tracking-widest block mb-1">
-                    ← {t('previous_news') || 'ÖNCEKİ HABER'}
-                  </span>
-                  <h3 className="text-sm font-light text-[var(--text-primary)] uppercase line-clamp-1 group-hover:text-[var(--text-secondary)] transition-colors">
-                    {t(prevNews.title)}
-                  </h3>
-                </div>
-              </Link>
-            ) : (
-              <div />
-            )}
+          <ScrollReveal delay={100} threshold={0.05} direction="up" distance={20}>
+            <div className="mt-20 md:mt-32 pt-10 border-t border-[var(--border-primary)] grid grid-cols-1 md:grid-cols-2 gap-8">
+              {prevNews ? (
+                <Link
+                  to={`/news/${prevNews.id}`}
+                  className="group flex items-center gap-4 p-4 border border-[var(--border-primary)] hover:border-[var(--text-primary)]/50 transition-colors"
+                >
+                  <div className="w-20 h-16 overflow-hidden flex-shrink-0">
+                    <ProductCardReveal direction="down" duration={0.8} className="w-full h-full">
+                      <OptimizedImage
+                        src={
+                          typeof prevNews.mainImage === 'string'
+                            ? prevNews.mainImage
+                            : prevNews.mainImage?.url || ''
+                        }
+                        alt={t(prevNews.title)}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        width={160}
+                        height={120}
+                      />
+                    </ProductCardReveal>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-mono uppercase text-[var(--text-secondary)] tracking-widest block mb-1">
+                      ← {t('previous_news') || 'ÖNCEKİ HABER'}
+                    </span>
+                    <TextMaskReveal delay={60}>
+                      <h3 className="text-sm font-light text-[var(--text-primary)] uppercase line-clamp-1 group-hover:text-[var(--text-secondary)] transition-colors">
+                        {t(prevNews.title)}
+                      </h3>
+                    </TextMaskReveal>
+                  </div>
+                </Link>
+              ) : (
+                <div />
+              )}
 
-            {nextNews && (
-              <Link
-                to={`/news/${nextNews.id}`}
-                className="group flex items-center justify-between gap-4 p-4 border border-[var(--border-primary)] hover:border-[var(--text-primary)]/50 transition-colors text-right"
-              >
-                <div className="text-right ml-auto">
-                  <span className="text-[9px] font-mono uppercase text-[var(--text-secondary)] tracking-widest block mb-1">
-                    {t('next_news') || 'SONRAKİ HABER'} →
-                  </span>
-                  <h3 className="text-sm font-light text-[var(--text-primary)] uppercase line-clamp-1 group-hover:text-[var(--text-secondary)] transition-colors">
-                    {t(nextNews.title)}
-                  </h3>
-                </div>
-                <div className="w-20 h-16 overflow-hidden flex-shrink-0">
-                  <OptimizedImage
-                    src={
-                      typeof nextNews.mainImage === 'string'
-                        ? nextNews.mainImage
-                        : nextNews.mainImage?.url || ''
-                    }
-                    alt={t(nextNews.title)}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    width={160}
-                    height={120}
-                  />
-                </div>
-              </Link>
-            )}
-          </div>
+              {nextNews && (
+                <Link
+                  to={`/news/${nextNews.id}`}
+                  className="group flex items-center justify-between gap-4 p-4 border border-[var(--border-primary)] hover:border-[var(--text-primary)]/50 transition-colors text-right"
+                >
+                  <div className="text-right ml-auto">
+                    <span className="text-[9px] font-mono uppercase text-[var(--text-secondary)] tracking-widest block mb-1">
+                      {t('next_news') || 'SONRAKİ HABER'} →
+                    </span>
+                    <TextMaskReveal delay={60}>
+                      <h3 className="text-sm font-light text-[var(--text-primary)] uppercase line-clamp-1 group-hover:text-[var(--text-secondary)] transition-colors">
+                        {t(nextNews.title)}
+                      </h3>
+                    </TextMaskReveal>
+                  </div>
+                  <div className="w-20 h-16 overflow-hidden flex-shrink-0">
+                    <ProductCardReveal direction="down" duration={0.8} className="w-full h-full">
+                      <OptimizedImage
+                        src={
+                          typeof nextNews.mainImage === 'string'
+                            ? nextNews.mainImage
+                            : nextNews.mainImage?.url || ''
+                        }
+                        alt={t(nextNews.title)}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        width={160}
+                        height={120}
+                      />
+                    </ProductCardReveal>
+                  </div>
+                </Link>
+              )}
+            </div>
+          </ScrollReveal>
         )}
 
         {/* Related Articles Modülü */}
         {relatedArticles.length > 0 && (
-          <div className="mt-20">
-            <h2 className="text-xl font-light text-[var(--text-primary)] uppercase tracking-wider mb-8 border-b border-[var(--border-primary)] pb-4">
-              {t('related_news') || 'DİĞER HABERLER'}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {relatedArticles.map(relItem => (
-                <Link
-                  key={relItem.id}
-                  to={`/news/${relItem.id}`}
-                  className="group block border border-[var(--border-primary)] p-5 hover:border-[var(--text-primary)]/40 transition-colors"
-                >
-                  <div className="h-44 overflow-hidden mb-4">
-                    <OptimizedImage
-                      src={
-                        typeof relItem.mainImage === 'string'
-                          ? relItem.mainImage
-                          : relItem.mainImage?.url || ''
-                      }
-                      alt={t(relItem.title)}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      width={600}
-                      height={400}
-                    />
-                  </div>
-                  <span className="text-[10px] font-mono text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
-                    {formatDate(relItem.date, locale)}
-                  </span>
-                  <h3 className="text-lg font-light text-[var(--text-primary)] uppercase group-hover:text-[var(--text-secondary)] transition-colors line-clamp-2">
-                    {t(relItem.title)}
-                  </h3>
-                </Link>
-              ))}
+          <ScrollReveal delay={150} threshold={0.05} direction="up" distance={25}>
+            <div className="mt-20">
+              <TextMaskReveal delay={80}>
+                <h2 className="text-xl font-light text-[var(--text-primary)] uppercase tracking-wider mb-8 border-b border-[var(--border-primary)] pb-4">
+                  {t('related_news') || 'DİĞER HABERLER'}
+                </h2>
+              </TextMaskReveal>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {relatedArticles.map((relItem, index) => (
+                  <Link
+                    key={relItem.id}
+                    to={`/news/${relItem.id}`}
+                    className="group block border border-[var(--border-primary)] p-5 hover:border-[var(--text-primary)]/40 transition-colors"
+                  >
+                    <div className="h-44 overflow-hidden mb-4">
+                      <ProductCardReveal
+                        direction="down"
+                        duration={1.0}
+                        delay={0.1 + index * 0.15}
+                        className="w-full h-full"
+                      >
+                        <OptimizedImage
+                          src={
+                            typeof relItem.mainImage === 'string'
+                              ? relItem.mainImage
+                              : relItem.mainImage?.url || ''
+                          }
+                          alt={t(relItem.title)}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          width={600}
+                          height={400}
+                        />
+                      </ProductCardReveal>
+                    </div>
+                    <TextMaskReveal delay={100 + index * 60}>
+                      <span className="text-[10px] font-mono text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                        {formatDate(relItem.date, locale)}
+                      </span>
+                    </TextMaskReveal>
+                    <TextMaskReveal delay={160 + index * 60}>
+                      <h3 className="text-lg font-light text-[var(--text-primary)] uppercase group-hover:text-[var(--text-secondary)] transition-colors line-clamp-2">
+                        {t(relItem.title)}
+                      </h3>
+                    </TextMaskReveal>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          </ScrollReveal>
         )}
       </div>
     </div>

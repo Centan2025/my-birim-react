@@ -23,6 +23,8 @@ export default {
   see_all: 'HEPSİNİ GÖR',
   categories: 'Ürün Grupları',
   designer: 'Tasarımcı',
+  design_studio: 'Tasarım Stüdyosu',
+  explore_studio: 'STÜDYOYU KEŞFET',
   category: 'Kategori',
   featured_products: 'Öne Çıkan Ürünler',
   featured_products_subtitle: 'Her biri birer ikon olan, en sevilen tasarımlarımızdan bir seçki.',

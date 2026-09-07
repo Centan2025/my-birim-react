@@ -1,5 +1,5 @@
 import {useState, useEffect, useMemo, useRef} from 'react'
-import {motion, AnimatePresence} from 'framer-motion'
+import {motion, AnimatePresence, useReducedMotion, type Variants} from 'framer-motion'
 import {Link} from 'react-router-dom'
 import {getFactoryPageContent} from '../services/cms'
 import {mapImage} from '../services/sanity/client'
@@ -11,8 +11,45 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
+import {TextMaskReveal} from '../components/TextMaskReveal'
+import {TextLineReveal} from '../components/TextLineReveal'
+import {ProductCardReveal} from '../components/ProductCardReveal'
 import PortableTextLite from '../components/PortableTextLite'
 import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer/FullscreenMediaViewer'
+
+const itemVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+  },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.85,
+      delay: (i % 3) * 0.09,
+      ease: [0.215, 0.61, 0.355, 1],
+    },
+  }),
+}
+
+const getMediaZoomVariants = (reduceMotion: boolean): Variants => ({
+  hidden: {
+    scale: reduceMotion ? 1 : 1.22,
+    originX: 0,
+    originY: 0.5,
+  },
+  visible: (i: number = 0) => ({
+    scale: 1,
+    originX: 0,
+    originY: 0.5,
+    transition: {
+      duration: reduceMotion ? 0.01 : 1.25,
+      delay: reduceMotion ? 0 : (i % 3) * 0.09,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  }),
+})
 
 const containerClass =
   'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[82vw] mx-auto px-4 md:px-8 lg:px-0'
@@ -175,6 +212,11 @@ export function FactoryPageV2() {
   const {t, locale} = useTranslation()
   const isTr = locale === 'tr'
   const {setBrightness, reset} = useHeaderTheme()
+  const shouldReduceMotion = Boolean(useReducedMotion())
+  const mediaZoomVariants = useMemo(
+    () => getMediaZoomVariants(shouldReduceMotion),
+    [shouldReduceMotion]
+  )
 
   useEffect(() => {
     setBrightness(0)
@@ -488,26 +530,19 @@ export function FactoryPageV2() {
 
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
           {heroTitle ? (
-            <motion.div
-              initial={{opacity: 0, y: 25}}
-              animate={{opacity: 1, y: 0}}
-              transition={{duration: 0.9, ease: 'easeOut'}}
-            >
+            <TextMaskReveal delay={150} duration={1.1}>
               <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white max-w-4xl mx-auto">
                 {heroTitle}
               </h1>
-            </motion.div>
+            </TextMaskReveal>
           ) : null}
 
           {heroDescription ? (
-            <motion.p
-              initial={{opacity: 0, y: 20}}
-              animate={{opacity: 1, y: 0}}
-              transition={{duration: 0.9, delay: 0.25, ease: 'easeOut'}}
-              className="mt-5 sm:mt-7 text-sm sm:text-base md:text-lg text-neutral-300 max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2"
-            >
-              {heroDescription}
-            </motion.p>
+            <TextMaskReveal delay={350} duration={1.05}>
+              <p className="mt-5 sm:mt-7 text-sm sm:text-base md:text-lg text-neutral-300 max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2">
+                {heroDescription}
+              </p>
+            </TextMaskReveal>
           ) : null}
         </div>
       </section>
@@ -515,9 +550,11 @@ export function FactoryPageV2() {
       {/* 2. BREADCRUMBS & CAPACITY METRICS */}
       <div className="pb-16 sm:pb-28">
         <div className={containerClass + ' py-4 text-xs text-neutral-400'}>
-          <Breadcrumbs
-            items={[{label: t('homepage'), to: '/'}, {label: t('factory') || 'Fabrika'}]}
-          />
+          <TextMaskReveal delay={50}>
+            <Breadcrumbs
+              items={[{label: t('homepage'), to: '/'}, {label: t('factory') || 'Fabrika'}]}
+            />
+          </TextMaskReveal>
         </div>
 
         {/* METRICS GRID */}
@@ -525,14 +562,18 @@ export function FactoryPageV2() {
           <div className={containerClass}>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-primary,#e5e7eb)]/40">
               {metrics.map((m, mIdx) => (
-                <ScrollReveal key={mIdx} delay={mIdx * 100} distance={15}>
+                <ScrollReveal key={mIdx} delay={mIdx * 100} distance={20} threshold={0.05}>
                   <div className="pt-4 sm:pt-0 sm:px-4 text-center sm:text-left">
-                    <div className="font-outfit text-3xl sm:text-5xl font-light text-[var(--text-primary)] tracking-tight">
-                      {m.value}
-                    </div>
-                    <p className="mt-2 text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed">
-                      {m.label}
-                    </p>
+                    <TextMaskReveal delay={60 + mIdx * 60}>
+                      <div className="font-outfit text-3xl sm:text-5xl font-light text-[var(--text-primary)] tracking-tight">
+                        {m.value}
+                      </div>
+                    </TextMaskReveal>
+                    <TextMaskReveal delay={140 + mIdx * 60}>
+                      <p className="mt-2 text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed">
+                        {m.label}
+                      </p>
+                    </TextMaskReveal>
                   </div>
                 </ScrollReveal>
               ))}
@@ -546,20 +587,26 @@ export function FactoryPageV2() {
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-16 gap-4">
               <div>
                 {disciplinesTag ? (
-                  <span className="text-xs uppercase font-mono tracking-widest text-[var(--text-secondary)]">
-                    {disciplinesTag}
-                  </span>
+                  <TextMaskReveal delay={60}>
+                    <span className="text-xs uppercase font-mono tracking-widest text-[var(--text-secondary)]">
+                      {disciplinesTag}
+                    </span>
+                  </TextMaskReveal>
                 ) : null}
                 {disciplinesTitle ? (
-                  <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-2">
-                    {disciplinesTitle}
-                  </h2>
+                  <TextMaskReveal delay={120}>
+                    <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-2">
+                      {disciplinesTitle}
+                    </h2>
+                  </TextMaskReveal>
                 ) : null}
               </div>
               {disciplinesDescription ? (
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-md font-light leading-relaxed">
-                  {disciplinesDescription}
-                </p>
+                <TextMaskReveal delay={180}>
+                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-md font-light leading-relaxed">
+                    {disciplinesDescription}
+                  </p>
+                </TextMaskReveal>
               ) : null}
             </div>
 
@@ -573,24 +620,32 @@ export function FactoryPageV2() {
                 style={{WebkitOverflowScrolling: 'touch'}}
               >
                 {disciplinesList.map((item, idx) => (
-                  <div
+                  <motion.div
                     key={item.id}
+                    initial={{opacity: 0, y: 30}}
+                    whileInView={{opacity: 1, y: 0}}
+                    viewport={{once: true, amount: 0.15}}
+                    transition={{duration: 0.7, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1]}}
                     className="w-[85vw] max-w-[330px] flex-shrink-0 snap-center border border-[var(--border-primary,#e5e7eb)]/60 bg-[var(--bg-secondary)] p-5 flex flex-col justify-between shadow-sm"
                   >
                     <div>
                       {/* Kart Başlığı & Alt Başlığı - Kartla Birlikte Kayar */}
                       <div className="mb-3.5 space-y-1">
-                        <h3 className="font-outfit text-xl font-medium text-[var(--text-primary)] tracking-tight leading-snug">
-                          {item.title}
-                        </h3>
+                        <TextMaskReveal delay={60}>
+                          <h3 className="font-outfit text-xl font-medium text-[var(--text-primary)] tracking-tight leading-snug">
+                            {item.title}
+                          </h3>
+                        </TextMaskReveal>
                         {item.subtitle && (
-                          <p className="font-outfit text-xs text-[var(--text-secondary)] italic font-light">
-                            {item.subtitle}
-                          </p>
+                          <TextMaskReveal delay={120}>
+                            <p className="font-outfit text-xs text-[var(--text-secondary)] italic font-light">
+                              {item.subtitle}
+                            </p>
+                          </TextMaskReveal>
                         )}
                       </div>
 
-                      {/* Kart Görseli */}
+                      {/* Kart Görseli - ProductCardReveal curtain animation */}
                       <div
                         className="relative aspect-[16/10] overflow-hidden bg-black/10 cursor-pointer group shadow-sm"
                         onClick={() => openViewer(idx % galleryItems.length)}
@@ -603,13 +658,15 @@ export function FactoryPageV2() {
                         role="button"
                         tabIndex={0}
                       >
-                        <OptimizedImage
-                          src={item.image || item.fallbackImage}
-                          fallbackSrc={item.fallbackImage}
-                          alt={item.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
+                        <ProductCardReveal direction="down" duration={1.1} delay={0.1}>
+                          <OptimizedImage
+                            src={item.image || item.fallbackImage}
+                            fallbackSrc={item.fallbackImage}
+                            alt={item.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </ProductCardReveal>
+                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300 pointer-events-none" />
                       </div>
 
                       {/* Açıklama Metni */}
@@ -639,7 +696,7 @@ export function FactoryPageV2() {
                         </ul>
                       </div>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
@@ -671,9 +728,17 @@ export function FactoryPageV2() {
                 {disciplinesList.map((item, idx) => {
                   const isActive = activeDisciplineIndex === idx
                   return (
-                    <button
+                    <motion.button
                       key={item.id}
                       type="button"
+                      initial={{opacity: 0, y: 25}}
+                      whileInView={{opacity: 1, y: 0}}
+                      viewport={{once: true, amount: 0.15}}
+                      transition={{
+                        duration: 0.65,
+                        delay: idx * 0.09,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
                       onClick={() => setActiveDisciplineIndex(idx)}
                       className={`text-left p-5 sm:p-6 transition-all duration-300 border cursor-pointer relative overflow-hidden focus:outline-none flex flex-col justify-start ${
                         isActive
@@ -681,15 +746,19 @@ export function FactoryPageV2() {
                           : 'border-[var(--border-primary,#e5e7eb)]/30 hover:border-[var(--text-primary)]/10 bg-transparent'
                       }`}
                     >
-                      <h3 className="font-outfit text-base sm:text-lg md:text-xl font-medium text-[var(--text-primary)] tracking-tight leading-snug">
-                        {item.title}
-                      </h3>
+                      <TextMaskReveal delay={80 + idx * 40}>
+                        <h3 className="font-outfit text-base sm:text-lg md:text-xl font-medium text-[var(--text-primary)] tracking-tight leading-snug">
+                          {item.title}
+                        </h3>
+                      </TextMaskReveal>
                       {item.subtitle && (
-                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1.5 line-clamp-2 font-light leading-relaxed">
-                          {item.subtitle}
-                        </p>
+                        <TextMaskReveal delay={140 + idx * 40}>
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1.5 line-clamp-2 font-light leading-relaxed">
+                            {item.subtitle}
+                          </p>
+                        </TextMaskReveal>
                       )}
-                    </button>
+                    </motion.button>
                   )
                 })}
               </div>
@@ -706,36 +775,47 @@ export function FactoryPageV2() {
                 >
                   <div className="col-span-5 space-y-6">
                     <div className="space-y-2">
-                      <h3 className="font-outfit text-2xl sm:text-3xl lg:text-4xl font-light text-[var(--text-primary)] uppercase tracking-tight">
-                        {activeDiscipline.title}
-                      </h3>
+                      <TextMaskReveal delay={60}>
+                        <h3 className="font-outfit text-2xl sm:text-3xl lg:text-4xl font-light text-[var(--text-primary)] uppercase tracking-tight">
+                          {activeDiscipline.title}
+                        </h3>
+                      </TextMaskReveal>
                       {activeDiscipline.subtitle && (
-                        <p className="font-outfit text-sm sm:text-base text-[var(--text-secondary)] italic font-light">
-                          {activeDiscipline.subtitle}
-                        </p>
+                        <TextMaskReveal delay={120}>
+                          <p className="font-outfit text-sm sm:text-base text-[var(--text-secondary)] italic font-light">
+                            {activeDiscipline.subtitle}
+                          </p>
+                        </TextMaskReveal>
                       )}
                     </div>
 
                     {activeDiscipline.description && (
-                      <p className="text-sm sm:text-base text-[var(--text-primary)] font-light leading-relaxed">
-                        {activeDiscipline.description}
-                      </p>
+                      <TextMaskReveal delay={180}>
+                        <p className="text-sm sm:text-base text-[var(--text-primary)] font-light leading-relaxed">
+                          {activeDiscipline.description}
+                        </p>
+                      </TextMaskReveal>
                     )}
 
                     {activeDiscipline.features && activeDiscipline.features.length > 0 && (
                       <div className="pt-2 border-t border-[var(--border-primary,#e5e7eb)]/50">
-                        <h4 className="text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-3">
-                          {isTr ? 'Öne Çıkan Kabiliyetler' : 'Key Capabilities'}
-                        </h4>
+                        <TextMaskReveal delay={220}>
+                          <h4 className="text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+                            {isTr ? 'Öne Çıkan Kabiliyetler' : 'Key Capabilities'}
+                          </h4>
+                        </TextMaskReveal>
                         <ul className="space-y-2.5">
                           {activeDiscipline.features.map((feat, fIdx) => (
-                            <li
+                            <motion.li
                               key={fIdx}
+                              initial={{opacity: 0, x: -10}}
+                              animate={{opacity: 1, x: 0}}
+                              transition={{duration: 0.4, delay: 0.2 + fIdx * 0.07}}
                               className="flex items-center gap-3 text-xs sm:text-sm text-[var(--text-primary)] font-light"
                             >
                               <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)] flex-shrink-0" />
                               <span>{feat}</span>
-                            </li>
+                            </motion.li>
                           ))}
                         </ul>
                       </div>
@@ -755,13 +835,21 @@ export function FactoryPageV2() {
                       role="button"
                       tabIndex={0}
                     >
-                      <OptimizedImage
-                        src={currentDisciplineImage}
-                        fallbackSrc={activeDiscipline.fallbackImage}
-                        alt={activeDiscipline.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
+                      <ProductCardReveal
+                        key={activeDiscipline.id}
+                        direction="down"
+                        duration={1.2}
+                        delay={0.1}
+                        className="w-full h-full"
+                      >
+                        <OptimizedImage
+                          src={currentDisciplineImage}
+                          fallbackSrc={activeDiscipline.fallbackImage}
+                          alt={activeDiscipline.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                      </ProductCardReveal>
+                      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300 pointer-events-none" />
                     </div>
                   </div>
                 </motion.div>
@@ -777,19 +865,25 @@ export function FactoryPageV2() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-14 items-start">
                 <div className="lg:col-span-4">
                   {philosophyTag ? (
-                    <span className="text-xs uppercase font-mono tracking-widest text-[var(--text-secondary)]">
-                      {philosophyTag}
-                    </span>
+                    <TextMaskReveal delay={60}>
+                      <span className="text-xs uppercase font-mono tracking-widest text-[var(--text-secondary)]">
+                        {philosophyTag}
+                      </span>
+                    </TextMaskReveal>
                   ) : null}
                   {philosophyTitle ? (
-                    <h2 className="font-outfit text-2xl sm:text-4xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-2">
-                      {philosophyTitle}
-                    </h2>
+                    <TextMaskReveal delay={120}>
+                      <h2 className="font-outfit text-2xl sm:text-4xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-2">
+                        {philosophyTitle}
+                      </h2>
+                    </TextMaskReveal>
                   ) : null}
                   {philosophySubtitle ? (
-                    <p className="mt-4 text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed">
-                      {philosophySubtitle}
-                    </p>
+                    <TextMaskReveal delay={180}>
+                      <p className="mt-4 text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed">
+                        {philosophySubtitle}
+                      </p>
+                    </TextMaskReveal>
                   ) : null}
                 </div>
 
@@ -806,14 +900,42 @@ export function FactoryPageV2() {
                       if (isPortable) {
                         const blocks = Array.isArray(textContent) ? textContent : [textContent]
                         return (
-                          <PortableTextLite
-                            value={blocks as Parameters<typeof PortableTextLite>[0]['value']}
-                          />
+                          <TextMaskReveal delay={120}>
+                            <PortableTextLite
+                              value={blocks as Parameters<typeof PortableTextLite>[0]['value']}
+                            />
+                          </TextMaskReveal>
                         )
                       }
 
                       const plainContent = typeof textContent === 'string' ? textContent : ''
-                      return <p className="leading-relaxed font-light">{plainContent}</p>
+                      const paragraphs = plainContent.split(/\n\n+/).filter(Boolean)
+                      if (paragraphs.length > 1) {
+                        return (
+                          <div className="space-y-4">
+                            {paragraphs.map((para, idx) => (
+                              <TextLineReveal
+                                key={idx}
+                                as="p"
+                                text={para}
+                                className="leading-relaxed font-light"
+                                delay={120 + idx * 90}
+                                stagger={60}
+                              />
+                            ))}
+                          </div>
+                        )
+                      }
+
+                      return (
+                        <TextLineReveal
+                          as="p"
+                          text={plainContent}
+                          className="leading-relaxed font-light"
+                          delay={120}
+                          stagger={60}
+                        />
+                      )
                     })()}
                   </div>
                 </div>
@@ -828,20 +950,26 @@ export function FactoryPageV2() {
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-14 gap-4">
               <div>
                 {galleryTag ? (
-                  <span className="text-xs uppercase font-mono tracking-widest text-[var(--text-secondary)]">
-                    {galleryTag}
-                  </span>
+                  <TextMaskReveal delay={60}>
+                    <span className="text-xs uppercase font-mono tracking-widest text-[var(--text-secondary)]">
+                      {galleryTag}
+                    </span>
+                  </TextMaskReveal>
                 ) : null}
                 {galleryTitle ? (
-                  <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-2">
-                    {galleryTitle}
-                  </h2>
+                  <TextMaskReveal delay={120}>
+                    <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-2">
+                      {galleryTitle}
+                    </h2>
+                  </TextMaskReveal>
                 ) : null}
               </div>
               {gallerySubtitle ? (
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-light">
-                  {gallerySubtitle}
-                </p>
+                <TextMaskReveal delay={180}>
+                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-light">
+                    {gallerySubtitle}
+                  </p>
+                </TextMaskReveal>
               ) : null}
             </div>
 
@@ -851,7 +979,15 @@ export function FactoryPageV2() {
                   typeof m.caption === 'string' ? m.caption : m.caption ? String(m.caption) : ''
                 const fallbackAlt = (t('factory') as string) || 'Factory'
                 return (
-                  <ScrollReveal key={idx} delay={idx * 60} distance={10} threshold={0.1}>
+                  <motion.div
+                    key={idx}
+                    variants={itemVariants}
+                    custom={idx}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{once: true, amount: 0.12, margin: '0px 0px -30px 0px'}}
+                    className="overflow-hidden"
+                  >
                     <div
                       className="relative aspect-[16/10] overflow-hidden bg-[var(--bg-secondary)] cursor-pointer group shadow-sm"
                       onClick={() => openViewer(idx)}
@@ -864,46 +1000,53 @@ export function FactoryPageV2() {
                       role="button"
                       tabIndex={0}
                     >
-                      {m.type === 'video' || m.type === 'youtube' ? (
-                        <div className="w-full h-full relative">
-                          <video
-                            src={m.url}
-                            className="w-full h-full object-cover"
-                            autoPlay
-                            muted
-                            loop
-                            playsInline
-                          />
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-300 flex items-center justify-center">
-                            <div className="w-12 h-12 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-90 group-hover:scale-110 transition-transform">
-                              <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
+                      <motion.div
+                        variants={mediaZoomVariants}
+                        custom={idx}
+                        className="w-full h-full transform-gpu origin-left"
+                        style={{transformOrigin: 'left center'}}
+                      >
+                        {m.type === 'video' || m.type === 'youtube' ? (
+                          <div className="w-full h-full relative">
+                            <video
+                              src={m.url}
+                              className="w-full h-full object-cover"
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                            />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-300 flex items-center justify-center">
+                              <div className="w-12 h-12 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-90 group-hover:scale-110 transition-transform">
+                                <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="w-full h-full relative">
-                          <OptimizedImage
-                            src={m.url}
-                            fallbackSrc={DEFAULT_FACTORY_IMAGES.hero}
-                            srcMobile={m.urlMobile}
-                            srcDesktop={m.urlDesktop}
-                            alt={captionText || `${fallbackAlt} ${idx + 1}`}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            crop={m.crop}
-                            hotspot={m.hotspot}
-                            origWidth={m.origWidth as number}
-                            origHeight={m.origHeight as number}
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                          {captionText && (
-                            <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/70 to-transparent text-white text-xs font-light opacity-0 group-hover:opacity-100 transition-opacity">
-                              {captionText}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                        ) : (
+                          <div className="w-full h-full relative">
+                            <OptimizedImage
+                              src={m.url}
+                              fallbackSrc={DEFAULT_FACTORY_IMAGES.hero}
+                              srcMobile={m.urlMobile}
+                              srcDesktop={m.urlDesktop}
+                              alt={captionText || `${fallbackAlt} ${idx + 1}`}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              crop={m.crop}
+                              hotspot={m.hotspot}
+                              origWidth={m.origWidth as number}
+                              origHeight={m.origHeight as number}
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                            {captionText && (
+                              <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/70 to-transparent text-white text-xs font-light opacity-0 group-hover:opacity-100 transition-opacity">
+                                {captionText}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </motion.div>
                     </div>
-                  </ScrollReveal>
+                  </motion.div>
                 )
               })}
             </div>
@@ -913,41 +1056,53 @@ export function FactoryPageV2() {
         {/* 6. SUSTAINABILITY & QUALITY STANDARDS */}
         <section className="py-16 sm:py-24">
           <div className={containerClass}>
-            <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary,#e5e7eb)]/60 p-8 sm:p-14 text-center max-w-4xl mx-auto space-y-6">
-              {sustainabilityTag ? (
-                <span className="text-xs uppercase font-mono tracking-widest text-[var(--text-secondary)]">
-                  {sustainabilityTag}
-                </span>
-              ) : null}
-              {sustainabilityTitle ? (
-                <h3 className="font-outfit text-2xl sm:text-3xl md:text-4xl font-extralight text-[var(--text-primary)] uppercase tracking-tight">
-                  {sustainabilityTitle}
-                </h3>
-              ) : null}
-              {sustainabilityDescription ? (
-                <p className="text-xs sm:text-sm md:text-base text-[var(--text-secondary)] font-light max-w-2xl mx-auto leading-relaxed">
-                  {sustainabilityDescription}
-                </p>
-              ) : null}
-              <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
-                {ctaPrimaryText ? (
-                  <Link
-                    to={ctaPrimaryLink}
-                    className="px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs uppercase font-mono tracking-wider font-medium hover:opacity-90 transition-opacity"
-                  >
-                    {ctaPrimaryText}
-                  </Link>
+            <ScrollReveal delay={100} distance={25} threshold={0.08}>
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary,#e5e7eb)]/60 p-8 sm:p-14 text-center max-w-4xl mx-auto space-y-6">
+                {sustainabilityTag ? (
+                  <TextMaskReveal delay={80}>
+                    <span className="text-xs uppercase font-mono tracking-widest text-[var(--text-secondary)]">
+                      {sustainabilityTag}
+                    </span>
+                  </TextMaskReveal>
                 ) : null}
-                {ctaSecondaryText ? (
-                  <Link
-                    to={ctaSecondaryLink}
-                    className="px-6 py-2.5 border border-[var(--text-primary)] text-[var(--text-primary)] text-xs uppercase font-mono tracking-wider font-medium hover:bg-[var(--text-primary)]/5 transition-colors"
-                  >
-                    {ctaSecondaryText}
-                  </Link>
+                {sustainabilityTitle ? (
+                  <TextMaskReveal delay={140}>
+                    <h3 className="font-outfit text-2xl sm:text-3xl md:text-4xl font-extralight text-[var(--text-primary)] uppercase tracking-tight">
+                      {sustainabilityTitle}
+                    </h3>
+                  </TextMaskReveal>
                 ) : null}
+                {sustainabilityDescription ? (
+                  <TextMaskReveal delay={200}>
+                    <p className="text-xs sm:text-sm md:text-base text-[var(--text-secondary)] font-light max-w-2xl mx-auto leading-relaxed">
+                      {sustainabilityDescription}
+                    </p>
+                  </TextMaskReveal>
+                ) : null}
+                <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
+                  {ctaPrimaryText ? (
+                    <TextMaskReveal delay={260} display="inline-block">
+                      <Link
+                        to={ctaPrimaryLink}
+                        className="px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs uppercase font-mono tracking-wider font-medium hover:opacity-90 transition-opacity"
+                      >
+                        {ctaPrimaryText}
+                      </Link>
+                    </TextMaskReveal>
+                  ) : null}
+                  {ctaSecondaryText ? (
+                    <TextMaskReveal delay={320} display="inline-block">
+                      <Link
+                        to={ctaSecondaryLink}
+                        className="px-6 py-2.5 border border-[var(--text-primary)] text-[var(--text-primary)] text-xs uppercase font-mono tracking-wider font-medium hover:bg-[var(--text-primary)]/5 transition-colors"
+                      >
+                        {ctaSecondaryText}
+                      </Link>
+                    </TextMaskReveal>
+                  ) : null}
+                </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
       </div>

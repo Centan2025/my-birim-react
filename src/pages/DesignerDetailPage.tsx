@@ -3,6 +3,7 @@ import {useParams, useLocation} from 'react-router-dom'
 import {ProductCard} from '../components/ProductCard'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
+import {SiteLogo} from '../components/SiteLogo'
 import {useTranslation} from '../i18n'
 import {useDesigner} from '../hooks/useDesigners'
 import {useProductsByDesigner} from '../hooks/useProducts'
@@ -12,6 +13,7 @@ import {analytics} from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
 import {useSEO} from '../hooks/useSEO'
 import PortableTextLite from '../components/PortableTextLite'
+import {isBirimDesignStudio} from '../utils/designerUtils'
 
 import {useCardTransition} from '../context/CardTransitionContext'
 import type {Designer, Product} from '../types'
@@ -95,12 +97,15 @@ export function DesignerDetailPage() {
     return () => {}
   }, [loading, designer, setTargetRect, imageBorderClass])
 
+  const isBirimStudio = isBirimDesignStudio(designer) || Boolean(designer?.isCompanyLogo)
   const designerName = designer ? t(designer.name) : ''
   const designerImageUrl =
     typeof designer?.image === 'string'
       ? designer.image
       : designer?.image?.url || designer?.image?.urlDesktop || designer?.image?.urlMobile || ''
-  const pageTitle = designerName ? `TASARIMCI - ${designerName}` : 'TASARIMCI'
+  const pageTitle = designerName
+    ? `${isBirimStudio ? t('design_studio') || 'TASARIM STÜDYOSU' : t('designer') || 'TASARIMCI'} - ${designerName}`
+    : 'TASARIMCI'
 
   useSEO({
     title: pageTitle,
@@ -177,59 +182,75 @@ export function DesignerDetailPage() {
           <div className="flex-1 relative mt-0 flex items-start justify-center overflow-visible">
             <div
               ref={imageRef}
-              className="relative w-full h-[95%] lg:h-[95%] xl:h-full max-h-[900px] z-10"
+              className="relative w-full h-[95%] lg:h-[95%] xl:h-full max-h-[900px] z-10 flex items-center justify-center"
             >
-              <OptimizedImage
-                src={
-                  typeof designer.image === 'string' ? designer.image : designer.image?.url || ''
-                }
-                srcMobile={
-                  typeof designer.image === 'object'
-                    ? designer.image.urlMobile
-                    : designer.imageMobile
-                }
-                srcDesktop={
-                  typeof designer.image === 'object'
-                    ? designer.image.urlDesktop
-                    : designer.imageDesktop
-                }
-                alt={t(designer.name)}
-                className={`w-full h-full object-cover portrait-frame filter grayscale transition-all duration-700 group-hover:grayscale-0 ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
-                loading="eager"
-                quality={90}
-                crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
-                hotspot={typeof designer.image === 'object' ? designer.image.hotspot : undefined}
-                origWidth={
-                  typeof designer.image === 'object' ? designer.image.origWidth : undefined
-                }
-                origHeight={
-                  typeof designer.image === 'object' ? designer.image.origHeight : undefined
-                }
-                cropMobile={
-                  typeof designer.image === 'object' ? designer.image.cropMobile : undefined
-                }
-                hotspotMobile={
-                  typeof designer.image === 'object' ? designer.image.hotspotMobile : undefined
-                }
-                origWidthMobile={
-                  typeof designer.image === 'object' ? designer.image.origWidthMobile : undefined
-                }
-                origHeightMobile={
-                  typeof designer.image === 'object' ? designer.image.origHeightMobile : undefined
-                }
-                cropDesktop={
-                  typeof designer.image === 'object' ? designer.image.cropDesktop : undefined
-                }
-                hotspotDesktop={
-                  typeof designer.image === 'object' ? designer.image.hotspotDesktop : undefined
-                }
-                origWidthDesktop={
-                  typeof designer.image === 'object' ? designer.image.origWidthDesktop : undefined
-                }
-                origHeightDesktop={
-                  typeof designer.image === 'object' ? designer.image.origHeightDesktop : undefined
-                }
-              />
+              {isBirimStudio ? (
+                <div
+                  className={`w-full h-full min-h-[360px] flex flex-col items-center justify-center p-8 sm:p-16 relative bg-gradient-to-b from-neutral-900 via-neutral-950 to-neutral-900 border border-white/10 select-none ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/[0.08] via-transparent to-transparent pointer-events-none" />
+                  <div className="w-full max-w-[280px] sm:max-w-[360px] flex items-center justify-center px-4 relative z-10 transition-transform duration-700 ease-out group-hover:scale-105">
+                    <SiteLogo
+                      logoUrl={settings?.logoUrl}
+                      className="w-full h-auto object-contain brightness-100"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <OptimizedImage
+                  src={
+                    typeof designer.image === 'string' ? designer.image : designer.image?.url || ''
+                  }
+                  srcMobile={
+                    typeof designer.image === 'object'
+                      ? designer.image.urlMobile
+                      : designer.imageMobile
+                  }
+                  srcDesktop={
+                    typeof designer.image === 'object'
+                      ? designer.image.urlDesktop
+                      : designer.imageDesktop
+                  }
+                  alt={t(designer.name)}
+                  className={`w-full h-full object-cover portrait-frame filter grayscale transition-all duration-700 group-hover:grayscale-0 ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
+                  loading="eager"
+                  quality={90}
+                  crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
+                  hotspot={typeof designer.image === 'object' ? designer.image.hotspot : undefined}
+                  origWidth={
+                    typeof designer.image === 'object' ? designer.image.origWidth : undefined
+                  }
+                  origHeight={
+                    typeof designer.image === 'object' ? designer.image.origHeight : undefined
+                  }
+                  cropMobile={
+                    typeof designer.image === 'object' ? designer.image.cropMobile : undefined
+                  }
+                  hotspotMobile={
+                    typeof designer.image === 'object' ? designer.image.hotspotMobile : undefined
+                  }
+                  origWidthMobile={
+                    typeof designer.image === 'object' ? designer.image.origWidthMobile : undefined
+                  }
+                  origHeightMobile={
+                    typeof designer.image === 'object' ? designer.image.origHeightMobile : undefined
+                  }
+                  cropDesktop={
+                    typeof designer.image === 'object' ? designer.image.cropDesktop : undefined
+                  }
+                  hotspotDesktop={
+                    typeof designer.image === 'object' ? designer.image.hotspotDesktop : undefined
+                  }
+                  origWidthDesktop={
+                    typeof designer.image === 'object' ? designer.image.origWidthDesktop : undefined
+                  }
+                  origHeightDesktop={
+                    typeof designer.image === 'object'
+                      ? designer.image.origHeightDesktop
+                      : undefined
+                  }
+                />
+              )}
             </div>
           </div>
         </div>
@@ -247,10 +268,14 @@ export function DesignerDetailPage() {
                 {t(designer.name)}
               </h1>
 
-              {designer.role && (
+              {(designer.role || isBirimStudio) && (
                 <ScrollReveal delay={400}>
                   <p className="text-sm md:text-base uppercase tracking-[0.25em] text-[var(--text-secondary)] font-medium ml-1">
-                    {t(designer.role)}
+                    {designer.role
+                      ? t(designer.role)
+                      : isBirimStudio
+                        ? t('design_studio') || 'Tasarım Stüdyosu'
+                        : ''}
                   </p>
                 </ScrollReveal>
               )}
@@ -261,7 +286,18 @@ export function DesignerDetailPage() {
                 <div className="text-base lg:text-lg leading-relaxed text-[var(--text-secondary)] font-light max-w-2xl">
                   {(() => {
                     const bio = t(designer.bio)
-                    return Array.isArray(bio) ? <PortableTextLite value={bio} /> : <p>{bio}</p>
+                    if (Array.isArray(bio) && bio.length > 0)
+                      return <PortableTextLite value={bio} />
+                    if (typeof bio === 'string' && bio.trim()) return <p>{bio}</p>
+                    if (isBirimStudio) {
+                      return (
+                        <p>
+                          {t('birim_studio_bio_full') ||
+                            "Birim'in yenilikçi ve zamansız tasarım vizyonunu yansıtan iç tasarım stüdyosu. Ergonomi, estetik ve mimari disiplini bir araya getirerek çağdaş mekanlar için ikonik mobilyalar tasarlar."}
+                        </p>
+                      )
+                    }
+                    return null
                   })()}
                 </div>
               </ScrollReveal>

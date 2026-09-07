@@ -5,7 +5,7 @@ vi.mock('./client', () => ({
     fetch: vi.fn(),
   },
   useSanity: true,
-  mapImage: vi.fn(val => val?.url || 'http://image.url'),
+  mapImage: vi.fn(val => (val ? val?.url || 'http://image.url' : '')),
   extractPalette: vi.fn(_val => ({})),
 }))
 
@@ -39,5 +39,24 @@ describe('sanity categories and designers service', () => {
     const designers = await getDesigners()
     expect(designers).toHaveLength(1)
     expect(designers[0].id).toBe('des-1')
+  })
+
+  it('Birim Design Studio için firma logosu ve stüdyo unvanını otomatik atar', async () => {
+    vi.mocked(sanity.fetch).mockResolvedValue([
+      {
+        id: 'tasarimci-birim-dessign-studio',
+        name: {tr: 'BIRIM DESIGN STUDIO', en: 'BIRIM DESIGN STUDIO'},
+        role: null,
+        bio: null,
+        image: null,
+        imageR2: null,
+      },
+    ])
+    const designers = await getDesigners()
+    expect(designers).toHaveLength(1)
+    const studio = designers[0]
+    expect(studio.isCompanyLogo).toBe(true)
+    expect((studio.image as {url: string}).url).toBe('/img/logo.png')
+    expect(studio.role).toEqual({tr: 'Tasarım Stüdyosu', en: 'Design Studio'})
   })
 })

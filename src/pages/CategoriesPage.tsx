@@ -242,14 +242,16 @@ export function CategoriesPage() {
                         }
                       />
                     )}
-                    {/* Text content inside at the bottom */}
-                    <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 lg:p-6 flex flex-col justify-end z-10">
-                      <div className="inline-block w-fit">
-                        <h2 className="text-lg md:text-xl lg:text-2xl font-light tracking-widest text-gray-400 uppercase leading-tight transition-colors duration-500 ease-out group-hover:text-[var(--text-primary)]">
+                    {/* Text content & full-width animated bottom line */}
+                    <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end pointer-events-none">
+                      <div className="px-4 sm:px-5 lg:px-6">
+                        <h2 className="text-lg md:text-xl lg:text-2xl font-light tracking-widest text-gray-400 uppercase leading-tight transition-colors duration-700 ease-out group-hover:text-[var(--text-primary)]">
                           {t(category.name)}
                         </h2>
-                        {/* Architectural expanding underline */}
-                        <div className="h-[1.5px] w-full bg-gradient-to-r from-[var(--text-primary)] via-[var(--text-primary)]/80 to-[var(--text-primary)]/20 origin-left scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100 transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] mt-2" />
+                      </div>
+                      {/* Full-width line spanning card from left to right, rising from the bottom to under the name */}
+                      <div className="w-full pt-3 sm:pt-3.5 pb-4 sm:pb-5 lg:pb-6">
+                        <div className="h-[1px] w-full bg-gray-400/50 dark:bg-gray-500/50 opacity-0 translate-y-10 scale-x-95 group-hover:translate-y-0 group-hover:opacity-100 group-hover:scale-x-100 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                       </div>
                     </div>
                   </div>

@@ -8,6 +8,8 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useNews} from '../hooks/useNews'
 import {useSEO} from '../hooks/useSEO'
 import ScrollReveal from '../components/ScrollReveal'
+import {TextMaskReveal} from '../components/TextMaskReveal'
+import {ProductCardReveal, getProductCardStaggerDelay} from '../components/ProductCardReveal'
 
 interface SanityBlockChild {
   _type?: string
@@ -269,15 +271,11 @@ export function NewsPage() {
 
       {/* Sayfa Header & Subtitle (Ortalanmış, Projeler başlığı boyutunda) */}
       <div className={containerClass + ' pt-2 md:pt-4 pb-4 md:pb-6 text-center'}>
-        <motion.div
-          initial={{opacity: 0, y: 15}}
-          animate={{opacity: 1, y: 0}}
-          transition={{duration: 0.8, ease: 'easeOut'}}
-        >
+        <TextMaskReveal delay={60} duration={1.15}>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight uppercase text-center">
             {t('news_title') || 'Haberler'}
           </h1>
-        </motion.div>
+        </TextMaskReveal>
       </div>
 
       <div className={containerClass + ' mb-6 md:mb-8'}>
@@ -327,119 +325,134 @@ export function NewsPage() {
       {/* Featured Spotlight Article (Only when showing all without active search) */}
       {featuredArticle && selectedCategory === 'all' && searchQuery.trim() === '' && (
         <div className={containerClass + ' mb-10 md:mb-14'}>
-          <ScrollReveal threshold={0.05} direction="up" distance={20}>
+          <ScrollReveal threshold={0.05} direction="up" distance={25} delay={100}>
             <Link to={`/news/${featuredArticle.id}`} className="group block relative">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center bg-[var(--bg-secondary)]/80 p-6 md:p-10 border border-black/[0.05] dark:border-white/[0.06] transition-all duration-500 hover:border-black/20 dark:hover:border-white/20">
                 {/* Hero Photo */}
                 <div className="lg:col-span-7 h-[300px] md:h-[450px] overflow-hidden relative">
-                  <OptimizedImage
-                    src={
-                      typeof featuredArticle.mainImage === 'string'
-                        ? featuredArticle.mainImage
-                        : featuredArticle.mainImage?.url || ''
-                    }
-                    srcMobile={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.urlMobile
-                        : undefined
-                    }
-                    srcDesktop={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.urlDesktop
-                        : undefined
-                    }
-                    alt={t(featuredArticle.title)}
-                    className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
-                    width={1400}
-                    height={900}
-                    loading="eager"
-                    quality={95}
-                    crop={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.crop
-                        : undefined
-                    }
-                    hotspot={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.hotspot
-                        : undefined
-                    }
-                    origWidth={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? (featuredArticle.mainImage.origWidth as number)
-                        : undefined
-                    }
-                    origHeight={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? (featuredArticle.mainImage.origHeight as number)
-                        : undefined
-                    }
-                    cropMobile={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.cropMobile
-                        : undefined
-                    }
-                    hotspotMobile={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.hotspotMobile
-                        : undefined
-                    }
-                    origWidthMobile={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.origWidthMobile
-                        : undefined
-                    }
-                    origHeightMobile={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.origHeightMobile
-                        : undefined
-                    }
-                    cropDesktop={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.cropDesktop
-                        : undefined
-                    }
-                    hotspotDesktop={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.hotspotDesktop
-                        : undefined
-                    }
-                    origWidthDesktop={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.origWidthDesktop
-                        : undefined
-                    }
-                    origHeightDesktop={
-                      typeof featuredArticle.mainImage === 'object'
-                        ? featuredArticle.mainImage.origHeightDesktop
-                        : undefined
-                    }
-                  />
+                  <ProductCardReveal
+                    direction="down"
+                    duration={1.2}
+                    delay={0.08}
+                    className="w-full h-full"
+                  >
+                    <OptimizedImage
+                      src={
+                        typeof featuredArticle.mainImage === 'string'
+                          ? featuredArticle.mainImage
+                          : featuredArticle.mainImage?.url || ''
+                      }
+                      srcMobile={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? featuredArticle.mainImage.urlMobile
+                          : undefined
+                      }
+                      srcDesktop={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? featuredArticle.mainImage.urlDesktop
+                          : undefined
+                      }
+                      alt={t(featuredArticle.title)}
+                      className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
+                      width={1400}
+                      height={900}
+                      loading="eager"
+                      quality={95}
+                      crop={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? featuredArticle.mainImage.crop
+                          : undefined
+                      }
+                      hotspot={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? featuredArticle.mainImage.hotspot
+                          : undefined
+                      }
+                      origWidth={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? (featuredArticle.mainImage.origWidth as number)
+                          : undefined
+                      }
+                      origHeight={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? (featuredArticle.mainImage.origHeight as number)
+                          : undefined
+                      }
+                      cropMobile={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? featuredArticle.mainImage.cropMobile
+                          : undefined
+                      }
+                      hotspotMobile={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? featuredArticle.mainImage.hotspotMobile
+                          : undefined
+                      }
+                      origWidthMobile={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? (featuredArticle.mainImage.origWidthMobile as number)
+                          : undefined
+                      }
+                      origHeightMobile={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? (featuredArticle.mainImage.origHeightMobile as number)
+                          : undefined
+                      }
+                      cropDesktop={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? featuredArticle.mainImage.cropDesktop
+                          : undefined
+                      }
+                      hotspotDesktop={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? featuredArticle.mainImage.hotspotDesktop
+                          : undefined
+                      }
+                      origWidthDesktop={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? (featuredArticle.mainImage.origWidthDesktop as number)
+                          : undefined
+                      }
+                      origHeightDesktop={
+                        typeof featuredArticle.mainImage === 'object'
+                          ? (featuredArticle.mainImage.origHeightDesktop as number)
+                          : undefined
+                      }
+                    />
+                  </ProductCardReveal>
                 </div>
 
                 {/* Hero Details */}
                 <div className="lg:col-span-5 flex flex-col justify-between h-full py-2">
                   <div>
-                    <div className="flex items-center gap-3 text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-4">
-                      <span>{formatDate(featuredArticle.date, locale)}</span>
-                      <span>•</span>
-                      <span>{featuredArticle.categoryLabel}</span>
+                    <TextMaskReveal delay={120}>
+                      <div className="flex items-center gap-3 text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-4">
+                        <span>{formatDate(featuredArticle.date, locale)}</span>
+                        <span>•</span>
+                        <span>{featuredArticle.categoryLabel}</span>
+                      </div>
+                    </TextMaskReveal>
+
+                    <TextMaskReveal delay={180}>
+                      <h2 className="text-2xl md:text-4xl font-light text-[var(--text-primary)] uppercase tracking-tight leading-tight group-hover:text-[var(--text-secondary)] transition-colors mb-4">
+                        {t(featuredArticle.title)}
+                      </h2>
+                    </TextMaskReveal>
+
+                    <TextMaskReveal delay={240}>
+                      <p className="text-sm md:text-base text-[var(--text-secondary)] font-light leading-relaxed mb-6 line-clamp-4">
+                        {featuredArticle.summary}
+                      </p>
+                    </TextMaskReveal>
+                  </div>
+
+                  <TextMaskReveal delay={300} display="inline-block" className="w-full">
+                    <div className="flex items-center justify-end pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-xs font-mono tracking-widest uppercase text-[var(--text-primary)]">
+                      <span className="flex items-center gap-1 group-hover:translate-x-2 transition-transform duration-300">
+                        OKU <span className="text-base">↗</span>
+                      </span>
                     </div>
-
-                    <h2 className="text-2xl md:text-4xl font-light text-[var(--text-primary)] uppercase tracking-tight leading-tight group-hover:text-[var(--text-secondary)] transition-colors mb-4">
-                      {t(featuredArticle.title)}
-                    </h2>
-
-                    <p className="text-sm md:text-base text-[var(--text-secondary)] font-light leading-relaxed mb-6 line-clamp-4">
-                      {featuredArticle.summary}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-end pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-xs font-mono tracking-widest uppercase text-[var(--text-primary)]">
-                    <span className="flex items-center gap-1 group-hover:translate-x-2 transition-transform duration-300">
-                      OKU <span className="text-base">↗</span>
-                    </span>
-                  </div>
+                  </TextMaskReveal>
                 </div>
               </div>
             </Link>
@@ -451,119 +464,149 @@ export function NewsPage() {
       <div className={containerClass + ' pb-20 md:pb-32'}>
         {newsList.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-14">
-            {newsList.map((item, index) => (
-              <ScrollReveal
-                key={item.id}
-                delay={index * 80}
-                threshold={0.01}
-                direction="up"
-                distance={30}
-              >
-                <Link
-                  to={`/news/${item.id}`}
-                  className="group block flex flex-col h-full border border-black/[0.05] dark:border-white/[0.06] p-6 hover:border-black/20 dark:hover:border-white/20 transition-all duration-500 bg-[var(--bg-secondary)]/50"
+            {newsList.map((item, index) => {
+              const staggerDelay = getProductCardStaggerDelay(index, 2)
+              return (
+                <ScrollReveal
+                  key={item.id}
+                  delay={staggerDelay * 1000}
+                  threshold={0.05}
+                  direction="up"
+                  distance={25}
                 >
-                  <div className="w-full aspect-[21/9] overflow-hidden relative mb-6 border border-black/[0.03] dark:border-white/[0.04] bg-neutral-900/10">
-                    <OptimizedImage
-                      src={
-                        typeof item.mainImage === 'string'
-                          ? item.mainImage
-                          : item.mainImage?.url || ''
-                      }
-                      srcMobile={
-                        typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined
-                      }
-                      srcDesktop={
-                        typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined
-                      }
-                      alt={t(item.title)}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      width={1200}
-                      height={514}
-                      loading="lazy"
-                      quality={92}
-                      crop={typeof item.mainImage === 'object' ? item.mainImage.crop : undefined}
-                      hotspot={
-                        typeof item.mainImage === 'object' ? item.mainImage.hotspot : undefined
-                      }
-                      origWidth={
-                        typeof item.mainImage === 'object'
-                          ? (item.mainImage.origWidth as number)
-                          : undefined
-                      }
-                      origHeight={
-                        typeof item.mainImage === 'object'
-                          ? (item.mainImage.origHeight as number)
-                          : undefined
-                      }
-                      cropMobile={
-                        typeof item.mainImage === 'object' ? item.mainImage.cropMobile : undefined
-                      }
-                      hotspotMobile={
-                        typeof item.mainImage === 'object'
-                          ? item.mainImage.hotspotMobile
-                          : undefined
-                      }
-                      origWidthMobile={
-                        typeof item.mainImage === 'object'
-                          ? item.mainImage.origWidthMobile
-                          : undefined
-                      }
-                      origHeightMobile={
-                        typeof item.mainImage === 'object'
-                          ? item.mainImage.origHeightMobile
-                          : undefined
-                      }
-                      cropDesktop={
-                        typeof item.mainImage === 'object' ? item.mainImage.cropDesktop : undefined
-                      }
-                      hotspotDesktop={
-                        typeof item.mainImage === 'object'
-                          ? item.mainImage.hotspotDesktop
-                          : undefined
-                      }
-                      origWidthDesktop={
-                        typeof item.mainImage === 'object'
-                          ? item.mainImage.origWidthDesktop
-                          : undefined
-                      }
-                      origHeightDesktop={
-                        typeof item.mainImage === 'object'
-                          ? item.mainImage.origHeightDesktop
-                          : undefined
-                      }
-                    />
-                  </div>
-                  <div className="flex flex-col justify-between flex-grow">
-                    <div>
-                      <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-3">
-                        <span>{formatDate(item.date, locale)}</span>
-                        <span>{item.categoryLabel}</span>
+                  <Link
+                    to={`/news/${item.id}`}
+                    className="group block flex flex-col h-full border border-black/[0.05] dark:border-white/[0.06] p-6 hover:border-black/20 dark:hover:border-white/20 transition-all duration-500 bg-[var(--bg-secondary)]/50"
+                  >
+                    <div className="w-full aspect-[21/9] overflow-hidden relative mb-6 border border-black/[0.03] dark:border-white/[0.04] bg-neutral-900/10">
+                      <ProductCardReveal
+                        direction="down"
+                        duration={1.05}
+                        delay={staggerDelay}
+                        className="w-full h-full"
+                      >
+                        <OptimizedImage
+                          src={
+                            typeof item.mainImage === 'string'
+                              ? item.mainImage
+                              : item.mainImage?.url || ''
+                          }
+                          srcMobile={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.urlMobile
+                              : undefined
+                          }
+                          srcDesktop={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.urlDesktop
+                              : undefined
+                          }
+                          alt={t(item.title)}
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          width={1200}
+                          height={514}
+                          loading="lazy"
+                          quality={92}
+                          crop={
+                            typeof item.mainImage === 'object' ? item.mainImage.crop : undefined
+                          }
+                          hotspot={
+                            typeof item.mainImage === 'object' ? item.mainImage.hotspot : undefined
+                          }
+                          origWidth={
+                            typeof item.mainImage === 'object'
+                              ? (item.mainImage.origWidth as number)
+                              : undefined
+                          }
+                          origHeight={
+                            typeof item.mainImage === 'object'
+                              ? (item.mainImage.origHeight as number)
+                              : undefined
+                          }
+                          cropMobile={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.cropMobile
+                              : undefined
+                          }
+                          hotspotMobile={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.hotspotMobile
+                              : undefined
+                          }
+                          origWidthMobile={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.origWidthMobile
+                              : undefined
+                          }
+                          origHeightMobile={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.origHeightMobile
+                              : undefined
+                          }
+                          cropDesktop={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.cropDesktop
+                              : undefined
+                          }
+                          hotspotDesktop={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.hotspotDesktop
+                              : undefined
+                          }
+                          origWidthDesktop={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.origWidthDesktop
+                              : undefined
+                          }
+                          origHeightDesktop={
+                            typeof item.mainImage === 'object'
+                              ? item.mainImage.origHeightDesktop
+                              : undefined
+                          }
+                        />
+                      </ProductCardReveal>
+                    </div>
+                    <div className="flex flex-col justify-between flex-grow">
+                      <div>
+                        <TextMaskReveal delay={80 + (index % 2) * 60}>
+                          <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-3">
+                            <span>{formatDate(item.date, locale)}</span>
+                            <span>{item.categoryLabel}</span>
+                          </div>
+                        </TextMaskReveal>
+                        <TextMaskReveal delay={140 + (index % 2) * 60}>
+                          <h2 className="text-xl md:text-2xl font-light text-[var(--text-primary)] uppercase tracking-tight leading-snug group-hover:text-[var(--text-secondary)] transition-colors mb-3">
+                            {t(item.title)}
+                          </h2>
+                        </TextMaskReveal>
+                        <TextMaskReveal delay={200 + (index % 2) * 60}>
+                          <p className="text-xs md:text-sm text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3 mb-6">
+                            {item.summary}
+                          </p>
+                        </TextMaskReveal>
                       </div>
-                      <h2 className="text-xl md:text-2xl font-light text-[var(--text-primary)] uppercase tracking-tight leading-snug group-hover:text-[var(--text-secondary)] transition-colors mb-3">
-                        {t(item.title)}
-                      </h2>
-                      <p className="text-xs md:text-sm text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3 mb-6">
-                        {item.summary}
-                      </p>
+                      <TextMaskReveal delay={260 + (index % 2) * 60}>
+                        <div className="flex items-center justify-between pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-[11px] font-mono uppercase tracking-widest text-[var(--text-primary)] mt-auto">
+                          <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors font-light">
+                            {t('read_more') || 'DEVAMINI OKU'}
+                          </span>
+                          <span className="group-hover:translate-x-1 transition-transform">↗</span>
+                        </div>
+                      </TextMaskReveal>
                     </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-[11px] font-mono uppercase tracking-widest text-[var(--text-primary)] mt-auto">
-                      <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors font-light">
-                        {t('read_more') || 'DEVAMINI OKU'}
-                      </span>
-                      <span className="group-hover:translate-x-1 transition-transform">↗</span>
-                    </div>
-                  </div>
-                </Link>
-              </ScrollReveal>
-            ))}
+                  </Link>
+                </ScrollReveal>
+              )
+            })}
           </div>
         ) : (
-          <div className="py-24 text-center border-t border-b border-[var(--border-primary)]">
-            <p className="text-[var(--text-secondary)] text-base font-light italic">
-              {t('no_news') || 'Şu anda gösterilecek haber bulunmamaktadır.'}
-            </p>
-          </div>
+          <ScrollReveal delay={0} threshold={0.01}>
+            <div className="py-24 text-center border-t border-b border-[var(--border-primary)]">
+              <p className="text-[var(--text-secondary)] text-base font-light italic">
+                {t('no_news') || 'Şu anda gösterilecek haber bulunmamaktadır.'}
+              </p>
+            </div>
+          </ScrollReveal>
         )}
       </div>
     </div>

@@ -154,6 +154,8 @@ export interface Designer {
   imageMobile?: string
   /** Art Direction: Desktop için görsel URL (opsiyonel) */
   imageDesktop?: string
+  /** Firma logosu kullanılıyor mu (örneğin Birim Design Studio) */
+  isCompanyLogo?: boolean
 }
 
 /**
