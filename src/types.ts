@@ -589,6 +589,16 @@ export interface ContentBlock {
     | 'bottom-right'
   /** Offset/distance of button from media edges in pixels */
   buttonOffsetOnMedia?: number
+  /** Button Hotspot X position (percentage 0-100) */
+  buttonHotspotX?: number
+  /** Button Hotspot Y position (percentage 0-100) */
+  buttonHotspotY?: number
+  /** Button Position on media for mobile screen */
+  buttonPositionOnMediaMobile?: string
+  /** Button Hotspot X position for mobile (percentage 0-100) */
+  buttonHotspotXMobile?: number
+  /** Button Hotspot Y position for mobile (percentage 0-100) */
+  buttonHotspotYMobile?: number
   /** Bottom spacing in pixels */
   spacingBottom?: number
   /** Top padding in pixels */

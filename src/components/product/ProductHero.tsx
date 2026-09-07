@@ -332,6 +332,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                 {label: t(product.name)},
               ]}
               className="pointer-events-auto text-black [&_a]:!text-black/80 [&_a:hover]:!text-black [&_span.font-bold]:!text-black [&_span]:!text-black"
+              fadeOnScroll
             />
           </div>
         </div>

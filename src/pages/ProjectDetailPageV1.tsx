@@ -715,6 +715,7 @@ export function ProjectDetailPageV1() {
                 {label: t(project.title)},
               ]}
               className="pointer-events-auto text-white/90 drop-shadow-md [&_a]:!text-white/80 [&_a:hover]:!text-white [&_span.font-bold]:!text-white [&_span.text-gray-400]:!text-white/50"
+              fadeOnScroll
             />
           </div>
         </div>

@@ -322,14 +322,28 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const targetWMob = origWidthMobile || targetW
   const targetHMob = origHeightMobile || targetH
 
+  const isSeparateMobileImage = Boolean(
+    activeMobileSrc &&
+      activeMobileSrc !== activeDesktopSrc &&
+      activeMobileSrc !== rewriteR2Url(currentSrc)
+  )
+
   const normalizedCropDesktop = useMemo(
     () => getActiveCrop(cropDesktop || crop, targetW, targetH),
     [cropDesktop, crop, targetW, targetH]
   )
   const normalizedCropMobile = useMemo(() => {
     if (cropMobile === null) return undefined
-    return getActiveCrop(cropMobile || cropDesktop || crop, targetWMob, targetHMob)
-  }, [cropMobile, cropDesktop, crop, targetWMob, targetHMob])
+    if (cropMobile) {
+      return getActiveCrop(cropMobile, targetWMob, targetHMob)
+    }
+    // Ayrı bir mobil görsel yüklendiğinde masaüstü görselinin kırpması (cropDesktop / crop)
+    // mobil görsele miras bırakılmamalıdır (kadraj ve en-boy oranları tamamen bağımsızdır).
+    if (isSeparateMobileImage) {
+      return undefined
+    }
+    return getActiveCrop(cropDesktop || crop, targetWMob, targetHMob)
+  }, [cropMobile, cropDesktop, crop, targetWMob, targetHMob, isSeparateMobileImage])
 
   const activeCrop = normalizedCropDesktop || normalizedCropMobile
 

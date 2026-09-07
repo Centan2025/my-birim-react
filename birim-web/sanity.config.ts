@@ -54,6 +54,7 @@ import {supabaseUsersTool} from './tools/supabaseUsers'
 import {colorInput} from '@sanity/color-input'
 import {CategoryProductsView} from './components/CategoryProductsView'
 import {PreviewView} from './components/PreviewView'
+import CustomStudioNavbar from './components/CustomStudioNavbar'
 
 export default defineConfig({
   name: 'default',
@@ -61,6 +62,12 @@ export default defineConfig({
 
   projectId: 'wn3a082f',
   dataset: 'production',
+
+  studio: {
+    components: {
+      navbar: CustomStudioNavbar,
+    },
+  },
 
   search: {
     strategy: 'groq2024',

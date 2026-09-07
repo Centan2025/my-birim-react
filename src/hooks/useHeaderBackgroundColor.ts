@@ -49,9 +49,9 @@ export function useHeaderBackgroundColor({
       if (!effectiveIsLight && !isDarkMode) {
         return 'rgba(0, 0, 0, 0.75)'
       }
-      // Yarı şeffaf beyaz buz efekti: bg-white/78 + backdrop-blur-sm
+      // Yarı şeffaf beyaz buz efekti: bg-white/78 + backdrop-blur-[4px]
       const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : 'rgba(255, 255, 255, '
-      return `${baseColor}${Math.max(headerOpacity, 0.78)})`
+      return `${baseColor}${Math.max(Math.min(headerOpacity, 0.82), 0.78)})`
     }
 
     // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda, Proje Detay, Fabrika V2 vb.):
@@ -64,7 +64,7 @@ export function useHeaderBackgroundColor({
 
     // Hero altından itibaren: yarı şeffaf beyaz buz efekti
     const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : 'rgba(255, 255, 255, '
-    return `${baseColor}${Math.max(Math.min(headerOpacity, 0.78), 0.75)})`
+    return `${baseColor}${Math.max(Math.min(headerOpacity, 0.82), 0.78)})`
   }
 
   return calculateBackgroundColor()

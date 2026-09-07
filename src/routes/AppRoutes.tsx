@@ -260,6 +260,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
             </PageBoundary>
           }
         />
+        <Route path="/news-v2" element={<Navigate to="/news?v=2" replace />} />
         <Route
           path="/news/:newsId"
           element={

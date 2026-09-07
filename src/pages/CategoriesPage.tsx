@@ -121,7 +121,6 @@ export function CategoriesPage() {
               <ProductCardReveal
                 key={category.id}
                 delay={getProductCardStaggerDelay(index, 3)}
-                duration={1.2}
                 className="h-[300px] sm:h-[350px] lg:h-[450px]"
               >
                 <Link

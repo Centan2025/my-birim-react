@@ -33,19 +33,19 @@ export function getProductCardStaggerDelay(index: number, columns = 4, randomize
   const row = Math.floor(index / columns)
   const rand = getPseudoRandom(index)
 
-  // First 2 rows (initial viewport): scatter delays between 0.04s and 0.28s (snappy yet organic)
+  // First 2 rows (initial viewport): scatter delays between 0.05s and 0.32s (smooth yet organic)
   if (row < 2) {
-    return Math.round((0.04 + rand * 0.24) * 100) / 100
+    return Math.round((0.05 + rand * 0.27) * 100) / 100
   }
 
-  // Subsequent rows scrolled into view: scatter delays across the row between 0.02s and 0.18s
-  return Math.round((0.02 + rand * 0.16) * 100) / 100
+  // Subsequent rows scrolled into view: scatter delays across the row between 0.03s and 0.20s
+  return Math.round((0.03 + rand * 0.17) * 100) / 100
 }
 
 export const ProductCardReveal: React.FC<ProductCardRevealProps> = ({
   children,
   delay = 0,
-  duration = 1.15,
+  duration = 1.5,
   direction = 'down',
   className = '',
 }) => {
@@ -107,7 +107,7 @@ interface CategoryTitleRevealProps {
 export const CategoryTitleReveal: React.FC<CategoryTitleRevealProps> = ({
   children,
   delay = 0.05,
-  duration = 1.3,
+  duration = 1.5,
   className = '',
 }) => {
   const ref = useRef<HTMLDivElement>(null)

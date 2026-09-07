@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {InputProps, useClient} from 'sanity'
 import {Card, Flex, Text, Box} from '@sanity/ui'
+import StudioLanguageBar from './StudioLanguageBar'
 
 export default function ProductDocumentInput(props: InputProps) {
   const {renderDefault, value} = props
@@ -44,44 +45,52 @@ export default function ProductDocumentInput(props: InputProps) {
           top: 0,
         }}
       >
-        <Flex align="center" gap={1} style={{fontSize: '13px', fontWeight: 500, color: '#8b949e'}}>
-          <span
-            style={{display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 4px'}}
+        <Flex align="center" justify="space-between" gap={2} style={{flexWrap: 'wrap'}}>
+          <Flex
+            align="center"
+            gap={1}
+            style={{fontSize: '13px', fontWeight: 500, color: '#8b949e'}}
           >
-            🪑 Ürünler
-          </span>
+            <span
+              style={{display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 4px'}}
+            >
+              🪑 Ürünler
+            </span>
 
-          <span style={{color: '#484f58', userSelect: 'none'}}>›</span>
+            <span style={{color: '#484f58', userSelect: 'none'}}>›</span>
 
-          {categoryName ? (
-            <>
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '2px 4px',
-                  fontWeight: 600,
-                  color: '#c9d1d9',
-                }}
-              >
-                📁 {categoryName}
-              </span>
-              <span style={{color: '#484f58', userSelect: 'none'}}>›</span>
-            </>
-          ) : null}
+            {categoryName ? (
+              <>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '2px 4px',
+                    fontWeight: 600,
+                    color: '#c9d1d9',
+                  }}
+                >
+                  📁 {categoryName}
+                </span>
+                <span style={{color: '#484f58', userSelect: 'none'}}>›</span>
+              </>
+            ) : null}
 
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '2px 4px',
-              color: '#8b949e',
-            }}
-          >
-            📄 {productName}
-          </span>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '2px 4px',
+                color: '#8b949e',
+              }}
+            >
+              📄 {productName}
+            </span>
+          </Flex>
+
+          <StudioLanguageBar size="small" showAllOption showLabel={false} />
         </Flex>
       </Card>
 

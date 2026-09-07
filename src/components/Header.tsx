@@ -637,7 +637,7 @@ export function Header() {
         } ${
           headerBgColor === 'transparent' && !isProductsOpen
             ? ''
-            : 'header-frosted-glass backdrop-blur-sm backdrop-saturate-110 border-b border-black/[0.06] dark:border-white/[0.08]'
+            : 'header-frosted-glass backdrop-blur-[4px] border-b border-black/[0.06] dark:border-white/[0.08]'
         }`}
         style={{
           transform: isHeaderVisible ? 'none' : 'translateY(-100%)',
@@ -645,14 +645,9 @@ export function Header() {
             ? 'transform 0.2s ease-out, background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           backgroundColor: headerBgColor,
-          backdropFilter:
-            headerBgColor === 'transparent' && !isProductsOpen
-              ? 'none'
-              : 'blur(8px) saturate(110%)',
+          backdropFilter: headerBgColor === 'transparent' && !isProductsOpen ? 'none' : 'blur(4px)',
           WebkitBackdropFilter:
-            headerBgColor === 'transparent' && !isProductsOpen
-              ? 'none'
-              : 'blur(8px) saturate(110%)',
+            headerBgColor === 'transparent' && !isProductsOpen ? 'none' : 'blur(4px)',
         }}
       >
         <div

@@ -513,7 +513,32 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             ? 'justify-end'
             : 'justify-center'
 
+        // Masaüstü ve Mobil için responsive buton konumu çözümlemesi
+        const rawButtonPos = block.buttonPositionOnMedia || ''
+        const [desktopPosStr, mobilePosStr] = rawButtonPos.split('@mobile:')
+        const effectiveButtonPos =
+          isMobile && (mobilePosStr || block.buttonPositionOnMediaMobile)
+            ? mobilePosStr || block.buttonPositionOnMediaMobile
+            : desktopPosStr
+
+        const effectiveHotspotX =
+          isMobile && typeof block.buttonHotspotXMobile === 'number'
+            ? block.buttonHotspotXMobile
+            : block.buttonHotspotX
+        const effectiveHotspotY =
+          isMobile && typeof block.buttonHotspotYMobile === 'number'
+            ? block.buttonHotspotYMobile
+            : block.buttonHotspotY
+
+        const hasHotspot =
+          (typeof effectiveButtonPos === 'string' && effectiveButtonPos.startsWith('custom:')) ||
+          (typeof effectiveHotspotX === 'number' &&
+            !isNaN(effectiveHotspotX) &&
+            typeof effectiveHotspotY === 'number' &&
+            !isNaN(effectiveHotspotY))
+
         const getButtonPositionClasses = (pos?: string, hasCustomOffset?: boolean) => {
+          if (hasHotspot || (pos && pos.startsWith('custom:'))) return 'items-center justify-center'
           switch (pos) {
             case 'top-left':
               return `${hasCustomOffset ? '' : 'top-4 left-4 md:top-8 md:left-8'} justify-start items-start`
@@ -537,7 +562,36 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           }
         }
 
-        const getButtonPositionStyles = (pos?: string, offset?: number): React.CSSProperties => {
+        const getButtonPositionStyles = (
+          pos?: string,
+          offset?: number,
+          hotspotX?: number,
+          hotspotY?: number
+        ): React.CSSProperties => {
+          if (pos && pos.startsWith('custom:')) {
+            const parts = pos.split(':')
+            const x = parseFloat(parts[1] ?? '')
+            const y = parseFloat(parts[2] ?? '')
+            if (!isNaN(x) && !isNaN(y)) {
+              return {
+                left: `${x}%`,
+                top: `${y}%`,
+                transform: 'translate(-50%, -50%)',
+              }
+            }
+          }
+          if (
+            typeof hotspotX === 'number' &&
+            !isNaN(hotspotX) &&
+            typeof hotspotY === 'number' &&
+            !isNaN(hotspotY)
+          ) {
+            return {
+              left: `${hotspotX}%`,
+              top: `${hotspotY}%`,
+              transform: 'translate(-50%, -50%)',
+            }
+          }
           if (typeof offset !== 'number' || isNaN(offset) || pos === 'center') return {}
           const px = `${offset}px`
           switch (pos) {
@@ -893,8 +947,17 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               {overlayTextElement}
               {block.showButtonOnMedia && block.linkText && (
                 <div
-                  className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
-                  style={getButtonPositionStyles(block.buttonPositionOnMedia, customOffset)}
+                  className={`absolute z-30 flex pointer-events-none ${
+                    hasHotspot
+                      ? 'items-center justify-center'
+                      : `${buttonOverlayPaddingClass} ${getButtonPositionClasses(effectiveButtonPos, hasCustomOffset)}`
+                  }`}
+                  style={getButtonPositionStyles(
+                    effectiveButtonPos,
+                    customOffset,
+                    effectiveHotspotX,
+                    effectiveHotspotY
+                  )}
                 >
                   {block.linkUrl ? (
                     <Link

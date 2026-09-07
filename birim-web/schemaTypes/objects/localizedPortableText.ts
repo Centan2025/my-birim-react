@@ -4,13 +4,21 @@ import {Palette, Type} from 'lucide-react'
 import PortableTextImagePreview from '../../components/PortableTextImagePreview'
 import PortableTextImageInput from '../../components/PortableTextImageInput'
 import PortableTextArrayInput from '../../components/PortableTextArrayInput'
+import LocalizedPortableTextInput from '../../components/LocalizedPortableTextInput'
+import FontSizeIcon from '../../components/FontSizeIcon'
 import {browserOnly, browserOnlyInput} from '../utils/browserOnly'
 
 const createFontSizeDecorator = (title: string, value: string, px: string) => ({
   title,
   value,
-  icon: () =>
-    React.createElement('span', {style: {fontSize: '11px', fontWeight: 700, padding: '0 2px'}}, px),
+  icon:
+    browserOnly(() => React.createElement(FontSizeIcon, {px, markValue: value})) ||
+    (() =>
+      React.createElement(
+        'span',
+        {style: {fontSize: '11px', fontWeight: 700, padding: '0 2px'}},
+        px,
+      )),
   component: (props: {children: React.ReactNode}) =>
     React.createElement('span', {style: {fontSize: px}}, props.children),
 })
@@ -318,6 +326,9 @@ export const localizedPortableText = defineType({
   name: 'localizedPortableText',
   title: 'Çok Dilli Zengin Metin',
   type: 'object',
+  components: {
+    input: browserOnlyInput(LocalizedPortableTextInput),
+  },
   fields: [
     defineField({
       name: 'tr',

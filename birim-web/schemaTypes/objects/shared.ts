@@ -6,6 +6,7 @@ import FontSelectorInput from '../../components/FontSelectorInput'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 import MirroredImageObjectInput from '../../components/MirroredImageObjectInput'
 import SingleCoverBooleanInput from '../../components/SingleCoverBooleanInput'
+import ButtonMediaPositionInput from '../../components/ButtonMediaPositionInput'
 import {browserOnlyInput} from '../utils/browserOnly'
 import {getPreviewUrl} from '../utils/previewUrl'
 
@@ -1300,35 +1301,42 @@ export const contentBlock = defineType({
       title: 'Butonun Medya Üzerindeki Konumu',
       type: 'string',
       fieldset: 'buttonGroup',
-      options: {
-        list: [
-          {title: 'Sol Üst', value: 'top-left'},
-          {title: 'Üst Orta', value: 'top-center'},
-          {title: 'Sağ Üst', value: 'top-right'},
-          {title: 'Sol Orta', value: 'center-left'},
-          {title: 'Merkez / Orta', value: 'center'},
-          {title: 'Sağ Orta', value: 'center-right'},
-          {title: 'Sol Alt', value: 'bottom-left'},
-          {title: 'Alt Orta', value: 'bottom-center'},
-          {title: 'Sağ Alt', value: 'bottom-right'},
-        ],
-        layout: 'radio',
-        direction: 'horizontal',
+      components: {
+        input: browserOnlyInput(ButtonMediaPositionInput),
       },
       initialValue: 'center',
       hidden: ({parent}) => !parent?.showButtonOnMedia,
-      description: 'Butonun medya (resim/video) üzerindeki duracağı konumu seçin.',
+      description:
+        'Butonun medya üzerindeki konumunu görsel üzerinden tıklayarak/sürükleyerek, hazır şablonlarla veya hassas koordinatlarla belirleyin.',
+    }),
+    defineField({
+      name: 'buttonHotspotX',
+      title: 'Buton Konumu X (%)',
+      type: 'number',
+      fieldset: 'buttonGroup',
+      hidden: true,
+    }),
+    defineField({
+      name: 'buttonHotspotY',
+      title: 'Buton Konumu Y (%)',
+      type: 'number',
+      fieldset: 'buttonGroup',
+      hidden: true,
+    }),
+    defineField({
+      name: 'buttonPositionOnMediaMobile',
+      title: 'Buton Konumu (Mobil)',
+      type: 'string',
+      fieldset: 'buttonGroup',
+      hidden: true,
     }),
     defineField({
       name: 'buttonOffsetOnMedia',
       title: 'Butonun Kenarlardan Uzaklığı (px)',
       type: 'number',
       fieldset: 'buttonGroup',
-      description:
-        'Butonun medya (resim/video) kenarlarından (üst, alt, sol, sağ) kaç piksel uzakta duracağını belirler (Varsayılan: 32px).',
       initialValue: 32,
-      hidden: ({parent}) => !parent?.showButtonOnMedia,
-      validation: (Rule) => Rule.min(0).max(300),
+      hidden: true,
     }),
     defineField({
       name: 'buttonColor',
