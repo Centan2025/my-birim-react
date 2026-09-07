@@ -346,7 +346,7 @@ export function ProductsPage() {
 
               return (
                 <div>
-                  {sortedCategoryIds.map(catId => {
+                  {sortedCategoryIds.map((catId, catIndex) => {
                     const {category, products} = productsByCategory.get(catId)!
                     const categoryName = category ? t(category.name) : catId
 
@@ -368,7 +368,7 @@ export function ProductsPage() {
                               key={`${sortBy}-${product.id}`}
                               delay={getProductCardStaggerDelay(idx)}
                             >
-                              <ProductCard product={product} />
+                              <ProductCard product={product} priority={catIndex === 0 && idx < 6} />
                             </ProductCardReveal>
                           ))}
                         </div>
@@ -386,7 +386,7 @@ export function ProductsPage() {
                   key={`${sortBy}-${product.id}`}
                   delay={getProductCardStaggerDelay(index)}
                 >
-                  <ProductCard product={product} />
+                  <ProductCard product={product} priority={index < 6} />
                 </ProductCardReveal>
               ))}
             </div>

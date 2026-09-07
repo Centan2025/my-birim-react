@@ -2,6 +2,7 @@ import React from 'react'
 import {Link} from 'react-router-dom'
 import {useTranslation} from '../../i18n'
 import {TextMaskReveal} from '../TextMaskReveal'
+import {TextLineReveal} from '../TextLineReveal'
 import PortableTextLite from '../PortableTextLite'
 import type {LocalizedString} from '../../types'
 
@@ -110,11 +111,13 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
       )}
 
       <div>
-        <TextMaskReveal delay={60}>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)]">
-            {t(product.name)}
-          </h2>
-        </TextMaskReveal>
+        <TextLineReveal
+          as="h2"
+          text={t(product.name)}
+          className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)]"
+          delay={60}
+          stagger={80}
+        />
 
         {(() => {
           const desc = t(product.description)
@@ -126,6 +129,39 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
 
           if (isPortableText) {
             const blocks = Array.isArray(desc) ? desc : [desc]
+            const isAllSimpleText = blocks.every(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (b: any) =>
+                b?._type === 'block' &&
+                Array.isArray(b?.children) &&
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                b.children.every(
+                  (c: any) => c?._type === 'span' && (!c.marks || c.marks.length === 0)
+                )
+            )
+
+            if (isAllSimpleText) {
+              return (
+                <div className="mt-4 space-y-4 max-w-3xl">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  {blocks.map((b: any, idx: number) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const blockText = b.children.map((c: any) => c.text || '').join('')
+                    return (
+                      <TextLineReveal
+                        key={b._key || idx}
+                        as="p"
+                        text={blockText}
+                        className="text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed font-roboto-thin"
+                        delay={160 + idx * 120}
+                        stagger={65}
+                      />
+                    )
+                  })}
+                </div>
+              )
+            }
+
             return (
               <TextMaskReveal delay={180}>
                 <div className="mt-4 text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed max-w-3xl font-roboto-thin">
@@ -142,22 +178,27 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
             return (
               <div className="mt-4 space-y-4 max-w-3xl">
                 {paragraphs.map((para, idx) => (
-                  <TextMaskReveal key={idx} delay={180 + idx * 80}>
-                    <p className="text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed font-roboto-thin">
-                      {para}
-                    </p>
-                  </TextMaskReveal>
+                  <TextLineReveal
+                    key={idx}
+                    as="p"
+                    text={para}
+                    className="text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed font-roboto-thin"
+                    delay={160 + idx * 120}
+                    stagger={65}
+                  />
                 ))}
               </div>
             )
           }
 
           return (
-            <TextMaskReveal delay={180}>
-              <p className="mt-4 text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed max-w-3xl font-roboto-thin">
-                {rawDesc}
-              </p>
-            </TextMaskReveal>
+            <TextLineReveal
+              as="p"
+              text={rawDesc}
+              className="mt-4 text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed max-w-3xl font-roboto-thin"
+              delay={160}
+              stagger={65}
+            />
           )
         })()}
       </div>

@@ -27,10 +27,9 @@ export const ProductRelated: React.FC<ProductRelatedProps> = ({products, show}) 
           <ProductCardReveal
             key={related.id}
             delay={getProductCardStaggerDelay(index, 4)}
-            duration={1.6}
             direction="down"
           >
-            <ProductCard product={related} />
+            <ProductCard product={related} priority={index < 4} />
           </ProductCardReveal>
         ))}
       </div>

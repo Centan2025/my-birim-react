@@ -68,6 +68,7 @@ interface OptimizedImageProps {
   isMirroredDesktop?: boolean
   fitAuto?: boolean
   disableResizing?: boolean
+  fadeOnLoad?: boolean
 }
 
 /**
@@ -175,6 +176,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   isMirroredDesktop,
   fitAuto = false,
   disableResizing = false,
+  fadeOnLoad,
 }) => {
   const styleBlock = useMemo(() => {
     return (
@@ -415,6 +417,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Placeholder (çok küçük, özel renk veya varsayılan gri)
   const placeholder = `data:image/svg+xml;base64,${btoa(`<svg width="1" height="1" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="${placeholderColor}"/></svg>`)}`
+
+  const shouldFade = fadeOnLoad ?? (loading !== 'eager' && fetchPriority !== 'high')
+  const opacityClass = shouldFade
+    ? `${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`
+    : 'opacity-100'
 
   const handleLoad = (e?: React.SyntheticEvent<HTMLImageElement>) => {
     setIsLoaded(true)
@@ -1024,8 +1031,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           width={width}
           height={height}
           loading={loading}
+          decoding="async"
           {...fetchPriorityAttr}
-          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop || isHeightDefined ? 'h-full' : 'h-auto'} ${innerImgClassName} responsive-mirror responsive-crop-pos`}
+          className={`${opacityClass} w-full ${useClientCrop || isHeightDefined ? 'h-full' : 'h-auto'} ${innerImgClassName} responsive-mirror responsive-crop-pos`}
           draggable={draggable}
           onLoad={handleLoad}
           onError={handleError}
@@ -1058,7 +1066,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         tabIndex={onClick ? 0 : undefined}
       >
         {styleBlock}
-        {showPlaceholder && !isLoaded && (
+        {showPlaceholder && !isLoaded && shouldFade && (
           <img
             src={placeholder}
             alt=""
@@ -1082,10 +1090,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         width={width}
         height={height}
         loading={loading}
+        decoding="async"
         {...fetchPriorityAttr}
         srcSet={responsiveSrcSet}
         sizes={responsiveSrcSet ? defaultSizes : undefined}
-        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop || isHeightDefined ? 'h-full' : 'h-auto'} ${innerImgClassName} responsive-mirror responsive-crop-pos`}
+        className={`${opacityClass} w-full ${useClientCrop || isHeightDefined ? 'h-full' : 'h-auto'} ${innerImgClassName} responsive-mirror responsive-crop-pos`}
         draggable={draggable}
         onLoad={handleLoad}
         onError={handleError}
@@ -1118,7 +1127,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       tabIndex={onClick ? 0 : undefined}
     >
       {styleBlock}
-      {showPlaceholder && !isLoaded && (
+      {showPlaceholder && !isLoaded && shouldFade && (
         <img
           src={placeholder}
           alt=""

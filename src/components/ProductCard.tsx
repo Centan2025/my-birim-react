@@ -7,7 +7,10 @@ import {useSiteSettings} from '../context/SiteSettingsContext'
 import {analytics} from '../lib/analytics'
 import {useDesigners} from '../hooks/useDesigners'
 
-export const ProductCard: React.FC<{product: Product}> = ({product}) => {
+export const ProductCard: React.FC<{
+  product: Product
+  priority?: boolean
+}> = ({product, priority = false}) => {
   const {t} = useTranslation()
   const {settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
@@ -78,19 +81,20 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
   return (
     <Link to={`/product/${product.id}`} className="group block w-full" onClick={handleClick}>
       <div className={`bg-[var(--bg-primary)] ${imageBorderClass} overflow-hidden`}>
-        <div
-          className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-[var(--bg-primary)]"
-          style={{
-            transition: 'scale 1.1s cubic-bezier(0.25, 0.1, 0.25, 1)',
-          }}
-        >
+        <div className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-[var(--bg-primary)]">
           <OptimizedImage
             src={mainImageUrl}
             srcMobile={mainImageMobile}
             srcDesktop={mainImageDesktop}
             alt={t(product.name)}
-            className="w-full h-full transform transition-transform duration-1000 ease-out group-hover:scale-[1.04]"
-            loading="lazy"
+            width={480}
+            height={480}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="w-full h-full transform transition-transform duration-700 ease-out md:group-hover:scale-[1.04]"
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
+            showPlaceholder={!priority}
+            fadeOnLoad={!priority}
             quality={85}
             crop={mainImageCrop}
             cropMobile={mainImageCropMobile}

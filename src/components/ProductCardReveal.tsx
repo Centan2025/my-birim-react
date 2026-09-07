@@ -33,19 +33,19 @@ export function getProductCardStaggerDelay(index: number, columns = 4, randomize
   const row = Math.floor(index / columns)
   const rand = getPseudoRandom(index)
 
-  // First 2 rows (initial viewport): scatter delays between 0.05s and 0.55s
+  // First 2 rows (initial viewport): scatter delays between 0.04s and 0.28s (snappy yet organic)
   if (row < 2) {
-    return Math.round((0.05 + rand * 0.5) * 100) / 100
+    return Math.round((0.04 + rand * 0.24) * 100) / 100
   }
 
-  // Subsequent rows scrolled into view: scatter delays across the row between 0.03s and 0.35s
-  return Math.round((0.03 + rand * 0.32) * 100) / 100
+  // Subsequent rows scrolled into view: scatter delays across the row between 0.02s and 0.18s
+  return Math.round((0.02 + rand * 0.16) * 100) / 100
 }
 
 export const ProductCardReveal: React.FC<ProductCardRevealProps> = ({
   children,
   delay = 0,
-  duration = 1.9,
+  duration = 0.75,
   direction = 'down',
   className = '',
 }) => {
@@ -83,11 +83,12 @@ export const ProductCardReveal: React.FC<ProductCardRevealProps> = ({
             ease: [0.19, 1, 0.22, 1], // Elegant, gentle glide with smooth deceleration
           },
           opacity: {
-            duration: duration * 1.1, // Gradual fade-in matching the slower slide
+            duration: duration * 0.9,
             delay: delayInSeconds,
-            ease: [0.45, 0, 0.15, 1], // Starts very faint in the beginning, then clarifies
+            ease: [0.25, 0.1, 0.25, 1],
           },
         }}
+        style={{willChange: 'transform, opacity'}}
         className="w-full h-full"
       >
         {children}
