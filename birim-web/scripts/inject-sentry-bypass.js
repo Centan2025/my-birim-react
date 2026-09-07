@@ -69,6 +69,13 @@ if (fs.existsSync(indexHtmlPath)) {
   } else {
     console.log('Sentry bypass already injected.')
   }
+
+  const redirectsSrc = path.join(__dirname, '..', 'static', '_redirects')
+  const redirectsDest = path.join(__dirname, '..', 'dist', '_redirects')
+  if (fs.existsSync(redirectsSrc)) {
+    fs.copyFileSync(redirectsSrc, redirectsDest)
+    console.log('Successfully copied _redirects to dist')
+  }
 } else {
   console.log('dist/index.html not found, skipping Sentry bypass injection.')
 }
