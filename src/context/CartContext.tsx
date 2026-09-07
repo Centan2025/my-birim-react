@@ -1,5 +1,12 @@
-/* eslint-disable react-refresh/only-export-components */
-import {createContext, useContext, useState, useEffect, PropsWithChildren} from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  PropsWithChildren,
+} from 'react'
 import type {Product, CartItem} from '../types'
 import {analytics} from '../lib/analytics'
 
@@ -51,15 +58,14 @@ export const CartProvider = ({children}: PropsWithChildren) => {
     }
   }, [cartItems])
 
-  const toggleCart = () => setIsCartOpen(!isCartOpen)
-  const openCart = () => setIsCartOpen(true)
+  const toggleCart = useCallback(() => setIsCartOpen(prev => !prev), [])
+  const openCart = useCallback(() => setIsCartOpen(true), [])
 
-  const addToCart = (product: Product) => {
+  const addToCart = useCallback((product: Product) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.product.id === product.id)
       const newQuantity = existingItem ? existingItem.quantity + 1 : 1
 
-      // Analytics: sepete ekleme olayı
       analytics.trackEcommerce('add_to_cart', product.id, product.price)
 
       if (existingItem) {
@@ -69,22 +75,24 @@ export const CartProvider = ({children}: PropsWithChildren) => {
       }
       return [...prevItems, {product, quantity: newQuantity}]
     })
-    openCart()
-  }
+    setIsCartOpen(true)
+  }, [])
 
-  const removeFromCart = (productId: string) => {
-    const itemToRemove = cartItems.find(item => item.product.id === productId)
-    if (itemToRemove) {
-      analytics.trackEcommerce(
-        'remove_from_cart',
-        itemToRemove.product.id,
-        itemToRemove.product.price
-      )
-    }
-    setCartItems(prevItems => prevItems.filter(item => item.product.id !== productId))
-  }
+  const removeFromCart = useCallback((productId: string) => {
+    setCartItems(prevItems => {
+      const itemToRemove = prevItems.find(item => item.product.id === productId)
+      if (itemToRemove) {
+        analytics.trackEcommerce(
+          'remove_from_cart',
+          itemToRemove.product.id,
+          itemToRemove.product.price
+        )
+      }
+      return prevItems.filter(item => item.product.id !== productId)
+    })
+  }, [])
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
     setCartItems(prevItems => {
       if (quantity <= 0) {
         const itemToRemove = prevItems.find(item => item.product.id === productId)
@@ -99,38 +107,57 @@ export const CartProvider = ({children}: PropsWithChildren) => {
       }
       return prevItems.map(item => (item.product.id === productId ? {...item, quantity} : item))
     })
-  }
+  }, [])
 
-  const clearCart = () => {
-    if (cartItems.length > 0) {
-      analytics.event({
-        action: 'clear_cart',
-        category: 'ecommerce',
-        label: `Cleared ${cartItems.length} items`,
-      })
-    }
-    setCartItems([])
-  }
+  const clearCart = useCallback(() => {
+    setCartItems(prev => {
+      if (prev.length > 0) {
+        analytics.event({
+          action: 'clear_cart',
+          category: 'ecommerce',
+          label: `Cleared ${prev.length} items`,
+        })
+      }
+      return []
+    })
+  }, [])
 
-  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0)
-
-  const cartTotal = cartItems.reduce(
-    (acc, item) => acc + (item.product.price || 0) * item.quantity,
-    0
+  const cartCount = useMemo(
+    () => cartItems.reduce((acc, item) => acc + item.quantity, 0),
+    [cartItems]
   )
 
-  const value = {
-    cartItems,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    cartCount,
-    cartTotal,
-    isCartOpen,
-    toggleCart,
-    openCart,
-  }
+  const cartTotal = useMemo(
+    () => cartItems.reduce((acc, item) => acc + (item.product.price || 0) * item.quantity, 0),
+    [cartItems]
+  )
+
+  const value = useMemo<CartContextType>(
+    () => ({
+      cartItems,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      cartCount,
+      cartTotal,
+      isCartOpen,
+      toggleCart,
+      openCart,
+    }),
+    [
+      cartItems,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      cartCount,
+      cartTotal,
+      isCartOpen,
+      toggleCart,
+      openCart,
+    ]
+  )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

@@ -54,10 +54,6 @@ export default defineConfig({
           'manifest.webmanifest',
           'assets/index-*.{js,css}',
           'assets/react-vendor-*.js',
-          'assets/HomePage-*.js',
-          'assets/HomeContentBlocks-*.js',
-          'assets/icons-vendor-*.js',
-          'assets/query-vendor-*.js',
         ],
         globIgnores: [
           '**/AnalyticsPage*',

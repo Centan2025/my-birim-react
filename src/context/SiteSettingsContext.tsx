@@ -1,4 +1,4 @@
-import {useContext, createContext, PropsWithChildren, useEffect} from 'react'
+import {useContext, createContext, PropsWithChildren, useEffect, useMemo} from 'react'
 import {useQuery} from '@tanstack/react-query'
 import {getSiteSettings} from '../services/cms'
 import {useSeoDefaults} from '../hooks/useSEO'
@@ -45,11 +45,16 @@ export const SiteSettingsProvider = ({children}: PropsWithChildren) => {
     }
   }, [setSeoDefaults, settings?.topBannerText])
 
+  const contextValue = useMemo<SiteSettingsContextType>(
+    () => ({
+      settings: settings || null,
+      isLoading,
+      error: error as Error | null,
+    }),
+    [settings, isLoading, error]
+  )
+
   return (
-    <SiteSettingsContext.Provider
-      value={{settings: settings || null, isLoading, error: error as Error | null}}
-    >
-      {children}
-    </SiteSettingsContext.Provider>
+    <SiteSettingsContext.Provider value={contextValue}>{children}</SiteSettingsContext.Provider>
   )
 }

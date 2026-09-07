@@ -170,24 +170,6 @@ export const registerUser = async (
       ...extraProfile,
     })
 
-    try {
-      const siteUrl = import.meta.env['VITE_SITE_URL'] || window.location.origin
-      const verificationUrl = `${siteUrl}/#/verify-email?token=${data.user.verificationToken}`
-      const emailServerUrl = import.meta.env['VITE_EMAIL_SERVER_URL'] || 'http://localhost:3002'
-
-      fetch(`${emailServerUrl}/api/send-verification`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          email: normEmail,
-          verificationUrl,
-          logoUrl: `${siteUrl}/logo.png`,
-        }),
-      }).catch(e => console.error('E-posta gönderilemedi:', e))
-    } catch (e) {
-      console.error('E-posta tetikleme hatası:', e)
-    }
-
     return data.user
   }
 

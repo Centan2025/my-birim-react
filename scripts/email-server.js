@@ -4,7 +4,17 @@ import cors from 'cors'
 import nodemailer from 'nodemailer'
 
 const app = express()
-app.use(cors())
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:5173',
+      'https://www.birim.com',
+      'https://birim.com',
+    ],
+  })
+)
 app.use(express.json())
 
 const SMTP_PASSWORD = process.env.SMTP_PASSWORD
@@ -30,8 +40,6 @@ function isValidHttpUrl(urlStr) {
     const isAllowedHost =
       hostname === 'birim.com' ||
       hostname === 'www.birim.com' ||
-      hostname.endsWith('.birim.com') ||
-      hostname.endsWith('.vercel.app') ||
       hostname === 'localhost' ||
       hostname === '127.0.0.1'
 

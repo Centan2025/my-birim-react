@@ -1,4 +1,5 @@
 import type {VercelRequest, VercelResponse} from '@vercel/node'
+import {handleCors} from '../../lib/server/cors.js'
 
 const SANITY_PROJECT_ID =
   process.env['VITE_SANITY_PROJECT_ID'] || process.env['SANITY_PROJECT_ID'] || 'wn3a082f'
@@ -8,29 +9,13 @@ const SANITY_API_VERSION =
   process.env['VITE_SANITY_API_VERSION'] || process.env['SANITY_API_VERSION'] || '2025-01-01'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
-  const ALLOWED_ORIGINS = [
-    'https://www.birim.com',
-    'https://birim.com',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:5173',
-  ]
-  const isAllowedOrigin =
-    ALLOWED_ORIGINS.includes(requestOrigin) ||
-    requestOrigin.endsWith('.birim.com') ||
-    requestOrigin.endsWith('.vercel.app')
-
-  if (isAllowedOrigin) {
-    res.setHeader('Access-Control-Allow-Origin', requestOrigin)
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', 'https://www.birim.com')
-  }
-
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    return res.status(200).end()
+  if (
+    handleCors(req, res, {
+      allowMethods: 'GET, POST, OPTIONS',
+      allowHeaders: 'Content-Type, Authorization',
+    })
+  ) {
+    return
   }
 
   if (req.method !== 'GET' && req.method !== 'POST') {

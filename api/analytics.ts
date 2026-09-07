@@ -3,6 +3,8 @@ import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {GoogleAuth} from 'google-auth-library'
 import dotenv from 'dotenv'
 import {getAuthTokenFromReq, verifyToken} from '../lib/server/token.js'
+import {handleCors} from '../lib/server/cors.js'
+import {isRateLimitedAsync, getClientIp} from '../lib/server/rateLimiter.js'
 
 dotenv.config({path: '.env.local'})
 dotenv.config()
@@ -377,37 +379,26 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
-  const ALLOWED_ORIGINS = [
-    'https://www.birim.com',
-    'https://birim.com',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3333',
-    'http://localhost:5173',
-  ]
-  const isAllowedOrigin =
-    ALLOWED_ORIGINS.includes(requestOrigin) ||
-    requestOrigin.endsWith('.birim.com') ||
-    requestOrigin.endsWith('.vercel.app') ||
-    requestOrigin.endsWith('.sanity.studio')
-
-  if (requestOrigin && isAllowedOrigin) {
-    res.setHeader('Access-Control-Allow-Origin', requestOrigin)
-    res.setHeader('Access-Control-Allow-Credentials', 'true')
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', 'https://www.birim.com')
-  }
-
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-analytics-pin')
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end()
+  if (
+    handleCors(req, res, {
+      allowMethods: 'GET, OPTIONS',
+      allowHeaders: 'Content-Type, Authorization, x-analytics-pin',
+    })
+  ) {
+    return
   }
 
   // Server-side authentication: valid PIN or valid Admin JWT
-  const expectedPin = (process.env['ANALYTICS_PIN'] || 'birim2026').trim()
+  const rawExpectedPin = process.env['ANALYTICS_PIN']?.trim()
+  if (!rawExpectedPin) {
+    console.error('[Analytics Security] ANALYTICS_PIN environment variable is not configured!')
+    return res.status(500).json({
+      success: false,
+      error: 'Analitik servisi yapılandırma hatası: ANALYTICS_PIN sunucuda tanımlı değil.',
+    })
+  }
+  const expectedPin = rawExpectedPin
+
   const rawProvidedPin = req.headers['x-analytics-pin'] || req.query['pin']
   const providedPin = typeof rawProvidedPin === 'string' ? rawProvidedPin.trim() : ''
 
@@ -421,8 +412,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const payload = token ? verifyToken(token) : null
   const isUserAdmin = Boolean(payload && payload.role === 'admin')
 
-  // Verification endpoint for client PIN submission
+  // Verification endpoint for client PIN submission (Rate limited)
   if (req.query['action'] === 'verify') {
+    const clientIp = getClientIp(req)
+    if (await isRateLimitedAsync(`analytics_verify_${clientIp}`, {limit: 5, windowMs: 60000})) {
+      return res.status(429).json({
+        success: false,
+        error: 'Çok fazla hatalı PIN denemesi yaptınız. Lütfen 1 dakika sonra tekrar deneyin.',
+      })
+    }
+
     if (isPinValid || isUserAdmin) {
       return res.status(200).json({success: true, message: 'Doğrulama başarılı.'})
     }

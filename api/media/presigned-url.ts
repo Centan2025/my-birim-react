@@ -3,6 +3,7 @@ import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
+import {handleCors, isOriginAllowed} from '../../lib/server/cors.js'
 
 const R2_ACCOUNT_ID = (
   process.env['R2_ACCOUNT_ID'] ||
@@ -40,37 +41,11 @@ const r2Client = new S3Client({
 })
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
-  const ALLOWED_ORIGINS = [
-    'https://www.birim.com',
-    'https://birim.com',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3333',
-    'http://localhost:5173',
-  ]
-  const isAllowedOrigin =
-    ALLOWED_ORIGINS.includes(requestOrigin) ||
-    requestOrigin.endsWith('.birim.com') ||
-    requestOrigin.endsWith('.vercel.app') ||
-    requestOrigin.endsWith('.sanity.studio')
-
-  if (requestOrigin && isAllowedOrigin) {
-    res.setHeader('Access-Control-Allow-Origin', requestOrigin)
-    res.setHeader('Access-Control-Allow-Credentials', 'true')
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', 'https://www.birim.com')
+  if (handleCors(req, res)) {
+    return
   }
 
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
-  )
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end()
-  }
+  const requestOrigin = typeof req.headers?.origin === 'string' ? req.headers.origin : ''
 
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
@@ -91,7 +66,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(adminSecret))
   )
   const isUserAdmin = Boolean(payload && payload.role === 'admin')
-  const isDevLocal = process.env['NODE_ENV'] !== 'production' && requestOrigin.includes('localhost')
+  const isDevLocal =
+    process.env['NODE_ENV'] !== 'production' &&
+    isOriginAllowed(requestOrigin) &&
+    /^http:\/\/(localhost|127\.0\.0\.1)/.test(requestOrigin)
 
   if (!isUserAdmin && !isAdminSecretMatch && !isDevLocal) {
     return res.status(401).json({

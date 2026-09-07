@@ -2,6 +2,7 @@ import {GoogleGenAI} from '@google/genai'
 import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
 import crypto from 'crypto'
 import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
+import {handleCors} from '../../lib/server/cors.js'
 
 // Rate Limiting (In-Memory IP Tracker)
 interface RateLimitRecord {
@@ -164,29 +165,13 @@ async function uploadToR2OrFallback(
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
-    const ALLOWED_ORIGINS = [
-      'https://www.birim.com',
-      'https://birim.com',
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:5173',
-    ]
-    const isAllowedOrigin =
-      ALLOWED_ORIGINS.includes(requestOrigin) ||
-      requestOrigin.endsWith('.birim.com') ||
-      requestOrigin.endsWith('.vercel.app')
-
-    if (isAllowedOrigin) {
-      res.setHeader('Access-Control-Allow-Origin', requestOrigin)
-      res.setHeader('Access-Control-Allow-Credentials', 'true')
-    }
-
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-
-    if (req.method === 'OPTIONS') {
-      return res.status(200).json({})
+    if (
+      handleCors(req, res, {
+        allowMethods: 'POST, OPTIONS',
+        allowHeaders: 'Content-Type, Authorization, x-api-secret',
+      })
+    ) {
+      return
     }
 
     if (req.method !== 'POST') {
@@ -251,8 +236,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-      await getBase64FromImageInput(roomImage)
-      await getBase64FromImageInput(productImage)
+      if (!roomImage.startsWith('http') && !roomImage.startsWith('data:image/')) {
+        throw new Error('Geçersiz oda görseli formatı.')
+      }
+      if (!productImage.startsWith('http') && !productImage.startsWith('data:image/')) {
+        throw new Error('Geçersiz ürün görseli formatı.')
+      }
 
       let promptText = cleanPrompt
         ? cleanPrompt

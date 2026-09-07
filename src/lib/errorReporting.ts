@@ -168,6 +168,3 @@ class ErrorReporter {
 }
 
 export const errorReporter = new ErrorReporter()
-
-// Initialize on module load
-errorReporter.init()

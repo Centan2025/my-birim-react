@@ -38,15 +38,27 @@ try {
   }
 }
 
-// Initialize error reporting
-errorReporter.init()
+// Telemetry & Error Reporting (Lazy-loaded to keep critical initial thread lightweight)
+if (typeof window !== 'undefined') {
+  const initTelemetry = () => {
+    errorReporter.init()
+    initWebVitals({
+      sendToAnalytics: true,
+      sendToSentry: true,
+      debug: DEBUG_LOGS,
+    })
+  }
 
-// Initialize Web Vitals monitoring
-initWebVitals({
-  sendToAnalytics: true,
-  sendToSentry: true,
-  debug: DEBUG_LOGS,
-})
+  const win = window as typeof window & {
+    requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number
+  }
+
+  if (typeof win.requestIdleCallback === 'function') {
+    win.requestIdleCallback(initTelemetry, {timeout: 3000})
+  } else {
+    window.addEventListener('load', () => setTimeout(initTelemetry, 1500))
+  }
+}
 
 const rootElement = document.getElementById('root')
 if (!rootElement) {
