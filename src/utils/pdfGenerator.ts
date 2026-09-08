@@ -1,6 +1,7 @@
 import {jsPDF} from 'jspdf'
 import type {Product} from '../types'
 import {getProductImageProps} from '../types/seckim'
+import {rewriteR2Url} from '../services/sanity/client'
 
 interface GeneratePdfOptions {
   projectName?: string
@@ -45,142 +46,222 @@ async function loadFontAsBase64(url: string): Promise<string | null> {
 }
 
 /**
+ * Loads an image from a URL, using Blob fetch first (to prevent tainted canvas / CORS browser cache collisions),
+ * then falls back to direct Image element loading.
+ */
+async function fetchImageElement(
+  url: string
+): Promise<{img: HTMLImageElement; cleanup: () => void} | null> {
+  if (!url) return null
+
+  const cleanUrl = rewriteR2Url(url)
+
+  // 1. Try fetching as Blob (bypasses tainted canvas completely once loaded into Image)
+  try {
+    let res = await fetch(cleanUrl, {mode: 'cors'}).catch(() => null)
+
+    // If standard fetch failed (e.g. CORS cache collision with previous non-CORS img request),
+    // try with cache-busting query param
+    if (!res || !res.ok) {
+      const separator = cleanUrl.includes('?') ? '&' : '?'
+      res = await fetch(`${cleanUrl}${separator}_pdf_cors=1`, {mode: 'cors'}).catch(() => null)
+    }
+
+    if (res && res.ok) {
+      const blob = await res.blob()
+      const objectUrl = URL.createObjectURL(blob)
+      const img = new Image()
+      const loaded = await new Promise<boolean>(resolve => {
+        img.onload = () => resolve(true)
+        img.onerror = () => resolve(false)
+        img.src = objectUrl
+      })
+
+      if (loaded && (img.naturalWidth || img.width)) {
+        return {
+          img,
+          cleanup: () => URL.revokeObjectURL(objectUrl),
+        }
+      }
+      URL.revokeObjectURL(objectUrl)
+    }
+  } catch {
+    // Fallback to direct HTMLImageElement loading below
+  }
+
+  // 2. Fallback: load directly via HTMLImageElement with crossOrigin
+  try {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    const loaded = await new Promise<boolean>(resolve => {
+      img.onload = () => resolve(true)
+      img.onerror = () => resolve(false)
+      img.src = cleanUrl
+    })
+
+    if (loaded && (img.naturalWidth || img.width)) {
+      return {img, cleanup: () => {}}
+    }
+  } catch {
+    // Fallback without crossOrigin
+  }
+
+  // 3. Fallback: load directly without crossOrigin (works for local/same-origin images)
+  try {
+    const img = new Image()
+    const loaded = await new Promise<boolean>(resolve => {
+      img.onload = () => resolve(true)
+      img.onerror = () => resolve(false)
+      img.src = cleanUrl
+    })
+
+    if (loaded && (img.naturalWidth || img.width)) {
+      return {img, cleanup: () => {}}
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+/**
  * Loads the Birim black logo image for white PDF pages.
  */
 async function loadLogo(): Promise<{dataUrl: string; aspect: number} | null> {
   if (cachedLogo) return cachedLogo
 
-  return new Promise(resolve => {
-    try {
-      const img = new Image()
-      img.crossOrigin = 'Anonymous'
-      img.onload = () => {
-        try {
-          const naturalW = img.naturalWidth || img.width
-          const naturalH = img.naturalHeight || img.height
-          const aspect = naturalW / naturalH
+  const handle = await fetchImageElement('/logo-black.png')
+  if (!handle) return null
 
-          // Target canvas size for high-DPI print clarity without bloating file size (max width 800)
-          const targetW = Math.min(800, naturalW)
-          const targetH = Math.round(targetW / aspect)
-
-          const canvas = document.createElement('canvas')
-          canvas.width = targetW
-          canvas.height = targetH
-          const ctx = canvas.getContext('2d')
-          if (!ctx) {
-            resolve(null)
-            return
-          }
-          ctx.drawImage(img, 0, 0, targetW, targetH)
-          const dataUrl = canvas.toDataURL('image/png')
-          cachedLogo = {dataUrl, aspect}
-          resolve(cachedLogo)
-        } catch {
-          resolve(null)
-        }
-      }
-      img.onerror = () => resolve(null)
-      img.src = '/logo-black.png'
-    } catch {
-      resolve(null)
+  const {img, cleanup} = handle
+  try {
+    const naturalW = img.naturalWidth || img.width
+    const naturalH = img.naturalHeight || img.height
+    if (!naturalW || !naturalH) {
+      cleanup()
+      return null
     }
-  })
+    const aspect = naturalW / naturalH
+    const targetW = Math.min(800, naturalW)
+    const targetH = Math.round(targetW / aspect)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = targetW
+    canvas.height = targetH
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      cleanup()
+      return null
+    }
+    ctx.drawImage(img, 0, 0, targetW, targetH)
+    const dataUrl = canvas.toDataURL('image/png')
+    cleanup()
+    cachedLogo = {dataUrl, aspect}
+    return cachedLogo
+  } catch {
+    cleanup()
+    return null
+  }
 }
 
 /**
  * Loads a product image from URL, applies crop if defined, and converts to base64 JPEG
  * while preserving its natural aspect ratio to prevent stretching.
  */
-async function loadProductImage(imageUrl: string, crop?: any): Promise<LoadedImageInfo | null> {
+async function loadProductImage(
+  imageUrl: string,
+  crop?: unknown
+): Promise<LoadedImageInfo | null> {
   if (!imageUrl) return null
 
-  return new Promise(resolve => {
-    try {
-      const img = new Image()
-      img.crossOrigin = 'Anonymous'
-      img.onload = () => {
-        try {
-          const naturalW = img.naturalWidth || img.width
-          const naturalH = img.naturalHeight || img.height
+  const handle = await fetchImageElement(imageUrl)
+  if (!handle) return null
 
-          let sx = 0
-          let sy = 0
-          let sw = naturalW
-          let sh = naturalH
+  const {img, cleanup} = handle
 
-          // Check if crop metadata is present (from Sanity / Cloudflare R2)
-          if (crop && typeof crop === 'object') {
-            let cx = 0
-            let cy = 0
-            let cw = 1
-            let ch = 1
-
-            if (crop.cropX !== undefined || crop.cropWidth !== undefined) {
-              cx = Number(crop.cropX) || 0
-              cy = Number(crop.cropY) || 0
-              cw = Number(crop.cropWidth) || 1
-              ch = Number(crop.cropHeight) || 1
-            } else if (crop.x !== undefined || crop.width !== undefined) {
-              cx = Number(crop.x) || 0
-              cy = Number(crop.y) || 0
-              cw = Number(crop.width) || 1
-              ch = Number(crop.height) || 1
-            } else if (
-              crop.top !== undefined ||
-              crop.left !== undefined ||
-              crop.bottom !== undefined ||
-              crop.right !== undefined
-            ) {
-              cx = Number(crop.left) || 0
-              cy = Number(crop.top) || 0
-              cw = Math.max(0.001, 1 - (Number(crop.left) || 0) - (Number(crop.right) || 0))
-              ch = Math.max(0.001, 1 - (Number(crop.top) || 0) - (Number(crop.bottom) || 0))
-            }
-
-            if (cw <= 1 && ch <= 1 && (cw < 0.999 || ch < 0.999 || cx > 0.001 || cy > 0.001)) {
-              sx = Math.round(cx * naturalW)
-              sy = Math.round(cy * naturalH)
-              sw = Math.max(1, Math.round(cw * naturalW))
-              sh = Math.max(1, Math.round(ch * naturalH))
-            }
-          }
-
-          // Target canvas (max 800px) for sharp print rendering
-          const maxDimension = 800
-          const scale = Math.min(1, maxDimension / Math.max(sw, sh))
-          const canvasW = Math.max(1, Math.round(sw * scale))
-          const canvasH = Math.max(1, Math.round(sh * scale))
-
-          const canvas = document.createElement('canvas')
-          canvas.width = canvasW
-          canvas.height = canvasH
-          const ctx = canvas.getContext('2d')
-          if (!ctx) {
-            resolve(null)
-            return
-          }
-
-          // Pure white background for furniture isolation
-          ctx.fillStyle = '#FFFFFF'
-          ctx.fillRect(0, 0, canvasW, canvasH)
-          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasW, canvasH)
-
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
-          resolve({
-            dataUrl,
-            aspect: canvasW / canvasH,
-          })
-        } catch {
-          resolve(null)
-        }
-      }
-      img.onerror = () => resolve(null)
-      img.src = imageUrl
-    } catch {
-      resolve(null)
+  try {
+    const naturalW = img.naturalWidth || img.width
+    const naturalH = img.naturalHeight || img.height
+    if (!naturalW || !naturalH) {
+      cleanup()
+      return null
     }
-  })
+
+    let sx = 0
+    let sy = 0
+    let sw = naturalW
+    let sh = naturalH
+
+    // Check if crop metadata is present (from Sanity / Cloudflare R2)
+    if (crop && typeof crop === 'object') {
+      const cropObj = crop as Record<string, unknown>
+      let cx = 0
+      let cy = 0
+      let cw = 1
+      let ch = 1
+
+      if (cropObj['cropX'] !== undefined || cropObj['cropWidth'] !== undefined) {
+        cx = Number(cropObj['cropX']) || 0
+        cy = Number(cropObj['cropY']) || 0
+        cw = Number(cropObj['cropWidth']) || 1
+        ch = Number(cropObj['cropHeight']) || 1
+      } else if (cropObj['x'] !== undefined || cropObj['width'] !== undefined) {
+        cx = Number(cropObj['x']) || 0
+        cy = Number(cropObj['y']) || 0
+        cw = Number(cropObj['width']) || 1
+        ch = Number(cropObj['height']) || 1
+      } else if (
+        cropObj['top'] !== undefined ||
+        cropObj['left'] !== undefined ||
+        cropObj['bottom'] !== undefined ||
+        cropObj['right'] !== undefined
+      ) {
+        cx = Number(cropObj['left']) || 0
+        cy = Number(cropObj['top']) || 0
+        cw = Math.max(0.001, 1 - (Number(cropObj['left']) || 0) - (Number(cropObj['right']) || 0))
+        ch = Math.max(0.001, 1 - (Number(cropObj['top']) || 0) - (Number(cropObj['bottom']) || 0))
+      }
+
+      if (cw <= 1 && ch <= 1 && (cw < 0.999 || ch < 0.999 || cx > 0.001 || cy > 0.001)) {
+        sx = Math.round(cx * naturalW)
+        sy = Math.round(cy * naturalH)
+        sw = Math.max(1, Math.round(cw * naturalW))
+        sh = Math.max(1, Math.round(ch * naturalH))
+      }
+    }
+
+    // Target canvas (max 800px) for sharp print rendering
+    const maxDimension = 800
+    const scale = Math.min(1, maxDimension / Math.max(sw, sh))
+    const canvasW = Math.max(1, Math.round(sw * scale))
+    const canvasH = Math.max(1, Math.round(sh * scale))
+
+    const canvas = document.createElement('canvas')
+    canvas.width = canvasW
+    canvas.height = canvasH
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      cleanup()
+      return null
+    }
+
+    // Pure white background for furniture isolation
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(0, 0, canvasW, canvasH)
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasW, canvasH)
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
+    cleanup()
+    return {
+      dataUrl,
+      aspect: canvasW / canvasH,
+    }
+  } catch (err) {
+    cleanup()
+    console.warn('PDF product image canvas error:', err)
+    return null
+  }
 }
 
 export async function generateSeckimPDF({
@@ -226,7 +307,9 @@ export async function generateSeckimPDF({
     Promise.all(
       products.map(p => {
         const imgProps = getProductImageProps(p)
-        return imgProps.src ? loadProductImage(imgProps.src, imgProps.crop) : Promise.resolve(null)
+        const imgSrc = imgProps.src || imgProps.srcDesktop || imgProps.srcMobile
+        const crop = imgProps.crop || imgProps.cropDesktop || imgProps.cropMobile
+        return imgSrc ? loadProductImage(imgSrc, crop) : Promise.resolve(null)
       })
     ),
   ])
@@ -483,9 +566,10 @@ export async function generateSeckimPDF({
     // 5. Product Code (SKU)
     doc.setFont(activeFont, 'normal')
     doc.setFontSize(7.5)
-    doc.setTextColor(150, 150, 150)
     const code =
-      (product as any).sku || `BIRIM-${product.id.slice(0, 8).toLocaleUpperCase('tr-TR')}`
+      product.sku ||
+      (prodRecord['sku'] ? String(prodRecord['sku']) : '') ||
+      `BIRIM-${product.id.slice(0, 8).toLocaleUpperCase('tr-TR')}`
     doc.text(`Ürün Kodu: ${code}`, infoX, textY)
 
     yOffset += cardHeight + 7

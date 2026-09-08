@@ -1,4 +1,5 @@
-import type {Product} from '../types'
+import type {Product, R2ImageMetadata} from '../types'
+import {rewriteR2Url} from '../services/sanity/client'
 
 export interface UserSelectionItem {
   id: string
@@ -57,18 +58,25 @@ export function getLocalizedText(val: unknown): string {
 }
 
 export function getProductImageProps(product: Product) {
+  if (!product) {
+    return {
+      src: '',
+      fitAuto: true,
+    }
+  }
+
   const isObject = typeof product.mainImage === 'object' && product.mainImage !== null
   const mainImageObj = isObject
     ? (product.mainImage as {
         url?: string
         urlMobile?: string
         urlDesktop?: string
-        crop?: any
-        cropMobile?: any
-        cropDesktop?: any
-        hotspot?: any
-        hotspotMobile?: any
-        hotspotDesktop?: any
+        crop?: R2ImageMetadata['crop']
+        cropMobile?: R2ImageMetadata['crop']
+        cropDesktop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+        hotspotMobile?: R2ImageMetadata['hotspot']
+        hotspotDesktop?: R2ImageMetadata['hotspot']
         origWidth?: number
         origHeight?: number
         origWidthMobile?: number
@@ -78,14 +86,60 @@ export function getProductImageProps(product: Product) {
         isMirrored?: boolean
         isMirroredMobile?: boolean
         isMirroredDesktop?: boolean
+        asset?: {url?: string}
+        imageR2?: {url?: string}
       })
     : {}
-  const mainImageUrl = (isObject ? mainImageObj.url : (product.mainImage as string)) || ''
+
+  let rawSrc = ''
+  if (isObject) {
+    rawSrc =
+      mainImageObj.url ||
+      mainImageObj.urlDesktop ||
+      mainImageObj.urlMobile ||
+      mainImageObj.asset?.url ||
+      mainImageObj.imageR2?.url ||
+      ''
+  } else if (typeof product.mainImage === 'string') {
+    rawSrc = product.mainImage
+  }
+
+  // Fallback to media array or alternativeMedia if mainImage has no URL
+  if (!rawSrc && Array.isArray(product.media) && product.media.length > 0) {
+    const firstImg = product.media.find(
+      m => m && (m.type === 'image' || !m.type) && (m.url || m.urlDesktop || m.urlMobile)
+    )
+    if (firstImg) {
+      rawSrc = firstImg.url || firstImg.urlDesktop || firstImg.urlMobile || ''
+    }
+  }
+
+  if (!rawSrc && Array.isArray(product.alternativeMedia) && product.alternativeMedia.length > 0) {
+    const firstAlt = product.alternativeMedia.find(
+      m => m && (m.type === 'image' || !m.type) && (m.url || m.urlDesktop || m.urlMobile)
+    )
+    if (firstAlt) {
+      rawSrc = firstAlt.url || firstAlt.urlDesktop || firstAlt.urlMobile || ''
+    }
+  }
+
+  if (!rawSrc && Array.isArray(product.dimensionImages) && product.dimensionImages.length > 0) {
+    const firstDim = product.dimensionImages.find(
+      d => d && (d.image || d.imageDesktop || d.imageMobile)
+    )
+    if (firstDim) {
+      rawSrc = firstDim.image || firstDim.imageDesktop || firstDim.imageMobile || ''
+    }
+  }
+
+  const finalSrc = rawSrc ? rewriteR2Url(rawSrc) : ''
+  const finalSrcMobile = mainImageObj.urlMobile ? rewriteR2Url(mainImageObj.urlMobile) : undefined
+  const finalSrcDesktop = mainImageObj.urlDesktop ? rewriteR2Url(mainImageObj.urlDesktop) : undefined
 
   return {
-    src: mainImageUrl,
-    srcMobile: mainImageObj.urlMobile,
-    srcDesktop: mainImageObj.urlDesktop,
+    src: finalSrc,
+    srcMobile: finalSrcMobile,
+    srcDesktop: finalSrcDesktop,
     crop: mainImageObj.crop,
     cropMobile: mainImageObj.cropMobile,
     cropDesktop: mainImageObj.cropDesktop,
