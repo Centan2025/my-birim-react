@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {useMemo, useEffect, useState, FC} from 'react'
 import {useParams, Link, useLocation} from 'react-router-dom'
 import {FullscreenMediaViewer, type MediaItem} from '../components/FullscreenMediaViewer'
@@ -36,7 +35,11 @@ const formatDate = (dateString: string, locale: string = 'tr'): string => {
     .toLocaleUpperCase(locale === 'tr' ? 'tr-TR' : 'en-US')
 }
 
-const getCategoryLabel = (category: unknown, t: (key: string) => string, locale: string = 'tr'): string => {
+const getCategoryLabel = (
+  category: unknown,
+  t: (key: string) => string,
+  locale: string = 'tr'
+): string => {
   const loc = locale === 'tr' ? 'tr-TR' : 'en-US'
   if (!category) return (t('news_press') || 'BASIN').toLocaleUpperCase(loc)
   if (typeof category === 'string') {
