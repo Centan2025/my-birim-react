@@ -87,7 +87,7 @@ export function Header() {
     }
     const update = () => {
       const heroEl = document.querySelector('.hero-section') as HTMLElement | null
-      const heroBottom = heroEl ? heroEl.offsetTop + heroEl.offsetHeight : window.innerHeight
+      const heroBottom = heroEl ? heroEl.offsetTop + heroEl.offsetHeight : 0
       setIsPastHero(window.scrollY >= heroBottom - headerHeight)
     }
     update()

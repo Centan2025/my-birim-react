@@ -30,14 +30,15 @@ const DEFAULT_IMAGES = {
 const isBrokenUrl = (url?: string): boolean =>
   !url || url.includes('1772637182314') || url.includes('BF006_CAB_06')
 
-const getSanitizedImage = (img: unknown, fallback: string): string => {
+const getSanitizedImage = (img: unknown, fallback: string = ''): string => {
   const rawUrl =
     typeof img === 'object' && img !== null && 'url' in img
       ? (img as {url?: string}).url
       : typeof img === 'string'
         ? img
         : ''
-  return isBrokenUrl(rawUrl) ? fallback : rawUrl!
+  if (!rawUrl || rawUrl.trim() === '') return fallback
+  return isBrokenUrl(rawUrl) ? fallback : rawUrl
 }
 
 const getPlainText = (val: unknown): string => {
@@ -196,8 +197,6 @@ export function AboutPageNew() {
   const {reset} = useHeaderTheme()
 
   useEffect(() => {
-    // Let the Header's hero-boundary tracker handle light/dark mode.
-    // Reset any leftover theme from previous pages on mount/unmount.
     reset()
     return () => reset()
   }, [reset])
@@ -247,10 +246,8 @@ export function AboutPageNew() {
       ? (content.heroImageMobile as Record<string, unknown>)
       : null
 
-  const heroImageUrl = getSanitizedImage(
-    heroImageObj?.['url'] || content?.heroImage,
-    DEFAULT_IMAGES.hero
-  )
+  const rawHeroImage = heroImageObj?.['url'] || content?.heroImage
+  const heroImageUrl = rawHeroImage ? getSanitizedImage(rawHeroImage, '') : ''
   const heroImageMobileUrl = getSanitizedImage(
     heroImageMobileObj?.['url'] ||
       (heroImageObj?.['urlMobile'] as string | undefined) ||
@@ -453,57 +450,61 @@ export function AboutPageNew() {
   return (
     <div className="bg-[var(--bg-primary)] text-[var(--text-primary)] animate-fade-in-up-subtle font-light selection:bg-[var(--text-primary)] selection:text-[var(--bg-primary)]">
       {/* Hero Header Section */}
-      <div className="relative h-[60vh] sm:h-[75vh] min-h-[420px] sm:min-h-[550px] bg-gray-900 text-white flex items-center justify-center overflow-hidden hero-section">
-        <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">
-          <OptimizedImage
-            src={heroImageUrl}
-            srcMobile={heroImageMobileUrl || undefined}
-            fallbackSrc={DEFAULT_IMAGES.hero}
-            alt={getPlainText(t(content?.heroTitle)) || 'Hakkımızda'}
-            className="w-full h-full opacity-85 object-cover"
-            width={1920}
-            height={1080}
-            loading="eager"
-            sizes="100vw"
-            quality={90}
-            crop={heroImgMeta.crop}
-            hotspot={heroImgMeta.hotspot}
-            origWidth={heroImgMeta.origWidth}
-            origHeight={heroImgMeta.origHeight}
-            cropMobile={heroImgMobMeta.crop}
-            hotspotMobile={heroImgMobMeta.hotspot}
-            origWidthMobile={heroImgMobMeta.origWidth}
-            origHeightMobile={heroImgMobMeta.origHeight}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/50" />
+      {heroImageUrl ? (
+        <div className="relative h-[60vh] sm:h-[75vh] min-h-[420px] sm:min-h-[550px] bg-gray-900 text-white flex items-center justify-center overflow-hidden hero-section">
+          <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">
+            <OptimizedImage
+              src={heroImageUrl}
+              srcMobile={heroImageMobileUrl || undefined}
+              fallbackSrc={heroImageUrl}
+              alt={getPlainText(t(content?.heroTitle)) || 'Hakkımızda'}
+              className="w-full h-full opacity-85 object-cover"
+              width={1920}
+              height={1080}
+              loading="eager"
+              sizes="100vw"
+              quality={90}
+              crop={heroImgMeta.crop}
+              hotspot={heroImgMeta.hotspot}
+              origWidth={heroImgMeta.origWidth}
+              origHeight={heroImgMeta.origHeight}
+              cropMobile={heroImgMobMeta.crop}
+              hotspotMobile={heroImgMobMeta.hotspot}
+              origWidthMobile={heroImgMobMeta.origWidth}
+              origHeightMobile={heroImgMobMeta.origHeight}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/50" />
+          </div>
+          <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
+            {heroBadgeText ? (
+              <TextMaskReveal delay={80} display="inline-block">
+                <span className="font-outfit text-[10px] sm:text-xs md:text-sm uppercase tracking-[0.25em] sm:tracking-[0.35em] text-gray-300 mb-3 sm:mb-6 inline-block font-light">
+                  {heroBadgeText}
+                </span>
+              </TextMaskReveal>
+            ) : null}
+            {heroTitleText ? (
+              <TextMaskReveal delay={160}>
+                <h1 className="font-outfit text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white break-words">
+                  {heroTitleText}
+                </h1>
+              </TextMaskReveal>
+            ) : null}
+            {heroSubtitleText ? (
+              <TextMaskReveal delay={280}>
+                <p className="font-outfit mt-4 sm:mt-8 text-sm sm:text-base md:text-xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2 sm:px-0">
+                  {heroSubtitleText}
+                </p>
+              </TextMaskReveal>
+            ) : null}
+          </div>
         </div>
-        <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
-          {heroBadgeText ? (
-            <TextMaskReveal delay={80} display="inline-block">
-              <span className="font-outfit text-[10px] sm:text-xs md:text-sm uppercase tracking-[0.25em] sm:tracking-[0.35em] text-gray-300 mb-3 sm:mb-6 inline-block font-light">
-                {heroBadgeText}
-              </span>
-            </TextMaskReveal>
-          ) : null}
-          {heroTitleText ? (
-            <TextMaskReveal delay={160}>
-              <h1 className="font-outfit text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white break-words">
-                {heroTitleText}
-              </h1>
-            </TextMaskReveal>
-          ) : null}
-          {heroSubtitleText ? (
-            <TextMaskReveal delay={280}>
-              <p className="font-outfit mt-4 sm:mt-8 text-sm sm:text-base md:text-xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2 sm:px-0">
-                {heroSubtitleText}
-              </p>
-            </TextMaskReveal>
-          ) : null}
-        </div>
-      </div>
+      ) : null}
 
       {/* Main Page Layout */}
-      <div className="bg-[var(--bg-primary)] pb-16 sm:pb-32">
+      <div
+        className={`bg-[var(--bg-primary)] pb-16 sm:pb-32 ${heroImageUrl ? '' : 'pt-20 sm:pt-28'}`}
+      >
         <div className={containerClass + ' py-3 sm:py-4 text-[11px] sm:text-[12px]'}>
           <TextMaskReveal delay={50}>
             <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('about')}]} />
