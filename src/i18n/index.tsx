@@ -122,6 +122,9 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
   }, [])
 
   useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = locale
+    }
     if (!loading) {
       try {
         if (typeof window !== 'undefined' && window.localStorage) {

@@ -246,7 +246,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
           >
             <span>
               <CrossFadeText
-                text={(t('products') || '').toLocaleUpperCase('en')}
+                text={(t('products') || '').toLocaleUpperCase(locale === 'tr' ? 'tr-TR' : 'en-US')}
                 triggerKey={locale}
                 className="inline-block w-[8rem] text-left"
               />
@@ -318,7 +318,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               >
                 <span>
                   <CrossFadeText
-                    text={(t('see_all') || '').toLocaleUpperCase('en')}
+                    text={(t('see_all') || '').toLocaleUpperCase(locale === 'tr' ? 'tr-TR' : 'en-US')}
                     triggerKey={locale}
                   />
                 </span>

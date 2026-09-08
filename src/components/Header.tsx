@@ -497,26 +497,27 @@ export function Header() {
     transition: `opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), ${colorTransition}`,
   }
 
+  const upperLoc = locale === 'tr' ? 'tr-TR' : 'en-US'
   const mobileMenuLinks: {to: string; label: string}[] = [
-    {to: '/designers', label: (t('designers') || '').toLocaleUpperCase('en')},
-    {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase('en')},
+    {to: '/designers', label: (t('designers') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase(upperLoc)},
     ...(isSelectionEnabled
       ? [
           {
             to: '/seckim',
             label:
               selectionCount > 0
-                ? `${(t('seckim') || 'Seçtiklerim').toLocaleUpperCase('tr')} (${selectionCount})`
-                : (t('seckim') || 'Seçtiklerim').toLocaleUpperCase('tr'),
+                ? `${(t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc)} (${selectionCount})`
+                : (t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc),
           },
         ]
       : []),
     ...(settings?.isFactoryVisible
-      ? [{to: '/factory', label: (t('factory') || 'Fabrika').toLocaleUpperCase('en')}]
+      ? [{to: '/factory', label: (t('factory') || 'Fabrika').toLocaleUpperCase(upperLoc)}]
       : []),
-    {to: '/news', label: (t('news') || '').toLocaleUpperCase('en')},
-    {to: '/about', label: (t('about') || '').toLocaleUpperCase('en')},
-    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase('en')},
+    {to: '/news', label: (t('news') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/about', label: (t('about') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase(upperLoc)},
   ]
 
   // Mobil overlay menü kapanırken önce yazıların kaybolup sonra panelin animasyonla kapanması için (biraz daha hızlı)

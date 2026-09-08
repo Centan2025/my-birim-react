@@ -33,22 +33,23 @@ const formatDate = (dateString: string, locale: string = 'tr'): string => {
       month: 'long',
       year: 'numeric',
     })
-    .toUpperCase()
+    .toLocaleUpperCase(locale === 'tr' ? 'tr-TR' : 'en-US')
 }
 
-const getCategoryLabel = (category: any, t: (key: string) => string): string => {
-  if (!category) return (t('news_press') || 'BASIN').toUpperCase()
+const getCategoryLabel = (category: unknown, t: (key: string) => string, locale: string = 'tr'): string => {
+  const loc = locale === 'tr' ? 'tr-TR' : 'en-US'
+  if (!category) return (t('news_press') || 'BASIN').toLocaleUpperCase(loc)
   if (typeof category === 'string') {
     const key = category.toLowerCase()
-    if (key === 'press') return (t('news_press') || 'BASIN').toUpperCase()
-    if (key === 'events') return (t('news_events') || 'SERGİ & ETKİNLİK').toUpperCase()
-    if (key === 'awards') return (t('news_awards') || 'ÖDÜLLER').toUpperCase()
-    if (key === 'launch') return (t('news_launch') || 'LANSMAN').toUpperCase()
-    return category.toUpperCase()
+    if (key === 'press') return (t('news_press') || 'BASIN').toLocaleUpperCase(loc)
+    if (key === 'events') return (t('news_events') || 'SERGİ & ETKİNLİK').toLocaleUpperCase(loc)
+    if (key === 'awards') return (t('news_awards') || 'ÖDÜLLER').toLocaleUpperCase(loc)
+    if (key === 'launch') return (t('news_launch') || 'LANSMAN').toLocaleUpperCase(loc)
+    return category.toLocaleUpperCase(loc)
   }
-  const translated = t(category)
-  if (translated) return translated.toUpperCase()
-  return (t('news_press') || 'BASIN').toUpperCase()
+  const translated = t(String(category))
+  if (translated) return translated.toLocaleUpperCase(loc)
+  return (t('news_press') || 'BASIN').toLocaleUpperCase(loc)
 }
 
 const MediaComponent: FC<{media: NewsMedia; onImageClick?: (url: string) => void}> = ({
@@ -370,7 +371,7 @@ export function NewsDetailPage() {
                 {item.category && (
                   <>
                     <span>•</span>
-                    <span>{getCategoryLabel(item.category, t)}</span>
+                    <span>{getCategoryLabel(item.category, t, locale)}</span>
                   </>
                 )}
               </div>

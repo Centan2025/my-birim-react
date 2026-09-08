@@ -48,7 +48,7 @@ const blockToPlainText = (blocks: unknown): string => {
     .join(' ')
 }
 
-const formatDate = (dateString: string, locale: string): string => {
+const formatDate = (dateString: string, locale: string = 'tr'): string => {
   if (!dateString) return ''
   const date = new Date(dateString)
   return date
@@ -57,22 +57,23 @@ const formatDate = (dateString: string, locale: string): string => {
       month: 'short',
       year: 'numeric',
     })
-    .toUpperCase()
+    .toLocaleUpperCase(locale === 'tr' ? 'tr-TR' : 'en-US')
 }
 
-const getCategoryLabel = (category: unknown, t: (key: string) => string): string => {
-  if (!category) return (t('news_press') || 'BASIN').toUpperCase()
+const getCategoryLabel = (category: unknown, t: (key: string) => string, locale: string = 'tr'): string => {
+  const loc = locale === 'tr' ? 'tr-TR' : 'en-US'
+  if (!category) return (t('news_press') || 'BASIN').toLocaleUpperCase(loc)
   if (typeof category === 'string') {
     const key = category.toLowerCase()
-    if (key === 'press') return (t('news_press') || 'BASIN').toUpperCase()
-    if (key === 'events') return (t('news_events') || 'SERGİ & ETKİNLİK').toUpperCase()
-    if (key === 'awards') return (t('news_awards') || 'ÖDÜLLER').toUpperCase()
-    if (key === 'launch') return (t('news_launch') || 'LANSMAN').toUpperCase()
-    return category.toUpperCase()
+    if (key === 'press') return (t('news_press') || 'BASIN').toLocaleUpperCase(loc)
+    if (key === 'events') return (t('news_events') || 'SERGİ & ETKİNLİK').toLocaleUpperCase(loc)
+    if (key === 'awards') return (t('news_awards') || 'ÖDÜLLER').toLocaleUpperCase(loc)
+    if (key === 'launch') return (t('news_launch') || 'LANSMAN').toLocaleUpperCase(loc)
+    return category.toLocaleUpperCase(loc)
   }
   const translated = t(String(category))
-  if (translated) return translated.toUpperCase()
-  return (t('news_press') || 'BASIN').toUpperCase()
+  if (translated) return translated.toLocaleUpperCase(loc)
+  return (t('news_press') || 'BASIN').toLocaleUpperCase(loc)
 }
 
 type ViewLayoutMode = 'bento' | 'archive'
@@ -106,10 +107,10 @@ export function NewsPageV2() {
       return {
         ...item,
         summary,
-        categoryLabel: getCategoryLabel(item.category, t),
+        categoryLabel: getCategoryLabel(item.category, t, locale),
       }
     })
-  }, [news, t])
+  }, [news, t, locale])
 
   // Filtered news
   const filteredNews = useMemo(() => {
