@@ -1039,42 +1039,6 @@ export function Header() {
                   )}
                 </div>
                 <div className="lg:hidden flex items-center gap-1">
-                  {isSelectionEnabled && (
-                    <button
-                      type="button"
-                      onClick={openDrawer}
-                      className="group relative p-2 rounded-full hover:bg-white/10 transition-colors flex items-center gap-1.5 justify-center cursor-pointer"
-                      style={{color: headerForegroundColor, transition: colorTransition}}
-                      aria-label={`${t('seckim') || 'Seçtiklerim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect x="7" y="7" width="13" height="13" rx="1.5" fill="none" />
-                        <path d="M4 17V5a1 1 0 0 1 1-1h12" fill="none" />
-                      </svg>
-                      {selectionCount > 0 && (
-                        <span
-                          className="inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[9.5px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs"
-                          style={{
-                            backgroundColor: '#3c424d',
-                            color: '#ffffff',
-                            lineHeight: 1,
-                            fontVariantNumeric: 'tabular-nums',
-                            letterSpacing: 0,
-                          }}
-                        >
-                          <span style={{transform: 'translateY(0.35px)'}}>{selectionCount}</span>
-                        </span>
-                      )}
-                    </button>
-                  )}
                   {isOverlayMobileMenu ? (
                     // Overlay modunda: hamburger → X animasyonu
                     <button
@@ -1191,6 +1155,9 @@ export function Header() {
             setIsMobileProductsMenuOpen={setIsMobileProductsMenuOpen}
             mobileMenuRef={mobileMenuRef}
             mobileMenuFocusTrap={mobileMenuFocusTrap}
+            selectionCount={selectionCount}
+            openDrawer={openDrawer}
+            isSelectionEnabled={isSelectionEnabled}
           />
         </div>
       </header>
@@ -1220,6 +1187,9 @@ export function Header() {
         subscribeEmailService={handleHeaderSubscribeEmail}
         mobileMenuRef={mobileMenuRef}
         mobileMenuFocusTrap={mobileMenuFocusTrap}
+        selectionCount={selectionCount}
+        openDrawer={openDrawer}
+        isSelectionEnabled={isSelectionEnabled}
       />
 
       <HeaderSearchPanel

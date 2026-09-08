@@ -19,6 +19,9 @@ interface HeaderMobileMenuInlineProps {
   setIsMobileProductsMenuOpen: (open: boolean) => void
   mobileMenuRef: MutableRefObject<HTMLDivElement | null>
   mobileMenuFocusTrap: MutableRefObject<HTMLElement | null>
+  selectionCount?: number
+  openDrawer?: () => void
+  isSelectionEnabled?: boolean
 }
 
 export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
@@ -37,6 +40,9 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
   setIsMobileProductsMenuOpen,
   mobileMenuRef,
   mobileMenuFocusTrap,
+  selectionCount = 0,
+  openDrawer,
+  isSelectionEnabled = true,
 }) => {
   // Menü her açıldığında scroll pozisyonunu en üste sıfırla
   useEffect(() => {
@@ -95,17 +101,60 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                 )
               })}
             </div>
-            {/* Login button - opens FloatingAuthPanel */}
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false)
-                window.dispatchEvent(new Event('openFloatingAuthPanel'))
-              }}
-              className="text-gray-300 hover:text-white transition-all duration-300 transform hover:scale-125"
-              aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
-            >
-              {isLoggedIn ? <UserLoggedInIcon /> : <UserIcon />}
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Seçkim Butonu - Kullanıcı düğmesinin solunda */}
+              {isSelectionEnabled && openDrawer && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false)
+                    openDrawer()
+                  }}
+                  className="group relative flex items-center gap-1.5 p-1 text-gray-300 hover:text-white transition-all duration-300 cursor-pointer"
+                  aria-label={`${t('seckim') || 'Seçtiklerim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
+                  title={t('seckim') || 'Seçtiklerim'}
+                >
+                  <svg
+                    className="w-5 h-5 transition-transform duration-300 group-hover:scale-105"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="7" y="7" width="13" height="13" rx="1.5" fill="none" />
+                    <path d="M4 17V5a1 1 0 0 1 1-1h12" fill="none" />
+                  </svg>
+                  {selectionCount > 0 && (
+                    <span
+                      className="inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[9.5px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs"
+                      style={{
+                        backgroundColor: '#3c424d',
+                        color: '#ffffff',
+                        lineHeight: 1,
+                        fontVariantNumeric: 'tabular-nums',
+                        letterSpacing: 0,
+                      }}
+                    >
+                      <span style={{transform: 'translateY(0.35px)'}}>{selectionCount}</span>
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {/* Login button - opens FloatingAuthPanel */}
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  window.dispatchEvent(new Event('openFloatingAuthPanel'))
+                }}
+                className="text-gray-300 hover:text-white transition-all duration-300 transform hover:scale-125"
+                aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
+              >
+                {isLoggedIn ? <UserLoggedInIcon /> : <UserIcon />}
+              </button>
+            </div>
           </div>
         </div>
       )}
