@@ -275,18 +275,16 @@ export function FactoryPageV2() {
       return isTr ? fallbackTr : fallbackEn
     }
     // CMS dokümanı yüklendiğinde alan boşsa veya silindiyse kesinlikle boş string döndür
-    if (!field) {
-      return ''
-    }
     // CMS'te alan varsa seçili dildeki değerini al (boşsa boş döner)
     return t(field)
   }
 
-  const heroTitle = resolveCmsText(
-    content?.heroTitle,
-    'Zanaatın Endüstriyel Ölçekle Buluşması',
-    'Where Craftsmanship Meets Industrial Scale'
-  )
+  const pageTitle = resolveCmsText(content?.title, 'Fabrika', 'Factory')
+  const rawHeroTitle = resolveCmsText(content?.heroTitle, '', '')
+  const heroTitle =
+    rawHeroTitle ||
+    pageTitle ||
+    (isTr ? 'Zanaatın Endüstriyel Ölçekle Buluşması' : 'Where Craftsmanship Meets Industrial Scale')
 
   const heroDescription = resolveCmsText(
     content?.heroDescription,
@@ -435,8 +433,9 @@ export function FactoryPageV2() {
   const ctaSecondaryLink = content?.ctaSecondaryLink || '/projects'
 
   useSEO({
-    title: `BIRIM - ${t('factory') || 'Üretim Tesisi & Fabrika'}`,
+    title: `BIRIM - ${pageTitle || heroTitle || t('factory') || 'Üretim Tesisi & Fabrika'}`,
     description:
+      heroDescription ||
       (content && (t(content.title) as string)) ||
       (isTr
         ? 'Birim 15.000 m² entegre üretim tesisi; ileri teknoloji ve el işçiliğiyle mimari mobilya üretimi.'
@@ -449,8 +448,8 @@ export function FactoryPageV2() {
     schema: {
       '@context': 'https://schema.org',
       '@type': 'ManufacturingBusiness',
-      name: 'BIRIM - İleri Üretim ve Tasarım Tesisi',
-      description: 'BIRIM mobilya ve mimari tasarım üretim tesisi',
+      name: `BIRIM - ${pageTitle || 'İleri Üretim ve Tasarım Tesisi'}`,
+      description: heroDescription || 'BIRIM mobilya ve mimari tasarım üretim tesisi',
       url: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/factory`,
       image: heroImageUrl,
       parentOrganization: {
@@ -559,10 +558,30 @@ export function FactoryPageV2() {
         <div className={containerClass + ' py-4 text-xs text-neutral-400'}>
           <TextMaskReveal delay={50}>
             <Breadcrumbs
-              items={[{label: t('homepage'), to: '/'}, {label: t('factory') || 'Fabrika'}]}
+              items={[
+                {label: t('homepage'), to: '/'},
+                {label: pageTitle || t('factory') || 'Fabrika'},
+              ]}
             />
           </TextMaskReveal>
         </div>
+
+        {!heroImageUrl && (heroTitle || pageTitle) ? (
+          <div className="pt-6 sm:pt-10 pb-6 sm:pb-8 text-center px-4 max-w-5xl mx-auto">
+            <TextMaskReveal delay={100}>
+              <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-[var(--text-primary)] max-w-4xl mx-auto">
+                {heroTitle || pageTitle}
+              </h1>
+            </TextMaskReveal>
+            {heroDescription ? (
+              <TextMaskReveal delay={200}>
+                <p className="mt-4 sm:mt-6 text-sm sm:text-base md:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2">
+                  {heroDescription}
+                </p>
+              </TextMaskReveal>
+            ) : null}
+          </div>
+        ) : null}
 
         {/* METRICS GRID */}
         <section className="py-8 sm:py-14 border-b border-[var(--border-primary,#e5e7eb)]/40">
