@@ -330,20 +330,17 @@ export function AboutPageNew() {
 
   const renderContentText = (val: unknown) => {
     if (!val) return null
-    const translated = t(val as string)
-    if (!translated) return null
+    const resolved = resolvePortableTextOrString(val, locale)
+    if (!resolved) return null
 
-    const isPortable =
-      Array.isArray(translated) ||
-      (typeof translated === 'object' &&
-        translated !== null &&
-        (translated as Record<string, unknown>)['_type'] === 'block')
-
-    if (isPortable) {
-      const blocks = Array.isArray(translated) ? translated : [translated]
-      return <PortableTextLite value={blocks as Record<string, unknown>[]} />
+    if (Array.isArray(resolved)) {
+      return (
+        <div className="space-y-4">
+          <PortableTextLite value={resolved as Parameters<typeof PortableTextLite>[0]['value']} />
+        </div>
+      )
     }
-    return <p className="leading-relaxed font-light text-base md:text-lg">{translated as string}</p>
+    return <p className="leading-relaxed font-light text-base md:text-lg">{resolved}</p>
   }
 
   const renderEraDescription = (val: unknown, className: string = '') => {
@@ -810,7 +807,7 @@ export function AboutPageNew() {
                     ) : null}
                   </div>
                   <TextMaskReveal delay={200}>
-                    <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-base sm:text-lg md:text-xl">
+                    <div className="text-[var(--text-primary)] leading-relaxed text-base sm:text-lg md:text-xl">
                       {renderContentText(identitySection.content)}
                     </div>
                   </TextMaskReveal>
@@ -897,7 +894,7 @@ export function AboutPageNew() {
                     ) : null}
                   </div>
                   <TextMaskReveal delay={200}>
-                    <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-base sm:text-lg md:text-xl">
+                    <div className="text-[var(--text-primary)] leading-relaxed text-base sm:text-lg md:text-xl">
                       {renderContentText(qualitySection.content)}
                     </div>
                   </TextMaskReveal>

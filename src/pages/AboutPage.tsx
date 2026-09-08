@@ -9,6 +9,7 @@ import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
 import PortableTextLite from '../components/PortableTextLite'
+import {resolvePortableTextOrString} from '../utils/portableText'
 
 // Alt Medya Galerisi Bileşeni - Ekranı sağdan sola kaplayan tam genişlik (breakout) yapı
 const MediaGallery = ({media, alt}: {media?: NewsMedia[]; alt: string}) => {
@@ -53,7 +54,7 @@ const MediaGallery = ({media, alt}: {media?: NewsMedia[]; alt: string}) => {
 export function AboutPage() {
   const [content, setContent] = useState<AboutPageContent | null>(null)
   const [loading, setLoading] = useState(true)
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
   const {reset} = useHeaderTheme()
 
   useEffect(() => {
@@ -188,23 +189,22 @@ export function AboutPage() {
                     <h2 className="text-3xl md:text-5xl font-light text-[var(--text-primary)] mb-8 tracking-tight">
                       {t(content.historySection.title)}
                     </h2>
-                    <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
+                    <div className="text-[var(--text-primary)] leading-relaxed text-lg md:text-xl">
                       {(() => {
-                        const historyContent = t(content.historySection.content)
-                        const isPortable =
-                          Array.isArray(historyContent) ||
-                          (typeof historyContent === 'object' &&
-                            historyContent !== null &&
-                            (historyContent as Record<string, unknown>)['_type'] === 'block')
-
-                        if (isPortable) {
-                          const blocks = Array.isArray(historyContent)
-                            ? historyContent
-                            : [historyContent]
-                          return <PortableTextLite value={blocks as Record<string, unknown>[]} />
+                        const historyContent = resolvePortableTextOrString(
+                          content.historySection.content,
+                          locale
+                        )
+                        if (Array.isArray(historyContent)) {
+                          return (
+                            <PortableTextLite
+                              value={
+                                historyContent as Parameters<typeof PortableTextLite>[0]['value']
+                              }
+                            />
+                          )
                         }
-
-                        return <p>{historyContent as string}</p>
+                        return <p>{historyContent}</p>
                       })()}
                     </div>
                   </ScrollReveal>
@@ -285,15 +285,23 @@ export function AboutPage() {
                     <h2 className="text-3xl md:text-5xl font-light text-[var(--text-primary)] mb-8 tracking-tight">
                       {t(content.identitySection.title)}
                     </h2>
-                    <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
-                      {Array.isArray(t(content.identitySection.content)) ? (
-                        <>
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          <PortableTextLite value={t(content.identitySection.content) as any} />
-                        </>
-                      ) : (
-                        <p>{t(content.identitySection.content)}</p>
-                      )}
+                    <div className="text-[var(--text-primary)] leading-relaxed text-lg md:text-xl">
+                      {(() => {
+                        const identityContent = resolvePortableTextOrString(
+                          content.identitySection.content,
+                          locale
+                        )
+                        if (Array.isArray(identityContent)) {
+                          return (
+                            <PortableTextLite
+                              value={
+                                identityContent as Parameters<typeof PortableTextLite>[0]['value']
+                              }
+                            />
+                          )
+                        }
+                        return <p>{identityContent}</p>
+                      })()}
                     </div>
                   </ScrollReveal>
                 </div>
@@ -318,15 +326,23 @@ export function AboutPage() {
                 <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start text-left">
                   <div className="lg:w-1/3">
                     <ScrollReveal threshold={0.2} distance={25} delay={100}>
-                      <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
-                        {Array.isArray(t(content.qualitySection.content)) ? (
-                          <>
-                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                            <PortableTextLite value={t(content.qualitySection.content) as any} />
-                          </>
-                        ) : (
-                          <p>{t(content.qualitySection.content)}</p>
-                        )}
+                      <div className="text-[var(--text-primary)] leading-relaxed text-lg md:text-xl">
+                        {(() => {
+                          const qualityContent = resolvePortableTextOrString(
+                            content.qualitySection.content,
+                            locale
+                          )
+                          if (Array.isArray(qualityContent)) {
+                            return (
+                              <PortableTextLite
+                                value={
+                                  qualityContent as Parameters<typeof PortableTextLite>[0]['value']
+                                }
+                              />
+                            )
+                          }
+                          return <p>{qualityContent}</p>
+                        })()}
                       </div>
                     </ScrollReveal>
                   </div>
