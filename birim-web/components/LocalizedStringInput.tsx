@@ -26,10 +26,14 @@ export default function LocalizedStringInput(props: ObjectInputProps) {
   const globalLang = useStudioLanguage()
   const [localLang, setLocalLang] = useState<string | null>(null)
   const [translating, setTranslating] = useState<string | null>(null)
-
   const effectiveLang = localLang || globalLang
 
-  const trValue = value?.tr || ''
+  const trValue =
+    typeof value === 'object' && value !== null
+      ? ((value as Record<string, unknown>)['tr'] as string) || ''
+      : typeof value === 'string'
+        ? value
+        : ''
 
   // Ürün adı (name) alanında otomatik çeviriyi devre dışı bırak
   const pathArray = (path || []).map((p) =>

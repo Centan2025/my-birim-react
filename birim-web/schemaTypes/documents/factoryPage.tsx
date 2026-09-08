@@ -86,7 +86,9 @@ export default defineType({
       type: 'array',
       fieldset: 'metricsGroup',
       of: [
-        {
+        defineField({
+          name: 'factoryMetric',
+          title: 'Metrik',
           type: 'object',
           fields: [
             defineField({name: 'value', title: 'Değer (Örn: 15.000 m²)', type: 'localizedString'}),
@@ -98,33 +100,45 @@ export default defineType({
               subtitle: 'label.tr',
             },
           },
-        },
+        }),
       ],
       initialValue: [
         {
-          value: {tr: '15.000 m²', en: '15,000 m²'},
+          _type: 'factoryMetric',
+          _key: 'metric-1',
+          value: {_type: 'localizedString', tr: '15.000 m²', en: '15,000 m²'},
           label: {
+            _type: 'localizedString',
             tr: 'Entegre kapalı üretim tesisi ve modern makine parkuru',
             en: 'Integrated manufacturing facility and advanced machine park',
           },
         },
         {
-          value: {tr: '50+ Yıl', en: '50+ Yrs'},
+          _type: 'factoryMetric',
+          _key: 'metric-2',
+          value: {_type: 'localizedString', tr: '50+ Yıl', en: '50+ Yrs'},
           label: {
+            _type: 'localizedString',
             tr: 'Kuşaktan kuşağa aktarılan zanaatkarlık mirası ve uzmanlık',
             en: 'Generations of artisanal mastery and manufacturing know-how',
           },
         },
         {
-          value: {tr: '4 Disiplin', en: '4 Units'},
+          _type: 'factoryMetric',
+          _key: 'metric-3',
+          value: {_type: 'localizedString', tr: '4 Disiplin', en: '4 Units'},
           label: {
+            _type: 'localizedString',
             tr: 'Ahşap, Metal, Döşeme ve Yüzey İşlem tek çatı altında',
             en: 'Wood, Metal, Upholstery & Finishing under single management',
           },
         },
         {
-          value: {tr: '%100 FSC', en: '100% FSC'},
+          _type: 'factoryMetric',
+          _key: 'metric-4',
+          value: {_type: 'localizedString', tr: '%100 FSC', en: '100% FSC'},
           label: {
+            _type: 'localizedString',
             tr: 'Sürdürülebilir orman kaynakları ve çevre dostu üretim',
             en: 'Sustainably sourced certified timber & eco-conscious processes',
           },
