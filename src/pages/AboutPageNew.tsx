@@ -14,6 +14,7 @@ import {TextMaskReveal} from '../components/TextMaskReveal'
 import {TextLineReveal} from '../components/TextLineReveal'
 import {ProductCardReveal} from '../components/ProductCardReveal'
 import PortableTextLite from '../components/PortableTextLite'
+import {resolvePortableTextOrString} from '../utils/portableText'
 import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer/FullscreenMediaViewer'
 
 const containerClass =
@@ -191,7 +192,7 @@ export function AboutPageNew() {
   const [loading, setLoading] = useState(true)
   const [activeEraIndex, setActiveEraIndex] = useState(0)
   const [activeDesignerIndex, setActiveDesignerIndex] = useState(0)
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
   const {reset} = useHeaderTheme()
 
   useEffect(() => {
@@ -345,6 +346,21 @@ export function AboutPageNew() {
     return <p className="leading-relaxed font-light text-base md:text-lg">{translated as string}</p>
   }
 
+  const renderEraDescription = (val: unknown, className: string = '') => {
+    if (!val) return null
+    const resolved = resolvePortableTextOrString(val, locale)
+    if (!resolved) return null
+
+    if (Array.isArray(resolved)) {
+      return (
+        <div className={className}>
+          <PortableTextLite value={resolved as Parameters<typeof PortableTextLite>[0]['value']} />
+        </div>
+      )
+    }
+    return <p className={className}>{resolved}</p>
+  }
+
   const heroBadgeText = getPlainText(t(content?.heroBadge))
   const heroTitleText = getPlainText(t(content?.heroTitle))
   const heroSubtitleText = getPlainText(t(content?.heroSubtitle || content?.storyTitle))
@@ -358,7 +374,7 @@ export function AboutPageNew() {
   interface FormattedEra {
     year: string
     title: string
-    description: string
+    description?: unknown
     image: string
     imageMobile: string
     crop?: R2ImageMetadata['crop']
@@ -389,7 +405,7 @@ export function AboutPageNew() {
                 typeof era.year === 'object' && era.year !== null ? t(era.year) : era.year
               ) || `${1970 + idx * 15}`,
             title: getPlainText(t(era.title)),
-            description: getPlainText(t(era.description)),
+            description: era.description,
             image: getSanitizedImage(era.image, DEFAULT_IMAGES.history),
             imageMobile: getSanitizedImage(era.imageMobile, ''),
             crop: imgMeta['crop'] as R2ImageMetadata['crop'],
@@ -620,14 +636,16 @@ export function AboutPageNew() {
                                   </motion.h3>
                                 ) : null}
                                 {era.description ? (
-                                  <motion.p
+                                  <motion.div
                                     initial={{opacity: 0, y: 4}}
                                     animate={{opacity: 1, y: 0}}
                                     transition={{duration: 0.35, delay: 0.1, ease: 'easeOut'}}
-                                    className="text-[var(--text-secondary)] font-light text-xs sm:text-sm leading-relaxed"
                                   >
-                                    {era.description}
-                                  </motion.p>
+                                    {renderEraDescription(
+                                      era.description,
+                                      'text-[var(--text-secondary)] font-light text-xs sm:text-sm leading-relaxed'
+                                    )}
+                                  </motion.div>
                                 ) : null}
                               </div>
                               <div className="relative aspect-[16/10] overflow-hidden rounded-none">
@@ -727,9 +745,10 @@ export function AboutPageNew() {
                             ) : null}
                             {currentEra.description ? (
                               <TextMaskReveal delay={200}>
-                                <p className="text-[var(--text-secondary)] font-light text-base lg:text-lg leading-relaxed">
-                                  {currentEra.description}
-                                </p>
+                                {renderEraDescription(
+                                  currentEra.description,
+                                  'text-[var(--text-secondary)] font-light text-base lg:text-lg leading-relaxed'
+                                )}
                               </TextMaskReveal>
                             ) : null}
                           </div>

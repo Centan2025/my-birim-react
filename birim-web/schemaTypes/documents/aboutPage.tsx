@@ -89,7 +89,7 @@ export default defineType({
           fields: [
             defineField({name: 'year', title: 'Yıl / Dönem', type: 'localizedString'}),
             defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
-            defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
+            defineField({name: 'description', title: 'Açıklama', type: 'localizedPortableText'}),
             defineField({name: 'imageR2', title: 'Dönem Görseli (R2)', type: 'r2Asset'}),
           ],
           preview: {

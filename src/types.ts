@@ -737,7 +737,7 @@ export interface AboutPageContent {
   eras?: {
     year?: string | LocalizedString
     title?: LocalizedString
-    description?: LocalizedString
+    description?: LocalizedString | LocalizedPortableText | unknown
     image?:
       | string
       | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}

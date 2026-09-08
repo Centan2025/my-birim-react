@@ -1,20 +1,133 @@
 import React, {useState} from 'react'
 import type {ObjectInputProps} from 'sanity'
-import {MemberField} from 'sanity'
-import {Flex, Box, Button} from '@sanity/ui'
+import {set, MemberField} from 'sanity'
+import {
+  Flex,
+  Box,
+  Button,
+  MenuButton,
+  Menu,
+  MenuItem,
+  MenuDivider,
+  useToast,
+  Spinner,
+} from '@sanity/ui'
 import {
   SUPPORTED_LANGUAGES,
   ALL_LANGUAGES_OPTION,
   useStudioLanguage,
 } from '../utils/studioLanguageStore'
+import {translatePortableText} from '../utils/translate'
+
+const hasTextContent = (val: unknown): boolean => {
+  if (!val) return false
+  if (typeof val === 'string') return val.trim().length > 0
+  if (Array.isArray(val)) {
+    return val.some((block) => {
+      if (block && block._type === 'block' && Array.isArray(block.children)) {
+        return block.children.some(
+          (child: {text?: unknown}) => typeof child?.text === 'string' && child.text.trim().length > 0,
+        )
+      }
+      return Boolean(block)
+    })
+  }
+  return false
+}
 
 export default function LocalizedPortableTextInput(props: ObjectInputProps) {
-  const {value, members} = props
+  const {value, onChange, members} = props
+  const toast = useToast()
 
   const globalLang = useStudioLanguage()
   const [localLang, setLocalLang] = useState<string | null>(null)
+  const [translating, setTranslating] = useState<string | null>(null)
 
   const effectiveLang = localLang || globalLang
+  const trValue = value && value['tr']
+  const hasTrValue = hasTextContent(trValue)
+
+  const handleTranslate = async (targetLang: string) => {
+    if (!hasTrValue) {
+      toast.push({
+        status: 'warning',
+        title: 'Önce Türkçe metni girin',
+      })
+      return
+    }
+
+    setTranslating(targetLang)
+    try {
+      const translated = await translatePortableText(trValue, targetLang)
+      const currentValue = typeof value === 'object' && value !== null ? value : {}
+      onChange(set({...currentValue, _type: 'localizedPortableText', [targetLang]: translated}))
+
+      const langInfo = SUPPORTED_LANGUAGES.find((l) => l.id === targetLang)
+      toast.push({
+        status: 'success',
+        title: `${langInfo ? langInfo.title : targetLang} çevirisi tamamlandı`,
+      })
+    } catch (error: any) {
+      toast.push({
+        status: 'error',
+        title: 'Çeviri hatası',
+        description: error.message || 'Çeviri yapılamadı',
+      })
+    } finally {
+      setTranslating(null)
+    }
+  }
+
+  const handleTranslateAllMissing = async () => {
+    if (!hasTrValue) {
+      toast.push({
+        status: 'warning',
+        title: 'Önce Türkçe metni girin',
+      })
+      return
+    }
+
+    const missingLangs = SUPPORTED_LANGUAGES.filter(
+      (lang) => lang.id !== 'tr' && (!value || !hasTextContent(value[lang.id])),
+    )
+
+    if (missingLangs.length === 0) {
+      toast.push({
+        status: 'info',
+        title: 'Tüm diller zaten dolu',
+      })
+      return
+    }
+
+    setTranslating('all')
+    try {
+      const newTranslations: Record<string, any> = {}
+      for (const lang of missingLangs) {
+        try {
+          const res = await translatePortableText(trValue, lang.id)
+          newTranslations[lang.id] = res
+        } catch (e) {
+          console.error(`Çeviri başarısız: ${lang.id}`, e)
+        }
+      }
+
+      const currentValue = typeof value === 'object' && value !== null ? value : {}
+      onChange(set({...currentValue, _type: 'localizedPortableText', ...newTranslations}))
+
+      toast.push({
+        status: 'success',
+        title: `${Object.keys(newTranslations).length} dil otomatik çevrildi`,
+      })
+    } catch (error: any) {
+      toast.push({
+        status: 'error',
+        title: 'Toplu çeviri hatası',
+        description: error.message || 'Çeviri yapılamadı',
+      })
+    } finally {
+      setTranslating(null)
+    }
+  }
 
   const activeMember = members.find((m) => m.kind === 'field' && m.name === effectiveLang)
 
@@ -40,7 +153,7 @@ export default function LocalizedPortableTextInput(props: ObjectInputProps) {
         }}
       />
 
-      {/* Dil Sekmeleri */}
+      {/* Dil Sekmeleri ve Çeviri Menüsü */}
       <Flex
         align="center"
         justify="space-between"
@@ -58,9 +171,7 @@ export default function LocalizedPortableTextInput(props: ObjectInputProps) {
           {SUPPORTED_LANGUAGES.map((lang) => {
             const isSelected = effectiveLang === lang.id
             const fieldVal = value && value[lang.id]
-            const hasValue = Array.isArray(fieldVal)
-              ? fieldVal.length > 0
-              : Boolean(fieldVal && String(fieldVal).trim() !== '')
+            const hasValue = hasTextContent(fieldVal)
 
             return (
               <Button
@@ -123,6 +234,61 @@ export default function LocalizedPortableTextInput(props: ObjectInputProps) {
           >
             🌐 {ALL_LANGUAGES_OPTION.shortLabel}
           </Button>
+        </Flex>
+
+        {/* Zarif Çeviri Menüsü */}
+        <Flex align="center" gap={1}>
+          <MenuButton
+            id={`translate-menu-${props.id}`}
+            button={
+              <Button
+                size={0}
+                mode="ghost"
+                tone={hasTrValue ? 'primary' : 'default'}
+                disabled={Boolean(translating) || !hasTrValue}
+                title={
+                  hasTrValue
+                    ? 'Türkçe metinden diğer dillere çevir'
+                    : 'Çeviri için önce Türkçe metin girin'
+                }
+                style={{
+                  padding: '3px 8px',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  borderRadius: '5px',
+                  cursor: hasTrValue ? 'pointer' : 'not-allowed',
+                }}
+              >
+                <Flex align="center" gap={1}>
+                  {translating ? <Spinner size={1} /> : <span>🪄</span>}
+                  <span>{translating ? 'Çevriliyor...' : 'Çevir ▾'}</span>
+                </Flex>
+              </Button>
+            }
+            menu={
+              <Menu>
+                {SUPPORTED_LANGUAGES.filter((l) => l.id !== 'tr').map((l) => (
+                  <MenuItem
+                    key={l.id}
+                    fontSize={1}
+                    padding={2}
+                    text={`${l.flag} ${l.title}'ye Çevir`}
+                    onClick={() => handleTranslate(l.id)}
+                    disabled={!hasTrValue || Boolean(translating)}
+                  />
+                ))}
+                <MenuDivider />
+                <MenuItem
+                  fontSize={1}
+                  padding={2}
+                  text="⚡ Tüm Boş Dillere Çevir"
+                  onClick={handleTranslateAllMissing}
+                  disabled={!hasTrValue || Boolean(translating)}
+                />
+              </Menu>
+            }
+            popover={{portal: true, placement: 'bottom-end'}}
+          />
         </Flex>
       </Flex>
 

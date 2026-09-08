@@ -24,3 +24,87 @@ export const translateText = async (text: string, targetLang: string): Promise<s
     throw new Error(`Çeviri hatası: ${error.message}`)
   }
 }
+
+const generateKey = () => Math.random().toString(36).substring(2, 11)
+
+/**
+ * PortableText blok dizisini veya metnini hedef dile çevirir
+ */
+export const translatePortableText = async (
+  blocks: any,
+  targetLang: string,
+): Promise<any> => {
+  if (typeof blocks === 'string') {
+    const translated = await translateText(blocks, targetLang)
+    return [
+      {
+        _key: generateKey(),
+        _type: 'block',
+        style: 'normal',
+        markDefs: [],
+        children: [
+          {
+            _key: generateKey(),
+            _type: 'span',
+            marks: [],
+            text: translated,
+          },
+        ],
+      },
+    ]
+  }
+
+  if (!Array.isArray(blocks) || blocks.length === 0) {
+    throw new Error('Çevrilecek blok metin bulunamadı')
+  }
+
+  const translatedBlocks = await Promise.all(
+    blocks.map(async (block) => {
+      if (block && block._type === 'block' && Array.isArray(block.children)) {
+        const translatedChildren = await Promise.all(
+          block.children.map(async (child: any) => {
+            if (
+              child &&
+              child._type === 'span' &&
+              typeof child.text === 'string' &&
+              child.text.trim() !== ''
+            ) {
+              try {
+                const translated = await translateText(child.text, targetLang)
+                return {
+                  ...child,
+                  _key: generateKey(),
+                  text: translated,
+                }
+              } catch (err) {
+                console.warn(`Span translation error for ${targetLang}:`, err)
+                return {
+                  ...child,
+                  _key: generateKey(),
+                }
+              }
+            }
+            return {
+              ...child,
+              _key: generateKey(),
+            }
+          })
+        )
+
+        return {
+          ...block,
+          _key: generateKey(),
+          children: translatedChildren,
+        }
+      }
+
+      return {
+        ...block,
+        _key: generateKey(),
+      }
+    }),
+  )
+
+  return translatedBlocks
+}
+
