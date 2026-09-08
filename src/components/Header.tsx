@@ -52,6 +52,7 @@ export function Header() {
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null)
   const mobileMenuFocusTrap = useFocusTrap(isMobileMenuOpen, () => setIsMobileMenuOpen(false))
   const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevMobileMenuOpenRef = useRef(false)
   const mobileLocaleTimeoutRef = useRef<number | null>(null)
   const [submenuOffset, setSubmenuOffset] = useState(0)
   const {theme: headerTheme, reset: resetHeaderTheme} = useHeaderTheme()
@@ -521,8 +522,11 @@ export function Header() {
   // Mobil overlay menü kapanırken önce yazıların kaybolup sonra panelin animasyonla kapanması için (biraz daha hızlı)
   const mobileMenuCloseDelay = mobileMenuLinks.length * 80 + 80
 
-  // Overlay mobil menüde: kapanma animasyonu süresince header rengini sabit siyah tut
+  // Overlay mobil menüde: kapanma animasyonu süresince header rengini sabit koyu tut
   useEffect(() => {
+    const wasOpen = prevMobileMenuOpenRef.current
+    prevMobileMenuOpenRef.current = isMobileMenuOpen
+
     if (!isOverlayMobileMenu || !isMobile) {
       // Overlay modunda değilsek veya mobil değilsek zamanlayıcıyı temizle
       if (mobileMenuCloseTimeoutRef.current) {
@@ -543,21 +547,16 @@ export function Header() {
       return
     }
 
-    // Menü kapanıyorsa: kapanma animasyonu süresince header siyah kalsın
-    setIsMobileMenuClosing(true)
-    if (mobileMenuCloseTimeoutRef.current) {
-      clearTimeout(mobileMenuCloseTimeoutRef.current)
-    }
-    mobileMenuCloseTimeoutRef.current = setTimeout(() => {
-      setIsMobileMenuClosing(false)
-      mobileMenuCloseTimeoutRef.current = null
-    }, mobileMenuCloseDelay + 500)
-
-    return () => {
+    // Sadece açıktan kapalıya geçişte (kullanıcı kapattığında) tetikle
+    if (wasOpen) {
+      setIsMobileMenuClosing(true)
       if (mobileMenuCloseTimeoutRef.current) {
         clearTimeout(mobileMenuCloseTimeoutRef.current)
-        mobileMenuCloseTimeoutRef.current = null
       }
+      mobileMenuCloseTimeoutRef.current = setTimeout(() => {
+        setIsMobileMenuClosing(false)
+        mobileMenuCloseTimeoutRef.current = null
+      }, mobileMenuCloseDelay + 450)
     }
   }, [isMobileMenuOpen, isOverlayMobileMenu, isMobile, mobileMenuCloseDelay])
 

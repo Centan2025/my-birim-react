@@ -19,6 +19,7 @@ export function useHeaderBackgroundColor({
   headerOpacity,
   isMobileMenuOpen,
   isOverlayMobileMenu,
+  isMobileMenuClosing = false,
   isSearchOpen,
   isDarkMode,
   isLightMode,
@@ -31,8 +32,8 @@ export function useHeaderBackgroundColor({
     const isDarkHeroMatched = isDarkHeroPage(path)
     const effectiveIsLight = isLightMode ?? !isDarkHeroMatched
 
-    if (isOverlayMobileMenu && isMobileMenuOpen) {
-      return isDarkMode || !effectiveIsLight ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'
+    if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
+      return 'transparent'
     }
 
     if (isSearchOpen) {

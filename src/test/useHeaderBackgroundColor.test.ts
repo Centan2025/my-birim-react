@@ -78,17 +78,30 @@ describe('useHeaderBackgroundColor', () => {
     expect(result.current).toBe('rgba(16, 24, 32, 0.85)')
   })
 
-  it('mobilde heroBrightness düşük ve headerOpacity düşükse transparent döner', () => {
-    const {result} = renderHook(
+  it('overlay mobil menü açıkken veya kapanırken transparent döndürmeli', () => {
+    const {result: openResult} = renderHook(
       () =>
         useHeaderBackgroundColor({
           ...baseParams,
           isMobile: true,
-          heroBrightness: 0.2,
-          headerOpacity: 0.1,
+          isMobileMenuOpen: true,
+          isOverlayMobileMenu: true,
         }),
-      {wrapper: wrapper('/')}
+      {wrapper: wrapper('/contact')}
     )
-    expect(result.current).toBe('transparent')
+    expect(openResult.current).toBe('transparent')
+
+    const {result: closingResult} = renderHook(
+      () =>
+        useHeaderBackgroundColor({
+          ...baseParams,
+          isMobile: true,
+          isMobileMenuOpen: false,
+          isMobileMenuClosing: true,
+          isOverlayMobileMenu: true,
+        }),
+      {wrapper: wrapper('/contact')}
+    )
+    expect(closingResult.current).toBe('transparent')
   })
 })
