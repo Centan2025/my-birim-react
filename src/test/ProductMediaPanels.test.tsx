@@ -2,6 +2,7 @@ import {describe, it, expect, vi} from 'vitest'
 import {render, screen, fireEvent} from '@testing-library/react'
 import '@testing-library/jest-dom'
 import {ProductMediaPanels} from '../components/ProductMediaPanels'
+import type {Product} from '../types'
 
 describe('ProductMediaPanels', () => {
   const mockProduct = {
@@ -25,11 +26,16 @@ describe('ProductMediaPanels', () => {
   it('renders bottom alternative media panels properly', () => {
     const openLightbox = vi.fn()
     const youTubeThumb = vi.fn(() => `https://img.youtube.com/vi/thumb.jpg`)
-    const t = (val: any) => (typeof val === 'string' ? val : val?.tr || '')
+    const t = (val: unknown) =>
+      typeof val === 'string'
+        ? val
+        : typeof val === 'object' && val !== null
+          ? (val as {tr?: string}).tr || ''
+          : ''
 
     render(
       <ProductMediaPanels
-        product={mockProduct as any}
+        product={mockProduct as unknown as Product}
         imageBorderClass="rounded-lg"
         youTubeThumb={youTubeThumb}
         openPanelLightbox={openLightbox}
@@ -51,11 +57,13 @@ describe('ProductMediaPanels', () => {
   it('returns null if no media available', () => {
     const {container} = render(
       <ProductMediaPanels
-        product={{id: 'p2', name: {tr: 'Boş'}} as any}
+        product={{id: 'p2', name: {tr: 'Boş'}} as unknown as Product}
         imageBorderClass=""
         youTubeThumb={vi.fn()}
         openPanelLightbox={vi.fn()}
-        t={(v: any) => v?.tr || ''}
+        t={(v: unknown) =>
+          typeof v === 'object' && v !== null ? (v as {tr?: string}).tr || '' : ''
+        }
       />
     )
     expect(container).toBeEmptyDOMElement()

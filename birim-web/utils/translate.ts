@@ -50,10 +50,7 @@ export const stringToBlocks = (text: string) => {
 /**
  * PortableText blok dizisini veya metnini hedef dile çevirir
  */
-export const translatePortableText = async (
-  blocks: any,
-  targetLang: string,
-): Promise<any> => {
+export const translatePortableText = async (blocks: any, targetLang: string): Promise<any> => {
   if (typeof blocks === 'string') {
     const translated = await translateText(blocks, targetLang)
     return [
@@ -108,7 +105,7 @@ export const translatePortableText = async (
               ...child,
               _key: generateKey(),
             }
-          })
+          }),
         )
 
         return {
@@ -127,4 +124,3 @@ export const translatePortableText = async (
 
   return translatedBlocks
 }
-

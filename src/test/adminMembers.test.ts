@@ -1,5 +1,13 @@
-﻿import {describe, it, expect, vi, beforeEach} from 'vitest'
+import {describe, it, expect, vi} from 'vitest'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
+
+interface AdminMembersResponse {
+  success?: boolean
+  count?: number
+  members?: Array<{name: string}>
+  member?: {architect_verification_status: string}
+  error?: string
+}
 
 // Mock Supabase admin
 vi.mock('../../lib/server/supabaseAdmin.js', () => ({
@@ -92,9 +100,10 @@ describe('api/admin/members', () => {
     await membersHandler(req, res)
 
     expect(res.statusCode).toBe(200)
-    expect((res.body as any)?.success).toBe(true)
-    expect((res.body as any)?.count).toBe(1)
-    expect((res.body as any)?.members[0].name).toBe('Ahmet Mimar')
+    const body = res.body as AdminMembersResponse
+    expect(body.success).toBe(true)
+    expect(body.count).toBe(1)
+    expect(body.members?.[0]?.name).toBe('Ahmet Mimar')
   })
 
   it('POST /api/admin/members geçerli ID ile mimar statüsünü güncellemeli', async () => {
@@ -112,8 +121,9 @@ describe('api/admin/members', () => {
     await membersHandler(req, res)
 
     expect(res.statusCode).toBe(200)
-    expect((res.body as any)?.success).toBe(true)
-    expect((res.body as any)?.member.architect_verification_status).toBe('approved')
+    const body = res.body as AdminMembersResponse
+    expect(body.success).toBe(true)
+    expect(body.member?.architect_verification_status).toBe('approved')
   })
 
   it('POST /api/admin/members ID verilmediğinde 400 dönmeli', async () => {
@@ -128,6 +138,7 @@ describe('api/admin/members', () => {
     await membersHandler(req, res)
 
     expect(res.statusCode).toBe(400)
-    expect((res.body as any)?.error).toContain("ID'si gereklidir")
+    const body = res.body as AdminMembersResponse
+    expect(body.error).toContain("ID'si gereklidir")
   })
 })

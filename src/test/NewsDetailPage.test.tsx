@@ -15,7 +15,15 @@ vi.mock('../hooks/useSiteData')
 
 // FullscreenMediaViewer mock'u
 vi.mock('../components/FullscreenMediaViewer', () => ({
-  FullscreenMediaViewer: ({items, initialIndex, onClose}: any) => (
+  FullscreenMediaViewer: ({
+    items,
+    initialIndex,
+    onClose,
+  }: {
+    items: unknown[]
+    initialIndex?: number
+    onClose?: () => void
+  }) => (
     <div data-testid="fullscreen-media-viewer" data-initial-index={initialIndex}>
       <button onClick={onClose}>Close Viewer</button>
       <span>{items.length} items</span>
