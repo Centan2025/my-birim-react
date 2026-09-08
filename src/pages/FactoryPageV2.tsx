@@ -1110,7 +1110,7 @@ export function FactoryPageV2() {
                     <TextMaskReveal delay={260} display="inline-block">
                       <Link
                         to={ctaPrimaryLink}
-                        className="px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs uppercase font-mono tracking-wider font-medium hover:opacity-90 transition-opacity"
+                        className="px-6 py-2.5 border border-[var(--text-primary)] text-[var(--text-primary)] text-xs uppercase font-mono tracking-wider font-medium hover:bg-[var(--text-primary)]/5 transition-colors"
                       >
                         {ctaPrimaryText}
                       </Link>
