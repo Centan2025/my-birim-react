@@ -1,7 +1,7 @@
 import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {getPreviewUrl} from '../utils/previewUrl'
-import {renderPreviewMedia} from '../objects/shared'
+import {renderPreviewMedia} from '../utils/renderPreviewMedia'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 import ReferenceInputFix from '../../components/ReferenceInputFix'
 
