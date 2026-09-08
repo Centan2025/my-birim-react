@@ -1,4 +1,4 @@
-﻿import {supabase, isSupabaseConfigured} from '../../lib/supabaseClient'
+import {supabase, isSupabaseConfigured} from '../../lib/supabaseClient'
 import type {UserProject, InquiryPayload} from '../../types/seckim'
 
 export async function fetchUserSelections(userId: string): Promise<string[]> {
@@ -100,7 +100,18 @@ export async function fetchUserProjects(userId: string): Promise<UserProject[]> 
       }
     }
 
-    return projectsData.map((p: any) => ({
+    return (
+      projectsData as Array<{
+        id: string
+        user_id: string
+        name: string
+        description?: string | null
+        share_token?: string
+        is_public?: boolean | number
+        created_at: string
+        updated_at: string
+      }>
+    ).map(p => ({
       id: p.id,
       userId: p.user_id,
       name: p.name,

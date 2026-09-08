@@ -286,10 +286,7 @@ async function loadLogo(): Promise<{dataUrl: string; aspect: number} | null> {
  * Loads a product image from URL, applies crop if defined, and converts to base64 JPEG
  * while preserving its natural aspect ratio to prevent stretching.
  */
-async function loadProductImage(
-  imageUrl: string,
-  crop?: unknown
-): Promise<LoadedImageInfo | null> {
+async function loadProductImage(imageUrl: string, crop?: unknown): Promise<LoadedImageInfo | null> {
   if (!imageUrl) return null
 
   const handle = await fetchImageElement(imageUrl)
@@ -820,7 +817,11 @@ export async function generateProductPDF({
 
   // Meta Row (Category • Year • SKU • Designer)
   const prodRecord = product as unknown as Record<string, unknown>
-  const catName = category ? getLocalizedValue(category.name, locale) : (prodRecord['category'] ? String(prodRecord['category']) : '')
+  const catName = category
+    ? getLocalizedValue(category.name, locale)
+    : prodRecord['category']
+      ? String(prodRecord['category'])
+      : ''
   const yearStr = product.year ? (isEn ? `Year: ${product.year}` : `Yıl: ${product.year}`) : ''
   const skuCode =
     product.sku ||
@@ -829,7 +830,10 @@ export async function generateProductPDF({
   const skuStr = `${isEn ? 'SKU' : 'Ürün Kodu'}: ${skuCode}`
 
   const allDesigners = designers && designers.length > 0 ? designers : designer ? [designer] : []
-  const designerNames = allDesigners.map(d => getLocalizedValue(d.name, locale)).filter(Boolean).join(', ')
+  const designerNames = allDesigners
+    .map(d => getLocalizedValue(d.name, locale))
+    .filter(Boolean)
+    .join(', ')
 
   doc.setFont(bodyFont, 'normal')
   doc.setFontSize(8.5)
@@ -903,7 +907,9 @@ export async function generateProductPDF({
     doc.setFont(bodyFont, 'normal')
     doc.setFontSize(8)
     doc.setTextColor(170, 170, 170)
-    doc.text(isEn ? 'No Image' : 'Görsel Yok', imgBoxX + imgBoxW / 2, imgBoxY + imgBoxH / 2, {align: 'center'})
+    doc.text(isEn ? 'No Image' : 'Görsel Yok', imgBoxX + imgBoxW / 2, imgBoxY + imgBoxH / 2, {
+      align: 'center',
+    })
   }
 
   // Right Side: Description (Top) + Specifications Box (Bottom-aligned with image box)
@@ -919,7 +925,9 @@ export async function generateProductPDF({
   sideY += 7.5
 
   // Dimensions & Quick Specs data
-  const dims = prodRecord['dimensions'] as {width?: number; depth?: number; height?: number} | undefined
+  const dims = prodRecord['dimensions'] as
+    | {width?: number; depth?: number; height?: number}
+    | undefined
   const dimParts = dims
     ? [
         dims.width ? `G: ${dims.width} cm` : '',
@@ -1008,7 +1016,11 @@ export async function generateProductPDF({
     doc.setFont(headingFont, 'bold')
     doc.setFontSize(10)
     doc.setTextColor(25, 25, 25)
-    doc.text(isEn ? 'DIMENSIONS & TECHNICAL DRAWINGS' : 'ÖLÇÜLER & TEKNİK ÇİZİMLER', margin, currentY)
+    doc.text(
+      isEn ? 'DIMENSIONS & TECHNICAL DRAWINGS' : 'ÖLÇÜLER & TEKNİK ÇİZİMLER',
+      margin,
+      currentY
+    )
     currentY += 4.5
 
     const drawingCount = Math.min(validDimDrawings.length, 3)
@@ -1158,9 +1170,7 @@ export async function downloadProductDetailPDF(
   a.href = url
 
   const rawName = getLocalizedValue(options.product.name, options.locale || 'tr') || 'Urun'
-  const sanitizedName = rawName
-    .replace(/[^a-zA-Z0-9ığüşöçİĞÜŞÖÇ\-_]/g, '_')
-    .replace(/_+/g, '_')
+  const sanitizedName = rawName.replace(/[^a-zA-Z0-9ığüşöçİĞÜŞÖÇ\-_]/g, '_').replace(/_+/g, '_')
   const dateStr = new Date().toISOString().slice(0, 10)
 
   a.download = `Birim-${sanitizedName}-Bilgi-Formu-${dateStr}.pdf`

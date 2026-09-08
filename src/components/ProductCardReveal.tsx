@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, {useRef} from 'react'
 import {motion, useInView, useReducedMotion} from 'framer-motion'
 

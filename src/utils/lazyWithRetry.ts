@@ -26,6 +26,7 @@ export function isChunkLoadError(error: unknown): boolean {
  * Wraps React.lazy with automatic retry and auto-reload mechanisms
  * to recover from new deployments and chunk loading failures seamlessly.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function lazyWithRetry<T extends React.ComponentType<any>>(
   componentImport: () => Promise<{default: T}>
 ): React.LazyExoticComponent<T> {

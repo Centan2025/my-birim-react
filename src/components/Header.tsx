@@ -644,7 +644,9 @@ export function Header() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 header-scroll-transition ${
           // Overlay mobil menü açıkken veya kapanırken header ile panelin tam aynı renkte görünmesi için özel sınıf
-          isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing) ? 'overlay-menu-open' : ''
+          isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
+            ? 'overlay-menu-open'
+            : ''
         } ${
           headerBgColor === 'transparent' && !isProductsOpen
             ? ''

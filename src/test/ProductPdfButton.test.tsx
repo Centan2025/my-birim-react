@@ -31,7 +31,9 @@ describe('ProductPdfButton', () => {
       </I18nProvider>
     )
 
-    expect(screen.getByRole('button', {name: /ürün bilgi formu|product datasheet/i})).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {name: /ürün bilgi formu|product datasheet/i})
+    ).toBeInTheDocument()
   })
 
   it('renders default button with text correctly', () => {
@@ -41,7 +43,9 @@ describe('ProductPdfButton', () => {
       </I18nProvider>
     )
 
-    expect(screen.getByRole('button', {name: /ürün bilgi formu|product datasheet/i})).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {name: /ürün bilgi formu|product datasheet/i})
+    ).toBeInTheDocument()
     expect(screen.getByText(/pdf i̇ndi̇r|pdf indir|download pdf/i)).toBeInTheDocument()
   })
 

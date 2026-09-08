@@ -69,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <tbody>
           ${selectedProducts
             .map(
-              (p: any, idx: number) => `
+              (p: {id?: string; name?: string; dimensions?: string}, idx: number) => `
             <tr style="border-bottom: 1px solid #eee; font-size: 13px;">
               <td style="padding: 8px 4px; color: #999;">${idx + 1}</td>
               <td style="padding: 8px 4px; font-weight: 600;">

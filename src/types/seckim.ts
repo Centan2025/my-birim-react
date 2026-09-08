@@ -134,7 +134,9 @@ export function getProductImageProps(product: Product) {
 
   const finalSrc = rawSrc ? rewriteR2Url(rawSrc) : ''
   const finalSrcMobile = mainImageObj.urlMobile ? rewriteR2Url(mainImageObj.urlMobile) : undefined
-  const finalSrcDesktop = mainImageObj.urlDesktop ? rewriteR2Url(mainImageObj.urlDesktop) : undefined
+  const finalSrcDesktop = mainImageObj.urlDesktop
+    ? rewriteR2Url(mainImageObj.urlDesktop)
+    : undefined
 
   return {
     src: finalSrc,

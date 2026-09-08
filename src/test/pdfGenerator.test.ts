@@ -25,7 +25,10 @@ const mockProduct: Product = {
   ],
   materials: [
     {name: {tr: 'Doğal Meşe', en: 'Natural Oak'}, image: 'https://example.com/oak.jpg'},
-    {name: {tr: 'Keten Dokuma Kumaş', en: 'Linen Weave Fabric'}, image: 'https://example.com/linen.jpg'},
+    {
+      name: {tr: 'Keten Dokuma Kumaş', en: 'Linen Weave Fabric'},
+      image: 'https://example.com/linen.jpg',
+    },
   ],
   groupedMaterials: [
     {
@@ -34,7 +37,10 @@ const mockProduct: Product = {
         {
           bookTitle: {tr: 'Koleksiyon Kumaşları', en: 'Collection Fabrics'},
           materials: [
-            {name: {tr: 'Boucle Kumaş', en: 'Boucle Fabric'}, image: 'https://example.com/boucle.jpg'},
+            {
+              name: {tr: 'Boucle Kumaş', en: 'Boucle Fabric'},
+              image: 'https://example.com/boucle.jpg',
+            },
           ],
         },
       ],
@@ -96,9 +102,15 @@ describe('generateProductPDF', () => {
 
   it('downloadProductDetailPDF initiates DOM download with sanitized filename', async () => {
     const createElementSpy = vi.spyOn(document, 'createElement')
-    const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => document.createElement('div'))
-    const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => document.createElement('div'))
-    const createObjectURLSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:http://localhost/fake-pdf')
+    const appendChildSpy = vi
+      .spyOn(document.body, 'appendChild')
+      .mockImplementation(() => document.createElement('div'))
+    const removeChildSpy = vi
+      .spyOn(document.body, 'removeChild')
+      .mockImplementation(() => document.createElement('div'))
+    const createObjectURLSpy = vi
+      .spyOn(URL, 'createObjectURL')
+      .mockReturnValue('blob:http://localhost/fake-pdf')
     const revokeObjectURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockReturnValue()
 
     await downloadProductDetailPDF({

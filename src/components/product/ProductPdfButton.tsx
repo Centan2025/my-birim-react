@@ -70,11 +70,7 @@ export const ProductPdfButton: React.FC<ProductPdfButtonProps> = ({
               stroke="currentColor"
               strokeWidth="2.5"
             />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
           </svg>
         ) : (
           <svg
@@ -120,11 +116,7 @@ export const ProductPdfButton: React.FC<ProductPdfButtonProps> = ({
               stroke="currentColor"
               strokeWidth="3"
             />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
           </svg>
           <span className="tracking-widest">{t('generating_pdf') || 'PDF HAZIRLANIYOR...'}</span>
         </>

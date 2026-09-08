@@ -58,7 +58,7 @@ export function VerifyEmailPage() {
     return () => {
       cancelled = true
     }
-  }, [token, auth, navigate])
+  }, [token, emailParam, auth, navigate])
 
   return (
     <div className="min-h-screen bg-[var(--bg-secondary)] flex items-center justify-center px-4">

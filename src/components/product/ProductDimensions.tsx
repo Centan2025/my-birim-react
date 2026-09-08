@@ -4,7 +4,7 @@ import {useTranslation} from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
 import {TextMaskReveal} from '../TextMaskReveal'
 
-import type {LocalizedString} from '../../types'
+import type {LocalizedString, R2ImageMetadata} from '../../types'
 
 interface ProductDimensionsProps {
   dimImages: {
@@ -56,10 +56,18 @@ export const ProductDimensions: React.FC<ProductDimensionsProps> = ({
                   className={`w-full h-40 object-contain group-hover:scale-[1.03] transition-transform duration-700 ease-in-out ${imageBorderClass}`}
                   loading="lazy"
                   quality={85}
-                  crop={(dimImg as Record<string, unknown>)['crop'] as any}
-                  hotspot={(dimImg as Record<string, unknown>)['hotspot'] as any}
-                  cropMobile={(dimImg as Record<string, unknown>)['cropMobile'] as any}
-                  hotspotMobile={(dimImg as Record<string, unknown>)['hotspotMobile'] as any}
+                  crop={(dimImg as Record<string, unknown>)['crop'] as R2ImageMetadata['crop']}
+                  hotspot={
+                    (dimImg as Record<string, unknown>)['hotspot'] as R2ImageMetadata['hotspot']
+                  }
+                  cropMobile={
+                    (dimImg as Record<string, unknown>)['cropMobile'] as R2ImageMetadata['crop']
+                  }
+                  hotspotMobile={
+                    (dimImg as Record<string, unknown>)[
+                      'hotspotMobile'
+                    ] as R2ImageMetadata['hotspot']
+                  }
                   origWidth={(dimImg as Record<string, unknown>)['origWidth'] as number}
                   origHeight={(dimImg as Record<string, unknown>)['origHeight'] as number}
                   origWidthMobile={(dimImg as Record<string, unknown>)['origWidthMobile'] as number}

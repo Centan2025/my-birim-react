@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, {useState, useEffect, useRef} from 'react'
 import {motion, type Variants} from 'framer-motion'
 import {OptimizedImage} from '../OptimizedImage'

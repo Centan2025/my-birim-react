@@ -64,7 +64,7 @@ export const TextLineReveal: React.FC<TextLineRevealProps> = ({
     return text.trim().split(/\s+/).filter(Boolean)
   }, [text])
 
-  const calculateLines = () => {
+  const calculateLines = React.useCallback(() => {
     if (!measuringRef.current || words.length === 0) return
     const wordSpans = measuringRef.current.children
     if (!wordSpans || wordSpans.length === 0) return
@@ -98,11 +98,11 @@ export const TextLineReveal: React.FC<TextLineRevealProps> = ({
     if (computedLines.length > 0) {
       setLines(computedLines)
     }
-  }
+  }, [words])
 
   useIsomorphicLayoutEffect(() => {
     calculateLines()
-  }, [words])
+  }, [calculateLines])
 
   useEffect(() => {
     if (
@@ -126,7 +126,7 @@ export const TextLineReveal: React.FC<TextLineRevealProps> = ({
 
     resizeObserver.observe(container)
     return () => resizeObserver.disconnect()
-  }, [words])
+  }, [calculateLines])
 
   if (!text) return null
 
