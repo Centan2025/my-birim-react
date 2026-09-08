@@ -420,10 +420,12 @@ export function NewsPageV2() {
                     {heroArticle.summary}
                   </p>
 
-                  <div className="flex items-center justify-end pt-4 border-t border-black/[0.06] dark:border-white/[0.08] text-xs font-mono uppercase tracking-widest text-[var(--text-primary)]">
-                    <span className="flex items-center gap-1.5 group-hover:translate-x-2 transition-transform duration-300 font-medium">
-                      {isTr ? 'HABERİ OKU' : 'READ STORY'}{' '}
-                      <span className="text-base leading-none">↗</span>
+                  <div className="flex items-center justify-end pt-4 border-t border-black/[0.06] dark:border-white/[0.08] text-xs font-mono uppercase tracking-widest text-[var(--text-primary)] pr-1">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <span>{isTr ? 'HABERİ OKU' : 'READ STORY'}</span>
+                      <span className="text-base leading-none inline-block transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">
+                        ↗
+                      </span>
                     </span>
                   </div>
                 </Link>
@@ -472,8 +474,8 @@ export function NewsPageV2() {
                               {t(pick.title)}
                             </h4>
                           </div>
-                          <div className="flex items-center justify-end mt-2 pt-2 text-[10px] font-mono text-[var(--text-secondary)] uppercase tracking-wider">
-                            <span className="group-hover:translate-x-1 group-hover:text-[var(--text-primary)] transition-all">
+                          <div className="flex items-center justify-end mt-2 pt-2 text-[10px] font-mono text-[var(--text-secondary)] uppercase tracking-wider pr-1">
+                            <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5 group-hover:text-[var(--text-primary)]">
                               ↗
                             </span>
                           </div>
@@ -620,9 +622,12 @@ export function NewsPageV2() {
                             </p>
                           </div>
 
-                          <div className="flex items-center justify-end pt-3 border-t border-black/[0.06] dark:border-white/[0.08] text-[11px] font-mono uppercase tracking-widest text-[var(--text-primary)] mt-auto">
-                            <span className="group-hover:translate-x-1.5 transition-transform flex items-center gap-1 font-medium">
-                              {t('read_more') || 'OKU'} ↗
+                          <div className="flex items-center justify-end pt-3 border-t border-black/[0.06] dark:border-white/[0.08] text-[11px] font-mono uppercase tracking-widest text-[var(--text-primary)] mt-auto pr-1">
+                            <span className="flex items-center gap-1 font-medium">
+                              <span>{t('read_more') || 'OKU'}</span>
+                              <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">
+                                ↗
+                              </span>
                             </span>
                           </div>
                         </div>

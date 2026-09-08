@@ -447,13 +447,14 @@ export function NewsPageV1() {
                     </TextMaskReveal>
                   </div>
 
-                  <TextMaskReveal delay={300} display="inline-block" className="w-full">
-                    <div className="flex items-center justify-end pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-xs font-mono tracking-widest uppercase text-[var(--text-primary)]">
-                      <span className="flex items-center gap-1 group-hover:translate-x-2 transition-transform duration-300">
-                        OKU <span className="text-base">↗</span>
+                  <div className="flex items-center justify-end pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-xs font-mono tracking-widest uppercase text-[var(--text-primary)] pr-1">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <span>{t('read_more') || 'OKU'}</span>
+                      <span className="text-base leading-none inline-block transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">
+                        ↗
                       </span>
-                    </div>
-                  </TextMaskReveal>
+                    </span>
+                  </div>
                 </div>
               </div>
             </Link>
@@ -586,14 +587,14 @@ export function NewsPageV1() {
                           </p>
                         </TextMaskReveal>
                       </div>
-                      <TextMaskReveal delay={260 + (index % 2) * 60}>
-                        <div className="flex items-center justify-between pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-[11px] font-mono uppercase tracking-widest text-[var(--text-primary)] mt-auto">
-                          <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors font-light">
-                            {t('read_more') || 'DEVAMINI OKU'}
-                          </span>
-                          <span className="group-hover:translate-x-1 transition-transform">↗</span>
-                        </div>
-                      </TextMaskReveal>
+                      <div className="flex items-center justify-between pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-[11px] font-mono uppercase tracking-widest text-[var(--text-primary)] mt-auto pr-1">
+                        <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors font-light">
+                          {t('read_more') || 'DEVAMINI OKU'}
+                        </span>
+                        <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">
+                          ↗
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 </ScrollReveal>
