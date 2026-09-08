@@ -536,7 +536,7 @@ export function FactoryPageV2() {
           <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
             {heroTitle ? (
               <TextMaskReveal delay={150} duration={1.1}>
-                <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white max-w-4xl mx-auto line-clamp-2 break-words">
+                <h1 className="font-outfit text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extralight tracking-tight uppercase leading-tight md:leading-[1.1] text-white max-w-5xl mx-auto text-balance break-words">
                   {heroTitle}
                 </h1>
               </TextMaskReveal>
@@ -569,7 +569,7 @@ export function FactoryPageV2() {
         {!heroImageUrl && (heroTitle || pageTitle) ? (
           <div className="pt-6 sm:pt-10 pb-6 sm:pb-8 text-center px-4 max-w-5xl mx-auto">
             <TextMaskReveal delay={100}>
-              <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-[var(--text-primary)] max-w-4xl mx-auto line-clamp-2 break-words">
+              <h1 className="font-outfit text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extralight tracking-tight uppercase leading-tight md:leading-[1.1] text-[var(--text-primary)] max-w-5xl mx-auto text-balance break-words">
                 {heroTitle || pageTitle}
               </h1>
             </TextMaskReveal>
