@@ -38,7 +38,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
         onMouseLeave={() => setShowTooltip(false)}
         onFocus={() => setShowTooltip(true)}
         onBlur={() => setShowTooltip(false)}
-        className={`group/btn relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 ease-out backdrop-blur-md cursor-pointer z-10 ${
+        className={`group/btn relative w-8 h-8 flex items-center justify-center rounded-none transition-all duration-300 ease-out backdrop-blur-md cursor-pointer z-10 ${
           selected
             ? 'bg-[#3c424d] text-white border border-[#3c424d] shadow-[0_2px_10px_rgba(60,66,77,0.35)] hover:bg-[#4a515c] hover:border-[#4a515c] hover:scale-105 active:scale-95'
             : 'bg-white/90 dark:bg-neutral-900/80 text-neutral-700 dark:text-neutral-200 hover:text-neutral-950 dark:hover:text-white hover:bg-white dark:hover:bg-neutral-900 border border-black/[0.07] dark:border-white/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:scale-105 active:scale-95'
