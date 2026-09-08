@@ -485,7 +485,7 @@ export function AboutPageNew() {
             ) : null}
             {heroTitleText ? (
               <TextMaskReveal delay={160}>
-                <h1 className="font-outfit text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white break-words">
+                <h1 className="font-outfit text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white break-words line-clamp-2">
                   {heroTitleText}
                 </h1>
               </TextMaskReveal>
