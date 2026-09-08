@@ -14,7 +14,7 @@ import {isBirimDesignStudio} from '../utils/designerUtils'
 export function DesignersPage() {
   const {data: designers = [], isLoading: loading} = useDesigners()
   const {data: settings} = useSiteSettings()
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
   const navigate = useNavigate()
   const shouldReduceMotion = useReducedMotion()
 
@@ -59,15 +59,39 @@ export function DesignersPage() {
   }
 
   const getBioText = (bio: unknown) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bioVal = t(bio as any) as any
-    if (typeof bioVal === 'string') return bioVal
-    if (Array.isArray(bioVal) && bioVal.length > 0) {
-      const firstBlock = bioVal.find((b: Record<string, unknown>) => b['_type'] === 'block')
-      if (firstBlock && Array.isArray(firstBlock.children)) {
-        return firstBlock.children.map((c: Record<string, unknown>) => c['text']).join(' ')
+    if (!bio) return ''
+    const raw = bio as Record<string, unknown> | unknown[]
+    let blocks: unknown[] | null = null
+    if (Array.isArray(raw)) {
+      blocks = raw
+    } else if (raw && typeof raw === 'object') {
+      const localizedMap = raw as Record<string, unknown[]>
+      if (Array.isArray(localizedMap[locale])) {
+        blocks = localizedMap[locale]
+      } else if (Array.isArray(localizedMap['tr'])) {
+        blocks = localizedMap['tr']
+      } else if (Array.isArray(localizedMap['en'])) {
+        blocks = localizedMap['en']
       }
     }
+
+    if (blocks && Array.isArray(blocks) && blocks.length > 0) {
+      return blocks
+        .map((b: unknown) => {
+          if (b && typeof b === 'object' && (b as {children?: unknown[]}).children) {
+            return ((b as {children: {text?: string}[]}).children || [])
+              .map(c => c.text || '')
+              .join('')
+              .trim()
+          }
+          return ''
+        })
+        .filter(Boolean)
+        .join('\n')
+    }
+
+    const bioVal = t(bio as Parameters<typeof t>[0])
+    if (typeof bioVal === 'string') return bioVal.trim()
     return ''
   }
 
@@ -291,7 +315,7 @@ export function DesignersPage() {
 
                     <div className="h-px w-8 bg-white/20 mb-8 group-hover:w-full transition-all duration-700 ease-in-out"></div>
 
-                    <div className="text-[11px] text-white/40 font-light line-clamp-3 uppercase tracking-widest opacity-0 group-hover:opacity-100 group-hover:text-white/70 transition-all duration-700 delay-100 leading-relaxed">
+                    <div className="text-[11px] text-white/40 font-light whitespace-pre-line line-clamp-4 uppercase tracking-widest opacity-0 group-hover:opacity-100 group-hover:text-white/70 transition-all duration-700 delay-100 leading-relaxed">
                       {getBioText(designer.bio) ||
                         (isBirimStudio
                           ? t('birim_studio_bio_short') ||

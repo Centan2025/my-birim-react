@@ -54,7 +54,7 @@ export function DesignerDetailPage() {
   const designer = designerData || frozenDesigner
   const products = productsData.length > 0 ? productsData : frozenProducts
 
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
   const {setTargetRect, phase} = useCardTransition()
   const imageRef = useRef<HTMLDivElement>(null)
 
@@ -283,15 +283,39 @@ export function DesignerDetailPage() {
               <div className="h-px w-full bg-[var(--border-primary)] my-8 lg:my-12"></div>
 
               <ScrollReveal delay={500}>
-                <div className="text-base lg:text-lg leading-relaxed text-[var(--text-secondary)] font-light max-w-2xl">
+                <div className="text-base lg:text-lg leading-relaxed text-[var(--text-secondary)] font-light max-w-2xl space-y-4">
                   {(() => {
+                    const rawBio = designer.bio as Record<string, unknown> | unknown[] | undefined
+                    let blocks: unknown[] | null = null
+
+                    if (Array.isArray(rawBio)) {
+                      blocks = rawBio
+                    } else if (rawBio && typeof rawBio === 'object') {
+                      const localizedMap = rawBio as Record<string, unknown[]>
+                      if (Array.isArray(localizedMap[locale])) {
+                        blocks = localizedMap[locale]
+                      } else if (Array.isArray(localizedMap['tr'])) {
+                        blocks = localizedMap['tr']
+                      } else if (Array.isArray(localizedMap['en'])) {
+                        blocks = localizedMap['en']
+                      }
+                    }
+
+                    if (blocks && Array.isArray(blocks) && blocks.length > 0) {
+                      return (
+                        <PortableTextLite
+                          value={blocks as Parameters<typeof PortableTextLite>[0]['value']}
+                        />
+                      )
+                    }
+
                     const bio = t(designer.bio)
-                    if (Array.isArray(bio) && bio.length > 0)
-                      return <PortableTextLite value={bio} />
-                    if (typeof bio === 'string' && bio.trim()) return <p>{bio}</p>
+                    if (typeof bio === 'string' && bio.trim()) {
+                      return <p className="whitespace-pre-line">{bio}</p>
+                    }
                     if (isBirimStudio) {
                       return (
-                        <p>
+                        <p className="whitespace-pre-line">
                           {t('birim_studio_bio_full') ||
                             "Birim'in yenilikçi ve zamansız tasarım vizyonunu yansıtan iç tasarım stüdyosu. Ergonomi, estetik ve mimari disiplini bir araya getirerek çağdaş mekanlar için ikonik mobilyalar tasarlar."}
                         </p>
