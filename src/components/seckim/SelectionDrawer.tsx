@@ -268,7 +268,7 @@ export const SelectionDrawer: React.FC = () => {
                         onClick={handleNavigateToSeckim}
                         className="w-full py-3.5 px-3 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs tracking-widest uppercase font-semibold hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all duration-200 text-center cursor-pointer"
                       >
-                        SEÇTİKLERİMİ GÖRÜNTÜLE
+                        SEÇTİKLERİM
                       </button>
 
                       <button
