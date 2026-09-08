@@ -25,10 +25,10 @@ export const SelectionToast: React.FC = () => {
           role="status"
           aria-live="polite"
         >
-          <div className="bg-[#181818] text-white px-5 py-3.5 shadow-2xl border border-neutral-700/60 flex items-center justify-between gap-4">
+          <div className="bg-[#3c424d] text-white px-5 py-3.5 shadow-2xl border border-[#4a515c] flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-white flex-shrink-0" />
-              <p className="text-xs tracking-wider uppercase font-light text-neutral-200">
+              <p className="text-xs tracking-wider uppercase font-light text-neutral-100">
                 {notification.message}
               </p>
             </div>
@@ -38,7 +38,7 @@ export const SelectionToast: React.FC = () => {
                 <button
                   type="button"
                   onClick={notification.onAction}
-                  className="text-xs font-medium tracking-widest uppercase text-white hover:text-neutral-300 underline underline-offset-4 cursor-pointer transition-colors"
+                  className="text-xs font-medium tracking-widest uppercase text-white hover:text-neutral-200 underline underline-offset-4 cursor-pointer transition-colors"
                 >
                   {notification.actionLabel}
                 </button>

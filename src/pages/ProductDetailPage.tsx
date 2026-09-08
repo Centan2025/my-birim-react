@@ -343,7 +343,13 @@ export function ProductDetailPage() {
             showProductPrevNext={showProductPrevNext}
           />
 
-          <DetailSelectionCTA product={product} />
+          <DetailSelectionCTA
+            product={product}
+            category={category}
+            designer={designer}
+            designers={designers}
+            mergedGroups={mergedGroups}
+          />
 
           {settings?.enableAiRoomPlanner !== false && (
             <div className="mt-8 pt-6 border-t border-[var(--border-color,rgba(255,255,255,0.1))]">

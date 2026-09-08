@@ -82,7 +82,7 @@ export function SeckimProjectDetailPage() {
         </p>
         <Link
           to="/seckim?tab=projeler"
-          className="mt-6 px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold hover:opacity-90 transition-opacity"
+          className="mt-6 px-6 py-2.5 bg-[#3c424d] text-white border border-[#3c424d] text-xs uppercase tracking-widest font-semibold hover:bg-[#4a515c] hover:border-[#4a515c] transition-all"
         >
           PROJELERİM'E DÖN
         </Link>
@@ -250,7 +250,7 @@ export function SeckimProjectDetailPage() {
               <button
                 type="button"
                 onClick={() => setIsInquiryOpen(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#3c424d] text-white border border-[#3c424d] text-xs uppercase tracking-widest font-semibold hover:bg-[#4a515c] hover:border-[#4a515c] transition-all cursor-pointer shadow-sm"
               >
                 <svg
                   className="w-3.5 h-3.5"
@@ -325,7 +325,7 @@ export function SeckimProjectDetailPage() {
               </p>
               <Link
                 to="/products"
-                className="mt-8 inline-block px-8 py-3.5 bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold hover:opacity-90 transition-opacity"
+                className="mt-8 inline-block px-8 py-3.5 bg-[#3c424d] text-white border border-[#3c424d] text-xs uppercase tracking-widest font-semibold hover:bg-[#4a515c] hover:border-[#4a515c] transition-all"
               >
                 ÜRÜNLERİ İNCELE
               </Link>

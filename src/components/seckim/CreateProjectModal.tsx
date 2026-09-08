@@ -139,7 +139,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-2 cursor-pointer shadow-sm"
+                  className="px-6 py-2.5 bg-[#3c424d] text-white border border-[#3c424d] text-xs uppercase tracking-widest font-semibold hover:bg-[#4a515c] hover:border-[#4a515c] disabled:opacity-50 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
                 >
                   {loading ? 'KAYDEDİLİYOR...' : 'OLUŞTUR'}
                 </button>

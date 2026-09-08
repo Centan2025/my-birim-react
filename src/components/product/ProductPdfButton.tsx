@@ -1,0 +1,101 @@
+import React, {useState} from 'react'
+import {useTranslation} from '../../i18n'
+import type {Category, Designer, Product, ProductMaterialsGroup} from '../../types'
+import {downloadProductDetailPDF} from '../../utils/pdfGenerator'
+
+interface ProductPdfButtonProps {
+  product: Product
+  category?: Category | null
+  designer?: Designer | null
+  designers?: Designer[]
+  mergedGroups?: ProductMaterialsGroup[]
+  className?: string
+}
+
+export const ProductPdfButton: React.FC<ProductPdfButtonProps> = ({
+  product,
+  category,
+  designer,
+  designers,
+  mergedGroups,
+  className = '',
+}) => {
+  const {t, locale} = useTranslation()
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  const handleDownload = async () => {
+    if (isDownloading || !product) return
+    setIsDownloading(true)
+    try {
+      await downloadProductDetailPDF({
+        product,
+        category,
+        designer,
+        designers,
+        mergedGroups,
+        locale,
+      })
+    } catch (err) {
+      console.error('PDF download error:', err)
+      alert(t('pdf_download_error') || 'PDF oluşturulurken bir hata oluştu.')
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleDownload}
+      disabled={isDownloading}
+      className={`group relative inline-flex items-center justify-center gap-2.5 px-6 py-3.5 text-xs font-semibold uppercase tracking-widest text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--border-primary)] hover:border-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all duration-300 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shadow-none ${className}`}
+      aria-label={t('product_info_pdf') || 'Ürün Bilgi Formu PDF İndir'}
+      title={t('product_info_pdf') || 'Ürün Bilgi Formu'}
+    >
+      {isDownloading ? (
+        <>
+          <svg
+            className="w-4 h-4 animate-spin text-current"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="3"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8H4z"
+            />
+          </svg>
+          <span className="tracking-widest">{t('generating_pdf') || 'PDF HAZIRLANIYOR...'}</span>
+        </>
+      ) : (
+        <>
+          <svg
+            className="w-4 h-4 transition-transform duration-300 group-hover:scale-110"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="12" y1="18" x2="12" y2="12" />
+            <line x1="9" y1="15" x2="12" y2="18" />
+            <line x1="15" y1="15" x2="12" y2="18" />
+          </svg>
+          <span className="tracking-widest">{t('download_pdf') || 'PDF İNDİR'}</span>
+        </>
+      )}
+    </button>
+  )
+}

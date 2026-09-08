@@ -1,7 +1,8 @@
 import {jsPDF} from 'jspdf'
-import type {Product} from '../types'
+import type {Category, Designer, Product, ProductMaterialsGroup} from '../types'
 import {getProductImageProps} from '../types/seckim'
 import {rewriteR2Url} from '../services/sanity/client'
+import {toPlainText} from './portableText'
 
 interface GeneratePdfOptions {
   projectName?: string
@@ -10,6 +11,16 @@ interface GeneratePdfOptions {
   date?: string
   designerNamesMap?: Record<string, string>
   categoryNamesMap?: Record<string, string>
+}
+
+export interface GenerateSingleProductPdfOptions {
+  product: Product
+  category?: Category | null
+  designer?: Designer | null
+  designers?: Designer[]
+  mergedGroups?: ProductMaterialsGroup[]
+  locale?: string
+  date?: string
 }
 
 interface LoadedImageInfo {
@@ -27,8 +38,12 @@ let cachedLogo: {dataUrl: string; aspect: number} | null = null
  */
 async function loadFontAsBase64(url: string): Promise<string | null> {
   try {
-    const response = await fetch(url)
-    if (!response.ok) return null
+    let resolvedUrl = url
+    if (typeof window !== 'undefined' && window.location?.origin && url.startsWith('/')) {
+      resolvedUrl = `${window.location.origin}${url}`
+    }
+    const response = await fetch(resolvedUrl).catch(() => null)
+    if (!response || !response.ok) return null
     const buffer = await response.arrayBuffer()
     const bytes = new Uint8Array(buffer)
     let binary = ''
@@ -38,9 +53,10 @@ async function loadFontAsBase64(url: string): Promise<string | null> {
       const chunk = bytes.subarray(i, Math.min(i + chunkSize, len))
       binary += String.fromCharCode.apply(null, Array.from(chunk))
     }
-    return window.btoa(binary)
-  } catch (err) {
-    console.warn('PDF font load notice:', err)
+    return typeof window !== 'undefined' && typeof window.btoa === 'function'
+      ? window.btoa(binary)
+      : null
+  } catch {
     return null
   }
 }
@@ -54,7 +70,37 @@ async function fetchImageElement(
 ): Promise<{img: HTMLImageElement; cleanup: () => void} | null> {
   if (!url) return null
 
-  const cleanUrl = rewriteR2Url(url)
+  let cleanUrl = rewriteR2Url(url)
+  if (typeof window !== 'undefined' && window.location?.origin && cleanUrl.startsWith('/')) {
+    cleanUrl = `${window.location.origin}${cleanUrl}`
+  }
+
+  const waitForImage = (img: HTMLImageElement, timeoutMs = 1500): Promise<boolean> => {
+    return new Promise<boolean>(resolve => {
+      let done = false
+      const timer = setTimeout(() => {
+        if (!done) {
+          done = true
+          resolve(false)
+        }
+      }, timeoutMs)
+
+      img.onload = () => {
+        if (!done) {
+          done = true
+          clearTimeout(timer)
+          resolve(true)
+        }
+      }
+      img.onerror = () => {
+        if (!done) {
+          done = true
+          clearTimeout(timer)
+          resolve(false)
+        }
+      }
+    })
+  }
 
   // 1. Try fetching as Blob (bypasses tainted canvas completely once loaded into Image)
   try {
@@ -71,11 +117,9 @@ async function fetchImageElement(
       const blob = await res.blob()
       const objectUrl = URL.createObjectURL(blob)
       const img = new Image()
-      const loaded = await new Promise<boolean>(resolve => {
-        img.onload = () => resolve(true)
-        img.onerror = () => resolve(false)
-        img.src = objectUrl
-      })
+      const loadPromise = waitForImage(img)
+      img.src = objectUrl
+      const loaded = await loadPromise
 
       if (loaded && (img.naturalWidth || img.width)) {
         return {
@@ -93,11 +137,9 @@ async function fetchImageElement(
   try {
     const img = new Image()
     img.crossOrigin = 'anonymous'
-    const loaded = await new Promise<boolean>(resolve => {
-      img.onload = () => resolve(true)
-      img.onerror = () => resolve(false)
-      img.src = cleanUrl
-    })
+    const loadPromise = waitForImage(img)
+    img.src = cleanUrl
+    const loaded = await loadPromise
 
     if (loaded && (img.naturalWidth || img.width)) {
       return {img, cleanup: () => {}}
@@ -109,11 +151,9 @@ async function fetchImageElement(
   // 3. Fallback: load directly without crossOrigin (works for local/same-origin images)
   try {
     const img = new Image()
-    const loaded = await new Promise<boolean>(resolve => {
-      img.onload = () => resolve(true)
-      img.onerror = () => resolve(false)
-      img.src = cleanUrl
-    })
+    const loadPromise = waitForImage(img)
+    img.src = cleanUrl
+    const loaded = await loadPromise
 
     if (loaded && (img.naturalWidth || img.width)) {
       return {img, cleanup: () => {}}
@@ -579,4 +619,502 @@ export async function generateSeckimPDF({
   renderFooter(currentPage, totalPages)
 
   return doc.output('blob')
+}
+
+function getLocalizedValue(val: unknown, locale: string = 'tr'): string {
+  if (typeof val === 'string') return val
+  if (val && typeof val === 'object') {
+    const rec = val as Record<string, unknown>
+    if (rec[locale] && typeof rec[locale] === 'string') return rec[locale] as string
+    if (rec['tr'] && typeof rec['tr'] === 'string') return rec['tr'] as string
+    if (rec['en'] && typeof rec['en'] === 'string') return rec['en'] as string
+    return toPlainText(val)
+  }
+  return ''
+}
+
+/**
+ * Generates an architectural, high-resolution single product datasheet (Ürün Bilgi Formu) PDF.
+ */
+export async function generateProductPDF({
+  product,
+  category,
+  designer,
+  designers = [],
+  mergedGroups = [],
+  locale = 'tr',
+  date = new Date().toLocaleDateString(locale === 'en' ? 'en-US' : 'tr-TR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }),
+}: GenerateSingleProductPdfOptions): Promise<Blob> {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  })
+
+  // 1. Setup Inter Turkish font
+  let activeFont = 'helvetica'
+  try {
+    if (!cachedRegularFont) {
+      cachedRegularFont = await loadFontAsBase64('/fonts/Inter-Regular.ttf')
+    }
+    if (!cachedBoldFont) {
+      cachedBoldFont = await loadFontAsBase64('/fonts/Inter-Bold.ttf')
+    }
+
+    if (cachedRegularFont) {
+      doc.addFileToVFS('Inter-Regular.ttf', cachedRegularFont)
+      doc.addFont('Inter-Regular.ttf', 'Inter', 'normal')
+      activeFont = 'Inter'
+    }
+    if (cachedBoldFont) {
+      doc.addFileToVFS('Inter-Bold.ttf', cachedBoldFont)
+      doc.addFont('Inter-Bold.ttf', 'Inter', 'bold')
+    }
+  } catch (err) {
+    console.warn('Font initialization warning:', err)
+  }
+
+  // 2. Pre-load assets concurrently
+  const imgProps = getProductImageProps(product)
+  const mainImgSrc = imgProps.src || imgProps.srcDesktop || imgProps.srcMobile
+  const mainCrop = imgProps.crop || imgProps.cropDesktop || imgProps.cropMobile
+
+  const dimensionImageItems = (product.dimensionImages || []).filter(di => Boolean(di?.image))
+
+  const [logoInfo, mainImgInfo, dimImgInfos] = await Promise.all([
+    loadLogo(),
+    mainImgSrc ? loadProductImage(mainImgSrc, mainCrop) : Promise.resolve(null),
+    Promise.all(
+      dimensionImageItems.map(di =>
+        di.image ? loadProductImage(di.image, undefined) : Promise.resolve(null)
+      )
+    ),
+  ])
+
+  const pageWidth = 210
+  const pageHeight = 297
+  const margin = 16
+  const contentWidth = pageWidth - margin * 2
+  const maxSafeY = pageHeight - 18
+
+  const isEn = locale === 'en'
+  const subTitleHeader = isEn ? 'PRODUCT DATASHEET' : 'ÜRÜN BİLGİ FORMU'
+
+  // Render Page Header
+  const renderHeader = () => {
+    doc.setFillColor(255, 255, 255)
+    doc.rect(0, 0, pageWidth, pageHeight, 'F')
+
+    // Top horizontal divider
+    doc.setDrawColor(220, 220, 220)
+    doc.setLineWidth(0.35)
+    doc.line(margin, margin + 14, pageWidth - margin, margin + 14)
+
+    // Brand Logo or Title
+    if (logoInfo) {
+      const logoH = 5.2
+      const logoW = Math.min(48, logoH * logoInfo.aspect)
+      try {
+        doc.addImage(logoInfo.dataUrl, 'PNG', margin, margin + 2.5, logoW, logoH, undefined, 'FAST')
+      } catch {
+        doc.setFont(activeFont, 'bold')
+        doc.setFontSize(15)
+        doc.setTextColor(20, 20, 20)
+        doc.text('BİRİM', margin, margin + 7.5)
+      }
+
+      doc.setFont(activeFont, 'normal')
+      doc.setFontSize(7.5)
+      doc.setTextColor(130, 130, 130)
+      doc.text('|', margin + logoW + 3.5, margin + 6.8)
+      doc.text(subTitleHeader, margin + logoW + 6.5, margin + 6.8)
+    } else {
+      doc.setFont(activeFont, 'bold')
+      doc.setFontSize(15)
+      doc.setTextColor(20, 20, 20)
+      doc.text('BİRİM', margin, margin + 7.5)
+
+      doc.setFont(activeFont, 'normal')
+      doc.setFontSize(7.5)
+      doc.setTextColor(130, 130, 130)
+      doc.text(subTitleHeader, margin + 24, margin + 7)
+    }
+
+    // Top right: Date
+    doc.setFont(activeFont, 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(110, 110, 110)
+    doc.text(date, pageWidth - margin, margin + 6.8, {align: 'right'})
+  }
+
+  // Render Page Footer
+  const renderFooter = (pageNumber: number, total: number) => {
+    doc.setDrawColor(225, 225, 225)
+    doc.setLineWidth(0.3)
+    doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12)
+
+    doc.setFont(activeFont, 'normal')
+    doc.setFontSize(7.5)
+    doc.setTextColor(140, 140, 140)
+    doc.text('Birim Mobilya • www.birim.com • info@birim.com', margin, pageHeight - 7.5)
+    doc.text(`${pageNumber} / ${total}`, pageWidth - margin, pageHeight - 7.5, {align: 'right'})
+  }
+
+  // 1. Initial Page 1
+  renderHeader()
+
+  let currentY = margin + 22
+
+  // Product Name
+  const rawName = getLocalizedValue(product.name, locale)
+  const productTitle = rawName.toLocaleUpperCase(isEn ? 'en-US' : 'tr-TR')
+
+  doc.setFont(activeFont, 'bold')
+  doc.setFontSize(16)
+  doc.setTextColor(15, 15, 15)
+  const titleLines = doc.splitTextToSize(productTitle, contentWidth)
+  doc.text(titleLines, margin, currentY)
+  currentY += titleLines.length * 6.5 + 2
+
+  // Meta Row (Category • Year • SKU • Designer)
+  const prodRecord = product as unknown as Record<string, unknown>
+  const catName = category ? getLocalizedValue(category.name, locale) : (prodRecord['category'] ? String(prodRecord['category']) : '')
+  const yearStr = product.year ? (isEn ? `Year: ${product.year}` : `Yıl: ${product.year}`) : ''
+  const skuCode =
+    product.sku ||
+    (prodRecord['sku'] ? String(prodRecord['sku']) : '') ||
+    `BIRIM-${product.id.slice(0, 8).toLocaleUpperCase('tr-TR')}`
+  const skuStr = `${isEn ? 'SKU' : 'Ürün Kodu'}: ${skuCode}`
+
+  const allDesigners = designers && designers.length > 0 ? designers : designer ? [designer] : []
+  const designerNames = allDesigners.map(d => getLocalizedValue(d.name, locale)).filter(Boolean).join(', ')
+
+  doc.setFont(activeFont, 'normal')
+  doc.setFontSize(8.5)
+  doc.setTextColor(100, 100, 100)
+
+  const metaParts = [catName, yearStr, skuStr].filter(Boolean)
+  if (metaParts.length > 0) {
+    doc.text(metaParts.join('   •   '), margin, currentY)
+    currentY += 5
+  }
+
+  if (designerNames) {
+    doc.text(`${isEn ? 'Designer' : 'Tasarımcı'}: ${designerNames}`, margin, currentY)
+    currentY += 5
+  }
+
+  // Price (if buyable)
+  if (product.buyable && product.price && product.price > 0) {
+    const formattedPrice = new Intl.NumberFormat(isEn ? 'en-US' : 'tr-TR', {
+      style: 'currency',
+      currency: product.currency || 'TRY',
+    }).format(product.price)
+    doc.setFont(activeFont, 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(30, 30, 30)
+    doc.text(`${isEn ? 'Price' : 'Fiyat'}: ${formattedPrice}`, margin, currentY)
+    currentY += 5.5
+  }
+
+  // Hairline divider
+  currentY += 1
+  doc.setDrawColor(235, 235, 235)
+  doc.setLineWidth(0.3)
+  doc.line(margin, currentY, pageWidth - margin, currentY)
+  currentY += 6
+
+  // Hero Section: Image Box (Left) + Description & Highlights (Right)
+  const imgBoxW = 94
+  const imgBoxH = 74
+  const imgBoxX = margin
+  const imgBoxY = currentY
+
+  // Image Frame
+  doc.setDrawColor(235, 235, 235)
+  doc.setFillColor(250, 250, 250)
+  doc.roundedRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 1.5, 1.5, 'FD')
+
+  if (mainImgInfo) {
+    try {
+      const padding = 3
+      const maxW = imgBoxW - padding * 2
+      const maxH = imgBoxH - padding * 2
+
+      let renderW = maxW
+      let renderH = maxH
+
+      if (mainImgInfo.aspect > maxW / maxH) {
+        renderH = renderW / mainImgInfo.aspect
+      } else {
+        renderW = renderH * mainImgInfo.aspect
+      }
+
+      const posX = imgBoxX + (imgBoxW - renderW) / 2
+      const posY = imgBoxY + (imgBoxH - renderH) / 2
+
+      doc.addImage(mainImgInfo.dataUrl, 'JPEG', posX, posY, renderW, renderH, undefined, 'FAST')
+    } catch (err) {
+      console.warn('PDF main image render error:', err)
+    }
+  } else {
+    doc.setFont(activeFont, 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(170, 170, 170)
+    doc.text(isEn ? 'No Image' : 'Görsel Yok', imgBoxX + imgBoxW / 2, imgBoxY + imgBoxH / 2, {align: 'center'})
+  }
+
+  // Right Side: Description & Specifications Box
+  const sideX = imgBoxX + imgBoxW + 8
+  const sideW = contentWidth - imgBoxW - 8
+  let sideY = imgBoxY + 4
+
+  // Description Heading
+  doc.setFont(activeFont, 'bold')
+  doc.setFontSize(8)
+  doc.setTextColor(50, 50, 50)
+  doc.text(isEn ? 'PRODUCT DESCRIPTION' : 'ÜRÜN HAKKINDA', sideX, sideY)
+  sideY += 5
+
+  // Description Text
+  const descText = getLocalizedValue(product.description, locale)
+  doc.setFont(activeFont, 'normal')
+  doc.setFontSize(7.5)
+  doc.setTextColor(80, 80, 80)
+  if (descText) {
+    const descLines = doc.splitTextToSize(descText, sideW)
+    const displayLines = descLines.slice(0, 9)
+    doc.text(displayLines, sideX, sideY)
+    sideY += displayLines.length * 3.8 + 3
+  } else {
+    doc.text(isEn ? 'Contemporary design piece crafted by Birim.' : 'Birim tasarım ve üretim standartlarıyla üretilmiştir.', sideX, sideY)
+    sideY += 7
+  }
+
+  // Dimensions & Quick Specs
+  const dims = prodRecord['dimensions'] as {width?: number; depth?: number; height?: number} | undefined
+  const dimParts = dims
+    ? [
+        dims.width ? `G: ${dims.width} cm` : '',
+        dims.depth ? `D: ${dims.depth} cm` : '',
+        dims.height ? `Y: ${dims.height} cm` : '',
+      ].filter(Boolean)
+    : []
+
+  if (dimParts.length > 0 || catName || designerNames) {
+    doc.setFillColor(246, 246, 246)
+    doc.roundedRect(sideX, sideY, sideW, 26, 1, 1, 'F')
+
+    let specY = sideY + 4.5
+    doc.setFont(activeFont, 'bold')
+    doc.setFontSize(7)
+    doc.setTextColor(50, 50, 50)
+    doc.text(isEn ? 'SPECIFICATIONS' : 'TEKNİK ÖZET', sideX + 3.5, specY)
+    specY += 4.5
+
+    doc.setFont(activeFont, 'normal')
+    doc.setFontSize(6.8)
+    doc.setTextColor(90, 90, 90)
+
+    if (dimParts.length > 0) {
+      doc.text(`${isEn ? 'Dimensions' : 'Ölçüler'}: ${dimParts.join('  •  ')}`, sideX + 3.5, specY)
+      specY += 3.8
+    }
+    if (catName) {
+      doc.text(`${isEn ? 'Category' : 'Kategori'}: ${catName}`, sideX + 3.5, specY)
+      specY += 3.8
+    }
+    if (designerNames) {
+      doc.text(`${isEn ? 'Designer' : 'Tasarımcı'}: ${designerNames}`, sideX + 3.5, specY)
+      specY += 3.8
+    }
+  }
+
+  currentY = imgBoxY + imgBoxH + 9
+
+  // Dimension Drawings Section
+  const validDimDrawings: {
+    info: LoadedImageInfo
+    item?: (typeof dimensionImageItems)[number]
+  }[] = []
+
+  dimImgInfos.forEach((info, idx) => {
+    if (info) {
+      validDimDrawings.push({info, item: dimensionImageItems[idx]})
+    }
+  })
+
+  if (validDimDrawings.length > 0) {
+    if (currentY + 54 > maxSafeY) {
+      doc.addPage()
+      renderHeader()
+      currentY = margin + 22
+    }
+
+    doc.setFont(activeFont, 'bold')
+    doc.setFontSize(9.5)
+    doc.setTextColor(25, 25, 25)
+    doc.text(isEn ? 'DIMENSIONS & TECHNICAL DRAWINGS' : 'ÖLÇÜLER & TEKNİK ÇİZİMLER', margin, currentY)
+    currentY += 4.5
+
+    const drawingCount = Math.min(validDimDrawings.length, 3)
+    const gap = 5
+    const drawBoxW = (contentWidth - gap * (drawingCount - 1)) / drawingCount
+    const drawBoxH = 42
+
+    for (let dIdx = 0; dIdx < drawingCount; dIdx++) {
+      const entry = validDimDrawings[dIdx]
+      if (!entry) continue
+      const {info, item} = entry
+      const bx = margin + dIdx * (drawBoxW + gap)
+      const by = currentY
+
+      doc.setDrawColor(235, 235, 235)
+      doc.setFillColor(252, 252, 252)
+      doc.roundedRect(bx, by, drawBoxW, drawBoxH, 1, 1, 'FD')
+
+      try {
+        const pad = 2.5
+        const maxW = drawBoxW - pad * 2
+        const maxH = drawBoxH - pad * 2 - (item?.title ? 5 : 0)
+
+        let dw = maxW
+        let dh = maxH
+
+        if (info.aspect > maxW / maxH) {
+          dh = dw / info.aspect
+        } else {
+          dw = dh * info.aspect
+        }
+
+        const dx = bx + (drawBoxW - dw) / 2
+        const dy = by + pad + (maxH - dh) / 2
+
+        doc.addImage(info.dataUrl, 'JPEG', dx, dy, dw, dh, undefined, 'FAST')
+      } catch (e) {
+        console.warn('PDF drawing render error:', e)
+      }
+
+      if (item?.title) {
+        const dTitle = getLocalizedValue(item.title, locale)
+        doc.setFont(activeFont, 'normal')
+        doc.setFontSize(6.5)
+        doc.setTextColor(110, 110, 110)
+        doc.text(dTitle, bx + drawBoxW / 2, by + drawBoxH - 1.8, {align: 'center'})
+      }
+    }
+
+    currentY += drawBoxH + 8
+  }
+
+  // Materials & Finishes Section
+  const groupsToDisplay: {title: string; items: string[]}[] = []
+
+  if (mergedGroups.length > 0) {
+    for (const g of mergedGroups) {
+      const gTitle = getLocalizedValue(g.groupTitle, locale)
+      const matNames = (g.materials || [])
+        .map(m => getLocalizedValue(m.name, locale))
+        .filter(Boolean)
+      const bookNames = (g.books || [])
+        .map(b => getLocalizedValue(b.bookTitle, locale))
+        .filter(Boolean)
+      const combined = Array.from(new Set([...bookNames, ...matNames])).slice(0, 10)
+      if (gTitle && combined.length > 0) {
+        groupsToDisplay.push({title: gTitle, items: combined})
+      }
+    }
+  } else if (product.materials && product.materials.length > 0) {
+    const flatNames = product.materials
+      .map(m => getLocalizedValue(m.name, locale))
+      .filter(Boolean)
+      .slice(0, 16)
+    if (flatNames.length > 0) {
+      groupsToDisplay.push({
+        title: isEn ? 'Standard Materials' : 'Standart Malzemeler',
+        items: flatNames,
+      })
+    }
+  }
+
+  if (groupsToDisplay.length > 0) {
+    if (currentY + 36 > maxSafeY) {
+      doc.addPage()
+      renderHeader()
+      currentY = margin + 22
+    }
+
+    doc.setFont(activeFont, 'bold')
+    doc.setFontSize(9.5)
+    doc.setTextColor(25, 25, 25)
+    doc.text(isEn ? 'MATERIALS & FINISHES' : 'MALZEME & YÜZEY SEÇENEKLERİ', margin, currentY)
+    currentY += 5
+
+    const colCount = Math.min(groupsToDisplay.length, 3)
+    const colGap = 5
+    const colW = (contentWidth - colGap * (colCount - 1)) / colCount
+
+    for (let cIdx = 0; cIdx < colCount; cIdx++) {
+      const g = groupsToDisplay[cIdx]
+      if (!g) continue
+      const cx = margin + cIdx * (colW + colGap)
+      let cy = currentY
+
+      doc.setFillColor(248, 248, 248)
+      doc.roundedRect(cx, cy, colW, 28, 1, 1, 'F')
+
+      doc.setFont(activeFont, 'bold')
+      doc.setFontSize(7.5)
+      doc.setTextColor(40, 40, 40)
+      doc.text(g.title, cx + 3, cy + 4.5)
+      cy += 8
+
+      doc.setFont(activeFont, 'normal')
+      doc.setFontSize(6.8)
+      doc.setTextColor(90, 90, 90)
+
+      const itemsText = g.items.join('  •  ')
+      const lines = doc.splitTextToSize(itemsText, colW - 6)
+      doc.text(lines.slice(0, 4), cx + 3, cy)
+    }
+
+    currentY += 34
+  }
+
+  // Loop through all pages and render footers
+  const totalPages = doc.getNumberOfPages()
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p)
+    renderFooter(p, totalPages)
+  }
+
+  return doc.output('blob')
+}
+
+/**
+ * Generates and automatically triggers browser download for a single product datasheet.
+ */
+export async function downloadProductDetailPDF(
+  options: GenerateSingleProductPdfOptions
+): Promise<void> {
+  const pdfBlob = await generateProductPDF(options)
+  const url = URL.createObjectURL(pdfBlob)
+  const a = document.createElement('a')
+  a.href = url
+
+  const rawName = getLocalizedValue(options.product.name, options.locale || 'tr') || 'Urun'
+  const sanitizedName = rawName
+    .replace(/[^a-zA-Z0-9ığüşöçİĞÜŞÖÇ\-_]/g, '_')
+    .replace(/_+/g, '_')
+  const dateStr = new Date().toISOString().slice(0, 10)
+
+  a.download = `Birim-${sanitizedName}-Bilgi-Formu-${dateStr}.pdf`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }

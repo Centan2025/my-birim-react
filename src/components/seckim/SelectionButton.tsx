@@ -40,7 +40,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
         onBlur={() => setShowTooltip(false)}
         className={`group/btn relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 ease-out backdrop-blur-md cursor-pointer z-10 ${
           selected
-            ? 'bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 border border-neutral-950 dark:border-white shadow-[0_2px_10px_rgba(0,0,0,0.16)] hover:scale-105 active:scale-95'
+            ? 'bg-[#3c424d] text-white border border-[#3c424d] shadow-[0_2px_10px_rgba(60,66,77,0.35)] hover:bg-[#4a515c] hover:border-[#4a515c] hover:scale-105 active:scale-95'
             : 'bg-white/90 dark:bg-neutral-900/80 text-neutral-700 dark:text-neutral-200 hover:text-neutral-950 dark:hover:text-white hover:bg-white dark:hover:bg-neutral-900 border border-black/[0.07] dark:border-white/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:scale-105 active:scale-95'
         }`}
         aria-label={selected ? `${rawName} seçtiklerimden çıkar` : `${rawName} seçtiklerime ekle`}
@@ -49,13 +49,14 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
         <svg
           className="w-4 h-4 transition-transform duration-300 ease-out group-hover/btn:scale-105 group-active/btn:scale-90"
           viewBox="0 0 24 24"
-          fill={selected ? 'currentColor' : 'none'}
+          fill="none"
           stroke="currentColor"
           strokeWidth={selected ? '1.4' : '1.25'}
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M6.5 3.5H17.5V20.5L12 16.75L6.5 20.5V3.5Z" />
+          <rect x="7" y="7" width="13" height="13" rx="1.5" fill="none" />
+          <path d="M4 17V5a1 1 0 0 1 1-1h12" fill="none" />
         </svg>
 
         {showLabel && (
@@ -81,7 +82,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
             </span>
             {/* Tam genişlikte sağdan sola çizilen zarif animasyonlu yatay çizgi */}
             <motion.div
-              className="h-[1.5px] w-full bg-neutral-900 dark:bg-white origin-right mt-1 shadow-xs"
+              className={`h-[1.5px] w-full ${selected ? 'bg-[#3c424d]' : 'bg-neutral-900 dark:bg-white'} origin-right mt-1 shadow-xs`}
               initial={{scaleX: 0}}
               animate={{scaleX: 1}}
               exit={{scaleX: 0}}
