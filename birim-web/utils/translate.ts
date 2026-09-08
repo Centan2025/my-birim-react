@@ -27,6 +27,26 @@ export const translateText = async (text: string, targetLang: string): Promise<s
 
 const generateKey = () => Math.random().toString(36).substring(2, 11)
 
+export const stringToBlocks = (text: string) => {
+  if (!text || typeof text !== 'string') return []
+  return [
+    {
+      _key: generateKey(),
+      _type: 'block',
+      style: 'normal',
+      markDefs: [],
+      children: [
+        {
+          _key: generateKey(),
+          _type: 'span',
+          marks: [],
+          text,
+        },
+      ],
+    },
+  ]
+}
+
 /**
  * PortableText blok dizisini veya metnini hedef dile çevirir
  */

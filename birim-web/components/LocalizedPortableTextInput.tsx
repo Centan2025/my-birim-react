@@ -1,6 +1,6 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import type {ObjectInputProps} from 'sanity'
-import {set, MemberField} from 'sanity'
+import {set, setIfMissing, PatchEvent, MemberField} from 'sanity'
 import {
   Flex,
   Box,
@@ -17,7 +17,7 @@ import {
   ALL_LANGUAGES_OPTION,
   useStudioLanguage,
 } from '../utils/studioLanguageStore'
-import {translatePortableText} from '../utils/translate'
+import {translatePortableText, stringToBlocks} from '../utils/translate'
 
 const hasTextContent = (val: unknown): boolean => {
   if (!val) return false
@@ -26,7 +26,8 @@ const hasTextContent = (val: unknown): boolean => {
     return val.some((block) => {
       if (block && block._type === 'block' && Array.isArray(block.children)) {
         return block.children.some(
-          (child: {text?: unknown}) => typeof child?.text === 'string' && child.text.trim().length > 0,
+          (child: {text?: unknown}) =>
+            typeof child?.text === 'string' && child.text.trim().length > 0,
         )
       }
       return Boolean(block)
@@ -47,6 +48,47 @@ export default function LocalizedPortableTextInput(props: ObjectInputProps) {
   const trValue = value && value['tr']
   const hasTrValue = hasTextContent(trValue)
 
+  // Otomatik migrasyon: Eski düz metin (string) verilerini veya eksik _type'ı düzeltir
+  useEffect(() => {
+    if (!value) return
+
+    if (typeof value === 'string') {
+      const timer = setTimeout(() => {
+        onChange(
+          PatchEvent.from([
+            set({
+              _type: 'localizedPortableText',
+              tr: stringToBlocks(value),
+            }),
+          ]),
+        )
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+
+    if (typeof value === 'object') {
+      const patches: any[] = []
+
+      if (value._type !== 'localizedPortableText') {
+        patches.push(set('localizedPortableText', ['_type']))
+      }
+
+      for (const lang of SUPPORTED_LANGUAGES) {
+        const fieldVal = value[lang.id]
+        if (typeof fieldVal === 'string' && fieldVal.trim() !== '') {
+          patches.push(set(stringToBlocks(fieldVal), [lang.id]))
+        }
+      }
+
+      if (patches.length > 0) {
+        const timer = setTimeout(() => {
+          onChange(PatchEvent.from(patches))
+        }, 0)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [value, onChange])
+
   const handleTranslate = async (targetLang: string) => {
     if (!hasTrValue) {
       toast.push({
@@ -59,8 +101,12 @@ export default function LocalizedPortableTextInput(props: ObjectInputProps) {
     setTranslating(targetLang)
     try {
       const translated = await translatePortableText(trValue, targetLang)
-      const currentValue = typeof value === 'object' && value !== null ? value : {}
-      onChange(set({...currentValue, _type: 'localizedPortableText', [targetLang]: translated}))
+      onChange(
+        PatchEvent.from([
+          setIfMissing({_type: 'localizedPortableText'}),
+          set(translated, [targetLang]),
+        ]),
+      )
 
       const langInfo = SUPPORTED_LANGUAGES.find((l) => l.id === targetLang)
       toast.push({
@@ -101,22 +147,23 @@ export default function LocalizedPortableTextInput(props: ObjectInputProps) {
 
     setTranslating('all')
     try {
-      const newTranslations: Record<string, any> = {}
+      const patches: any[] = [setIfMissing({_type: 'localizedPortableText'})]
+      let count = 0
       for (const lang of missingLangs) {
         try {
           const res = await translatePortableText(trValue, lang.id)
-          newTranslations[lang.id] = res
+          patches.push(set(res, [lang.id]))
+          count++
         } catch (e) {
           console.error(`Çeviri başarısız: ${lang.id}`, e)
         }
       }
 
-      const currentValue = typeof value === 'object' && value !== null ? value : {}
-      onChange(set({...currentValue, _type: 'localizedPortableText', ...newTranslations}))
+      onChange(PatchEvent.from(patches))
 
       toast.push({
         status: 'success',
-        title: `${Object.keys(newTranslations).length} dil otomatik çevrildi`,
+        title: `${count} dil otomatik çevrildi`,
       })
     } catch (error: any) {
       toast.push({
