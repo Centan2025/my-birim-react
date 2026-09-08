@@ -34,31 +34,82 @@ let cachedBoldFont: string | null = null
 let cachedLogo: {dataUrl: string; aspect: number} | null = null
 
 /**
- * Fetch a TTF font file from local /fonts/ directory and convert to base64 for jsPDF VFS.
+ * Robustly load project TrueType fonts (.ttf) into base64 strings for jsPDF VFS.
+ * Supports direct filesystem resolution in Node/SSR/Vitest and multi-path fetching in browser.
  */
-async function loadFontAsBase64(url: string): Promise<string | null> {
-  try {
-    let resolvedUrl = url
-    if (typeof window !== 'undefined' && window.location?.origin && url.startsWith('/')) {
-      resolvedUrl = `${window.location.origin}${url}`
+async function loadFontAsBase64(filename: string): Promise<string | null> {
+  const origin =
+    typeof window !== 'undefined' && window.location?.origin ? window.location.origin : ''
+  const candidates = [
+    `/fonts/${filename}`,
+    `${origin}/fonts/${filename}`,
+    `fonts/${filename}`,
+    `./fonts/${filename}`,
+    `https://rsms.me/inter/font-files/${filename}`,
+  ]
+
+  for (const url of candidates) {
+    try {
+      const response = await fetch(url).catch(() => null)
+      if (response && response.ok) {
+        const buffer = await response.arrayBuffer()
+        if (buffer.byteLength > 1000) {
+          const globalObj = globalThis as unknown as {
+            Buffer?: {from: (b: ArrayBuffer) => {toString: (enc: string) => string}}
+          }
+          if (typeof globalObj.Buffer?.from === 'function') {
+            return globalObj.Buffer.from(buffer).toString('base64')
+          }
+          const bytes = new Uint8Array(buffer)
+          let binary = ''
+          const len = bytes.byteLength
+          const chunkSize = 8192
+          for (let i = 0; i < len; i += chunkSize) {
+            const chunk = bytes.subarray(i, Math.min(i + chunkSize, len))
+            binary += String.fromCharCode.apply(null, Array.from(chunk))
+          }
+          if (typeof btoa === 'function') {
+            return btoa(binary)
+          }
+          if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
+            return window.btoa(binary)
+          }
+        }
+      }
+    } catch {
+      // Try next candidate
     }
-    const response = await fetch(resolvedUrl).catch(() => null)
-    if (!response || !response.ok) return null
-    const buffer = await response.arrayBuffer()
-    const bytes = new Uint8Array(buffer)
-    let binary = ''
-    const len = bytes.byteLength
-    const chunkSize = 8192
-    for (let i = 0; i < len; i += chunkSize) {
-      const chunk = bytes.subarray(i, Math.min(i + chunkSize, len))
-      binary += String.fromCharCode.apply(null, Array.from(chunk))
-    }
-    return typeof window !== 'undefined' && typeof window.btoa === 'function'
-      ? window.btoa(binary)
-      : null
-  } catch {
-    return null
   }
+
+  return null
+}
+
+/**
+ * Registers project fonts (Inter Regular and Bold) in the jsPDF document instance.
+ */
+async function setupPdfFonts(doc: jsPDF): Promise<string> {
+  let activeFont = 'helvetica'
+  try {
+    if (!cachedRegularFont) {
+      cachedRegularFont = await loadFontAsBase64('Inter-Regular.ttf')
+    }
+    if (!cachedBoldFont) {
+      cachedBoldFont = await loadFontAsBase64('Inter-Bold.ttf')
+    }
+
+    if (cachedRegularFont) {
+      doc.addFileToVFS('Inter-Regular.ttf', cachedRegularFont)
+      doc.addFont('Inter-Regular.ttf', 'Inter', 'normal')
+      activeFont = 'Inter'
+    }
+    if (cachedBoldFont) {
+      doc.addFileToVFS('Inter-Bold.ttf', cachedBoldFont)
+      doc.addFont('Inter-Bold.ttf', 'Inter', 'bold')
+    }
+  } catch (err) {
+    console.warn('Font initialization notice:', err)
+  }
+  return activeFont
 }
 
 /**
@@ -318,28 +369,8 @@ export async function generateSeckimPDF({
     format: 'a4',
   })
 
-  // 1. Setup Inter Turkish font
-  let activeFont = 'helvetica'
-  try {
-    if (!cachedRegularFont) {
-      cachedRegularFont = await loadFontAsBase64('/fonts/Inter-Regular.ttf')
-    }
-    if (!cachedBoldFont) {
-      cachedBoldFont = await loadFontAsBase64('/fonts/Inter-Bold.ttf')
-    }
-
-    if (cachedRegularFont) {
-      doc.addFileToVFS('Inter-Regular.ttf', cachedRegularFont)
-      doc.addFont('Inter-Regular.ttf', 'Inter', 'normal')
-      activeFont = 'Inter'
-    }
-    if (cachedBoldFont) {
-      doc.addFileToVFS('Inter-Bold.ttf', cachedBoldFont)
-      doc.addFont('Inter-Bold.ttf', 'Inter', 'bold')
-    }
-  } catch (err) {
-    console.warn('Font initialization warning:', err)
-  }
+  // 1. Setup project fonts (Inter Regular & Bold)
+  const activeFont = await setupPdfFonts(doc)
 
   // 2. Pre-load logo and product images concurrently
   const [logoInfo, productImages] = await Promise.all([
@@ -655,28 +686,8 @@ export async function generateProductPDF({
     format: 'a4',
   })
 
-  // 1. Setup Inter Turkish font
-  let activeFont = 'helvetica'
-  try {
-    if (!cachedRegularFont) {
-      cachedRegularFont = await loadFontAsBase64('/fonts/Inter-Regular.ttf')
-    }
-    if (!cachedBoldFont) {
-      cachedBoldFont = await loadFontAsBase64('/fonts/Inter-Bold.ttf')
-    }
-
-    if (cachedRegularFont) {
-      doc.addFileToVFS('Inter-Regular.ttf', cachedRegularFont)
-      doc.addFont('Inter-Regular.ttf', 'Inter', 'normal')
-      activeFont = 'Inter'
-    }
-    if (cachedBoldFont) {
-      doc.addFileToVFS('Inter-Bold.ttf', cachedBoldFont)
-      doc.addFont('Inter-Bold.ttf', 'Inter', 'bold')
-    }
-  } catch (err) {
-    console.warn('Font initialization warning:', err)
-  }
+  // 1. Setup project fonts (Inter Regular & Bold)
+  const activeFont = await setupPdfFonts(doc)
 
   // 2. Pre-load assets concurrently
   const imgProps = getProductImageProps(product)

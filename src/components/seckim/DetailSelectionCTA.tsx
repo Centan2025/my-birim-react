@@ -1,27 +1,18 @@
 import React, {useState} from 'react'
 import {useSelection} from '../../context/SelectionContext'
 import {AddToProjectModal} from './AddToProjectModal'
-import {ProductPdfButton} from '../product/ProductPdfButton'
-import type {Category, Designer, Product, ProductMaterialsGroup} from '../../types'
+import type {Product} from '../../types'
 import {getLocalizedText} from '../../types/seckim'
 
 interface DetailSelectionCTAProps {
   product: Product
-  category?: Category | null
-  designer?: Designer | null
-  designers?: Designer[]
-  mergedGroups?: ProductMaterialsGroup[]
 }
 
-export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({
-  product,
-  category,
-  designer,
-  designers,
-  mergedGroups,
-}) => {
+export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product}) => {
   const {isInSelection, toggleSelection, isSelectionEnabled} = useSelection()
   const [isAddToProjectOpen, setIsAddToProjectOpen] = useState(false)
+
+  if (!isSelectionEnabled) return null
 
   const selected = isInSelection(product.id)
   const rawName = getLocalizedText(product.name)
@@ -32,73 +23,63 @@ export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({
 
   return (
     <>
-      <div className="pt-6 border-t border-[var(--border-primary)] flex flex-wrap items-center gap-3">
-        {isSelectionEnabled && (
-          <>
-            <button
-              type="button"
-              onClick={handleToggle}
-              className={`group relative inline-flex items-center justify-center gap-3 px-7 py-3.5 text-xs font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer border ${
-                selected
-                  ? 'bg-[#3c424d] text-white border-[#3c424d] hover:bg-[#4a515c] hover:border-[#4a515c] shadow-sm'
-                  : 'bg-transparent text-[var(--text-primary)] border-[var(--border-primary)] hover:border-[#3c424d] hover:text-[#3c424d]'
-              }`}
-              aria-label={selected ? `${rawName} seçtiklerimden çıkar` : `${rawName} seçtiklerime ekle`}
-            >
-              <svg
-                className="w-4 h-4 transition-transform duration-300 group-hover:scale-105"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={selected ? '1.4' : '1.2'}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="7" y="7" width="13" height="13" rx="1.5" fill="none" />
-                <path d="M4 17V5a1 1 0 0 1 1-1h12" fill="none" />
-              </svg>
-              <span className="tracking-widest">
-                {selected ? 'SEÇTİKLERİMDEN ÇIKAR' : 'SEÇTİKLERİME EKLE'}
-              </span>
-            </button>
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Seçtiklerime Ekle / Çıkar Icon Butonu */}
+        <button
+          type="button"
+          onClick={handleToggle}
+          className={`group relative inline-flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-none border transition-all duration-300 cursor-pointer shrink-0 shadow-none ${
+            selected
+              ? 'bg-[#3c424d] text-white border-[#3c424d] hover:bg-[#4a515c] hover:border-[#4a515c]'
+              : 'bg-transparent text-[var(--text-primary)] hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 border-neutral-400 dark:border-neutral-500 hover:border-black dark:hover:border-white'
+          }`}
+          aria-label={selected ? `${rawName} seçtiklerimden çıkar` : `${rawName} seçtiklerime ekle`}
+          title={selected ? 'Seçtiklerimden Çıkar' : 'Seçtiklerime Ekle'}
+        >
+          <svg
+            className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:scale-105"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={selected ? '1.4' : '1.25'}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="7" y="7" width="13" height="13" rx="1.5" fill="none" />
+            <path d="M4 17V5a1 1 0 0 1 1-1h12" fill="none" />
+          </svg>
+        </button>
 
-            <button
-              type="button"
-              onClick={() => setIsAddToProjectOpen(true)}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--border-primary)] hover:border-[var(--text-primary)] transition-colors cursor-pointer"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span>PROJEYE EKLE</span>
-            </button>
-          </>
-        )}
-
-        <ProductPdfButton
-          product={product}
-          category={category}
-          designer={designer}
-          designers={designers}
-          mergedGroups={mergedGroups}
-        />
+        {/* Projeye Ekle Icon Butonu */}
+        <button
+          type="button"
+          onClick={() => setIsAddToProjectOpen(true)}
+          className="group relative inline-flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-none border border-neutral-400 dark:border-neutral-500 hover:border-black dark:hover:border-white text-[var(--text-primary)] hover:text-black dark:hover:text-white bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-300 cursor-pointer shrink-0 shadow-none"
+          aria-label="Projeye Ekle"
+          title="Projeye Ekle"
+        >
+          <svg
+            className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:scale-105"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            <line x1="12" y1="11" x2="12" y2="17" />
+            <line x1="9" y1="14" x2="15" y2="14" />
+          </svg>
+        </button>
       </div>
 
-      {isSelectionEnabled && (
-        <AddToProjectModal
-          isOpen={isAddToProjectOpen}
-          onClose={() => setIsAddToProjectOpen(false)}
-          productId={product.id}
-          productName={rawName}
-        />
-      )}
+      <AddToProjectModal
+        isOpen={isAddToProjectOpen}
+        onClose={() => setIsAddToProjectOpen(false)}
+        productId={product.id}
+        productName={rawName}
+      />
     </>
   )
 }

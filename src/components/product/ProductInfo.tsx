@@ -4,7 +4,9 @@ import {useTranslation} from '../../i18n'
 import {TextMaskReveal} from '../TextMaskReveal'
 import {TextLineReveal} from '../TextLineReveal'
 import PortableTextLite from '../PortableTextLite'
-import type {LocalizedString} from '../../types'
+import type {Category, Designer, LocalizedString, Product, ProductMaterialsGroup} from '../../types'
+import {ProductPdfButton} from './ProductPdfButton'
+import {DetailSelectionCTA} from '../seckim/DetailSelectionCTA'
 
 const ArrowLeft = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -43,17 +45,25 @@ const ArrowRight = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 interface ProductInfoProps {
-  product: {
-    name: LocalizedString
-    description: LocalizedString
-    buyable?: boolean
-    price?: number
-    currency?: string
-  }
+  product:
+    | Product
+    | {
+        id?: string
+        name: LocalizedString
+        description: LocalizedString
+        buyable?: boolean
+        price?: number
+        currency?: string
+        [key: string]: unknown
+      }
   locale: string
   prevProduct?: {id: string} | null
   nextProduct?: {id: string} | null
   showProductPrevNext?: boolean
+  category?: Category | null
+  designer?: Designer | null
+  designers?: Designer[]
+  mergedGroups?: ProductMaterialsGroup[]
 }
 
 export const ProductInfo: React.FC<ProductInfoProps> = ({
@@ -62,6 +72,10 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
   prevProduct,
   nextProduct,
   showProductPrevNext,
+  category,
+  designer,
+  designers,
+  mergedGroups,
 }) => {
   const {t} = useTranslation()
 
@@ -111,13 +125,28 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
       )}
 
       <div>
-        <TextLineReveal
-          as="h2"
-          text={t(product.name)}
-          className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)]"
-          delay={60}
-          stagger={80}
-        />
+        <div className="flex items-center justify-between gap-4">
+          <TextLineReveal
+            as="h2"
+            text={t(product.name)}
+            className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)]"
+            delay={60}
+            stagger={80}
+          />
+          <div className="flex items-center gap-2 shrink-0">
+            {product.id && <DetailSelectionCTA product={product as unknown as Product} />}
+            {product.id && (
+              <ProductPdfButton
+                product={product as unknown as Product}
+                category={category}
+                designer={designer}
+                designers={designers}
+                mergedGroups={mergedGroups}
+                variant="icon-only"
+              />
+            )}
+          </div>
+        </div>
 
         {(() => {
           const desc = t(product.description)

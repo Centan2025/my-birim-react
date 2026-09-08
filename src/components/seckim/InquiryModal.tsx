@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import {createPortal} from 'react-dom'
 import {motion, AnimatePresence} from 'framer-motion'
 import {useAuth} from '../../context/AuthContext'
 import {submitInquiry} from '../../services/supabase/seckim'
@@ -65,7 +66,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
           name: getLocalizedText(p.name),
           category: p.categoryId,
           dimensions: dimsStr,
-          image: typeof p.mainImage === 'string' ? p.mainImage : (p.mainImage as any)?.url || '',
+          image:
+            typeof p.mainImage === 'string'
+              ? p.mainImage
+              : (p.mainImage as {url?: string} | undefined)?.url || '',
         }
       })
 
@@ -107,11 +111,13 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
     onClose()
   }
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[85] flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
         >
@@ -330,6 +336,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }

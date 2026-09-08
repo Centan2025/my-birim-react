@@ -24,10 +24,20 @@ const mockProduct: Product = {
 }
 
 describe('ProductPdfButton', () => {
-  it('renders PDF download button correctly', () => {
+  it('renders icon-only PDF download button correctly', () => {
     render(
       <I18nProvider>
-        <ProductPdfButton product={mockProduct} />
+        <ProductPdfButton product={mockProduct} variant="icon-only" />
+      </I18nProvider>
+    )
+
+    expect(screen.getByRole('button', {name: /ürün bilgi formu|product datasheet/i})).toBeInTheDocument()
+  })
+
+  it('renders default button with text correctly', () => {
+    render(
+      <I18nProvider>
+        <ProductPdfButton product={mockProduct} variant="default" />
       </I18nProvider>
     )
 

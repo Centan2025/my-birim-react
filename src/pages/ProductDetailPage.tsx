@@ -26,7 +26,6 @@ import {useCardTransition} from '../context/CardTransitionContext'
 import {useSiteSettings} from '../context/SiteSettingsContext'
 import {AiRoomPlannerModal} from '../components/AiRoomPlannerModal'
 import {TextMaskReveal} from '../components/TextMaskReveal'
-import {DetailSelectionCTA} from '../components/seckim/DetailSelectionCTA'
 
 export function ProductDetailPage() {
   const {productId: liveId} = useParams<{productId: string}>()
@@ -341,10 +340,6 @@ export function ProductDetailPage() {
             prevProduct={prevProduct}
             nextProduct={nextProduct}
             showProductPrevNext={showProductPrevNext}
-          />
-
-          <DetailSelectionCTA
-            product={product}
             category={category}
             designer={designer}
             designers={designers}

@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import {createPortal} from 'react-dom'
 import {motion, AnimatePresence} from 'framer-motion'
 import {useSelection} from '../../context/SelectionContext'
 import type {UserProject} from '../../types/seckim'
@@ -48,11 +49,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
   }
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[88] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
         >
@@ -148,6 +151,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }
