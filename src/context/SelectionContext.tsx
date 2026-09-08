@@ -195,7 +195,7 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
 
   const dismissNotification = useCallback(() => setNotification(null), [])
 
-  const triggerToast = useCallback((message: string, actionLabel = 'Seçtiklerimi Gör') => {
+  const triggerToast = useCallback((message: string, actionLabel = 'Seçtiklerim') => {
     setNotification({
       visible: true,
       message,
