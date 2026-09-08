@@ -211,7 +211,7 @@ export function FactoryPageV2() {
 
   const {t, locale} = useTranslation()
   const isTr = locale === 'tr'
-  const {setBrightness, reset} = useHeaderTheme()
+  const {reset} = useHeaderTheme()
   const shouldReduceMotion = Boolean(useReducedMotion())
   const mediaZoomVariants = useMemo(
     () => getMediaZoomVariants(shouldReduceMotion),
@@ -219,9 +219,9 @@ export function FactoryPageV2() {
   )
 
   useEffect(() => {
-    setBrightness(0)
+    reset()
     return () => reset()
-  }, [setBrightness, reset])
+  }, [reset])
 
   useEffect(() => {
     let isMounted = true
@@ -255,10 +255,15 @@ export function FactoryPageV2() {
     ] as NewsMedia[]
   }, [content?.gallery])
 
-  const heroImageUrl =
+  const rawHeroImage =
     (content?.heroImageR2 ? mapImage(content.heroImageR2 as never) : '') ||
-    galleryItems[0]?.url ||
-    DEFAULT_FACTORY_IMAGES.hero
+    ((content as {heroImage?: unknown})?.heroImage
+      ? mapImage((content as {heroImage?: unknown}).heroImage as never)
+      : '')
+  const heroImageUrl =
+    rawHeroImage && typeof rawHeroImage === 'string' && rawHeroImage.trim() !== ''
+      ? rawHeroImage
+      : ''
 
   const resolveCmsText = (
     field: LocalizedString | undefined,
@@ -512,43 +517,45 @@ export function FactoryPageV2() {
   return (
     <div className="bg-[var(--bg-primary)] text-[var(--text-primary)] animate-fade-in-up-subtle font-light selection:bg-[var(--text-primary)] selection:text-[var(--bg-primary)]">
       {/* 1. CINEMATIC FULL-WIDTH ARCHITECTURAL HERO SECTION */}
-      <section className="hero-section relative h-[65vh] sm:h-[80vh] min-h-[480px] sm:min-h-[600px] bg-neutral-950 text-white flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">
-          <OptimizedImage
-            src={heroImageUrl}
-            fallbackSrc={DEFAULT_FACTORY_IMAGES.hero}
-            alt={isTr ? 'Birim Üretim Tesisi' : 'Birim Manufacturing Plant'}
-            className="w-full h-full opacity-85 object-cover"
-            width={1920}
-            height={1080}
-            loading="eager"
-            sizes="100vw"
-            quality={90}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60" />
-        </div>
+      {heroImageUrl ? (
+        <section className="hero-section relative h-[65vh] sm:h-[80vh] min-h-[480px] sm:min-h-[600px] bg-neutral-950 text-white flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">
+            <OptimizedImage
+              src={heroImageUrl}
+              fallbackSrc={heroImageUrl}
+              alt={isTr ? 'Birim Üretim Tesisi' : 'Birim Manufacturing Plant'}
+              className="w-full h-full opacity-85 object-cover"
+              width={1920}
+              height={1080}
+              loading="eager"
+              sizes="100vw"
+              quality={90}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60" />
+          </div>
 
-        <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
-          {heroTitle ? (
-            <TextMaskReveal delay={150} duration={1.1}>
-              <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white max-w-4xl mx-auto">
-                {heroTitle}
-              </h1>
-            </TextMaskReveal>
-          ) : null}
+          <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
+            {heroTitle ? (
+              <TextMaskReveal delay={150} duration={1.1}>
+                <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white max-w-4xl mx-auto">
+                  {heroTitle}
+                </h1>
+              </TextMaskReveal>
+            ) : null}
 
-          {heroDescription ? (
-            <TextMaskReveal delay={350} duration={1.05}>
-              <p className="mt-5 sm:mt-7 text-sm sm:text-base md:text-lg text-neutral-300 max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2">
-                {heroDescription}
-              </p>
-            </TextMaskReveal>
-          ) : null}
-        </div>
-      </section>
+            {heroDescription ? (
+              <TextMaskReveal delay={350} duration={1.05}>
+                <p className="mt-5 sm:mt-7 text-sm sm:text-base md:text-lg text-neutral-300 max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2">
+                  {heroDescription}
+                </p>
+              </TextMaskReveal>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       {/* 2. BREADCRUMBS & CAPACITY METRICS */}
-      <div className="pb-16 sm:pb-28">
+      <div className={`pb-16 sm:pb-28 ${heroImageUrl ? '' : 'pt-20 sm:pt-28'}`}>
         <div className={containerClass + ' py-4 text-xs text-neutral-400'}>
           <TextMaskReveal delay={50}>
             <Breadcrumbs
