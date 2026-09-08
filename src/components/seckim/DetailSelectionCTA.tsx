@@ -39,14 +39,13 @@ export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product})
           <svg
             className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:scale-105"
             viewBox="0 0 24 24"
-            fill="none"
+            fill={selected ? 'currentColor' : 'none'}
             stroke="currentColor"
-            strokeWidth={selected ? '1.4' : '1.25'}
+            strokeWidth={selected ? '1.4' : '1.3'}
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <rect x="7" y="7" width="13" height="13" rx="1.5" fill="none" />
-            <path d="M4 17V5a1 1 0 0 1 1-1h12" fill="none" />
+            <path d="M19 21l-7-4-7 4V3h14v18z" />
           </svg>
         </button>
 

@@ -49,14 +49,13 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
         <svg
           className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 ease-out group-hover/btn:scale-105 group-active/btn:scale-90"
           viewBox="0 0 24 24"
-          fill="none"
+          fill={selected ? 'currentColor' : 'none'}
           stroke="currentColor"
-          strokeWidth={selected ? '1.4' : '1.25'}
+          strokeWidth={selected ? '1.4' : '1.3'}
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <rect x="7" y="7" width="13" height="13" rx="1.5" fill="none" />
-          <path d="M4 17V5a1 1 0 0 1 1-1h12" fill="none" />
+          <path d="M19 21l-7-4-7 4V3h14v18z" />
         </svg>
 
         {showLabel && (

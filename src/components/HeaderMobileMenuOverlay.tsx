@@ -188,8 +188,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <rect x="7" y="7" width="13" height="13" rx="1.5" fill="none" />
-                    <path d="M4 17V5a1 1 0 0 1 1-1h12" fill="none" />
+                    <path d="M19 21l-7-4-7 4V3h14v18z" />
                   </svg>
                   {selectionCount > 0 && (
                     <span
