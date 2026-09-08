@@ -337,7 +337,7 @@ export function ContactPageV2() {
                       {/* Working Hours Info */}
                       <div className="mt-4 pt-4 border-t border-[var(--border-primary)]/60 flex items-start gap-2 text-xs text-[var(--text-secondary)] font-light">
                         <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-1.5 py-0.5 border border-[var(--border-primary)]">
-                          {isTr ? 'Saatler' : 'Hours'}
+                          {isTr ? 'Çalışma Saatleri' : 'Working Hours'}
                         </span>
                         <span>{hoursText}</span>
                       </div>
@@ -348,7 +348,7 @@ export function ContactPageV2() {
                       <div className="flex items-center justify-between">
                         <a
                           href={`tel:${loc.phone.replace(/[^0-9+]/g, '')}`}
-                          className="text-[var(--text-primary)] hover:underline font-mono text-sm tracking-wide"
+                          className="text-[var(--text-primary)] hover:underline font-sans text-sm tracking-wide"
                         >
                           {loc.phone}
                         </a>
