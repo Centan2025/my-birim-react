@@ -31,6 +31,7 @@ interface LoadedImageInfo {
 // In-memory cache for fonts and logo so repeated downloads are instant
 let cachedRegularFont: string | null = null
 let cachedBoldFont: string | null = null
+let cachedOswaldFont: string | null = null
 let cachedLogo: {dataUrl: string; aspect: number} | null = null
 
 /**
@@ -45,7 +46,9 @@ async function loadFontAsBase64(filename: string): Promise<string | null> {
     `${origin}/fonts/${filename}`,
     `fonts/${filename}`,
     `./fonts/${filename}`,
-    `https://rsms.me/inter/font-files/${filename}`,
+    filename === 'Oswald-Variable.ttf'
+      ? 'https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/Oswald%5Bwght%5D.ttf'
+      : `https://rsms.me/inter/font-files/${filename}`,
   ]
 
   for (const url of candidates) {
@@ -85,10 +88,15 @@ async function loadFontAsBase64(filename: string): Promise<string | null> {
 }
 
 /**
- * Registers project fonts (Inter Regular and Bold) in the jsPDF document instance.
+ * Registers project fonts in the jsPDF document instance:
+ * - Heading font: Oswald (used across Birim headers, h1-h6)
+ * - Body font: Inter (used across Birim UI and product specifications)
  */
-async function setupPdfFonts(doc: jsPDF): Promise<string> {
-  let activeFont = 'helvetica'
+async function setupPdfFonts(doc: jsPDF): Promise<{headingFont: string; bodyFont: string}> {
+  let bodyFont = 'helvetica'
+  let headingFont = 'helvetica'
+
+  // 1. Setup Inter (Body & UI font)
   try {
     if (!cachedRegularFont) {
       cachedRegularFont = await loadFontAsBase64('Inter-Regular.ttf')
@@ -100,16 +108,34 @@ async function setupPdfFonts(doc: jsPDF): Promise<string> {
     if (cachedRegularFont) {
       doc.addFileToVFS('Inter-Regular.ttf', cachedRegularFont)
       doc.addFont('Inter-Regular.ttf', 'Inter', 'normal')
-      activeFont = 'Inter'
+      bodyFont = 'Inter'
+      headingFont = 'Inter'
     }
     if (cachedBoldFont) {
       doc.addFileToVFS('Inter-Bold.ttf', cachedBoldFont)
       doc.addFont('Inter-Bold.ttf', 'Inter', 'bold')
     }
   } catch (err) {
-    console.warn('Font initialization notice:', err)
+    console.warn('Inter font initialization notice:', err)
   }
-  return activeFont
+
+  // 2. Setup Oswald (Heading / Display font)
+  try {
+    if (!cachedOswaldFont) {
+      cachedOswaldFont = await loadFontAsBase64('Oswald-Variable.ttf')
+    }
+
+    if (cachedOswaldFont) {
+      doc.addFileToVFS('Oswald-Variable.ttf', cachedOswaldFont)
+      doc.addFont('Oswald-Variable.ttf', 'Oswald', 'normal')
+      doc.addFont('Oswald-Variable.ttf', 'Oswald', 'bold')
+      headingFont = 'Oswald'
+    }
+  } catch (err) {
+    console.warn('Oswald heading font initialization notice:', err)
+  }
+
+  return {headingFont, bodyFont}
 }
 
 /**
@@ -369,8 +395,8 @@ export async function generateSeckimPDF({
     format: 'a4',
   })
 
-  // 1. Setup project fonts (Inter Regular & Bold)
-  const activeFont = await setupPdfFonts(doc)
+  // 1. Setup project fonts (Oswald for headings, Inter for body/specs)
+  const {headingFont, bodyFont} = await setupPdfFonts(doc)
 
   // 2. Pre-load logo and product images concurrently
   const [logoInfo, productImages] = await Promise.all([
@@ -411,39 +437,39 @@ export async function generateSeckimPDF({
       try {
         doc.addImage(logoInfo.dataUrl, 'PNG', margin, margin + 2.5, logoW, logoH, undefined, 'FAST')
       } catch {
-        doc.setFont(activeFont, 'bold')
+        doc.setFont(headingFont, 'bold')
         doc.setFontSize(15)
         doc.setTextColor(20, 20, 20)
         doc.text('BİRİM', margin, margin + 7.5)
       }
 
-      doc.setFont(activeFont, 'normal')
+      doc.setFont(bodyFont, 'normal')
       doc.setFontSize(7.5)
       doc.setTextColor(130, 130, 130)
       doc.text('|', margin + logoW + 3.5, margin + 6.8)
       doc.text('MİMARİ PROJE SEÇTİKLERİ', margin + logoW + 6.5, margin + 6.8)
     } else {
-      doc.setFont(activeFont, 'bold')
+      doc.setFont(headingFont, 'bold')
       doc.setFontSize(15)
       doc.setTextColor(20, 20, 20)
       doc.text('BİRİM', margin, margin + 7.5)
 
-      doc.setFont(activeFont, 'normal')
+      doc.setFont(bodyFont, 'normal')
       doc.setFontSize(7.5)
       doc.setTextColor(130, 130, 130)
       doc.text('MİMARİ PROJE SEÇTİKLERİ', margin + 24, margin + 7)
     }
 
     // Top right: Date & Total Products
-    doc.setFont(activeFont, 'normal')
+    doc.setFont(bodyFont, 'normal')
     doc.setFontSize(8)
     doc.setTextColor(110, 110, 110)
     doc.text(date, pageWidth - margin, margin + 6.8, {align: 'right'})
 
     // Project Name & Summary on Page 1
     if (pageNumber === 1) {
-      doc.setFont(activeFont, 'bold')
-      doc.setFontSize(16)
+      doc.setFont(headingFont, 'bold')
+      doc.setFontSize(17)
       doc.setTextColor(15, 15, 15)
       const projectTitle = projectName.toLocaleUpperCase('tr-TR')
       doc.text(projectTitle, margin, margin + 25)
@@ -451,7 +477,7 @@ export async function generateSeckimPDF({
       let currentHeaderY = margin + 31
 
       if (projectDescription) {
-        doc.setFont(activeFont, 'normal')
+        doc.setFont(bodyFont, 'normal')
         doc.setFontSize(9)
         doc.setTextColor(90, 90, 90)
         const descLines = doc.splitTextToSize(projectDescription, contentWidth)
@@ -459,7 +485,7 @@ export async function generateSeckimPDF({
         currentHeaderY += descLines.length * 4.5 + 1.5
       }
 
-      doc.setFont(activeFont, 'normal')
+      doc.setFont(bodyFont, 'normal')
       doc.setFontSize(8)
       doc.setTextColor(130, 130, 130)
       doc.text(`Toplam ${products.length} Ürün`, margin, currentHeaderY)
@@ -472,7 +498,7 @@ export async function generateSeckimPDF({
     doc.setLineWidth(0.3)
     doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12)
 
-    doc.setFont(activeFont, 'normal')
+    doc.setFont(bodyFont, 'normal')
     doc.setFontSize(7.5)
     doc.setTextColor(140, 140, 140)
     doc.text('Birim Mobilya • www.birim.com • info@birim.com', margin, pageHeight - 7.5)
@@ -506,18 +532,19 @@ export async function generateSeckimPDF({
     const cardHeight = 68
     const cardY = yOffset
 
-    // Border surrounding product row
-    doc.setDrawColor(235, 235, 235)
+    // Border surrounding product row (sharp rectangular card)
+    doc.setDrawColor(230, 230, 230)
     doc.setFillColor(252, 252, 252)
-    doc.roundedRect(margin, cardY, contentWidth, cardHeight, 1.5, 1.5, 'FD')
+    doc.rect(margin, cardY, contentWidth, cardHeight, 'FD')
 
-    // Image container box (56mm x 56mm square)
+    // Image container box (56mm x 56mm square, pure white interior)
     const imgBoxSize = 56
     const imgBoxX = margin + 6
     const imgBoxY = cardY + 6
 
-    doc.setFillColor(246, 246, 246)
-    doc.roundedRect(imgBoxX, imgBoxY, imgBoxSize, imgBoxSize, 1, 1, 'F')
+    doc.setFillColor(255, 255, 255)
+    doc.setDrawColor(235, 235, 235)
+    doc.rect(imgBoxX, imgBoxY, imgBoxSize, imgBoxSize, 'FD')
 
     // Render Product Image with Aspect Ratio Preservation (No stretching!)
     if (imgInfo) {
@@ -554,7 +581,7 @@ export async function generateSeckimPDF({
         console.warn('PDF image render notice:', e)
       }
     } else {
-      doc.setFont(activeFont, 'normal')
+      doc.setFont(bodyFont, 'normal')
       doc.setFontSize(7.5)
       doc.setTextColor(170, 170, 170)
       doc.text('Görsel Yok', imgBoxX + imgBoxSize / 2, imgBoxY + imgBoxSize / 2, {align: 'center'})
@@ -567,7 +594,7 @@ export async function generateSeckimPDF({
 
     if (!product) continue
 
-    // 1. Product Name (Turkish uppercase)
+    // 1. Product Name (Oswald Heading font)
     let rawName = ''
     if (typeof product.name === 'string') {
       rawName = product.name
@@ -579,8 +606,8 @@ export async function generateSeckimPDF({
     }
     const localizedTitle = rawName.toLocaleUpperCase('tr-TR')
 
-    doc.setFont(activeFont, 'bold')
-    doc.setFontSize(12.5)
+    doc.setFont(headingFont, 'bold')
+    doc.setFontSize(13)
     doc.setTextColor(20, 20, 20)
 
     const titleLines = doc.splitTextToSize(localizedTitle, infoMaxWidth)
@@ -588,7 +615,7 @@ export async function generateSeckimPDF({
     textY += titleLines.length * 5.5 + 1.5
 
     // 2. Category & Year
-    doc.setFont(activeFont, 'normal')
+    doc.setFont(bodyFont, 'normal')
     doc.setFontSize(8.5)
     doc.setTextColor(100, 100, 100)
 
@@ -606,7 +633,7 @@ export async function generateSeckimPDF({
     // 3. Designer
     const designer = designerNamesMap[product.designerId || ''] || ''
     if (designer) {
-      doc.setFont(activeFont, 'normal')
+      doc.setFont(bodyFont, 'normal')
       doc.setFontSize(8)
       doc.setTextColor(120, 120, 120)
       doc.text(`Tasarımcı: ${designer}`, infoX, textY)
@@ -626,7 +653,7 @@ export async function generateSeckimPDF({
       ].filter(Boolean)
 
       if (dimParts.length > 0) {
-        doc.setFont(activeFont, 'normal')
+        doc.setFont(bodyFont, 'normal')
         doc.setFontSize(8)
         doc.setTextColor(70, 70, 70)
         doc.text(`Ölçüler: ${dimParts.join('   ')}`, infoX, textY)
@@ -635,7 +662,7 @@ export async function generateSeckimPDF({
     }
 
     // 5. Product Code (SKU)
-    doc.setFont(activeFont, 'normal')
+    doc.setFont(bodyFont, 'normal')
     doc.setFontSize(7.5)
     const code =
       product.sku ||
@@ -686,8 +713,8 @@ export async function generateProductPDF({
     format: 'a4',
   })
 
-  // 1. Setup project fonts (Inter Regular & Bold)
-  const activeFont = await setupPdfFonts(doc)
+  // 1. Setup project fonts (Oswald for headings, Inter for body/specs)
+  const {headingFont, bodyFont} = await setupPdfFonts(doc)
 
   // 2. Pre-load assets concurrently
   const imgProps = getProductImageProps(product)
@@ -732,31 +759,31 @@ export async function generateProductPDF({
       try {
         doc.addImage(logoInfo.dataUrl, 'PNG', margin, margin + 2.5, logoW, logoH, undefined, 'FAST')
       } catch {
-        doc.setFont(activeFont, 'bold')
+        doc.setFont(headingFont, 'bold')
         doc.setFontSize(15)
         doc.setTextColor(20, 20, 20)
         doc.text('BİRİM', margin, margin + 7.5)
       }
 
-      doc.setFont(activeFont, 'normal')
+      doc.setFont(bodyFont, 'normal')
       doc.setFontSize(7.5)
       doc.setTextColor(130, 130, 130)
       doc.text('|', margin + logoW + 3.5, margin + 6.8)
       doc.text(subTitleHeader, margin + logoW + 6.5, margin + 6.8)
     } else {
-      doc.setFont(activeFont, 'bold')
+      doc.setFont(headingFont, 'bold')
       doc.setFontSize(15)
       doc.setTextColor(20, 20, 20)
       doc.text('BİRİM', margin, margin + 7.5)
 
-      doc.setFont(activeFont, 'normal')
+      doc.setFont(bodyFont, 'normal')
       doc.setFontSize(7.5)
       doc.setTextColor(130, 130, 130)
       doc.text(subTitleHeader, margin + 24, margin + 7)
     }
 
     // Top right: Date
-    doc.setFont(activeFont, 'normal')
+    doc.setFont(bodyFont, 'normal')
     doc.setFontSize(8)
     doc.setTextColor(110, 110, 110)
     doc.text(date, pageWidth - margin, margin + 6.8, {align: 'right'})
@@ -768,7 +795,7 @@ export async function generateProductPDF({
     doc.setLineWidth(0.3)
     doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12)
 
-    doc.setFont(activeFont, 'normal')
+    doc.setFont(bodyFont, 'normal')
     doc.setFontSize(7.5)
     doc.setTextColor(140, 140, 140)
     doc.text('Birim Mobilya • www.birim.com • info@birim.com', margin, pageHeight - 7.5)
@@ -780,16 +807,16 @@ export async function generateProductPDF({
 
   let currentY = margin + 22
 
-  // Product Name
+  // Product Name (Oswald Heading font)
   const rawName = getLocalizedValue(product.name, locale)
   const productTitle = rawName.toLocaleUpperCase(isEn ? 'en-US' : 'tr-TR')
 
-  doc.setFont(activeFont, 'bold')
-  doc.setFontSize(16)
+  doc.setFont(headingFont, 'bold')
+  doc.setFontSize(18)
   doc.setTextColor(15, 15, 15)
   const titleLines = doc.splitTextToSize(productTitle, contentWidth)
   doc.text(titleLines, margin, currentY)
-  currentY += titleLines.length * 6.5 + 2
+  currentY += titleLines.length * 7 + 2
 
   // Meta Row (Category • Year • SKU • Designer)
   const prodRecord = product as unknown as Record<string, unknown>
@@ -804,7 +831,7 @@ export async function generateProductPDF({
   const allDesigners = designers && designers.length > 0 ? designers : designer ? [designer] : []
   const designerNames = allDesigners.map(d => getLocalizedValue(d.name, locale)).filter(Boolean).join(', ')
 
-  doc.setFont(activeFont, 'normal')
+  doc.setFont(bodyFont, 'normal')
   doc.setFontSize(8.5)
   doc.setTextColor(100, 100, 100)
 
@@ -825,7 +852,7 @@ export async function generateProductPDF({
       style: 'currency',
       currency: product.currency || 'TRY',
     }).format(product.price)
-    doc.setFont(activeFont, 'bold')
+    doc.setFont(bodyFont, 'bold')
     doc.setFontSize(9)
     doc.setTextColor(30, 30, 30)
     doc.text(`${isEn ? 'Price' : 'Fiyat'}: ${formattedPrice}`, margin, currentY)
@@ -845,10 +872,10 @@ export async function generateProductPDF({
   const imgBoxX = margin
   const imgBoxY = currentY
 
-  // Image Frame
-  doc.setDrawColor(235, 235, 235)
-  doc.setFillColor(250, 250, 250)
-  doc.roundedRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 1.5, 1.5, 'FD')
+  // Image Frame (Pure white interior, sharp rectangular border)
+  doc.setDrawColor(230, 230, 230)
+  doc.setFillColor(255, 255, 255)
+  doc.rect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 'FD')
 
   if (mainImgInfo) {
     try {
@@ -873,40 +900,25 @@ export async function generateProductPDF({
       console.warn('PDF main image render error:', err)
     }
   } else {
-    doc.setFont(activeFont, 'normal')
+    doc.setFont(bodyFont, 'normal')
     doc.setFontSize(8)
     doc.setTextColor(170, 170, 170)
     doc.text(isEn ? 'No Image' : 'Görsel Yok', imgBoxX + imgBoxW / 2, imgBoxY + imgBoxH / 2, {align: 'center'})
   }
 
-  // Right Side: Description & Specifications Box
+  // Right Side: Description (Top) + Specifications Box (Bottom-aligned with image box)
   const sideX = imgBoxX + imgBoxW + 8
   const sideW = contentWidth - imgBoxW - 8
-  let sideY = imgBoxY + 4
+  let sideY = imgBoxY
 
-  // Description Heading
-  doc.setFont(activeFont, 'bold')
-  doc.setFontSize(8)
-  doc.setTextColor(50, 50, 50)
-  doc.text(isEn ? 'PRODUCT DESCRIPTION' : 'ÜRÜN HAKKINDA', sideX, sideY)
-  sideY += 5
+  // Description Heading (Oswald)
+  doc.setFont(headingFont, 'bold')
+  doc.setFontSize(8.5)
+  doc.setTextColor(30, 30, 30)
+  doc.text(isEn ? 'PRODUCT DESCRIPTION' : 'ÜRÜN HAKKINDA', sideX, sideY + 3.5)
+  sideY += 7.5
 
-  // Description Text
-  const descText = getLocalizedValue(product.description, locale)
-  doc.setFont(activeFont, 'normal')
-  doc.setFontSize(7.5)
-  doc.setTextColor(80, 80, 80)
-  if (descText) {
-    const descLines = doc.splitTextToSize(descText, sideW)
-    const displayLines = descLines.slice(0, 9)
-    doc.text(displayLines, sideX, sideY)
-    sideY += displayLines.length * 3.8 + 3
-  } else {
-    doc.text(isEn ? 'Contemporary design piece crafted by Birim.' : 'Birim tasarım ve üretim standartlarıyla üretilmiştir.', sideX, sideY)
-    sideY += 7
-  }
-
-  // Dimensions & Quick Specs
+  // Dimensions & Quick Specs data
   const dims = prodRecord['dimensions'] as {width?: number; depth?: number; height?: number} | undefined
   const dimParts = dims
     ? [
@@ -916,20 +928,47 @@ export async function generateProductPDF({
       ].filter(Boolean)
     : []
 
-  if (dimParts.length > 0 || catName || designerNames) {
-    doc.setFillColor(246, 246, 246)
-    doc.roundedRect(sideX, sideY, sideW, 26, 1, 1, 'F')
+  const hasSpecs = dimParts.length > 0 || catName || designerNames
+  const specBoxH = 25.5
+  // Align specs box bottom exactly with image box bottom:
+  const specBoxY = imgBoxY + imgBoxH - specBoxH
 
-    let specY = sideY + 4.5
-    doc.setFont(activeFont, 'bold')
-    doc.setFontSize(7)
-    doc.setTextColor(50, 50, 50)
+  // Description Text (Inter) - clamped above the specs box
+  const descText = getLocalizedValue(product.description, locale)
+  doc.setFont(bodyFont, 'normal')
+  doc.setFontSize(7.5)
+  doc.setTextColor(80, 80, 80)
+  if (descText) {
+    const descLines = doc.splitTextToSize(descText, sideW)
+    const maxDescLines = hasSpecs ? 6 : 10
+    const displayLines = descLines.slice(0, maxDescLines)
+    doc.text(displayLines, sideX, sideY)
+  } else {
+    doc.text(
+      isEn
+        ? 'Contemporary design piece crafted by Birim.'
+        : 'Birim tasarım ve üretim standartlarıyla üretilmiştir.',
+      sideX,
+      sideY
+    )
+  }
+
+  // Specifications Box (Bottom-aligned with left image panel, sharp rectangular box)
+  if (hasSpecs) {
+    doc.setFillColor(248, 248, 248)
+    doc.setDrawColor(230, 230, 230)
+    doc.rect(sideX, specBoxY, sideW, specBoxH, 'FD')
+
+    let specY = specBoxY + 4.8
+    doc.setFont(headingFont, 'bold')
+    doc.setFontSize(7.5)
+    doc.setTextColor(30, 30, 30)
     doc.text(isEn ? 'SPECIFICATIONS' : 'TEKNİK ÖZET', sideX + 3.5, specY)
     specY += 4.5
 
-    doc.setFont(activeFont, 'normal')
+    doc.setFont(bodyFont, 'normal')
     doc.setFontSize(6.8)
-    doc.setTextColor(90, 90, 90)
+    doc.setTextColor(80, 80, 80)
 
     if (dimParts.length > 0) {
       doc.text(`${isEn ? 'Dimensions' : 'Ölçüler'}: ${dimParts.join('  •  ')}`, sideX + 3.5, specY)
@@ -947,7 +986,7 @@ export async function generateProductPDF({
 
   currentY = imgBoxY + imgBoxH + 9
 
-  // Dimension Drawings Section
+  // Dimension Drawings Section (Sharp rectangular boxes)
   const validDimDrawings: {
     info: LoadedImageInfo
     item?: (typeof dimensionImageItems)[number]
@@ -966,8 +1005,8 @@ export async function generateProductPDF({
       currentY = margin + 22
     }
 
-    doc.setFont(activeFont, 'bold')
-    doc.setFontSize(9.5)
+    doc.setFont(headingFont, 'bold')
+    doc.setFontSize(10)
     doc.setTextColor(25, 25, 25)
     doc.text(isEn ? 'DIMENSIONS & TECHNICAL DRAWINGS' : 'ÖLÇÜLER & TEKNİK ÇİZİMLER', margin, currentY)
     currentY += 4.5
@@ -984,9 +1023,9 @@ export async function generateProductPDF({
       const bx = margin + dIdx * (drawBoxW + gap)
       const by = currentY
 
-      doc.setDrawColor(235, 235, 235)
-      doc.setFillColor(252, 252, 252)
-      doc.roundedRect(bx, by, drawBoxW, drawBoxH, 1, 1, 'FD')
+      doc.setDrawColor(230, 230, 230)
+      doc.setFillColor(255, 255, 255)
+      doc.rect(bx, by, drawBoxW, drawBoxH, 'FD')
 
       try {
         const pad = 2.5
@@ -1012,7 +1051,7 @@ export async function generateProductPDF({
 
       if (item?.title) {
         const dTitle = getLocalizedValue(item.title, locale)
-        doc.setFont(activeFont, 'normal')
+        doc.setFont(bodyFont, 'normal')
         doc.setFontSize(6.5)
         doc.setTextColor(110, 110, 110)
         doc.text(dTitle, bx + drawBoxW / 2, by + drawBoxH - 1.8, {align: 'center'})
@@ -1022,7 +1061,7 @@ export async function generateProductPDF({
     currentY += drawBoxH + 8
   }
 
-  // Materials & Finishes Section
+  // Materials & Finishes Section (Sharp rectangular boxes)
   const groupsToDisplay: {title: string; items: string[]}[] = []
 
   if (mergedGroups.length > 0) {
@@ -1059,8 +1098,8 @@ export async function generateProductPDF({
       currentY = margin + 22
     }
 
-    doc.setFont(activeFont, 'bold')
-    doc.setFontSize(9.5)
+    doc.setFont(headingFont, 'bold')
+    doc.setFontSize(10)
     doc.setTextColor(25, 25, 25)
     doc.text(isEn ? 'MATERIALS & FINISHES' : 'MALZEME & YÜZEY SEÇENEKLERİ', margin, currentY)
     currentY += 5
@@ -1076,15 +1115,16 @@ export async function generateProductPDF({
       let cy = currentY
 
       doc.setFillColor(248, 248, 248)
-      doc.roundedRect(cx, cy, colW, 28, 1, 1, 'F')
+      doc.setDrawColor(230, 230, 230)
+      doc.rect(cx, cy, colW, 28, 'FD')
 
-      doc.setFont(activeFont, 'bold')
-      doc.setFontSize(7.5)
+      doc.setFont(headingFont, 'bold')
+      doc.setFontSize(8)
       doc.setTextColor(40, 40, 40)
       doc.text(g.title, cx + 3, cy + 4.5)
       cy += 8
 
-      doc.setFont(activeFont, 'normal')
+      doc.setFont(bodyFont, 'normal')
       doc.setFontSize(6.8)
       doc.setTextColor(90, 90, 90)
 

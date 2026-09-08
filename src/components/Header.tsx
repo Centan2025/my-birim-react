@@ -98,10 +98,9 @@ export function Header() {
   // Standard pages: always dark text.
   // Search open: always dark text (white panel bg).
   // Mobile overlay menu: always dark text.
-  // Desktop products menu open: always dark text/theme (matching designers page).
   const isLightMode =
     (!isDarkHero || headerTheme.mode === 'light' || isPastHero || isSearchOpen) &&
-    !(isMobile && isMobileMenuOpen) &&
+    !(isMobile && (isMobileMenuOpen || isMobileMenuClosing)) &&
     !isProductsHovered
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
@@ -645,8 +644,8 @@ export function Header() {
       <HeaderStyles />
       <header
         className={`fixed top-0 left-0 right-0 z-50 header-scroll-transition ${
-          // Overlay mobil menü açıkken header ile panelin tam aynı renkte görünmesi için özel sınıf
-          isOverlayMobileMenu && isMobileMenuOpen ? 'overlay-menu-open' : ''
+          // Overlay mobil menü açıkken veya kapanırken header ile panelin tam aynı renkte görünmesi için özel sınıf
+          isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing) ? 'overlay-menu-open' : ''
         } ${
           headerBgColor === 'transparent' && !isProductsOpen
             ? ''
