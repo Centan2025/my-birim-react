@@ -23,7 +23,7 @@ if (R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY) {
 export async function uploadToR2(
   blob: Blob | File,
   key: string,
-  contentType: string
+  contentType: string,
 ): Promise<string> {
   const domainToUse = R2_DOMAIN.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
   const finalFileUrl = `${domainToUse}/${key}`
@@ -39,7 +39,7 @@ export async function uploadToR2(
           Key: key,
           Body: uint8,
           ContentType: contentType,
-        })
+        }),
       )
       return finalFileUrl
     } catch (s3Error) {
