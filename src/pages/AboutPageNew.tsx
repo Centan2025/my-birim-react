@@ -194,12 +194,7 @@ export function AboutPageNew() {
   const [activeEraIndex, setActiveEraIndex] = useState(0)
   const [activeDesignerIndex, setActiveDesignerIndex] = useState(0)
   const {t, locale} = useTranslation()
-  const {reset} = useHeaderTheme()
-
-  useEffect(() => {
-    reset()
-    return () => reset()
-  }, [reset])
+  const {setBrightness, reset} = useHeaderTheme()
 
   useEffect(() => {
     let isMounted = true
@@ -254,6 +249,16 @@ export function AboutPageNew() {
       content?.heroImageMobile,
     ''
   )
+
+  useEffect(() => {
+    if (loading) return
+    if (heroImageUrl) {
+      setBrightness(0)
+    } else {
+      setBrightness(1)
+    }
+    return () => reset()
+  }, [loading, heroImageUrl, setBrightness, reset])
 
   const heroImgMeta = getImageMeta(content?.heroImage)
   const heroImgMobMeta = getImageMeta(content?.heroImageMobile)

@@ -55,12 +55,23 @@ export function AboutPage() {
   const [content, setContent] = useState<AboutPageContent | null>(null)
   const [loading, setLoading] = useState(true)
   const {t, locale} = useTranslation()
-  const {reset} = useHeaderTheme()
+  const {setBrightness, reset} = useHeaderTheme()
 
   useEffect(() => {
-    reset()
+    if (loading) return
+    const rawHero = content?.heroImage
+    const heroImg = rawHero
+      ? typeof rawHero === 'string'
+        ? rawHero
+        : (rawHero as {url?: string})?.url
+      : ''
+    if (heroImg) {
+      setBrightness(0)
+    } else {
+      setBrightness(1)
+    }
     return () => reset()
-  }, [reset])
+  }, [loading, content?.heroImage, setBrightness, reset])
 
   // SEO
   const heroImageObj = typeof content?.heroImage === 'object' ? content.heroImage : null

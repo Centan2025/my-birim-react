@@ -211,17 +211,12 @@ export function FactoryPageV2() {
 
   const {t, locale} = useTranslation()
   const isTr = locale === 'tr'
-  const {reset} = useHeaderTheme()
+  const {setBrightness, reset} = useHeaderTheme()
   const shouldReduceMotion = Boolean(useReducedMotion())
   const mediaZoomVariants = useMemo(
     () => getMediaZoomVariants(shouldReduceMotion),
     [shouldReduceMotion]
   )
-
-  useEffect(() => {
-    reset()
-    return () => reset()
-  }, [reset])
 
   useEffect(() => {
     let isMounted = true
@@ -264,6 +259,16 @@ export function FactoryPageV2() {
     rawHeroImage && typeof rawHeroImage === 'string' && rawHeroImage.trim() !== ''
       ? rawHeroImage
       : ''
+
+  useEffect(() => {
+    if (loading) return
+    if (heroImageUrl) {
+      setBrightness(0)
+    } else {
+      setBrightness(1)
+    }
+    return () => reset()
+  }, [loading, heroImageUrl, setBrightness, reset])
 
   const resolveCmsText = (
     field: LocalizedString | undefined,
