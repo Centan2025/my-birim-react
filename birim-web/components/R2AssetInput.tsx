@@ -3,6 +3,7 @@ import {Box, Button, Card, Flex, Stack, Text, useToast, Inline, Spinner, Dialog}
 import {UploadIcon, TrashIcon, CheckmarkIcon, EditIcon, CropIcon, CloseIcon} from '@sanity/icons'
 import {ObjectInputProps, PatchEvent, set, unset, useFormValue} from 'sanity'
 import imageCompression from 'browser-image-compression'
+import {uploadToR2} from '../utils/r2Upload'
 import styled from 'styled-components'
 import ReactCrop, {
   type Crop,
@@ -357,85 +358,7 @@ const getApiUrl = (path: string): string => {
   return `https://birim-web-antigravity.vercel.app${path}`
 }
 
-async function uploadFileViaPresignedUrl(
-  blob: Blob | File,
-  key: string,
-  contentType: string,
-): Promise<string> {
-  const lastSlash = key.lastIndexOf('/')
-  const folder = key.substring(0, lastSlash)
-  const filename = key.substring(lastSlash + 1)
-
-  const studioToken =
-    (typeof process !== 'undefined' && process.env
-      ? process.env.SANITY_STUDIO_SANITY_TOKEN ||
-        process.env.SANITY_STUDIO_MEDIA_ADMIN_SECRET ||
-        process.env.SANITY_STUDIO_API_SECRET
-      : '') || ''
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
-  if (studioToken) {
-    headers['Authorization'] = `Bearer ${studioToken}`
-  }
-
-  // 1. Get Presigned URL (local API server or current environment API first)
-  let res: Response
-  try {
-    res = await fetch(getApiUrl('/api/media/presigned-url'), {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        filename,
-        contentType,
-        folder,
-      }),
-    })
-    if (!res.ok && res.status !== 400 && res.status !== 413) {
-      // Fallback to production if local server returned 404/500
-      throw new Error(`Local API error ${res.status}`)
-    }
-  } catch {
-    try {
-      res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          filename,
-          contentType,
-          folder,
-        }),
-      })
-    } catch {
-      throw new Error(
-        'Media API sunucusuna bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.',
-      )
-    }
-  }
-
-  if (!res.ok) {
-    const errBody = await res.json().catch(() => ({}))
-    throw new Error(errBody.error || `Presigned URL isteği başarısız: ${res.statusText}`)
-  }
-
-  const {uploadUrl, fileUrl} = await res.json()
-
-  // 2. Upload file to R2 using Presigned URL
-  const uploadRes = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': contentType,
-    },
-    body: blob,
-  })
-
-  if (!uploadRes.ok) {
-    throw new Error(`R2'ye yükleme başarısız: ${uploadRes.statusText}`)
-  }
-
-  return fileUrl
-}
+const uploadFileViaPresignedUrl = uploadToR2
 
 export function R2AssetInput(props: ObjectInputProps) {
   const {value, onChange} = props

@@ -85,7 +85,7 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
             ]),
         ),
       S.listItem()
-        .title('Fabrika')
+        .title('Üretim')
         .child(
           S.document()
             .schemaType('factoryPage')

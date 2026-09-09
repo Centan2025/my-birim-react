@@ -6,23 +6,37 @@ export const translateText = async (text: string, targetLang: string): Promise<s
     throw new Error('Çevrilecek metin boş')
   }
 
-  const sourceLang = 'tr' // Türkçe kaynak dil
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`
+  const sourceLang = 'tr'
 
+  // 1. MyMemory Çeviri API (CORS destekli)
   try {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error('Çeviri servisi yanıt vermedi')
+    const mmUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`
+    const response = await fetch(mmUrl)
+    if (response.ok) {
+      const data = await response.json()
+      if (data?.responseData?.translatedText && data.responseStatus === 200) {
+        return data.responseData.translatedText
+      }
     }
-
-    const data = await response.json()
-    if (data && data[0] && Array.isArray(data[0])) {
-      return data[0].map((item: any[]) => item[0] || '').join('')
-    }
-    throw new Error('Çeviri sonucu alınamadı')
-  } catch (error: any) {
-    throw new Error(`Çeviri hatası: ${error.message}`)
+  } catch {
+    // fallback to Google
   }
+
+  // 2. Google Translate API fallback
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`
+    const response = await fetch(url)
+    if (response.ok) {
+      const data = await response.json()
+      if (data && data[0] && Array.isArray(data[0])) {
+        return data[0].map((item: any[]) => item[0] || '').join('')
+      }
+    }
+  } catch {
+    // fallback
+  }
+
+  throw new Error('Çeviri servisi yanıt vermedi')
 }
 
 const generateKey = () => Math.random().toString(36).substring(2, 11)

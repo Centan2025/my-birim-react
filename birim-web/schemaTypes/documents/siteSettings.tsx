@@ -146,12 +146,12 @@ export default defineType({
     }),
     defineField({
       name: 'isFactoryVisible',
-      title: 'Fabrika Menüsünü Göster',
+      title: 'Üretim Menüsünü Göster',
       type: 'boolean',
       fieldset: 'navigation',
       initialValue: false,
       description:
-        'Aktif edildiğinde menüde "Fabrika" seçeneği belirir ve ilgili sayfa erişilebilir olur.',
+        'Aktif edildiğinde menüde "Üretim" seçeneği belirir ve ilgili sayfa erişilebilir olur.',
     }),
     defineField({
       name: 'enableAiRoomPlanner',

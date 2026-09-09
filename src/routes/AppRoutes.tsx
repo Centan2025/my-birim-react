@@ -191,21 +191,23 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           }
         />
         <Route
-          path="/factory"
+          path="/uretim"
           element={
-            <PageBoundary pageName="Fabrika">
+            <PageBoundary pageName="Üretim">
               <FactoryPage />
             </PageBoundary>
           }
         />
         <Route
-          path="/factory-v2"
+          path="/uretim-v2"
           element={
-            <PageBoundary pageName="Fabrika">
+            <PageBoundary pageName="Üretim">
               <FactoryPage />
             </PageBoundary>
           }
         />
+        <Route path="/factory" element={<Navigate to="/uretim" replace />} />
+        <Route path="/factory-v2" element={<Navigate to="/uretim" replace />} />
         <Route
           path="/contact"
           element={

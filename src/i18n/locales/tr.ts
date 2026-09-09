@@ -12,7 +12,7 @@ export default {
   about: 'HAKKIMIZDA',
   contact: 'İLETİŞİM',
   projects: 'PROJELER',
-  factory: 'FABRİKA',
+  factory: 'ÜRETİM',
   search_placeholder: 'Ara...',
   search_no_results: '"{0}" için sonuç bulunamadı.',
   searching: 'Aranıyor...',

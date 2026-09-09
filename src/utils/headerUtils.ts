@@ -18,8 +18,14 @@ export const isDarkHeroPage = (p: string): boolean => {
     return true
   }
 
-  // Koyu hero kapak görseli olan sayfalar (Ana Sayfa, Hakkımızda, Fabrika)
-  if (path === '/' || path === '' || path.startsWith('/about') || path.startsWith('/factory')) {
+  // Koyu hero kapak görseli olan sayfalar (Ana Sayfa, Hakkımızda, Üretim/Fabrika)
+  if (
+    path === '/' ||
+    path === '' ||
+    path.startsWith('/about') ||
+    path.startsWith('/factory') ||
+    path.startsWith('/uretim')
+  ) {
     return true
   }
 

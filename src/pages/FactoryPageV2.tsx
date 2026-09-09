@@ -284,7 +284,7 @@ export function FactoryPageV2() {
     return t(field)
   }
 
-  const pageTitle = resolveCmsText(content?.title, 'Fabrika', 'Factory')
+  const pageTitle = resolveCmsText(content?.title, 'Üretim', 'Manufacturing')
   const rawHeroTitle = resolveCmsText(content?.heroTitle, '', '')
   const heroTitle =
     rawHeroTitle ||
@@ -438,7 +438,7 @@ export function FactoryPageV2() {
   const ctaSecondaryLink = content?.ctaSecondaryLink || '/projects'
 
   useSEO({
-    title: `BIRIM - ${pageTitle || heroTitle || t('factory') || 'Üretim Tesisi & Fabrika'}`,
+    title: `BIRIM - ${pageTitle || heroTitle || t('factory') || 'Üretim Tesisi'}`,
     description:
       heroDescription ||
       (content && (t(content.title) as string)) ||
@@ -455,7 +455,7 @@ export function FactoryPageV2() {
       '@type': 'ManufacturingBusiness',
       name: `BIRIM - ${pageTitle || 'İleri Üretim ve Tasarım Tesisi'}`,
       description: heroDescription || 'BIRIM mobilya ve mimari tasarım üretim tesisi',
-      url: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/factory`,
+      url: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/uretim`,
       image: heroImageUrl,
       parentOrganization: {
         '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
@@ -565,7 +565,7 @@ export function FactoryPageV2() {
             <Breadcrumbs
               items={[
                 {label: t('homepage'), to: '/'},
-                {label: pageTitle || t('factory') || 'Fabrika'},
+                {label: pageTitle || t('factory') || 'Üretim'},
               ]}
             />
           </TextMaskReveal>

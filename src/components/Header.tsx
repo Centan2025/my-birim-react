@@ -531,7 +531,7 @@ export function Header() {
         ]
       : []),
     ...(settings?.isFactoryVisible
-      ? [{to: '/factory', label: (t('factory') || 'Fabrika').toLocaleUpperCase(upperLoc)}]
+      ? [{to: '/uretim', label: (t('factory') || 'Üretim').toLocaleUpperCase(upperLoc)}]
       : []),
     {to: '/news', label: (t('news') || '').toLocaleUpperCase(upperLoc)},
     {to: '/about', label: (t('about') || '').toLocaleUpperCase(upperLoc)},
@@ -935,11 +935,11 @@ export function Header() {
                 {settings?.isFactoryVisible && (
                   <div className="hidden lg:flex items-end">
                     <NavItem
-                      to="/factory"
+                      to="/uretim"
                       onMouseEnter={handleCloseProducts}
                       onClick={handleCloseProducts}
                     >
-                      {t('factory') || 'FABRİKA'}
+                      {t('factory') || 'ÜRETİM'}
                     </NavItem>
                   </div>
                 )}

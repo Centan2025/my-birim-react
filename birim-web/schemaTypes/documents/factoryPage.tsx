@@ -4,7 +4,7 @@ import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 
 export default defineType({
   name: 'factoryPage',
-  title: 'Fabrika',
+  title: 'Üretim',
   type: 'document',
   fieldsets: [
     {
@@ -49,7 +49,7 @@ export default defineType({
       title: 'Sayfa Başlığı',
       type: 'localizedString',
       fieldset: 'heroGroup',
-      initialValue: {tr: 'Fabrika', en: 'Factory'},
+      initialValue: {tr: 'Üretim', en: 'Manufacturing'},
     }),
     defineField({
       name: 'heroTitle',

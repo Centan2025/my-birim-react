@@ -8,7 +8,7 @@ import {
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
-import {handleCors} from '../../lib/server/cors.js'
+import {handleCors, isOriginAllowed} from '../../lib/server/cors.js'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 
 const R2_ACCOUNT_ID = (
@@ -93,8 +93,10 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
       crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(adminSecret))
   )
   const isUserAdmin = Boolean(payload && payload.role === 'admin')
+  const requestOrigin = typeof req.headers?.origin === 'string' ? req.headers.origin.trim() : ''
+  const isAllowedOrigin = requestOrigin === 'https://birim.sanity.studio' || isOriginAllowed(requestOrigin)
 
-  if (!isUserAdmin && !isAdminSecretMatch) {
+  if (!isUserAdmin && !isAdminSecretMatch && !isAllowedOrigin) {
     return res
       .status(401)
       .json({error: 'Dosya yükleme bileti almak için yönetici yetkisi gereklidir.'})

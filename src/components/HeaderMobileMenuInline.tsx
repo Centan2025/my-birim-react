@@ -250,11 +250,11 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
           )}
           {settings?.isFactoryVisible && (
             <NavLink
-              to="/factory"
+              to="/uretim"
               className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
               onClick={onCloseAll}
             >
-              <CrossFadeText text={t('factory') || 'Fabrika'} triggerKey={locale} />
+              <CrossFadeText text={t('factory') || 'Üretim'} triggerKey={locale} />
             </NavLink>
           )}
           <NavLink
