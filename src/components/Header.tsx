@@ -184,6 +184,29 @@ export function Header() {
     }
   }, [])
 
+  const upperLoc = locale === 'tr' ? 'tr-TR' : 'en-US'
+  const mobileMenuLinks: {to: string; label: string}[] = [
+    {to: '/designers', label: (t('designers') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase(upperLoc)},
+    ...(settings?.isFactoryVisible
+      ? [{to: '/uretim', label: (t('factory') || 'Üretim').toLocaleUpperCase(upperLoc)}]
+      : []),
+    {to: '/news', label: (t('news') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/about', label: (t('about') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase(upperLoc)},
+    ...(isSelectionEnabled
+      ? [
+          {
+            to: '/seckim',
+            label: (t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc),
+          },
+        ]
+      : []),
+  ]
+
+  // Mobil overlay menü kapanırken önce yazıların kaybolup sonra panelin animasyonla kapanması için (biraz daha hızlı)
+  const mobileMenuCloseDelay = mobileMenuLinks.length * 80 + 80
+
   // Sayfa değiştiğinde state'leri ve scroll takibini sıfırla
   useEffect(() => {
     currentRouteRef.current = location.pathname
@@ -193,15 +216,38 @@ export function Header() {
     opacitySetByHandleScrollRef.current = false
     setIsHeaderVisible(true)
     resetHeaderTheme()
-    if (mobileMenuCloseTimeoutRef.current) {
-      clearTimeout(mobileMenuCloseTimeoutRef.current)
-      mobileMenuCloseTimeoutRef.current = null
+
+    // Eğer mobil menü açıkken veya kapanma sürecindeyken sayfa değiştiyse (menüdeki bir linke tıklandıysa),
+    // kapanma animasyonunu yarıda kesip header'ı aniden beyaza döndürme.
+    // Menü panelinin kapanma animasyonu bitene kadar header menü overlay durumunda kalsın,
+    // animasyon bittikten sonra yumuşak bir geçişle yeni sayfanın rengine dönsün.
+    if (
+      isMobile &&
+      (isMobileMenuOpen || isMobileMenuClosing || mobileMenuCloseTimeoutRef.current)
+    ) {
+      setIsMobileMenuOpen(false)
+      setIsMobileProductsMenuOpen(false)
+      setIsMobileMenuClosing(true)
+      mobileMenuJustClosedUntilRef.current = Date.now() + mobileMenuCloseDelay + 800
+      if (!mobileMenuCloseTimeoutRef.current) {
+        mobileMenuCloseTimeoutRef.current = setTimeout(() => {
+          setIsMobileMenuClosing(false)
+          mobileMenuCloseTimeoutRef.current = null
+        }, mobileMenuCloseDelay + 400)
+      }
+    } else {
+      if (mobileMenuCloseTimeoutRef.current) {
+        clearTimeout(mobileMenuCloseTimeoutRef.current)
+        mobileMenuCloseTimeoutRef.current = null
+      }
+      setIsMobileMenuClosing(false)
+      setIsMobileMenuOpen(false)
+      setIsMobileProductsMenuOpen(false)
+      mobileMenuJustClosedUntilRef.current = 0
     }
-    setIsMobileMenuClosing(false)
-    setIsMobileMenuOpen(false)
+
     setIsSearchOpen(false)
     setIsProductsOpen(false)
-    mobileMenuJustClosedUntilRef.current = 0
 
     // Header opacity'yi sayfa türüne göre ayarla (koyu hero varsa 0, ürün detayı gibi standart sayfalarda 0.7)
     setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
@@ -220,7 +266,7 @@ export function Header() {
     checkScroll()
     const timeoutId = setTimeout(checkScroll, 50)
     return () => clearTimeout(timeoutId)
-  }, [location.pathname, isMobile, resetHeaderTheme])
+  }, [location.pathname, isMobile, resetHeaderTheme, mobileMenuCloseDelay])
 
   // Mobil kontrolü
   useEffect(() => {
@@ -416,29 +462,6 @@ export function Header() {
       }, 100)
     }
   }, [isSearchOpen])
-
-  const upperLoc = locale === 'tr' ? 'tr-TR' : 'en-US'
-  const mobileMenuLinks: {to: string; label: string}[] = [
-    {to: '/designers', label: (t('designers') || '').toLocaleUpperCase(upperLoc)},
-    {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase(upperLoc)},
-    ...(settings?.isFactoryVisible
-      ? [{to: '/uretim', label: (t('factory') || 'Üretim').toLocaleUpperCase(upperLoc)}]
-      : []),
-    {to: '/news', label: (t('news') || '').toLocaleUpperCase(upperLoc)},
-    {to: '/about', label: (t('about') || '').toLocaleUpperCase(upperLoc)},
-    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase(upperLoc)},
-    ...(isSelectionEnabled
-      ? [
-          {
-            to: '/seckim',
-            label: (t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc),
-          },
-        ]
-      : []),
-  ]
-
-  // Mobil overlay menü kapanırken önce yazıların kaybolup sonra panelin animasyonla kapanması için (biraz daha hızlı)
-  const mobileMenuCloseDelay = mobileMenuLinks.length * 80 + 80
 
   const handleOpenMobileMenu = useCallback(() => {
     if (mobileMenuCloseTimeoutRef.current) {

@@ -289,7 +289,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                     isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                   }`}
                   onClick={() => {
-                    setIsMobileMenuOpen(false)
+                    onCloseAll()
                     setIsMobileProductsMenuOpen(false)
                   }}
                 >
@@ -313,7 +313,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                   isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                 }`}
                 onClick={() => {
-                  setIsMobileMenuOpen(false)
+                  onCloseAll()
                   setIsMobileProductsMenuOpen(false)
                 }}
               >
