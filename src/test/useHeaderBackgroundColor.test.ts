@@ -90,4 +90,19 @@ describe('useHeaderBackgroundColor', () => {
     )
     expect(result.current).toBe('rgba(255, 255, 255, 0.95)')
   })
+
+  it('overlay mobil menü kapanırken de aynı arka plan rengini korumalı', () => {
+    const {result} = renderHook(
+      () =>
+        useHeaderBackgroundColor({
+          ...baseParams,
+          isMobile: true,
+          isMobileMenuOpen: false,
+          isMobileMenuClosing: true,
+          isOverlayMobileMenu: true,
+        }),
+      {wrapper: wrapper('/contact')}
+    )
+    expect(result.current).toBe('rgba(255, 255, 255, 0.95)')
+  })
 })

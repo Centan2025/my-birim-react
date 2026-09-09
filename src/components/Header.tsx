@@ -38,6 +38,8 @@ export function Header() {
   const [isLangOpen, setIsLangOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
+  const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null)
   const [categoryProducts, setCategoryProducts] = useState<Map<string, Product[]>>(new Map())
   const productsTimeoutRef = useRef<number | null>(null)
@@ -115,7 +117,7 @@ export function Header() {
   // Mobile overlay menu: always dark text.
   const isLightMode =
     (!isDarkHero || headerTheme.mode === 'light' || isPastHero || isSearchOpen) &&
-    !(isMobile && isMobileMenuOpen) &&
+    !(isMobile && (isMobileMenuOpen || isMobileMenuClosing)) &&
     !isProductsHovered
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
@@ -123,7 +125,7 @@ export function Header() {
   const iconBrightness = isLightMode ? 'brightness(0)' : 'none'
   // Smooth transitions for colors, backgrounds, and icon/logo filters
   const colorTransition =
-    'color 0.4s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s cubic-bezier(0.25, 1, 0.5, 1), fill 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1)'
+    'color 0.45s cubic-bezier(0.25, 1, 0.5, 1), filter 0.45s cubic-bezier(0.25, 1, 0.5, 1), fill 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1)'
 
   const lastScrollYRef = useRef(0)
   const headerVisibilityLastChanged = useRef(0)
@@ -175,6 +177,11 @@ export function Header() {
   useEffect(() => {
     getSiteSettings().then(setSettings)
     getFooterContent().then(setFooterContent)
+    return () => {
+      if (mobileMenuCloseTimeoutRef.current) {
+        clearTimeout(mobileMenuCloseTimeoutRef.current)
+      }
+    }
   }, [])
 
   // Sayfa değiştiğinde state'leri ve scroll takibini sıfırla
@@ -186,6 +193,11 @@ export function Header() {
     opacitySetByHandleScrollRef.current = false
     setIsHeaderVisible(true)
     resetHeaderTheme()
+    if (mobileMenuCloseTimeoutRef.current) {
+      clearTimeout(mobileMenuCloseTimeoutRef.current)
+      mobileMenuCloseTimeoutRef.current = null
+    }
+    setIsMobileMenuClosing(false)
     setIsMobileMenuOpen(false)
     setIsSearchOpen(false)
     setIsProductsOpen(false)
@@ -432,6 +444,11 @@ export function Header() {
   const mobileMenuCloseDelay = mobileMenuLinks.length * 80 + 80
 
   const handleOpenMobileMenu = useCallback(() => {
+    if (mobileMenuCloseTimeoutRef.current) {
+      clearTimeout(mobileMenuCloseTimeoutRef.current)
+      mobileMenuCloseTimeoutRef.current = null
+    }
+    setIsMobileMenuClosing(false)
     setIsMobileMenuOpen(true)
     setIsHeaderVisible(true)
     mobileMenuJustClosedUntilRef.current = 0
@@ -441,9 +458,20 @@ export function Header() {
     setIsMobileMenuOpen(false)
     setIsMobileProductsMenuOpen(false)
     setIsHeaderVisible(true)
-    mobileMenuJustClosedUntilRef.current = Date.now() + 800
+    mobileMenuJustClosedUntilRef.current = Date.now() + mobileMenuCloseDelay + 800
     headerVisibilityLastChanged.current = Date.now()
-  }, [])
+
+    if (isOverlayMobileMenu && isMobile) {
+      setIsMobileMenuClosing(true)
+      if (mobileMenuCloseTimeoutRef.current) {
+        clearTimeout(mobileMenuCloseTimeoutRef.current)
+      }
+      mobileMenuCloseTimeoutRef.current = setTimeout(() => {
+        setIsMobileMenuClosing(false)
+        mobileMenuCloseTimeoutRef.current = null
+      }, mobileMenuCloseDelay + 400)
+    }
+  }, [isOverlayMobileMenu, isMobile, mobileMenuCloseDelay])
 
   const handleToggleMobileMenu = useCallback(() => {
     if (isMobileMenuOpen) {
@@ -626,6 +654,7 @@ export function Header() {
     isProductsOpen,
     headerOpacity,
     isMobileMenuOpen,
+    isMobileMenuClosing,
     isOverlayMobileMenu,
     isSearchOpen,
     isDarkMode,
@@ -637,8 +666,7 @@ export function Header() {
       <HeaderStyles />
       <header
         className={`fixed top-0 left-0 right-0 z-50 header-scroll-transition ${
-          // Overlay mobil menü açıkken header ile panelin tam aynı renkte görünmesi için özel sınıf
-          isOverlayMobileMenu && isMobileMenuOpen ? 'overlay-menu-open' : ''
+          isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing) ? 'overlay-menu-open' : ''
         } ${
           headerBgColor === 'transparent' && !isProductsOpen
             ? ''
@@ -647,7 +675,7 @@ export function Header() {
         style={{
           transform: isHeaderVisible ? 'none' : 'translateY(-100%)',
           transition: isMobile
-            ? 'transform 0.2s ease-out, background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+            ? 'transform 0.2s ease-out, background-color 0.45s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.45s cubic-bezier(0.25, 1, 0.5, 1), backdrop-filter 0.45s cubic-bezier(0.25, 1, 0.5, 1), -webkit-backdrop-filter 0.45s cubic-bezier(0.25, 1, 0.5, 1)'
             : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           backgroundColor: headerBgColor,
           backdropFilter: headerBgColor === 'transparent' && !isProductsOpen ? 'none' : 'blur(4px)',

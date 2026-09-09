@@ -123,14 +123,14 @@ export function HeaderStyles() {
           will-change: auto !important;
         }
 
-        /* HEADER - MAKE TRANSPARENT WHEN OVERLAY MENU OPEN TO SHOW OVERLAY PANEL BELOW IT */
+        /* HEADER WHEN OVERLAY MENU OPEN OR CLOSING - TRANSPARENT TO MATCH OVERLAY PANEL WITHOUT DARKENING */
         header.overlay-menu-open,
         header.overlay-menu-open > div {
           background-color: transparent !important;
           background: transparent !important;
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
-          border-bottom: none !important;
+          border-bottom-color: transparent !important;
         }
 
 
