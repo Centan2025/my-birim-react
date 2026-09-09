@@ -15,7 +15,6 @@ const baseParams = {
   headerOpacity: 0,
   isMobileMenuOpen: false,
   isOverlayMobileMenu: false,
-  isMobileMenuClosing: false,
   isSearchOpen: false,
   isDarkMode: false,
 }
@@ -78,8 +77,8 @@ describe('useHeaderBackgroundColor', () => {
     expect(result.current).toBe('rgba(16, 24, 32, 0.85)')
   })
 
-  it('overlay mobil menü açıkken veya kapanırken transparent döndürmeli', () => {
-    const {result: openResult} = renderHook(
+  it('overlay mobil menü açıkken sayfa temasına göre koyu veya açık panel arka plan rengi döndürmeli', () => {
+    const {result} = renderHook(
       () =>
         useHeaderBackgroundColor({
           ...baseParams,
@@ -89,19 +88,6 @@ describe('useHeaderBackgroundColor', () => {
         }),
       {wrapper: wrapper('/contact')}
     )
-    expect(openResult.current).toBe('transparent')
-
-    const {result: closingResult} = renderHook(
-      () =>
-        useHeaderBackgroundColor({
-          ...baseParams,
-          isMobile: true,
-          isMobileMenuOpen: false,
-          isMobileMenuClosing: true,
-          isOverlayMobileMenu: true,
-        }),
-      {wrapper: wrapper('/contact')}
-    )
-    expect(closingResult.current).toBe('transparent')
+    expect(result.current).toBe('rgba(255, 255, 255, 0.95)')
   })
 })

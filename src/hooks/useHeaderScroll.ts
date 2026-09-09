@@ -88,7 +88,6 @@ export function useHeaderScroll({
       // Mobil davranış
       if (isMobile) {
         if (menuOpen) {
-          setHeaderOpacity(0.75)
           setIsHeaderVisible(true)
           lastScrollYRef.current = currentScrollY
           return

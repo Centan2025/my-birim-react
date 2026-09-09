@@ -50,9 +50,6 @@ export function Header() {
   const productsButtonRef = useRef<HTMLDivElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null)
-  const mobileMenuFocusTrap = useFocusTrap(isMobileMenuOpen, () => setIsMobileMenuOpen(false))
-  const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const prevMobileMenuOpenRef = useRef(false)
   const mobileLocaleTimeoutRef = useRef<number | null>(null)
   const [submenuOffset, setSubmenuOffset] = useState(0)
   const {theme: headerTheme, reset: resetHeaderTheme} = useHeaderTheme()
@@ -73,7 +70,6 @@ export function Header() {
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
   )
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
-  const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
   const isDarkHero = isDarkHeroPage(location.pathname)
   const isProductsHovered = isProductsOpen && !isSearchOpen && !isMobile
 
@@ -119,7 +115,7 @@ export function Header() {
   // Mobile overlay menu: always dark text.
   const isLightMode =
     (!isDarkHero || headerTheme.mode === 'light' || isPastHero || isSearchOpen) &&
-    !(isMobile && (isMobileMenuOpen || isMobileMenuClosing)) &&
+    !(isMobile && isMobileMenuOpen) &&
     !isProductsHovered
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
@@ -191,14 +187,9 @@ export function Header() {
     setIsHeaderVisible(true)
     resetHeaderTheme()
     setIsMobileMenuOpen(false)
-    setIsMobileMenuClosing(false)
     setIsSearchOpen(false)
     setIsProductsOpen(false)
     mobileMenuJustClosedUntilRef.current = 0
-    if (mobileMenuCloseTimeoutRef.current) {
-      clearTimeout(mobileMenuCloseTimeoutRef.current)
-      mobileMenuCloseTimeoutRef.current = null
-    }
 
     // Header opacity'yi sayfa türüne göre ayarla (koyu hero varsa 0, ürün detayı gibi standart sayfalarda 0.7)
     setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
@@ -304,7 +295,6 @@ export function Header() {
   useEffect(() => {
     if (isMobile) {
       if (isMobileMenuOpen) {
-        setHeaderOpacity(0.75)
         setIsHeaderVisible(true)
         // Menü yeni açıldı, "az önce kapandı" durumunu sıfırla
         mobileMenuJustClosedUntilRef.current = 0
@@ -415,6 +405,56 @@ export function Header() {
     }
   }, [isSearchOpen])
 
+  const upperLoc = locale === 'tr' ? 'tr-TR' : 'en-US'
+  const mobileMenuLinks: {to: string; label: string}[] = [
+    {to: '/designers', label: (t('designers') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase(upperLoc)},
+    ...(isSelectionEnabled
+      ? [
+          {
+            to: '/seckim',
+            label:
+              selectionCount > 0
+                ? `${(t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc)} (${selectionCount})`
+                : (t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc),
+          },
+        ]
+      : []),
+    ...(settings?.isFactoryVisible
+      ? [{to: '/uretim', label: (t('factory') || 'Üretim').toLocaleUpperCase(upperLoc)}]
+      : []),
+    {to: '/news', label: (t('news') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/about', label: (t('about') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase(upperLoc)},
+  ]
+
+  // Mobil overlay menü kapanırken önce yazıların kaybolup sonra panelin animasyonla kapanması için (biraz daha hızlı)
+  const mobileMenuCloseDelay = mobileMenuLinks.length * 80 + 80
+
+  const handleOpenMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(true)
+    setIsHeaderVisible(true)
+    mobileMenuJustClosedUntilRef.current = 0
+  }, [])
+
+  const handleCloseMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(false)
+    setIsMobileProductsMenuOpen(false)
+    setIsHeaderVisible(true)
+    mobileMenuJustClosedUntilRef.current = Date.now() + 800
+    headerVisibilityLastChanged.current = Date.now()
+  }, [])
+
+  const handleToggleMobileMenu = useCallback(() => {
+    if (isMobileMenuOpen) {
+      handleCloseMobileMenu()
+    } else {
+      handleOpenMobileMenu()
+    }
+  }, [isMobileMenuOpen, handleCloseMobileMenu, handleOpenMobileMenu])
+
+  const mobileMenuFocusTrap = useFocusTrap(isMobileMenuOpen, handleCloseMobileMenu)
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node
@@ -439,7 +479,7 @@ export function Header() {
         mobileMenuButtonRef.current &&
         !mobileMenuButtonRef.current.contains(target)
       ) {
-        setIsMobileMenuOpen(false)
+        handleCloseMobileMenu()
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -447,7 +487,7 @@ export function Header() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isSearchOpen, isMobileMenuOpen, closeSearch])
+  }, [isSearchOpen, isMobileMenuOpen, closeSearch, handleCloseMobileMenu])
 
   const handleProductsEnter = () => {
     if (productsTimeoutRef.current) {
@@ -514,70 +554,6 @@ export function Header() {
     filter: iconBrightness,
     transition: `opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), ${colorTransition}`,
   }
-
-  const upperLoc = locale === 'tr' ? 'tr-TR' : 'en-US'
-  const mobileMenuLinks: {to: string; label: string}[] = [
-    {to: '/designers', label: (t('designers') || '').toLocaleUpperCase(upperLoc)},
-    {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase(upperLoc)},
-    ...(isSelectionEnabled
-      ? [
-          {
-            to: '/seckim',
-            label:
-              selectionCount > 0
-                ? `${(t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc)} (${selectionCount})`
-                : (t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc),
-          },
-        ]
-      : []),
-    ...(settings?.isFactoryVisible
-      ? [{to: '/uretim', label: (t('factory') || 'Üretim').toLocaleUpperCase(upperLoc)}]
-      : []),
-    {to: '/news', label: (t('news') || '').toLocaleUpperCase(upperLoc)},
-    {to: '/about', label: (t('about') || '').toLocaleUpperCase(upperLoc)},
-    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase(upperLoc)},
-  ]
-
-  // Mobil overlay menü kapanırken önce yazıların kaybolup sonra panelin animasyonla kapanması için (biraz daha hızlı)
-  const mobileMenuCloseDelay = mobileMenuLinks.length * 80 + 80
-
-  // Overlay mobil menüde: kapanma animasyonu süresince header rengini sabit koyu tut
-  useEffect(() => {
-    const wasOpen = prevMobileMenuOpenRef.current
-    prevMobileMenuOpenRef.current = isMobileMenuOpen
-
-    if (!isOverlayMobileMenu || !isMobile) {
-      // Overlay modunda değilsek veya mobil değilsek zamanlayıcıyı temizle
-      if (mobileMenuCloseTimeoutRef.current) {
-        clearTimeout(mobileMenuCloseTimeoutRef.current)
-        mobileMenuCloseTimeoutRef.current = null
-      }
-      setIsMobileMenuClosing(false)
-      return
-    }
-
-    if (isMobileMenuOpen) {
-      // Menü tekrar açıldıysa: closing durumunu iptal et
-      setIsMobileMenuClosing(false)
-      if (mobileMenuCloseTimeoutRef.current) {
-        clearTimeout(mobileMenuCloseTimeoutRef.current)
-        mobileMenuCloseTimeoutRef.current = null
-      }
-      return
-    }
-
-    // Sadece açıktan kapalıya geçişte (kullanıcı kapattığında) tetikle
-    if (wasOpen) {
-      setIsMobileMenuClosing(true)
-      if (mobileMenuCloseTimeoutRef.current) {
-        clearTimeout(mobileMenuCloseTimeoutRef.current)
-      }
-      mobileMenuCloseTimeoutRef.current = setTimeout(() => {
-        setIsMobileMenuClosing(false)
-        mobileMenuCloseTimeoutRef.current = null
-      }, mobileMenuCloseDelay + 450)
-    }
-  }, [isMobileMenuOpen, isOverlayMobileMenu, isMobile, mobileMenuCloseDelay])
 
   const NavItem: FC<{
     to: string
@@ -651,7 +627,6 @@ export function Header() {
     headerOpacity,
     isMobileMenuOpen,
     isOverlayMobileMenu,
-    isMobileMenuClosing,
     isSearchOpen,
     isDarkMode,
     isLightMode,
@@ -662,10 +637,8 @@ export function Header() {
       <HeaderStyles />
       <header
         className={`fixed top-0 left-0 right-0 z-50 header-scroll-transition ${
-          // Overlay mobil menü açıkken veya kapanırken header ile panelin tam aynı renkte görünmesi için özel sınıf
-          isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
-            ? 'overlay-menu-open'
-            : ''
+          // Overlay mobil menü açıkken header ile panelin tam aynı renkte görünmesi için özel sınıf
+          isOverlayMobileMenu && isMobileMenuOpen ? 'overlay-menu-open' : ''
         } ${
           headerBgColor === 'transparent' && !isProductsOpen
             ? ''
@@ -1061,19 +1034,7 @@ export function Header() {
                     // Overlay modunda: hamburger → X animasyonu
                     <button
                       ref={mobileMenuButtonRef}
-                      onClick={() => {
-                        const willOpen = !isMobileMenuOpen
-                        setIsMobileMenuOpen(willOpen)
-                        // Menü tamamen KAPANIRKEN ürünler alt menüsünü de sıfırla
-                        if (!willOpen) {
-                          setIsMobileProductsMenuOpen(false)
-                        }
-                        // Menü KAPANIRKEN header her durumda görünür kalsın
-                        if (!willOpen) {
-                          setIsHeaderVisible(true)
-                          headerVisibilityLastChanged.current = Date.now()
-                        }
-                      }}
+                      onClick={handleToggleMobileMenu}
                       className="group p-2 -mr-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
                       aria-label={
                         isMobileMenuOpen
@@ -1113,19 +1074,7 @@ export function Header() {
                   ) : (
                     <button
                       ref={mobileMenuButtonRef}
-                      onClick={() => {
-                        const willOpen = !isMobileMenuOpen
-                        setIsMobileMenuOpen(willOpen)
-                        // Menü tamamen KAPANIRKEN ürünler alt menüsünü de sıfırla
-                        if (!willOpen) {
-                          setIsMobileProductsMenuOpen(false)
-                        }
-                        // Menü KAPANIRKEN header her durumda görünür kalsın
-                        if (!willOpen) {
-                          setIsHeaderVisible(true)
-                          headerVisibilityLastChanged.current = Date.now()
-                        }
-                      }}
+                      onClick={handleToggleMobileMenu}
                       className="group p-2 -mr-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
                       aria-label={
                         isMobileMenuOpen
@@ -1168,8 +1117,11 @@ export function Header() {
             isLoggedIn={isLoggedIn}
             onLocaleChange={handleMobileLocaleChange}
             onToggleProductsMenu={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
-            onCloseAll={() => setIsMobileMenuOpen(false)}
-            setIsMobileMenuOpen={setIsMobileMenuOpen}
+            onCloseAll={handleCloseMobileMenu}
+            setIsMobileMenuOpen={open => {
+              if (!open) handleCloseMobileMenu()
+              else handleOpenMobileMenu()
+            }}
             setIsMobileProductsMenuOpen={setIsMobileProductsMenuOpen}
             mobileMenuRef={mobileMenuRef}
             mobileMenuFocusTrap={mobileMenuFocusTrap}
@@ -1198,8 +1150,11 @@ export function Header() {
         footerContent={footerContent}
         onLocaleChange={handleMobileLocaleChange}
         onToggleProductsMenu={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
-        onCloseAll={() => setIsMobileMenuOpen(false)}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
+        onCloseAll={handleCloseMobileMenu}
+        setIsMobileMenuOpen={open => {
+          if (!open) handleCloseMobileMenu()
+          else handleOpenMobileMenu()
+        }}
         setIsMobileProductsMenuOpen={setIsMobileProductsMenuOpen}
         setSubscribeEmail={setSubscribeEmailState}
         subscribeEmailService={handleHeaderSubscribeEmail}

@@ -1,16 +1,40 @@
-﻿import {createClient} from '@supabase/supabase-js'
+import {createClient, type SupabaseClient} from '@supabase/supabase-js'
 
-const supabaseUrl =
-  (import.meta.env['VITE_SUPABASE_URL'] as string | undefined) ||
-  'https://rkmpfxervwqleibhbiqv.supabase.co'
-const supabaseAnonKey = (import.meta.env['VITE_SUPABASE_ANON_KEY'] as string | undefined) || ''
+const sanitizeEnv = (val?: string) => val?.trim().replace(/^["']|["']$/g, '') || ''
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
+const rawUrl = sanitizeEnv(import.meta.env['VITE_SUPABASE_URL'] as string | undefined)
+const rawKey = sanitizeEnv(import.meta.env['VITE_SUPABASE_ANON_KEY'] as string | undefined)
+
+const fallbackUrl = 'https://drertbtypneggtjjbiiu.supabase.co'
+
+function isValidHttpUrl(url: string): boolean {
+  if (!url) return false
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+const supabaseUrl = isValidHttpUrl(rawUrl) ? rawUrl : fallbackUrl
+const supabaseAnonKey = rawKey
+
+export const isSupabaseConfigured = Boolean(isValidHttpUrl(rawUrl) && supabaseAnonKey)
 
 if (!isSupabaseConfigured && typeof window !== 'undefined') {
   console.warn(
-    'VITE_SUPABASE_ANON_KEY bulunamadi. Supabase kimlik dogrulama ve veri tabani ozellikleri icin .env dosyasina VITE_SUPABASE_ANON_KEY ekleyin.'
+    'VITE_SUPABASE_ANON_KEY veya gecerli VITE_SUPABASE_URL bulunamadi. Supabase ozellikleri devre disi.'
   )
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey || 'dummy-key')
+let client: SupabaseClient
+try {
+  client = createClient(supabaseUrl, supabaseAnonKey || 'dummy-anon-key')
+} catch (err: unknown) {
+  console.error('Supabase client initialization error:', err)
+  client = createClient(fallbackUrl, 'dummy-anon-key')
+}
+
+export const supabase = client
+

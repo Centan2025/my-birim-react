@@ -7,7 +7,6 @@ interface HeaderBackgroundParams {
   headerOpacity: number
   isMobileMenuOpen: boolean
   isOverlayMobileMenu: boolean
-  isMobileMenuClosing?: boolean
   isSearchOpen: boolean
   isDarkMode: boolean
   isLightMode?: boolean
@@ -19,7 +18,6 @@ export function useHeaderBackgroundColor({
   headerOpacity,
   isMobileMenuOpen,
   isOverlayMobileMenu,
-  isMobileMenuClosing = false,
   isSearchOpen,
   isDarkMode,
   isLightMode,
@@ -32,8 +30,12 @@ export function useHeaderBackgroundColor({
     const isDarkHeroMatched = isDarkHeroPage(path)
     const effectiveIsLight = isLightMode ?? !isDarkHeroMatched
 
-    if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
-      return 'transparent'
+    if (isOverlayMobileMenu && isMobileMenuOpen) {
+      return isDarkMode || !effectiveIsLight ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'
+    }
+
+    if (isMobileMenuOpen && !isOverlayMobileMenu) {
+      return isDarkMode ? 'rgba(0, 0, 0, 0.85)' : `rgba(16, 24, 32, 0.85)`
     }
 
     if (isSearchOpen) {
@@ -57,11 +59,7 @@ export function useHeaderBackgroundColor({
 
     // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda, Proje Detay, Fabrika V2 vb.):
     // Hero üzerindeyken (ve lightMode değilken) tam şeffaf:
-    if (!effectiveIsLight && headerOpacity < 0.75) return 'transparent'
-
-    if (isMobileMenuOpen && !isOverlayMobileMenu) {
-      return isDarkMode ? 'rgba(0, 0, 0, 0.85)' : `rgba(16, 24, 32, 0.85)`
-    }
+    if (!effectiveIsLight) return 'transparent'
 
     // Hero altından itibaren: yarı şeffaf beyaz buz efekti
     const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : 'rgba(255, 255, 255, '

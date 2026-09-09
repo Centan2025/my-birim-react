@@ -139,7 +139,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
       {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
         <div
           className={`mb-6 pt-4 pb-4 transition-all duration-400 ${
-            isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'opacity-0'
           }`}
           style={{transitionDelay: isMobileMenuOpen ? '50ms' : '0ms'}}
         >
@@ -172,7 +172,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                 <button
                   type="button"
                   onClick={() => {
-                    setIsMobileMenuOpen(false)
+                    onCloseAll()
                     openDrawer()
                   }}
                   className="group relative flex items-center gap-1.5 p-1 text-gray-300 hover:text-white transition-all duration-300 cursor-pointer"
@@ -210,7 +210,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               {/* Login button - opens FloatingAuthPanel */}
               <button
                 onClick={() => {
-                  setIsMobileMenuOpen(false)
+                  onCloseAll()
                   window.dispatchEvent(new Event('openFloatingAuthPanel'))
                 }}
                 className="text-gray-300 hover:text-white transition-all duration-300 transform hover:scale-125"
