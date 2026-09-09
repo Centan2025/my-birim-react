@@ -797,6 +797,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       '--obj-pos-mobile': `${focalXMob.toFixed(2)}% ${focalYMob.toFixed(2)}%`,
     } as React.CSSProperties
 
+    const isPortraitCropDesk = aspectDesk < 0.999
+    const isPortraitCropMob = aspectMob < 0.999
+
     const isMobileContain = classList.some(
       (c: string) =>
         c.includes('max-md:object-contain') ||
@@ -813,9 +816,24 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         c === '!mb-0'
     )
 
+    const cropWrapperClasses = [
+      'responsive-crop-wrapper',
+      'relative',
+      'w-full',
+      'overflow-hidden',
+      isCoverMode ? 'is-cover' : 'has-aspect',
+      isMobileContain ? 'is-contain-mobile' : '',
+      isBottomAligned ? 'is-bottom-aligned' : '',
+      hasCropMobile ? 'has-mobile-crop' : '',
+      isPortraitCropDesk ? 'is-portrait-crop-desktop' : '',
+      isPortraitCropMob ? 'is-portrait-crop-mobile' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+
     return (
       <div
-        className={`responsive-crop-wrapper relative w-full overflow-hidden ${isCoverMode ? 'is-cover' : 'has-aspect'} ${isMobileContain ? 'is-contain-mobile' : ''} ${isBottomAligned ? 'is-bottom-aligned' : ''}`}
+        className={cropWrapperClasses}
         style={cropStyle}
         data-crop={JSON.stringify({desktop: cropDesk, mobile: cropMob})}
         data-debug-media-id={mediaId}

@@ -858,6 +858,19 @@ img.responsive-mirror {
   align-self: center !important;
   aspect-ratio: var(--crop-aspect-desktop, auto);
 }
+.responsive-crop-wrapper.has-aspect.is-portrait-crop-desktop,
+.responsive-crop-wrapper.is-portrait-crop-desktop {
+  width: auto !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+  align-self: center !important;
+  aspect-ratio: var(--crop-aspect-desktop, auto);
+}
 .responsive-crop-wrapper.is-bottom-aligned {
   margin-top: auto !important;
   margin-bottom: 0 !important;
@@ -923,11 +936,49 @@ img.responsive-mirror {
     align-self: center !important;
     aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
   }
-  .responsive-crop-wrapper.is-cover:not(.is-contain-mobile) {
+  .responsive-crop-wrapper.is-portrait-crop-mobile,
+  .responsive-crop-wrapper.has-aspect.is-portrait-crop-mobile,
+  .responsive-crop-wrapper.is-contain-mobile.is-portrait-crop-mobile {
+    width: auto !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    align-self: center !important;
+    aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
+  }
+  .responsive-crop-wrapper.is-cover:not(.is-contain-mobile):not(.has-mobile-crop) {
     width: 100% !important;
     height: 100% !important;
     max-height: 100% !important;
     aspect-ratio: unset !important;
+  }
+  .responsive-crop-wrapper.is-cover.has-mobile-crop {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    height: auto !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    align-self: center !important;
+    aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
+  }
+  .responsive-crop-wrapper.is-cover.has-mobile-crop.is-portrait-crop-mobile {
+    width: auto !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    align-self: center !important;
+    aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
   }
   .responsive-crop-inner {
     width: calc(var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) + 1px) !important;

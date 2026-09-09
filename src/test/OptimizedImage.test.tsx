@@ -136,4 +136,33 @@ describe('OptimizedImage Mobile Crop & Metadata', () => {
     expect(styleAttr).toContain('--crop-scale-x-mobile: 236.1833%')
     expect(styleAttr).toContain('--crop-left-mobile: -68.2806%')
   })
+
+  it('adds is-portrait-crop-mobile and has-mobile-crop for portrait mobile crops (like Tau Büfe & Flux Büfe)', () => {
+    // Tau Büfe: cropX=0.363, cropY=0, cropWidth=0.265, cropHeight=1.0, dims=2432x1368 -> aspectMob = 0.470
+    const cropMobileTau = {x: 0.363, y: 0, width: 0.265, height: 1.0}
+
+    const {container} = render(
+      <OptimizedImage
+        src="https://r2.dev/tau.jpg"
+        alt="Tau Büfe"
+        cropMobile={cropMobileTau}
+        origWidth={2432}
+        origHeight={1368}
+        origWidthMobile={2432}
+        origHeightMobile={1368}
+        fitAuto={true}
+        className="w-full h-full transform transition-transform duration-700 ease-out md:group-hover:scale-[1.04]"
+      />
+    )
+
+    const cropWrapper = container.querySelector('.responsive-crop-wrapper')
+    expect(cropWrapper).toBeInTheDocument()
+    expect(cropWrapper).toHaveClass('is-portrait-crop-mobile')
+    expect(cropWrapper).toHaveClass('has-mobile-crop')
+
+    const styleAttr = cropWrapper?.getAttribute('style') || ''
+    expect(styleAttr).toContain('--crop-aspect-mobile: 0.4711')
+    expect(styleAttr).toContain('--crop-scale-x-mobile: 377.3585%')
+    expect(styleAttr).toContain('--crop-left-mobile: -136.9811%')
+  })
 })
