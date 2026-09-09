@@ -660,16 +660,16 @@ export function FactoryPageV2() {
                     className="w-[85vw] max-w-[330px] flex-shrink-0 snap-center border border-[var(--border-primary,#e5e7eb)]/60 bg-[var(--bg-secondary)] p-5 flex flex-col justify-between shadow-sm"
                   >
                     <div>
-                      {/* Kart Başlığı & Alt Başlığı - Sabit yükseklik ile görseller tüm kartlarda üstten aynı hizada başlar */}
-                      <div className="min-h-[60px] flex flex-col justify-start mb-3.5 space-y-1">
+                      {/* Kart Başlığı & Alt Başlığı - Sabit yükseklik (h-[84px]) ile görseller tüm kartlarda üstten birebir aynı hizada başlar */}
+                      <div className="h-[84px] max-h-[84px] flex flex-col justify-start mb-3.5 space-y-1">
                         <TextMaskReveal delay={60}>
-                          <h3 className="font-outfit text-xl font-medium text-[var(--text-primary)] tracking-tight leading-snug">
+                          <h3 className="font-outfit text-xl font-medium text-[var(--text-primary)] tracking-tight leading-snug line-clamp-2">
                             {item.title}
                           </h3>
                         </TextMaskReveal>
                         {item.subtitle && (
                           <TextMaskReveal delay={120}>
-                            <p className="font-outfit text-xs text-[var(--text-secondary)] italic font-light">
+                            <p className="font-outfit text-xs text-[var(--text-secondary)] italic font-light line-clamp-1">
                               {item.subtitle}
                             </p>
                           </TextMaskReveal>
