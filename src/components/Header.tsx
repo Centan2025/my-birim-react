@@ -409,6 +409,12 @@ export function Header() {
   const mobileMenuLinks: {to: string; label: string}[] = [
     {to: '/designers', label: (t('designers') || '').toLocaleUpperCase(upperLoc)},
     {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase(upperLoc)},
+    ...(settings?.isFactoryVisible
+      ? [{to: '/uretim', label: (t('factory') || 'Üretim').toLocaleUpperCase(upperLoc)}]
+      : []),
+    {to: '/news', label: (t('news') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/about', label: (t('about') || '').toLocaleUpperCase(upperLoc)},
+    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase(upperLoc)},
     ...(isSelectionEnabled
       ? [
           {
@@ -420,12 +426,6 @@ export function Header() {
           },
         ]
       : []),
-    ...(settings?.isFactoryVisible
-      ? [{to: '/uretim', label: (t('factory') || 'Üretim').toLocaleUpperCase(upperLoc)}]
-      : []),
-    {to: '/news', label: (t('news') || '').toLocaleUpperCase(upperLoc)},
-    {to: '/about', label: (t('about') || '').toLocaleUpperCase(upperLoc)},
-    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase(upperLoc)},
   ]
 
   // Mobil overlay menü kapanırken önce yazıların kaybolup sonra panelin animasyonla kapanması için (biraz daha hızlı)

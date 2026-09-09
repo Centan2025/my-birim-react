@@ -6,7 +6,7 @@ interface ProductCardRevealProps {
   children: React.ReactNode
   delay?: number // In seconds or milliseconds
   duration?: number
-  direction?: 'down' | 'up' // 'down' emerges from top to bottom
+  direction?: 'down' | 'up' | 'left' | 'right'
   className?: string
 }
 
@@ -55,7 +55,14 @@ export const ProductCardReveal: React.FC<ProductCardRevealProps> = ({
 
   // Convert milliseconds to seconds if passed as ms (e.g. 150 -> 0.15)
   const delayInSeconds = delay > 5 ? delay / 1000 : delay
-  const initialY = direction === 'down' ? '-102%' : '102%'
+  const initialTransform =
+    direction === 'left'
+      ? {x: '-102%', y: '0%'}
+      : direction === 'right'
+        ? {x: '102%', y: '0%'}
+        : direction === 'up'
+          ? {x: '0%', y: '102%'}
+          : {x: '0%', y: '-102%'} // 'down'
 
   const isInView = useInView(ref, {
     once: true,
@@ -75,9 +82,14 @@ export const ProductCardReveal: React.FC<ProductCardRevealProps> = ({
       style={{isolation: 'isolate'}}
     >
       <motion.div
-        initial={{y: initialY, opacity: 0}}
-        animate={isInView ? {y: '0%', opacity: 1} : {y: initialY, opacity: 0}}
+        initial={{...initialTransform, opacity: 0}}
+        animate={isInView ? {x: '0%', y: '0%', opacity: 1} : {...initialTransform, opacity: 0}}
         transition={{
+          x: {
+            duration,
+            delay: delayInSeconds,
+            ease: [0.19, 1, 0.22, 1],
+          },
           y: {
             duration,
             delay: delayInSeconds,
