@@ -86,13 +86,31 @@ export function Header() {
       return
     }
     const update = () => {
+      const currentY = window.scrollY || document.documentElement.scrollTop || 0
+      if (currentY === 0) {
+        setIsPastHero(false)
+        return
+      }
       const heroEl = document.querySelector('.hero-section') as HTMLElement | null
-      const heroBottom = heroEl ? heroEl.offsetTop + heroEl.offsetHeight : 0
-      setIsPastHero(window.scrollY >= heroBottom - headerHeight)
+      const heroBottom = heroEl
+        ? heroEl.offsetTop + heroEl.offsetHeight
+        : typeof window !== 'undefined'
+          ? window.innerHeight
+          : 800
+      setIsPastHero(currentY >= heroBottom - headerHeight)
     }
     update()
     window.addEventListener('scroll', update, {passive: true})
-    return () => window.removeEventListener('scroll', update)
+    window.addEventListener('resize', update, {passive: true})
+
+    const observer = new MutationObserver(update)
+    observer.observe(document.body, {childList: true, subtree: true})
+
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+      observer.disconnect()
+    }
   }, [isDarkHero, headerHeight, location.pathname])
 
   // isDarkHero pages: white text at top, black after hero bottom boundary.

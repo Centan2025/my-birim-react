@@ -119,12 +119,6 @@ export function HomePage() {
   const [mobileHeroHeight, setMobileHeroHeight] = useState<number | null>(null)
   const lastWidthRef = React.useRef(typeof window !== 'undefined' ? window.innerWidth : 0)
 
-  // Header temasını sıfırla (HomeHero bg-black/50 overlay içerdiği için hero her zaman koyudur)
-  useEffect(() => {
-    reset()
-    return () => reset()
-  }, [reset])
-
   // İlham görselinin yüksekliğini hesapla
   useEffect(() => {
     const checkMobile = () => {
@@ -449,7 +443,7 @@ export function HomePage() {
   // Content blocks use natural fluid height without artificial 100vh height gaps
 
   if (!content || !settings) {
-    return <div className="h-screen w-full bg-gray-900" />
+    return <div className="h-screen w-full bg-gray-900 hero-section" />
   }
 
   const heroMedia = Array.isArray(content.heroMedia) ? content.heroMedia : []
