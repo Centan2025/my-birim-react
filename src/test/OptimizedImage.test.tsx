@@ -165,4 +165,34 @@ describe('OptimizedImage Mobile Crop & Metadata', () => {
     expect(styleAttr).toContain('--crop-scale-x-mobile: 377.3585%')
     expect(styleAttr).toContain('--crop-left-mobile: -136.9811%')
   })
+
+  it('renders Tayra (tk0251-tayra) mobile crop with correct portrait scaling', () => {
+    // Tayra in Sanity: cropX=0.306, cropY=0, cropWidth=0.3897, cropHeight=1.0, dims=6042x3402 -> aspectMob = 0.6921
+    const cropMobileTayra = {x: 0.306, y: 0, width: 0.3897, height: 1.0}
+
+    const {container} = render(
+      <OptimizedImage
+        src="https://birim-assets.web-birim.workers.dev/migration/products/tk0251-tayra/1785758162137-tayra-katalog-site1.webp"
+        srcMobile="https://birim-assets.web-birim.workers.dev/migration/products/tk0251-tayra/1786364424281-1785758162137-tayra-katalog-site1.webp"
+        alt="Tayra"
+        cropMobile={cropMobileTayra}
+        origWidth={6042}
+        origHeight={3402}
+        origWidthMobile={6042}
+        origHeightMobile={3402}
+        fitAuto={true}
+        className="w-full h-full transform transition-transform duration-700 ease-out md:group-hover:scale-[1.04]"
+      />
+    )
+
+    const cropWrapper = container.querySelector('.responsive-crop-wrapper')
+    expect(cropWrapper).toBeInTheDocument()
+    expect(cropWrapper).toHaveClass('is-portrait-crop-mobile')
+    expect(cropWrapper).toHaveClass('has-mobile-crop')
+
+    const styleAttr = cropWrapper?.getAttribute('style') || ''
+    expect(styleAttr).toContain('--crop-aspect-mobile: 0.6921')
+    expect(styleAttr).toContain('--crop-scale-x-mobile: 256.6076%')
+    expect(styleAttr).toContain('--crop-left-mobile: -78.5219%')
+  })
 })
