@@ -10,6 +10,7 @@ import {useProjects} from '../hooks/useProjects'
 import {useSEO} from '../hooks/useSEO'
 import {ProjectsV2VerticalView} from '../components/project/ProjectsV2VerticalView'
 import {ProjectsV3VerticalView} from '../components/project/ProjectsV3VerticalView'
+import {ProjectsV4FullscreenView} from '../components/project/ProjectsV4FullscreenView'
 
 /**
  * Architectural Horizontal Gallery Card with 3D Parallax Displacement
@@ -191,33 +192,45 @@ export function ProjectsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const paramVersion = searchParams.get('v')
 
-  // Layout View Version: 'v1' | 'v2' | 'v3'
-  const initialVersion: 'v1' | 'v2' | 'v3' =
-    paramVersion === '3' || paramVersion === 'v3'
-      ? 'v3'
-      : paramVersion === '2' || paramVersion === 'v2'
-        ? 'v2'
-        : paramVersion === '1' || paramVersion === 'v1'
-          ? 'v1'
-          : (typeof window !== 'undefined' &&
-              (localStorage.getItem('birim_projects_view_version') as 'v1' | 'v2' | 'v3')) ||
-            'v1'
+  // Layout View Version: 'v1' | 'v2' | 'v3' | 'v4'
+  const initialVersion: 'v1' | 'v2' | 'v3' | 'v4' =
+    paramVersion === '4' || paramVersion === 'v4' || paramVersion === 'fullscreen'
+      ? 'v4'
+      : paramVersion === '3' || paramVersion === 'v3'
+        ? 'v3'
+        : paramVersion === '2' || paramVersion === 'v2'
+          ? 'v2'
+          : paramVersion === '1' || paramVersion === 'v1'
+            ? 'v1'
+            : (typeof window !== 'undefined' &&
+                (localStorage.getItem('birim_projects_view_version') as
+                  | 'v1'
+                  | 'v2'
+                  | 'v3'
+                  | 'v4')) ||
+              'v1'
 
-  const [viewVersion, setViewVersion] = useState<'v1' | 'v2' | 'v3'>(initialVersion)
+  const [viewVersion, setViewVersion] = useState<'v1' | 'v2' | 'v3' | 'v4'>(initialVersion)
 
   useEffect(() => {
-    if (paramVersion === '3' || paramVersion === 'v3') setViewVersion('v3')
-    else if (paramVersion === '2' || paramVersion === 'v2') setViewVersion('v2')
-    else if (paramVersion === '1' || paramVersion === 'v1') setViewVersion('v1')
+    if (paramVersion === '4' || paramVersion === 'v4' || paramVersion === 'fullscreen') {
+      setViewVersion('v4')
+    } else if (paramVersion === '3' || paramVersion === 'v3') {
+      setViewVersion('v3')
+    } else if (paramVersion === '2' || paramVersion === 'v2') {
+      setViewVersion('v2')
+    } else if (paramVersion === '1' || paramVersion === 'v1') {
+      setViewVersion('v1')
+    }
   }, [paramVersion])
 
-  const handleVersionChange = (v: 'v1' | 'v2' | 'v3') => {
+  const handleVersionChange = (v: 'v1' | 'v2' | 'v3' | 'v4') => {
     setViewVersion(v)
     if (typeof window !== 'undefined') {
       localStorage.setItem('birim_projects_view_version', v)
     }
     const newParams = new URLSearchParams(searchParams)
-    newParams.set('v', v === 'v3' ? '3' : v === 'v2' ? '2' : '1')
+    newParams.set('v', v === 'v4' ? '4' : v === 'v3' ? '3' : v === 'v2' ? '2' : '1')
     setSearchParams(newParams, {replace: true})
   }
 
@@ -409,7 +422,9 @@ export function ProjectsPage() {
 
   return (
     <>
-      {viewVersion === 'v3' ? (
+      {viewVersion === 'v4' ? (
+        <ProjectsV4FullscreenView projects={projects} />
+      ) : viewVersion === 'v3' ? (
         <ProjectsV3VerticalView projects={projects} />
       ) : viewVersion === 'v2' ? (
         <ProjectsV2VerticalView projects={projects} />
@@ -544,7 +559,7 @@ export function ProjectsPage() {
         </div>
       )}
 
-      {/* Floating Version Comparison Switcher (V1 / V2 / V3 - Keskin Köşeli) */}
+      {/* Floating Version Comparison Switcher (V1 / V2 / V3 / V4 - Keskin Köşeli) */}
       <aside
         aria-label="Projeler Görünüm Seçici"
         className="fixed bottom-6 right-6 z-50 flex items-center select-none"
@@ -585,6 +600,18 @@ export function ProjectsPage() {
             title="V3 - Awwwards Kinetik Mimari Sahne & Split İndeks"
           >
             V3 <span className="text-[10px] opacity-70 hidden sm:inline">Awwwards</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleVersionChange('v4')}
+            className={`px-3 py-1.5 text-xs font-mono tracking-wider uppercase transition-colors rounded-none cursor-pointer ${
+              viewVersion === 'v4'
+                ? 'bg-white text-black font-semibold'
+                : 'text-neutral-300 hover:text-white'
+            }`}
+            title="V4 - Sinematik Tam Ekran Mimari Deneyim"
+          >
+            V4 <span className="text-[10px] opacity-70 hidden sm:inline">Tam Ekran</span>
           </button>
         </div>
       </aside>

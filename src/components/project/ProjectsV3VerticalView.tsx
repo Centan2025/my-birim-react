@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useRef, useEffect} from 'react'
+import React, {useState, useMemo, useRef} from 'react'
 import {Link} from 'react-router-dom'
 import {motion, useSpring, useTransform, useScroll} from 'framer-motion'
 import type {Project} from '../../types'
@@ -42,80 +42,6 @@ const CrosshairMark: React.FC<{
 }
 
 /**
- * AWWWARDS SCROLL RULER & ELEVATION TELEMETRY (Tüm sayfada başından sonuna aktif)
- */
-const ArchitecturalScrollRuler: React.FC<{
-  totalProjects: number
-}> = ({totalProjects}) => {
-  const {scrollYProgress} = useScroll()
-  const smoothProgress = useSpring(scrollYProgress, {stiffness: 300, damping: 30})
-
-  const [percent, setPercent] = useState(0)
-  const [activeProjectNum, setActiveProjectNum] = useState(1)
-
-  useEffect(() => {
-    return smoothProgress.on('change', latest => {
-      const p = Math.round(latest * 100)
-      setPercent(p)
-      const current = Math.min(totalProjects, Math.max(1, Math.ceil(latest * totalProjects)))
-      setActiveProjectNum(current)
-    })
-  }, [smoothProgress, totalProjects])
-
-  const markerTop = useTransform(smoothProgress, [0, 1], ['0%', '88%'])
-
-  const scrollToTop = () => {
-    window.scrollTo({top: 0, behavior: 'smooth'})
-  }
-
-  return (
-    <div className="fixed right-3 sm:right-6 top-24 bottom-20 z-40 hidden md:flex flex-col items-end pointer-events-none select-none">
-      <div className="relative h-full w-10 flex flex-col justify-between items-end border-r border-neutral-300 dark:border-neutral-800 pr-1.5 text-[9px] font-mono text-neutral-400">
-        <div className="flex items-center gap-1.5">
-          <span>00%</span>
-          <span className="w-2.5 h-px bg-neutral-400" />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span>25%</span>
-          <span className="w-1.5 h-px bg-neutral-300" />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span>50%</span>
-          <span className="w-2.5 h-px bg-neutral-400" />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span>75%</span>
-          <span className="w-1.5 h-px bg-neutral-300" />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span>100%</span>
-          <span className="w-2.5 h-px bg-neutral-400" />
-        </div>
-
-        {/* Scroll ile Senkronize Canlı Gösterge Kartuşu */}
-        <motion.div
-          style={{top: markerTop}}
-          className="absolute right-0 translate-x-[1px] flex items-center gap-2 pointer-events-auto cursor-pointer group"
-          onClick={scrollToTop}
-          title="Başa Dön"
-        >
-          <div className="bg-neutral-950 text-white px-2.5 py-1.5 border border-white/20 shadow-2xl flex flex-col items-end gap-0.5 whitespace-nowrap transition-transform duration-200 group-hover:-translate-x-1.5">
-            <div className="flex items-center gap-1.5 font-mono text-[9px] tracking-widest text-neutral-200">
-              <span className="w-1.5 h-1.5 bg-white animate-pulse" />
-              <span>ELV: {String(percent).padStart(2, '0')}%</span>
-            </div>
-            <div className="font-mono text-[8px] tracking-wider text-neutral-400">
-              [{String(activeProjectNum).padStart(2, '0')}/{String(totalProjects).padStart(2, '0')}]
-            </div>
-          </div>
-          <span className="w-3.5 h-0.5 bg-neutral-900 dark:bg-white" />
-        </motion.div>
-      </div>
-    </div>
-  )
-}
-
-/**
  * 1. AWWWARDS SCROLL STACKING MONOLITH CARD
  * Her kart ekranda sticky sabitlenir; kullanıcı scroll ettikçe bir sonraki kart üstüne biner
  * ve önceki kart hafifçe geriye doğru küçülüp kararır (Curtain Stacking Effect)
@@ -131,19 +57,10 @@ const StackingMonolithCard: React.FC<{
   // Bu kartın sayfa içindeki scroll durumunu takip et
   const {scrollYProgress} = useScroll({
     target: cardRef,
-    offset: ['start end', 'start start'],
+    offset: ['start end', 'end start'],
   })
 
-  // Bir sonraki kart bunun üstüne binerken bu kartın geriye çekilmesi için scroll offset
-  const {scrollYProgress: exitProgress} = useScroll({
-    target: cardRef,
-    offset: ['start start', 'end start'],
-  })
-
-  // Scroll girdisiyle ölçek ve parlaklık değişimi (Awwwards Stacking)
-  const scale = useTransform(exitProgress, [0, 1], [1, 0.92])
-  const opacity = useTransform(exitProgress, [0, 0.85, 1], [1, 0.5, 0.2])
-  const imageParallaxY = useTransform(scrollYProgress, [0, 1], ['-8%', '8%'])
+  const imageParallaxY = useTransform(scrollYProgress, [0, 1], ['-6%', '6%'])
 
   const title = toPlainText(t(project.title))
   const category = project.projectCategory ? toPlainText(t(project.projectCategory)) : ''
@@ -159,127 +76,124 @@ const StackingMonolithCard: React.FC<{
 
   return (
     <div
+      id={`project-${project.id}`}
       ref={cardRef}
-      className="relative min-h-[92vh] sm:min-h-[88vh] sticky top-24 sm:top-28 mb-12 sm:mb-20 last:mb-0"
+      className="relative mb-5 sm:mb-6 last:mb-0 scroll-mt-28"
     >
-      <motion.div
-        style={{scale, opacity}}
-        className="w-full h-full bg-white border border-neutral-300 dark:border-neutral-800 shadow-[0_20px_50px_rgba(0,0,0,0.12)] relative overflow-hidden"
+      <ScrollReveal
+        delay={Math.min(index * 60, 200)}
+        threshold={0.05}
+        distance={25}
+        duration={0.7}
+        initialScale={0.98}
       >
-        <CrosshairMark position="top-left" />
-        <CrosshairMark position="top-right" />
-        <CrosshairMark position="bottom-left" />
-        <CrosshairMark position="bottom-right" />
+        <div className="w-full bg-white border border-neutral-300 dark:border-neutral-800 shadow-[0_20px_50px_rgba(0,0,0,0.12)] relative overflow-hidden">
+          <CrosshairMark position="top-left" />
+          <CrosshairMark position="top-right" />
+          <CrosshairMark position="bottom-left" />
+          <CrosshairMark position="bottom-right" />
 
-        {/* Kart İçi Grid: Sol Metin & Telemetri / Sağ Devasa Görsel */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 h-full min-h-[540px] sm:min-h-[620px] lg:min-h-[700px] items-stretch">
-          {/* Sol Kolon: Mimari Künye & Devasa Tipografi (6 Kolon) */}
-          <div className="lg:col-span-6 p-6 sm:p-10 lg:p-14 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-neutral-200">
-            {/* Üst Mimari Aks Strip */}
-            <div className="space-y-4">
-              <TextMaskReveal delay={80} amount={0.05}>
-                <div className="flex items-center justify-end font-mono text-xs text-neutral-500 uppercase tracking-widest pb-4 border-b border-neutral-200">
-                  <span>{year || '2024'}</span>
-                </div>
-              </TextMaskReveal>
-
-              {category && (
-                <TextMaskReveal delay={120} amount={0.05}>
-                  <div className="text-xs font-mono tracking-[0.25em] text-neutral-400 uppercase">
-                    TYPOLOGY // {category}
+          {/* Kart İçi Grid: Sol Metin & Telemetri / Sağ Devasa Görsel */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[540px] sm:min-h-[620px] lg:min-h-[700px] items-stretch">
+            {/* Sol Kolon: Mimari Künye & Devasa Tipografi (6 Kolon) */}
+            <div className="lg:col-span-6 p-6 sm:p-10 lg:p-14 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-neutral-200">
+              {/* Üst Mimari Aks Strip */}
+              <div className="space-y-4">
+                <TextMaskReveal delay={80} amount={0.05}>
+                  <div className="flex items-center justify-end font-mono text-xs text-neutral-500 uppercase tracking-widest pb-4 border-b border-neutral-200">
+                    <span>{year || '2024'}</span>
                   </div>
                 </TextMaskReveal>
-              )}
 
-              {/* Devasa Brutalist Başlık */}
-              <TextMaskReveal delay={160} amount={0.05}>
-                <h2 className="text-3xl sm:text-5xl lg:text-6xl font-light font-michroma uppercase text-neutral-900 tracking-tight leading-[1.08] pt-2">
+                {category && (
+                  <TextMaskReveal delay={120} amount={0.05}>
+                    <div className="text-xs font-mono tracking-[0.25em] text-neutral-400 uppercase">
+                      TYPOLOGY // {category}
+                    </div>
+                  </TextMaskReveal>
+                )}
+
+                {/* Devasa Brutalist Başlık */}
+                <TextMaskReveal delay={160} amount={0.05}>
+                  <h2 className="text-3xl sm:text-5xl lg:text-6xl font-light font-oswald uppercase text-neutral-900 tracking-tight leading-[1.08] pt-2">
+                    <Link
+                      to={`/projects/${project.id}`}
+                      className="hover:opacity-80 transition-opacity"
+                    >
+                      {title}
+                    </Link>
+                  </h2>
+                </TextMaskReveal>
+
+                {excerpt && (
+                  <TextMaskReveal delay={200} amount={0.05}>
+                    <p className="text-xs sm:text-sm font-light text-neutral-600 leading-relaxed font-mono pt-4 line-clamp-3 max-w-lg">
+                      {excerpt}
+                    </p>
+                  </TextMaskReveal>
+                )}
+              </div>
+
+              {/* Alt Mimari Detaylar & Aksiyon */}
+              <div className="pt-8 mt-6 border-t border-neutral-200 space-y-6">
+                <TextMaskReveal delay={240} amount={0.05}>
+                  <div className="grid grid-cols-2 gap-4 font-mono text-xs">
+                    <div>
+                      <span className="text-[10px] text-neutral-400 block uppercase tracking-widest">
+                        LOKASYON
+                      </span>
+                      <span className="text-neutral-900 font-medium block mt-1">
+                        {location || 'İSTANBUL, TR'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-neutral-400 block uppercase tracking-widest">
+                        DURUM
+                      </span>
+                      <span className="text-neutral-900 font-medium block mt-1">TAMAMLANDI</span>
+                    </div>
+                  </div>
+                </TextMaskReveal>
+
+                <TextMaskReveal delay={280} amount={0.05}>
                   <Link
                     to={`/projects/${project.id}`}
-                    className="hover:opacity-80 transition-opacity"
+                    className="w-full inline-flex items-center justify-between px-6 py-4 bg-neutral-900 text-white hover:bg-neutral-800 font-mono text-xs uppercase tracking-[0.25em] transition-all rounded-none font-semibold shadow-md group"
                   >
-                    {title}
+                    <span>{isTr ? 'PROJEYİ DETAYLI İNCELE' : 'EXPLORE PROJECT'}</span>
+                    <span className="transition-transform duration-300 group-hover:translate-x-2 font-bold">
+                      →
+                    </span>
                   </Link>
-                </h2>
-              </TextMaskReveal>
-
-              {excerpt && (
-                <TextMaskReveal delay={200} amount={0.05}>
-                  <p className="text-xs sm:text-sm font-light text-neutral-600 leading-relaxed font-mono pt-4 line-clamp-3 max-w-lg">
-                    {excerpt}
-                  </p>
-                </TextMaskReveal>
-              )}
-            </div>
-
-            {/* Alt Mimari Detaylar & Aksiyon */}
-            <div className="pt-8 mt-6 border-t border-neutral-200 space-y-6">
-              <TextMaskReveal delay={240} amount={0.05}>
-                <div className="grid grid-cols-2 gap-4 font-mono text-xs">
-                  <div>
-                    <span className="text-[10px] text-neutral-400 block uppercase tracking-widest">
-                      LOKASYON
-                    </span>
-                    <span className="text-neutral-900 font-medium block mt-1">
-                      {location || 'İSTANBUL, TR'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-neutral-400 block uppercase tracking-widest">
-                      DURUM
-                    </span>
-                    <span className="text-neutral-900 font-medium block mt-1">TAMAMLANDI</span>
-                  </div>
-                </div>
-              </TextMaskReveal>
-
-              <TextMaskReveal delay={280} amount={0.05}>
-                <Link
-                  to={`/projects/${project.id}`}
-                  className="w-full inline-flex items-center justify-between px-6 py-4 bg-neutral-900 text-white hover:bg-neutral-800 font-mono text-xs uppercase tracking-[0.25em] transition-all rounded-none font-semibold shadow-md group"
-                >
-                  <span>{isTr ? 'PROJEYİ DETAYLI İNCELE' : 'EXPLORE PROJECT'}</span>
-                  <span className="transition-transform duration-300 group-hover:translate-x-2 font-bold">
-                    →
-                  </span>
-                </Link>
-              </TextMaskReveal>
-            </div>
-          </div>
-
-          {/* Sağ Kolon: Tam Boy Sinematik Görsel Sahnesi (6 Kolon) */}
-          <div className="lg:col-span-6 relative overflow-hidden bg-neutral-950 min-h-[360px] sm:min-h-[460px] lg:min-h-full">
-            <Link to={`/projects/${project.id}`} className="block w-full h-full relative group">
-              {coverUrl && (
-                <motion.div
-                  style={{y: imageParallaxY}}
-                  className="absolute -inset-y-12 inset-x-0 w-full h-[120%]"
-                >
-                  <OptimizedImage
-                    src={coverUrl}
-                    alt={title}
-                    className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
-                    quality={92}
-                    loading={index < 2 ? 'eager' : 'lazy'}
-                  />
-                </motion.div>
-              )}
-
-              {/* Gradient & Telemetri Katmanı */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
-
-              {/* Görsel İçi Canlı Etiket */}
-              <div className="absolute bottom-6 right-6 flex items-center justify-end text-white font-mono text-xs z-10 pointer-events-none">
-                <TextMaskReveal delay={180} amount={0.05} display="inline-block">
-                  <span className="tracking-widest uppercase text-[10px] text-white/80">
-                    {isTr ? 'GÖRÜNTÜLEMEK İÇİN TIKLAYIN ↗' : 'CLICK TO VIEW ↗'}
-                  </span>
                 </TextMaskReveal>
               </div>
-            </Link>
+            </div>
+
+            {/* Sağ Kolon: Tam Boy Sinematik Görsel Sahnesi (6 Kolon) */}
+            <div className="lg:col-span-6 relative overflow-hidden bg-neutral-950 min-h-[360px] sm:min-h-[460px] lg:min-h-full">
+              <Link to={`/projects/${project.id}`} className="block w-full h-full relative group">
+                {coverUrl && (
+                  <motion.div
+                    style={{y: imageParallaxY}}
+                    className="absolute -inset-y-12 inset-x-0 w-full h-[120%]"
+                  >
+                    <OptimizedImage
+                      src={coverUrl}
+                      alt={title}
+                      className="w-full h-full object-cover"
+                      quality={92}
+                      loading={index < 2 ? 'eager' : 'lazy'}
+                    />
+                  </motion.div>
+                )}
+
+                {/* Gradient & Telemetri Katmanı */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
+              </Link>
+            </div>
           </div>
         </div>
-      </motion.div>
+      </ScrollReveal>
     </div>
   )
 }
@@ -294,7 +208,7 @@ const MonolithicMatrixGrid: React.FC<{
   const isTr = locale === 'tr'
 
   return (
-    <div className="grid grid-cols-12 gap-6 sm:gap-8 items-stretch">
+    <div className="grid grid-cols-12 gap-4 sm:gap-6 items-stretch">
       {projects.map((project, idx) => {
         const title = toPlainText(t(project.title))
         const category = project.projectCategory ? toPlainText(t(project.projectCategory)) : ''
@@ -318,7 +232,11 @@ const MonolithicMatrixGrid: React.FC<{
             : 'col-span-12 lg:col-span-5'
 
         return (
-          <div key={project.id} className={colSpanClass}>
+          <div
+            key={project.id}
+            id={`project-${project.id}`}
+            className={`${colSpanClass} scroll-mt-28`}
+          >
             <ScrollReveal
               delay={Math.min((idx % 3) * 80, 240)}
               threshold={0.05}
@@ -364,7 +282,7 @@ const MonolithicMatrixGrid: React.FC<{
                     <OptimizedImage
                       src={coverUrl}
                       alt={title}
-                      className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-106"
+                      className="w-full h-full object-cover"
                       quality={90}
                       loading="lazy"
                     />
@@ -374,7 +292,7 @@ const MonolithicMatrixGrid: React.FC<{
 
                 <div className="space-y-2 pt-2">
                   <TextMaskReveal delay={120} amount={0.05}>
-                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-light font-michroma uppercase text-neutral-900 tracking-tight leading-tight group-hover:opacity-80 transition-opacity">
+                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-light font-oswald uppercase text-neutral-900 tracking-tight leading-tight group-hover:opacity-80 transition-opacity">
                       {title}
                     </h3>
                   </TextMaskReveal>
@@ -477,9 +395,6 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-neutral-900 overflow-x-hidden pt-20 md:pt-20 lg:pt-20 pb-32 selection:bg-neutral-900 selection:text-white relative">
-      {/* 1. TÜM SAYFA BOYUNCA AKTİF SCROLL TELEMETRİ CETVELİ */}
-      <ArchitecturalScrollRuler totalProjects={filteredProjects.length} />
-
       {/* Top Breadcrumb */}
       <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
         <Breadcrumbs

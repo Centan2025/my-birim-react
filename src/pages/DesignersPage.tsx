@@ -1,355 +1,52 @@
-import {motion, useReducedMotion} from 'framer-motion'
-import {useNavigate} from 'react-router-dom'
-import type {Designer} from '../types'
-import {useTranslation} from '../i18n'
-import {useDesigners} from '../hooks/useDesigners'
-import {useSEO} from '../hooks/useSEO'
-import {PageLoading} from '../components/LoadingSpinner'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {SiteLogo} from '../components/SiteLogo'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {isBirimDesignStudio} from '../utils/designerUtils'
+import {useState, useEffect} from 'react'
+import {useSearchParams} from 'react-router-dom'
+import {DesignersPageV1} from './DesignersPageV1'
+import {DesignersPageV2} from './DesignersPageV2'
+import {DesignersVersionSwitcher} from '../components/designers/DesignersVersionSwitcher'
 
 export function DesignersPage() {
-  const {data: designers = [], isLoading: loading} = useDesigners()
-  const {data: settings} = useSiteSettings()
-  const {t, locale} = useTranslation()
-  const navigate = useNavigate()
-  const shouldReduceMotion = useReducedMotion()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const paramVersion = searchParams.get('v')
 
-  // SEO meta
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
-  useSEO({
-    title: `BIRIM - ${t('designers') || 'Tasarımcılar'}`,
-    description: 'BIRIM ile çalışan vizyoner tasarımcılar ve yaratıcı küratörler.',
-    type: 'profile',
-    siteName: 'BIRIM',
-    locale: 'tr_TR',
-    section: 'Designers',
-    schema: {
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
-      name: t('designers') || 'Tasarımcılar',
-      description: 'BIRIM ile çalışan vizyoner tasarımcılar ve yaratıcı küratörler.',
-      url: `${baseUrl}/#/designers`,
-      mainEntity: {
-        '@type': 'ItemList',
-        numberOfItems: designers.length,
-        itemListElement: designers.slice(0, 20).map((d, index) => ({
-          '@type': 'ListItem',
-          position: index + 1,
-          name: t(d.name),
-          url: `${baseUrl}/#/designer/${d.id}`,
-        })),
-      },
-    },
-  })
+  // Layout View Version: 'v1' | 'v2'
+  const initialVersion: 'v1' | 'v2' =
+    paramVersion === '2' || paramVersion === 'v2'
+      ? 'v2'
+      : paramVersion === '1' || paramVersion === 'v1'
+        ? 'v1'
+        : (typeof window !== 'undefined' &&
+            (localStorage.getItem('birim_designers_view_version') as 'v1' | 'v2')) ||
+          'v1'
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
-        <PageLoading message={t('loading')} />
-      </div>
-    )
-  }
+  const [viewVersion, setViewVersion] = useState<'v1' | 'v2'>(initialVersion)
 
-  const getImageUrl = (designer: Designer) => {
-    return typeof designer.image === 'string' ? designer.image : designer.image?.url || ''
-  }
-
-  const getBioText = (bio: unknown) => {
-    if (!bio) return ''
-    const raw = bio as Record<string, unknown> | unknown[]
-    let blocks: unknown[] | null = null
-    if (Array.isArray(raw)) {
-      blocks = raw
-    } else if (raw && typeof raw === 'object') {
-      const localizedMap = raw as Record<string, unknown[]>
-      if (Array.isArray(localizedMap[locale])) {
-        blocks = localizedMap[locale]
-      } else if (Array.isArray(localizedMap['tr'])) {
-        blocks = localizedMap['tr']
-      } else if (Array.isArray(localizedMap['en'])) {
-        blocks = localizedMap['en']
-      }
+  useEffect(() => {
+    if (paramVersion === '2' || paramVersion === 'v2') {
+      setViewVersion('v2')
+    } else if (paramVersion === '1' || paramVersion === 'v1') {
+      setViewVersion('v1')
     }
+  }, [paramVersion])
 
-    if (blocks && Array.isArray(blocks) && blocks.length > 0) {
-      return blocks
-        .map((b: unknown) => {
-          if (b && typeof b === 'object' && (b as {children?: unknown[]}).children) {
-            return ((b as {children: {text?: string}[]}).children || [])
-              .map(c => c.text || '')
-              .join('')
-              .trim()
-          }
-          return ''
-        })
-        .filter(Boolean)
-        .join('\n')
+  const handleVersionChange = (v: 'v1' | 'v2') => {
+    setViewVersion(v)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('birim_designers_view_version', v)
     }
-
-    const bioVal = t(bio as Parameters<typeof t>[0])
-    if (typeof bioVal === 'string') return bioVal.trim()
-    return ''
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set('v', v === 'v2' ? '2' : '1')
+    setSearchParams(newParams, {replace: true})
   }
-
-  const containerVariants = {
-    hidden: {opacity: 0},
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.12,
-        delayChildren: shouldReduceMotion ? 0 : 0.1,
-      },
-    },
-  }
-
-  const cardVariants = shouldReduceMotion
-    ? {
-        hidden: {opacity: 0},
-        visible: {opacity: 1, transition: {duration: 0.3}},
-      }
-    : {
-        hidden: {
-          opacity: 0,
-          clipPath: 'inset(0% 0% 100% 0%)',
-        },
-        visible: {
-          opacity: 1,
-          clipPath: 'inset(0% 0% 0% 0%)',
-          transition: {
-            duration: 1.15,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ease: [0.19, 1, 0.22, 1] as any,
-          },
-        },
-      }
-
-  const imageVariants = shouldReduceMotion
-    ? {
-        hidden: {scale: 1},
-        visible: {scale: 1},
-      }
-    : {
-        hidden: {scale: 1.12},
-        visible: {
-          scale: 1,
-          transition: {
-            duration: 1.4,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ease: [0.19, 1, 0.22, 1] as any,
-          },
-        },
-      }
-
-  const contentVariants = shouldReduceMotion
-    ? {
-        hidden: {opacity: 1, y: 0},
-        visible: {opacity: 1, y: 0},
-      }
-    : {
-        hidden: {opacity: 0, y: 16},
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: {
-            duration: 0.8,
-            delay: 0.2,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ease: [0.19, 1, 0.22, 1] as any,
-          },
-        },
-      }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] overflow-x-hidden pt-20 md:pt-20 lg:pt-20 pb-32">
-      {/* Background Decorative Text */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden select-none z-0 opacity-[0.03] dark:opacity-[0.05]">
-        <h2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-bold leading-none outline-text whitespace-nowrap uppercase tracking-tighter">
-          {t('designers')}
-        </h2>
-      </div>
+    <>
+      {viewVersion === 'v2' ? <DesignersPageV2 /> : <DesignersPageV1 />}
 
-      {/* Breadcrumb Section */}
-      <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
-        <Breadcrumbs
-          items={[{label: t('homepage'), to: '/'}, {label: t('designers') || 'Tasarımcılar'}]}
-        />
-      </div>
-
-      {/* Header Section (Matching Projects Page) */}
-      <header className="relative z-10 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
-        <motion.div
-          initial={{opacity: 0, y: 20}}
-          animate={{opacity: 1, y: 0}}
-          transition={{duration: 1, ease: 'easeOut'}}
-        >
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
-            {t('designers')}
-          </h1>
-        </motion.div>
-      </header>
-
-      {/* Grid Section */}
-      <main className="relative z-10 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-        >
-          {designers.map(designer => {
-            const isBirimStudio = isBirimDesignStudio(designer) || Boolean(designer.isCompanyLogo)
-
-            return (
-              <motion.div
-                key={designer.id}
-                variants={cardVariants}
-                whileHover={shouldReduceMotion ? undefined : {y: -8}}
-                onClick={() => navigate(`/designer/${designer.id}`)}
-                className="group relative cursor-pointer overflow-hidden aspect-[4/5] bg-[var(--bg-secondary)] border border-[var(--border-primary)]/20"
-                style={{willChange: 'clip-path, transform'}}
-              >
-                {/* Image Container */}
-                <div className="w-full h-full overflow-hidden relative">
-                  {isBirimStudio ? (
-                    <motion.div
-                      variants={imageVariants}
-                      className="w-full h-full flex flex-col items-center justify-center p-8 sm:p-12 relative bg-gradient-to-b from-neutral-900/90 via-neutral-950 to-neutral-900 select-none"
-                    >
-                      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/[0.08] via-transparent to-transparent pointer-events-none" />
-                      <div className="relative z-10 w-full flex items-center justify-center px-4 transition-transform duration-1000 ease-out group-hover:scale-105">
-                        <SiteLogo
-                          logoUrl={settings?.logoUrl}
-                          className="w-full max-w-[200px] sm:max-w-[240px] h-auto object-contain brightness-100"
-                        />
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <motion.div variants={imageVariants} className="w-full h-full">
-                      <OptimizedImage
-                        alt={t(designer.name)}
-                        className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0 brightness-[1.08] contrast-[1.02]"
-                        src={getImageUrl(designer)}
-                        srcMobile={
-                          typeof designer.image === 'object' ? designer.image.urlMobile : undefined
-                        }
-                        srcDesktop={
-                          typeof designer.image === 'object' ? designer.image.urlDesktop : undefined
-                        }
-                        crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
-                        hotspot={
-                          typeof designer.image === 'object' ? designer.image.hotspot : undefined
-                        }
-                        origWidth={
-                          typeof designer.image === 'object' ? designer.image.origWidth : undefined
-                        }
-                        origHeight={
-                          typeof designer.image === 'object' ? designer.image.origHeight : undefined
-                        }
-                        cropMobile={
-                          typeof designer.image === 'object' ? designer.image.cropMobile : undefined
-                        }
-                        hotspotMobile={
-                          typeof designer.image === 'object'
-                            ? designer.image.hotspotMobile
-                            : undefined
-                        }
-                        origWidthMobile={
-                          typeof designer.image === 'object'
-                            ? designer.image.origWidthMobile
-                            : undefined
-                        }
-                        origHeightMobile={
-                          typeof designer.image === 'object'
-                            ? designer.image.origHeightMobile
-                            : undefined
-                        }
-                        cropDesktop={
-                          typeof designer.image === 'object'
-                            ? designer.image.cropDesktop
-                            : undefined
-                        }
-                        hotspotDesktop={
-                          typeof designer.image === 'object'
-                            ? designer.image.hotspotDesktop
-                            : undefined
-                        }
-                        origWidthDesktop={
-                          typeof designer.image === 'object'
-                            ? designer.image.origWidthDesktop
-                            : undefined
-                        }
-                        origHeightDesktop={
-                          typeof designer.image === 'object'
-                            ? designer.image.origHeightDesktop
-                            : undefined
-                        }
-                      />
-                    </motion.div>
-                  )}
-
-                  {/* Refined Overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-50 group-hover:opacity-25 transition-opacity duration-700"></div>
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                </div>
-
-                {/* Information Panel - Simplified & Modern */}
-                <div className="absolute bottom-0 left-0 w-full p-8 lg:p-10 translate-y-[calc(100%-110px)] group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)]">
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 border-t border-white/10"></div>
-
-                  <motion.div variants={contentVariants} className="relative z-10">
-                    <div className="overflow-hidden mb-2">
-                      <p className="text-[9px] tracking-[0.5em] font-medium text-white/40 uppercase group-hover:text-white/60 transition-colors duration-500">
-                        {isBirimStudio
-                          ? t('design_studio') || 'Tasarım Stüdyosu'
-                          : t('designer') || 'Tasarımcı'}
-                      </p>
-                    </div>
-
-                    <h3 className="text-xl md:text-2xl font-light text-white uppercase mb-4 tracking-widest leading-none">
-                      {t(designer.name)}
-                    </h3>
-
-                    <div className="h-px w-8 bg-white/20 mb-8 group-hover:w-full transition-all duration-700 ease-in-out"></div>
-
-                    <div className="text-[11px] text-white/40 font-light whitespace-pre-line line-clamp-4 uppercase tracking-widest opacity-0 group-hover:opacity-100 group-hover:text-white/70 transition-all duration-700 delay-100 leading-relaxed">
-                      {getBioText(designer.bio) ||
-                        (isBirimStudio
-                          ? t('birim_studio_bio_short') ||
-                            "Birim'in yenilikçi ve zamansız tasarım vizyonunu yansıtan iç tasarım stüdyosu."
-                          : '')}
-                    </div>
-
-                    <div className="mt-8 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 delay-200">
-                      <span className="text-[9px] font-medium tracking-[0.4em] text-white/30 group-hover:text-white border-b border-white/10 group-hover:border-white/30 pb-2 transition-all duration-500 uppercase">
-                        {t('explore_designer') || 'View Profile'}
-                      </span>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Decorative Linear Accents */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
-                  <div className="absolute top-0 left-8 right-8 h-px bg-white/5"></div>
-                  <div className="absolute bottom-0 left-8 right-8 h-px bg-white/5"></div>
-                </div>
-              </motion.div>
-            )
-          })}
-        </motion.div>
-      </main>
-
-      {/* Decorative Navigation Aid */}
-      <div className="mt-32 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex justify-between items-center opacity-30">
-        <div className="h-px flex-1 bg-[var(--border-primary)]"></div>
-        <div className="mx-8 text-[10px] uppercase tracking-[0.5em] font-light text-[var(--text-secondary)] whitespace-nowrap">
-          BIRIM COLLABORATORS
-        </div>
-        <div className="h-px flex-1 bg-[var(--border-primary)]"></div>
-      </div>
-    </div>
+      {/* Floating Version Switcher (V1 Izgara / V2 Tam Ekran) */}
+      <DesignersVersionSwitcher activeVersion={viewVersion} onChange={handleVersionChange} />
+    </>
   )
 }
+
+export {DesignersPageV1, DesignersPageV2}
+export default DesignersPage

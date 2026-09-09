@@ -150,6 +150,8 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
             </PageBoundary>
           }
         />
+        <Route path="/designers-v2" element={<Navigate to="/designers?v=2" replace />} />
+        <Route path="/designers-v1" element={<Navigate to="/designers?v=1" replace />} />
         <Route
           path="/designer/:designerId"
           element={

@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useCallback} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
-import {User, X, LogOut, ArrowRight} from 'lucide-react'
+import {X, LogOut, ArrowRight} from 'lucide-react'
 import {useAuth} from '../context/AuthContext'
 import {useTranslation} from '../i18n'
 import {useNavigate, Link} from 'react-router-dom'
@@ -98,24 +98,6 @@ export const FloatingAuthPanel: React.FC = () => {
 
   return (
     <>
-      {/* Floating button (Hidden on mobile) */}
-      <div className="hidden lg:flex fixed right-0 top-[60%] -translate-y-1/2 z-[45]">
-        <button
-          onClick={() => setIsOpen(true)}
-          className={`p-3.5 shadow-2xl backdrop-blur-xl focus:outline-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center border-[0.5px] rounded-none translate-x-1/2 hover:translate-x-0 opacity-80 hover:opacity-100 group ${
-            isLoggedIn
-              ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)] hover:bg-[var(--bg-secondary)]'
-              : 'bg-black/40 text-white border-white/30 hover:bg-black/80'
-          }`}
-          aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
-        >
-          <User
-            strokeWidth={0.8}
-            className="w-6 h-6 md:w-7 md:h-7 transition-transform duration-700 group-hover:scale-110"
-          />
-        </button>
-      </div>
-
       {/* Sidebar Overlay */}
       <AnimatePresence>
         {isOpen && (

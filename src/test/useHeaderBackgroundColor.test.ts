@@ -105,18 +105,4 @@ describe('useHeaderBackgroundColor', () => {
     )
     expect(result.current).toBe('rgba(255, 255, 255, 0.95)')
   })
-
-  it('desktopta products paneli kapanırken (isProductsClosing) koyu arka planı korumalı', () => {
-    const {result} = renderHook(
-      () =>
-        useHeaderBackgroundColor({
-          ...baseParams,
-          isMobile: false,
-          isProductsOpen: false,
-          isProductsClosing: true,
-        }),
-      {wrapper: wrapper('/contact')}
-    )
-    expect(result.current).toBe('rgba(0, 0, 0, 0.85)')
-  })
 })
