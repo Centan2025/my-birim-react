@@ -114,8 +114,10 @@ export const ProductCard: React.FC<{
             isMirroredDesktop={mainImageIsMirroredDesktop}
             fitAuto={true}
           />
-          <div className="absolute top-2.5 right-2.5 z-20">
-            <SelectionButton product={product} />
+          <div className="absolute top-2.5 left-2.5 right-2.5 z-20 flex justify-end pointer-events-none">
+            <div className="pointer-events-auto">
+              <SelectionButton product={product} />
+            </div>
           </div>
         </div>
         <div className="px-2.5 py-2 sm:px-3 sm:py-2 transition-colors duration-500">

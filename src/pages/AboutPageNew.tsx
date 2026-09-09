@@ -14,7 +14,7 @@ import {TextMaskReveal} from '../components/TextMaskReveal'
 import {TextLineReveal} from '../components/TextLineReveal'
 import {ProductCardReveal} from '../components/ProductCardReveal'
 import PortableTextLite from '../components/PortableTextLite'
-import {resolvePortableTextOrString} from '../utils/portableText'
+import {resolvePortableTextOrString, toPlainText} from '../utils/portableText'
 import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer/FullscreenMediaViewer'
 
 const containerClass =
@@ -888,7 +888,7 @@ export function AboutPageNew() {
                   <div>
                     <TextMaskReveal delay={80}>
                       <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)]">
-                        ZANAAT & KALİTE
+                        ÜRETİM & NİTELİK
                       </span>
                     </TextMaskReveal>
                     {getPlainText(t(qualitySection.title)) ? (
@@ -937,7 +937,7 @@ export function AboutPageNew() {
                     {designersWithImage.slice(0, 5).map((designer, idx) => {
                       const dName = getPlainText(t(designer.name))
                       const dRoleText = getPlainText(t(designer.role))
-                      const dBioText = getPlainText(t(designer.bio))
+                      const dBioText = toPlainText(t(designer.bio))
                       const dImgUrl =
                         typeof designer.image === 'string'
                           ? designer.image
@@ -1048,7 +1048,7 @@ export function AboutPageNew() {
                               </TextMaskReveal>
                               {dBioText && (
                                 <TextMaskReveal delay={160}>
-                                  <p className="text-xs text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3">
+                                  <p className="text-xs text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3 whitespace-pre-line">
                                     {dBioText}
                                   </p>
                                 </TextMaskReveal>
@@ -1104,7 +1104,7 @@ export function AboutPageNew() {
                       typeof currentDesigner.image === 'string'
                         ? currentDesigner.image
                         : (currentDesigner.image as {url: string}).url
-                    const currentBioText = getPlainText(t(currentDesigner.bio))
+                    const currentBioText = toPlainText(t(currentDesigner.bio))
 
                     return (
                       <div className="grid grid-cols-12 gap-8 items-stretch">
@@ -1315,7 +1315,7 @@ export function AboutPageNew() {
                                   </TextMaskReveal>
                                   {currentBioText && (
                                     <TextMaskReveal delay={200}>
-                                      <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed line-clamp-6">
+                                      <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed line-clamp-6 whitespace-pre-line">
                                         {currentBioText}
                                       </p>
                                     </TextMaskReveal>

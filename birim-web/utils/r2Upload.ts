@@ -28,7 +28,7 @@ export async function uploadToR2(
   const domainToUse = R2_DOMAIN.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
   const finalFileUrl = `${domainToUse}/${key}`
 
-  // 1. Direct R2 upload via S3Client if credentials present in studio bundle
+  // 1. Direct R2 upload via S3Client if valid credentials present in runtime
   if (r2Client) {
     try {
       const buffer = await blob.arrayBuffer()
@@ -42,8 +42,8 @@ export async function uploadToR2(
         }),
       )
       return finalFileUrl
-    } catch (s3Error) {
-      console.warn('Direct R2 S3 upload failed, trying presigned fallback...', s3Error)
+    } catch {
+      // Fallback silently to presigned URL
     }
   }
 
@@ -66,11 +66,37 @@ export async function uploadToR2(
     headers['Authorization'] = `Bearer ${studioToken}`
   }
 
-  const res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({filename, contentType, folder}),
-  })
+  const isLocal =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.startsWith('192.168.') ||
+      window.location.hostname.startsWith('10.') ||
+      window.location.hostname.endsWith('.local'))
+
+  const apiBase = isLocal
+    ? `${window.location.protocol || 'http:'}//${window.location.hostname}:3002`
+    : 'https://birim-web-antigravity.vercel.app'
+
+  let res: Response
+  try {
+    res = await fetch(`${apiBase}/api/media/presigned-url`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({filename, contentType, folder}),
+    })
+  } catch (fetchErr) {
+    if (isLocal) {
+      // Fallback to production if local API server is not running
+      res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({filename, contentType, folder}),
+      })
+    } else {
+      throw fetchErr
+    }
+  }
 
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({}))

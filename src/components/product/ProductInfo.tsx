@@ -129,7 +129,7 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
           <TextLineReveal
             as="h2"
             text={t(product.name)}
-            className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)]"
+            className="text-3xl md:text-4xl lg:text-5xl font-oswald uppercase tracking-tight text-[var(--text-primary)]"
             delay={60}
             stagger={80}
           />

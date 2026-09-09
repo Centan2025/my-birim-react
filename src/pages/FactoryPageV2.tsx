@@ -538,7 +538,7 @@ export function FactoryPageV2() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60" />
           </div>
 
-          <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto translate-y-24 sm:translate-y-12 md:translate-y-16">
+          <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto translate-y-24 sm:translate-y-16 md:translate-y-24 lg:translate-y-28">
             {heroTitle ? (
               <TextMaskReveal delay={150} duration={1.1}>
                 <h1 className="font-outfit text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extralight tracking-tight uppercase leading-tight md:leading-[1.1] text-white max-w-5xl mx-auto text-balance break-words">

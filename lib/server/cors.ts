@@ -24,7 +24,7 @@ export function isOriginAllowed(origin: string | undefined | null): boolean {
     return true
   }
 
-  // Development environment only
+  // Development environment & local studio access
   if (process.env['NODE_ENV'] !== 'production') {
     if (LOCALHOST_ORIGIN_REGEX.test(trimmed)) {
       return true

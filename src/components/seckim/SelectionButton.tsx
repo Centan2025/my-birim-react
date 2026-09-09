@@ -38,7 +38,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
         onMouseLeave={() => setShowTooltip(false)}
         onFocus={() => setShowTooltip(true)}
         onBlur={() => setShowTooltip(false)}
-        className={`group/btn relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-none transition-all duration-300 ease-out backdrop-blur-md cursor-pointer z-10 ${
+        className={`group/btn relative w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-none transition-all duration-300 ease-out backdrop-blur-md cursor-pointer z-10 ${
           selected
             ? 'bg-[#3c424d] text-white border border-[#3c424d] shadow-[0_2px_10px_rgba(60,66,77,0.35)] hover:bg-[#4a515c] hover:border-[#4a515c] hover:scale-105 active:scale-95'
             : 'bg-white/90 dark:bg-neutral-900/80 text-neutral-700 dark:text-neutral-200 hover:text-neutral-950 dark:hover:text-white hover:bg-white dark:hover:bg-neutral-900 border border-black/[0.07] dark:border-white/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:scale-105 active:scale-95'
@@ -47,7 +47,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
         title={selected ? 'Seçtiklerimden çıkar' : 'Seçtiklerime ekle'}
       >
         <svg
-          className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 ease-out group-hover/btn:scale-105 group-active/btn:scale-90"
+          className="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-300 ease-out group-hover/btn:scale-105 group-active/btn:scale-90"
           viewBox="0 0 24 24"
           fill={selected ? 'currentColor' : 'none'}
           stroke="currentColor"
@@ -76,17 +76,19 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
             transition={{duration: 0.22, ease: [0.16, 1, 0.3, 1]}}
             className="hidden sm:flex flex-col items-end absolute right-0 bottom-full mb-2 pointer-events-none z-30"
           >
-            <span className="text-[9px] tracking-[0.18em] uppercase font-medium text-neutral-900 dark:text-white bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md px-2.5 py-1 shadow-sm border border-black/[0.06] dark:border-white/[0.1] whitespace-nowrap">
+            <span className="text-[8.5px] tracking-[0.16em] uppercase font-medium text-neutral-900 dark:text-white bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md px-2 py-0.5 shadow-xs border border-black/[0.06] dark:border-white/[0.1] whitespace-nowrap">
               {selected ? 'Seçtiklerimden Çıkar' : 'Seçtiklerime Ekle'}
             </span>
-            {/* Tam genişlikte sağdan sola çizilen zarif animasyonlu yatay çizgi */}
-            <motion.div
-              className={`h-[1.5px] w-full ${selected ? 'bg-[#3c424d]' : 'bg-neutral-900 dark:bg-white'} origin-right mt-1 shadow-xs`}
-              initial={{scaleX: 0}}
-              animate={{scaleX: 1}}
-              exit={{scaleX: 0}}
-              transition={{duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: 0.04}}
-            />
+            {/* Kartın sol kenarına kadar tam boy uzanan animasyonlu çizgi */}
+            <div className="relative w-[600px] max-w-[calc(100vw-2rem)] overflow-visible flex justify-end">
+              <motion.div
+                className={`h-[1px] ${selected ? 'bg-[#3c424d]' : 'bg-neutral-900 dark:bg-white'} origin-right mt-1 w-full shadow-xs`}
+                initial={{scaleX: 0}}
+                animate={{scaleX: 1}}
+                exit={{scaleX: 0}}
+                transition={{duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.04}}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

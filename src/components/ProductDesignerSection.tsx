@@ -89,7 +89,7 @@ export function ProductDesignerSection({
                       </h3>
                     </TextMaskReveal>
                     <TextMaskReveal delay={200}>
-                      <p className="mt-4 text-[var(--text-primary)] font-normal leading-relaxed opacity-90">
+                      <p className="mt-4 text-[var(--text-primary)] font-normal leading-relaxed opacity-90 whitespace-pre-line">
                         {bioText.slice(0, 400)}
                         {isLongText ? '…' : ''}
                       </p>
