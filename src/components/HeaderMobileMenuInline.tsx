@@ -127,16 +127,15 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                   </svg>
                   {selectionCount > 0 && (
                     <span
-                      className="inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[9.5px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs"
+                      className="inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[9.5px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs leading-none"
                       style={{
                         backgroundColor: '#3c424d',
                         color: '#ffffff',
-                        lineHeight: 1,
                         fontVariantNumeric: 'tabular-nums',
                         letterSpacing: 0,
                       }}
                     >
-                      <span style={{transform: 'translateY(0.35px)'}}>{selectionCount}</span>
+                      <span className="flex items-center justify-center leading-none">{selectionCount}</span>
                     </span>
                   )}
                 </button>
@@ -242,10 +241,17 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
           {settings?.enableSelections !== false && (
             <NavLink
               to="/seckim"
-              className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+              className="flex items-center justify-between min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
               onClick={onCloseAll}
             >
-              <CrossFadeText text={t('seckim') || 'Seçtiklerim'} triggerKey={locale} />
+              <span className="inline-flex items-baseline gap-2">
+                <CrossFadeText text={t('seckim') || 'Seçtiklerim'} triggerKey={locale} />
+                {selectionCount > 0 && (
+                  <span className="text-xs font-light text-neutral-400 font-sans tracking-widest tabular-nums select-none opacity-80">
+                    /{selectionCount < 10 ? `0${selectionCount}` : selectionCount}
+                  </span>
+                )}
+              </span>
             </NavLink>
           )}
           {settings?.isFactoryVisible && (

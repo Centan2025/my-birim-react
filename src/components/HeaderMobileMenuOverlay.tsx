@@ -192,16 +192,15 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                   </svg>
                   {selectionCount > 0 && (
                     <span
-                      className="inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[9.5px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs"
+                      className="inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[9.5px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs leading-none"
                       style={{
                         backgroundColor: '#3c424d',
                         color: '#ffffff',
-                        lineHeight: 1,
                         fontVariantNumeric: 'tabular-nums',
                         letterSpacing: 0,
                       }}
                     >
-                      <span style={{transform: 'translateY(0.35px)'}}>{selectionCount}</span>
+                      <span className="flex items-center justify-center leading-none">{selectionCount}</span>
                     </span>
                   )}
                 </button>
@@ -353,8 +352,13 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               setIsMobileProductsMenuOpen(false)
             }}
           >
-            <span>
+            <span className="inline-flex items-baseline gap-2">
               <CrossFadeText text={item.label} triggerKey={locale} />
+              {item.to === '/seckim' && (selectionCount ?? 0) > 0 && (
+                <span className="text-xs md:text-sm font-light text-neutral-400 font-sans tracking-widest tabular-nums select-none opacity-80">
+                  /{selectionCount < 10 ? `0${selectionCount}` : selectionCount}
+                </span>
+              )}
             </span>
             <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
               <ChevronRightIcon />

@@ -431,10 +431,7 @@ export function Header() {
       ? [
           {
             to: '/seckim',
-            label:
-              selectionCount > 0
-                ? `${(t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc)} (${selectionCount})`
-                : (t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc),
+            label: (t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc),
           },
         ]
       : []),
@@ -982,16 +979,15 @@ export function Header() {
                       </svg>
                       {selectionCount > 0 && (
                         <span
-                          className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs"
+                          className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs leading-none"
                           style={{
                             backgroundColor: '#3c424d',
                             color: '#ffffff',
-                            lineHeight: 1,
                             fontVariantNumeric: 'tabular-nums',
                             letterSpacing: 0,
                           }}
                         >
-                          <span style={{transform: 'translateY(0.4px)'}}>{selectionCount}</span>
+                          <span className="flex items-center justify-center leading-none">{selectionCount}</span>
                         </span>
                       )}
                     </button>
