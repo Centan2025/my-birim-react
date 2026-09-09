@@ -666,7 +666,9 @@ export function Header() {
       <HeaderStyles />
       <header
         className={`fixed top-0 left-0 right-0 z-50 header-scroll-transition ${
-          isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing) ? 'overlay-menu-open' : ''
+          isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
+            ? 'overlay-menu-open'
+            : ''
         } ${
           headerBgColor === 'transparent' && !isProductsOpen
             ? ''

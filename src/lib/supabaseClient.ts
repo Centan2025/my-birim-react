@@ -37,4 +37,3 @@ try {
 }
 
 export const supabase = client
-
