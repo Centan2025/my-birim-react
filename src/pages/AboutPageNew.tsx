@@ -115,63 +115,67 @@ const MediaGallery = ({media, alt}: MediaGalleryProps) => {
 
   return (
     <>
-      <div className="mt-12 w-full overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+      <div className="mt-6 sm:mt-8 md:mt-12 w-full">
+        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-2 overflow-x-auto snap-x snap-mandatory pb-2 md:pb-0 scrollbar-none -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0">
           {galleryItems.map((m, idx) => (
-            <ProductCardReveal
+            <div
               key={idx}
-              direction="down"
-              duration={1.2}
-              delay={0.08 * (idx % 3)}
-              className="w-full h-full"
+              className="w-[78vw] max-w-[320px] flex-shrink-0 snap-center md:w-full md:max-w-none md:flex-shrink"
             >
-              <div
-                className="relative aspect-video overflow-hidden bg-[var(--bg-secondary)] cursor-pointer group"
-                onClick={() => openViewer(idx)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    openViewer(idx)
-                  }
-                }}
-                role="button"
-                tabIndex={0}
+              <ProductCardReveal
+                direction="down"
+                duration={1.2}
+                delay={0.08 * (idx % 3)}
+                className="w-full h-full"
               >
-                {m.type === 'video' || m.type === 'youtube' ? (
-                  <div className="w-full h-full relative">
-                    <video
-                      src={m.url}
-                      className="w-full h-full object-cover"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-300 flex items-center justify-center">
-                      <div className="w-10 h-10 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
+                <div
+                  className="relative aspect-video overflow-hidden bg-[var(--bg-secondary)] cursor-pointer group"
+                  onClick={() => openViewer(idx)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      openViewer(idx)
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  {m.type === 'video' || m.type === 'youtube' ? (
+                    <div className="w-full h-full relative">
+                      <video
+                        src={m.url}
+                        className="w-full h-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-300 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="w-full h-full relative">
-                    <OptimizedImage
-                      src={m.url}
-                      fallbackSrc={DEFAULT_IMAGES.history}
-                      srcMobile={m.urlMobile}
-                      srcDesktop={m.urlDesktop}
-                      alt={`${alt} ${idx + 1}`}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      crop={m.crop}
-                      hotspot={m.hotspot}
-                      origWidth={m.origWidth as number}
-                      origHeight={m.origHeight as number}
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                  </div>
-                )}
-              </div>
-            </ProductCardReveal>
+                  ) : (
+                    <div className="w-full h-full relative">
+                      <OptimizedImage
+                        src={m.url}
+                        fallbackSrc={DEFAULT_IMAGES.history}
+                        srcMobile={m.urlMobile}
+                        srcDesktop={m.urlDesktop}
+                        alt={`${alt} ${idx + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        crop={m.crop}
+                        hotspot={m.hotspot}
+                        origWidth={m.origWidth as number}
+                        origHeight={m.origHeight as number}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                    </div>
+                  )}
+                </div>
+              </ProductCardReveal>
+            </div>
           ))}
         </div>
       </div>
@@ -794,9 +798,9 @@ export function AboutPageNew() {
 
         {/* SECTION 3: IDENTITY & QUALITY ASYMMETRIC GRID */}
         <ScrollReveal delay={150} threshold={0.05}>
-          <section className="py-12 sm:py-24 border-b border-[var(--border-primary,#e5e7eb)]/30">
+          <section className="py-10 sm:py-16 md:py-24 border-b border-[var(--border-primary,#e5e7eb)]/30">
             <div className={containerClass}>
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-16 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-16 items-start">
                 <div className="lg:col-span-5 space-y-4 sm:space-y-8">
                   <div>
                     <TextMaskReveal delay={80}>
@@ -854,9 +858,9 @@ export function AboutPageNew() {
 
         {/* SECTION 4: CRAFTSMANSHIP & QUALITY */}
         <ScrollReveal delay={150} threshold={0.05}>
-          <section className="py-12 sm:py-24 border-b border-[var(--border-primary,#e5e7eb)]/30">
+          <section className="py-10 sm:py-16 md:py-24 border-b border-[var(--border-primary,#e5e7eb)]/30">
             <div className={containerClass}>
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-16 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-16 items-start">
                 <div className="lg:col-span-7 order-2 lg:order-1">
                   <div className="relative aspect-[4/3] overflow-hidden rounded-none">
                     <ProductCardReveal
@@ -1081,10 +1085,7 @@ export function AboutPageNew() {
                       )
                     })}
                   </div>
-                  <div className="flex items-center justify-between mt-4 px-1">
-                    <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-light opacity-60">
-                      Kaydırın &rarr;
-                    </span>
+                  <div className="flex items-center justify-end mt-4 px-1">
                     <Link
                       to="/designers"
                       className="text-xs uppercase tracking-widest text-[var(--text-primary)] hover:opacity-75 transition-opacity underline underline-offset-4"

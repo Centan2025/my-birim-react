@@ -34,6 +34,7 @@ export function Header() {
   const location = useLocation()
   const {data: categories = []} = useCategories()
   const [isProductsOpen, setIsProductsOpen] = useState(false)
+  const [isProductsClosing, setIsProductsClosing] = useState(false)
   const [isMobileProductsMenuOpen, setIsMobileProductsMenuOpen] = useState(false)
   const [isLangOpen, setIsLangOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -73,7 +74,7 @@ export function Header() {
   )
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const isDarkHero = isDarkHeroPage(location.pathname)
-  const isProductsHovered = isProductsOpen && !isSearchOpen && !isMobile
+  const isProductsHovered = (isProductsOpen || isProductsClosing) && !isSearchOpen && !isMobile
 
   // Track whether scroll has passed the hero bottom boundary
   const [isPastHero, setIsPastHero] = useState(false)
@@ -243,11 +244,32 @@ export function Header() {
       setIsMobileMenuClosing(false)
       setIsMobileMenuOpen(false)
       setIsMobileProductsMenuOpen(false)
-      mobileMenuJustClosedUntilRef.current = 0
+    }
+
+    // Desktop ürünler paneli açıkken veya kapanma sürecindeyken linke tıklandıysa,
+    // panelin 350ms kapanma animasyonu bitene kadar header'ın koyu kalmasını sağla,
+    // animasyon bittikten sonra yeni sayfanın header fon rengine yumuşak geçiş yap.
+    if (!isMobile && (isProductsOpen || isProductsClosing || productsCloseTimeoutRef.current)) {
+      setIsProductsOpen(false)
+      setIsProductsClosing(true)
+      if (!productsCloseTimeoutRef.current) {
+        productsCloseTimeoutRef.current = setTimeout(() => {
+          setIsProductsClosing(false)
+          setHoveredCategoryId(null)
+          productsCloseTimeoutRef.current = null
+        }, 350)
+      }
+    } else {
+      if (productsCloseTimeoutRef.current) {
+        clearTimeout(productsCloseTimeoutRef.current)
+        productsCloseTimeoutRef.current = null
+      }
+      setIsProductsClosing(false)
+      setIsProductsOpen(false)
+      setHoveredCategoryId(null)
     }
 
     setIsSearchOpen(false)
-    setIsProductsOpen(false)
 
     // Header opacity'yi sayfa türüne göre ayarla (koyu hero varsa 0, ürün detayı gibi standart sayfalarda 0.7)
     setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
@@ -546,6 +568,7 @@ export function Header() {
       clearTimeout(productsCloseTimeoutRef.current)
       productsCloseTimeoutRef.current = null
     }
+    setIsProductsClosing(false)
     setIsProductsOpen(true)
   }
 
@@ -555,12 +578,14 @@ export function Header() {
     }
     productsTimeoutRef.current = window.setTimeout(() => {
       setIsProductsOpen(false)
+      setIsProductsClosing(true)
       productsTimeoutRef.current = null
 
       if (productsCloseTimeoutRef.current) {
         clearTimeout(productsCloseTimeoutRef.current)
       }
       productsCloseTimeoutRef.current = setTimeout(() => {
+        setIsProductsClosing(false)
         setHoveredCategoryId(null) // Only clear after panel collapse completes to prevent flicker
         productsCloseTimeoutRef.current = null
       }, 350)
@@ -573,10 +598,12 @@ export function Header() {
       productsTimeoutRef.current = null
     }
     setIsProductsOpen(false)
+    setIsProductsClosing(true)
     if (productsCloseTimeoutRef.current) {
       clearTimeout(productsCloseTimeoutRef.current)
     }
     productsCloseTimeoutRef.current = setTimeout(() => {
+      setIsProductsClosing(false)
       setHoveredCategoryId(null)
       productsCloseTimeoutRef.current = null
     }, 350)
@@ -672,6 +699,7 @@ export function Header() {
   const headerBgColor = useHeaderBackgroundColor({
     isMobile,
     isProductsOpen,
+    isProductsClosing,
     headerOpacity,
     isMobileMenuOpen,
     isMobileMenuClosing,
@@ -690,7 +718,7 @@ export function Header() {
             ? 'overlay-menu-open'
             : ''
         } ${
-          headerBgColor === 'transparent' && !isProductsOpen
+          headerBgColor === 'transparent' && !isProductsOpen && !isProductsClosing
             ? ''
             : 'header-frosted-glass backdrop-blur-[4px] border-b border-black/[0.06] dark:border-white/[0.08]'
         }`}
@@ -700,9 +728,14 @@ export function Header() {
             ? 'transform 0.2s ease-out, background-color 0.45s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.45s cubic-bezier(0.25, 1, 0.5, 1), backdrop-filter 0.45s cubic-bezier(0.25, 1, 0.5, 1), -webkit-backdrop-filter 0.45s cubic-bezier(0.25, 1, 0.5, 1)'
             : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           backgroundColor: headerBgColor,
-          backdropFilter: headerBgColor === 'transparent' && !isProductsOpen ? 'none' : 'blur(4px)',
+          backdropFilter:
+            headerBgColor === 'transparent' && !isProductsOpen && !isProductsClosing
+              ? 'none'
+              : 'blur(4px)',
           WebkitBackdropFilter:
-            headerBgColor === 'transparent' && !isProductsOpen ? 'none' : 'blur(4px)',
+            headerBgColor === 'transparent' && !isProductsOpen && !isProductsClosing
+              ? 'none'
+              : 'blur(4px)',
         }}
       >
         <div

@@ -492,15 +492,10 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
         {/* Ana Tipografik Sahne: Masked Reveal Animasyonu */}
         <div className="pt-4 md:pt-6 pb-6">
           <div>
-            <TextMaskReveal delay={40} amount={0.05}>
-              <span className="text-xs font-mono tracking-[0.3em] uppercase text-neutral-500 block mb-2">
-                CURATED ARCHITECTURAL ARCHIVES
-              </span>
-            </TextMaskReveal>
             <TextLineReveal
               as="h1"
               text={t('projects') || 'Projeler'}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-neutral-900 tracking-tight uppercase font-sans"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-neutral-900 tracking-tight uppercase font-oswald"
               delay={80}
               stagger={65}
             />

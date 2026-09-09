@@ -86,7 +86,11 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
                 initial={{scaleX: 0}}
                 animate={{scaleX: 1}}
                 exit={{scaleX: 0}}
-                transition={{duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.04}}
+                transition={{
+                  duration: 0.85,
+                  ease: [0.16, 1, 0.3, 1],
+                  delay: 0.04,
+                }}
               />
             </div>
           </motion.div>

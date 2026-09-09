@@ -60,7 +60,6 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
     onLocaleChange,
     onToggleProductsMenu,
     onCloseAll,
-    setIsMobileMenuOpen,
     setIsMobileProductsMenuOpen,
     setSubscribeEmail,
     subscribeEmailService,

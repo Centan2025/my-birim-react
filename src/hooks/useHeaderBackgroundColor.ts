@@ -4,6 +4,7 @@ import {isDarkHeroPage} from '../utils/headerUtils'
 interface HeaderBackgroundParams {
   isMobile: boolean
   isProductsOpen: boolean
+  isProductsClosing?: boolean
   headerOpacity: number
   isMobileMenuOpen: boolean
   isMobileMenuClosing?: boolean
@@ -16,6 +17,7 @@ interface HeaderBackgroundParams {
 export function useHeaderBackgroundColor({
   isMobile,
   isProductsOpen,
+  isProductsClosing = false,
   headerOpacity,
   isMobileMenuOpen,
   isMobileMenuClosing = false,
@@ -45,7 +47,7 @@ export function useHeaderBackgroundColor({
       return 'rgba(255, 255, 255, 0.95)'
     }
 
-    if (isProductsOpen && !isMobile) {
+    if ((isProductsOpen || isProductsClosing) && !isMobile) {
       return 'rgba(0, 0, 0, 0.85)'
     }
 
