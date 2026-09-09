@@ -135,7 +135,9 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                         letterSpacing: 0,
                       }}
                     >
-                      <span className="flex items-center justify-center leading-none">{selectionCount}</span>
+                      <span className="flex items-center justify-center leading-none">
+                        {selectionCount}
+                      </span>
                     </span>
                   )}
                 </button>
