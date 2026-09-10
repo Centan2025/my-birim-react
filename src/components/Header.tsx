@@ -39,6 +39,10 @@ export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
+  const isMobileMenuOpenRef = useRef(isMobileMenuOpen)
+  isMobileMenuOpenRef.current = isMobileMenuOpen
+  const isMobileMenuClosingRef = useRef(isMobileMenuClosing)
+  isMobileMenuClosingRef.current = isMobileMenuClosing
   const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null)
   const [categoryProducts, setCategoryProducts] = useState<Map<string, Product[]>>(new Map())
@@ -223,9 +227,12 @@ export function Header() {
     // kapanma animasyonunu yarıda kesip header'ı aniden beyaza döndürme.
     // Menü panelinin kapanma animasyonu bitene kadar header menü overlay durumunda kalsın,
     // animasyon bittikten sonra yumuşak bir geçişle yeni sayfanın rengine dönsün.
+    const wasMobileMenuOpen = isMobileMenuOpenRef.current
+    const wasMobileMenuClosing = isMobileMenuClosingRef.current
+
     if (
       isMobile &&
-      (isMobileMenuOpen || isMobileMenuClosing || mobileMenuCloseTimeoutRef.current)
+      (wasMobileMenuOpen || wasMobileMenuClosing || mobileMenuCloseTimeoutRef.current)
     ) {
       setIsMobileMenuOpen(false)
       setIsMobileProductsMenuOpen(false)
