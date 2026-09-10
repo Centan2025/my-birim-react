@@ -120,7 +120,8 @@ export const productDimensionImage = defineType({
         title: title || 'İsimsiz Ölçü Görseli',
         media: renderPreviewMedia(
           finalUrl,
-          (selection as Record<string, unknown>).mediaType as string || (selection as Record<string, unknown>).type as string,
+          ((selection as Record<string, unknown>).mediaType as string) ||
+            ((selection as Record<string, unknown>).type as string),
           !!mirrored,
         ),
       }
