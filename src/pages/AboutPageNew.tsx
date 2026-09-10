@@ -150,8 +150,8 @@ const MediaGallery = ({media, alt}: MediaGalleryProps) => {
                         loop
                         playsInline
                       />
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-300 flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-90 transition-opacity">
                           <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
                         </div>
                       </div>
@@ -164,13 +164,12 @@ const MediaGallery = ({media, alt}: MediaGalleryProps) => {
                         srcMobile={m.urlMobile}
                         srcDesktop={m.urlDesktop}
                         alt={`${alt} ${idx + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-full object-cover brightness-[0.96] group-hover:brightness-100 transition-[filter] duration-500 ease-out"
                         crop={m.crop}
                         hotspot={m.hotspot}
                         origWidth={m.origWidth as number}
                         origHeight={m.origHeight as number}
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                     </div>
                   )}
                 </div>

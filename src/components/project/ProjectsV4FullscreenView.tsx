@@ -272,7 +272,6 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
               ? project.date
               : toPlainText(project.date ? t(project.date as never) : '')
           const year = typeof pDate === 'string' ? pDate.match(/\d{4}/)?.[0] || pDate : ''
-          const excerpt = project.excerpt ? toPlainText(t(project.excerpt as never)) : ''
           const coverUrl =
             typeof project.cover === 'string' ? project.cover : project.cover?.url || ''
 
@@ -350,14 +349,8 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
                     </div>
                   </div>
 
-                  {/* Right Column: Excerpt & Pure Typographic Text Link */}
-                  <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-end bg-transparent p-0">
-                    {excerpt ? (
-                      <p className="text-xs sm:text-sm text-white/85 font-light leading-relaxed line-clamp-3 sm:line-clamp-4 mb-4 drop-shadow-sm font-mono">
-                        {excerpt}
-                      </p>
-                    ) : null}
-
+                  {/* Right Column: Pure Typographic Text Link */}
+                  <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-end lg:items-end bg-transparent p-0">
                     {/* Direct Text Link without box/button */}
                     <div className="inline-flex items-center gap-2.5 text-xs sm:text-sm uppercase tracking-[0.25em] font-medium text-white/90 hover:text-white w-fit font-mono">
                       <span>{isTr ? 'Projeyi İncele' : 'Explore Project'}</span>

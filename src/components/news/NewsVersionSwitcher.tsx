@@ -3,8 +3,8 @@ import {motion} from 'framer-motion'
 import {useTranslation} from '../../i18n'
 
 export interface NewsVersionSwitcherProps {
-  activeVersion: 'v1' | 'v2'
-  onChange: (version: 'v1' | 'v2') => void
+  activeVersion: 'v1' | 'v2' | 'v3'
+  onChange: (version: 'v1' | 'v2' | 'v3') => void
 }
 
 export const NewsVersionSwitcher: React.FC<NewsVersionSwitcherProps> = ({
@@ -14,9 +14,10 @@ export const NewsVersionSwitcher: React.FC<NewsVersionSwitcherProps> = ({
   const {locale} = useTranslation()
   const isTr = locale === 'tr'
 
-  const versions: {id: 'v1' | 'v2'; label: string; descTr: string; descEn: string}[] = [
+  const versions: {id: 'v1' | 'v2' | 'v3'; label: string; descTr: string; descEn: string}[] = [
     {id: 'v1', label: 'V1', descTr: 'Klasik', descEn: 'Classic'},
-    {id: 'v2', label: 'V2', descTr: 'Editoryal', descEn: 'Editorial'},
+    {id: 'v2', label: 'V2', descTr: 'Dikey Kart', descEn: 'Vertical'},
+    {id: 'v3', label: 'V3', descTr: 'Dizin', descEn: 'Index'},
   ]
 
   return (
@@ -34,7 +35,7 @@ export const NewsVersionSwitcher: React.FC<NewsVersionSwitcherProps> = ({
               role="tab"
               aria-selected={isActive}
               onClick={() => onChange(v.id)}
-              className={`relative px-3.5 sm:px-4 py-1.5 text-xs font-mono font-medium tracking-wider uppercase transition-colors duration-200 rounded-none cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-white ${
+              className={`relative px-3 sm:px-3.5 py-1.5 text-xs font-mono font-medium tracking-wider uppercase transition-colors duration-200 rounded-none cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-white ${
                 isActive ? 'text-black font-semibold' : 'text-neutral-300 hover:text-white'
               }`}
               title={`${v.label} (${isTr ? v.descTr : v.descEn})`}
@@ -59,3 +60,7 @@ export const NewsVersionSwitcher: React.FC<NewsVersionSwitcherProps> = ({
     </aside>
   )
 }
+
+export default NewsVersionSwitcher
+
+

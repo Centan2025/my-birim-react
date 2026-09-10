@@ -1,6 +1,5 @@
 import {useState, useMemo} from 'react'
 import {Link} from 'react-router-dom'
-import {motion} from 'framer-motion'
 import {ArrowRight, Search, X} from 'lucide-react'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
@@ -35,24 +34,25 @@ const getCategoryLabel = (
   return (t('news_press') || 'BASIN').toLocaleUpperCase(loc)
 }
 
-export function NewsPageV2() {
+export function NewsPageV3() {
   const {data: news = [], isLoading: loading} = useNews()
   const {t, locale} = useTranslation()
   const isTr = locale === 'tr'
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [activeNewsId, setActiveNewsId] = useState<string | null>(null)
 
   // SEO meta
   useSEO({
-    title: `BIRIM - ${t('news') || 'Haberler'} | Dikey Kartlar`,
-    description: 'BIRIM ile ilgili güncel haberler, basın içerikleri ve editoryal duyurular.',
+    title: `BIRIM - ${t('news') || 'Haberler'} | Görsel Dizin`,
+    description: 'BIRIM ile ilgili güncel haberler, basın içerikleri ve görsel editoryal akış.',
     type: 'article',
     siteName: 'BIRIM',
     locale: isTr ? 'tr_TR' : 'en_US',
     section: 'News',
   })
 
-  // Pre-process items for image and category label
+  // Pre-process news
   const processedNews = useMemo(() => {
     return news.map(item => {
       const imageUrl =
@@ -125,7 +125,7 @@ export function NewsPageV2() {
     })
   }, [processedNews, selectedCategory, searchQuery, t])
 
-  // Predefined Categories (no counts)
+  // Categories without count
   const categories = useMemo(() => {
     const predefined = [
       {id: 'all', label: t('news_all') || 'TÜMÜ'},
@@ -155,6 +155,15 @@ export function NewsPageV2() {
       })
     })
   }, [processedNews, t])
+
+  // Currently focused article for the large sticky visual frame
+  const currentFeaturedItem = useMemo(() => {
+    if (activeNewsId) {
+      const found = filteredNews.find(item => item.id === activeNewsId)
+      if (found) return found
+    }
+    return filteredNews[0] || null
+  }, [activeNewsId, filteredNews])
 
   if (loading) {
     return (
@@ -187,7 +196,7 @@ export function NewsPageV2() {
       {/* Filtre ve Arama Alanı */}
       <div className={containerClass + ' mb-8 md:mb-12'}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1 md:pt-2 pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
-          {/* Kategoriler (Adetler kaldırıldı) */}
+          {/* Kategoriler */}
           <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar py-1">
             {categories.map(cat => {
               const isActive = selectedCategory === cat.id
@@ -235,7 +244,7 @@ export function NewsPageV2() {
         </div>
       </div>
 
-      {/* Dikey Kart Formatında Sade Haber Akışı (Minimal Vertical Cards) */}
+      {/* Görsel Ağırlıklı & Sade Split-Screen Akışı (Visual-Centric Editorial Split) */}
       <main className={containerClass}>
         {filteredNews.length === 0 ? (
           <div className="py-20 text-center flex flex-col items-center justify-center">
@@ -253,75 +262,125 @@ export function NewsPageV2() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 lg:gap-12">
-            {filteredNews.map((item, index) => {
-              const title = t(item.title)
-              const cardImage = item.imageUrl
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+            {/* Sol Kolon: Büyük Mimari Görsel Çerçevesi (Smooth Crossfade Showcase) */}
+            <div className="hidden lg:block lg:col-span-6 sticky top-28 select-none">
+              {currentFeaturedItem && (
+                <div className="flex flex-col">
+                  {/* Görsel Üstü Minimal Meta Başlık (Option 2) */}
+                  <div className="flex items-center justify-between pb-3 px-1 text-[11px] font-mono tracking-[0.25em] text-neutral-500 dark:text-neutral-400 uppercase font-light border-b border-black/[0.04] dark:border-white/[0.06] mb-3 transition-colors duration-300">
+                    <span>{currentFeaturedItem.categoryLabel}</span>
+                    <span className="text-neutral-400 dark:text-neutral-600 font-mono tracking-widest text-[10px]">BIRIM</span>
+                  </div>
 
-              return (
-                <motion.article
-                  key={item.id}
-                  initial={{opacity: 0, y: 35}}
-                  whileInView={{opacity: 1, y: 0}}
-                  viewport={{once: true, margin: '-40px'}}
-                  transition={{
-                    duration: 0.65,
-                    ease: [0.22, 1, 0.36, 1],
-                    delay: Math.min((index % 6) * 0.08, 0.45),
-                  }}
-                  className="group relative flex flex-col h-full bg-transparent border border-black/[0.06] dark:border-white/[0.08] hover:border-black/20 dark:hover:border-white/25 transition-colors duration-300"
-                >
                   <Link
-                    to={`/news/${item.id}`}
-                    className="flex flex-col h-full focus:outline-none"
+                    to={`/news/${currentFeaturedItem.id}`}
+                    className="group relative block w-full aspect-[4/3] xl:aspect-[16/11] overflow-hidden bg-neutral-900 border border-black/[0.08] dark:border-white/[0.1] shadow-2xl focus:outline-none"
                   >
-                    {/* Dikey Kart Görsel Alanı (Sade, rozetsiz 4:5 Dikey Görsel) */}
-                    <div className="relative w-full aspect-[4/5] overflow-hidden bg-neutral-100 dark:bg-neutral-900 select-none">
-                      {cardImage ? (
+                    {/* Katmanlı Yumuşak Geçişli Görseller (Smooth Stacked Crossfade) */}
+                    {filteredNews.map(item => {
+                      const isCurrent = item.id === currentFeaturedItem.id
+                      if (!item.imageUrl) return null
+                      return (
+                        <div
+                          key={item.id}
+                          className={`absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out ${
+                            isCurrent ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                          }`}
+                        >
+                          <OptimizedImage
+                            src={item.imageUrl}
+                            alt={t(item.title)}
+                            className="w-full h-full object-cover object-center"
+                            quality={95}
+                            loading="eager"
+                            crop={typeof item.mainImage === 'object' ? item.mainImage.crop : undefined}
+                            hotspot={typeof item.mainImage === 'object' ? item.mainImage.hotspot : undefined}
+                            origWidth={typeof item.mainImage === 'object' ? ((item.mainImage as Record<string, unknown>)['origWidth'] as number) : undefined}
+                            origHeight={typeof item.mainImage === 'object' ? ((item.mainImage as Record<string, unknown>)['origHeight'] as number) : undefined}
+                          />
+                        </div>
+                      )
+                    })}
+
+                    {/* Hafif Degrade Katmanı: Aşağısı daha koyu, yukarısı açık */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent z-20 pointer-events-none" />
+
+                    {/* Alt Tıklanabilir İnceleme İpucu */}
+                    <div className="absolute inset-x-0 bottom-0 p-6 flex items-end justify-between z-20 pointer-events-none">
+                      <span className="text-sm font-mono text-white/90 uppercase tracking-widest flex items-center gap-2">
+                        <span>{isTr ? 'Haberi Görüntüle' : 'View Article'}</span>
+                        <ArrowRight className="w-4 h-4 text-white" />
+                      </span>
+                    </div>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Sağ Kolon: Sade ve Akıcı Tipografik Liste (Sakin, animasyonsuz metinler) */}
+            <div className="lg:col-span-6 flex flex-col border-t border-black/[0.08] dark:border-white/[0.08]">
+              {filteredNews.map((item) => {
+                const title = t(item.title)
+                const isSelected = currentFeaturedItem?.id === item.id
+
+                return (
+                  <article
+                    key={item.id}
+                    onMouseEnter={() => setActiveNewsId(item.id)}
+                    className={`group border-b border-black/[0.08] dark:border-white/[0.08] transition-colors duration-200 ${
+                      isSelected
+                        ? 'bg-black/[0.03] dark:bg-white/[0.04]'
+                        : 'hover:bg-black/[0.015] dark:hover:bg-white/[0.02]'
+                    }`}
+                  >
+                    {/* Mobil Görsel (Sadece mobil/küçük ekranlarda kart üstünde gösterilir) */}
+                    <div className="lg:hidden w-full aspect-[16/9] overflow-hidden bg-neutral-900 mt-4 select-none">
+                      {item.imageUrl ? (
                         <OptimizedImage
-                          src={cardImage}
+                          src={item.imageUrl}
                           alt={title}
-                          className="w-full h-full object-cover object-center group-hover:opacity-95 transition-opacity duration-300"
-                          quality={90}
-                          loading={index < 3 ? 'eager' : 'lazy'}
-                          crop={typeof item.mainImage === 'object' ? item.mainImage.crop : undefined}
-                          hotspot={typeof item.mainImage === 'object' ? item.mainImage.hotspot : undefined}
-                          origWidth={typeof item.mainImage === 'object' ? ((item.mainImage as Record<string, unknown>)['origWidth'] as number) : undefined}
-                          origHeight={typeof item.mainImage === 'object' ? ((item.mainImage as Record<string, unknown>)['origHeight'] as number) : undefined}
+                          className="w-full h-full object-cover"
+                          quality={85}
+                          loading="lazy"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-neutral-200 dark:bg-neutral-800 text-neutral-400 font-mono text-xs">
+                        <div className="w-full h-full flex items-center justify-center bg-neutral-900 text-neutral-600 font-mono text-xs">
                           BIRIM
                         </div>
                       )}
                     </div>
 
-                    {/* Dikey Kart Tipografi Alanı (Kategori, Başlık ve Haberi Oku Butonu) */}
-                    <div className="flex flex-col flex-grow p-6 sm:p-7 justify-between gap-5">
-                      <div className="flex flex-col gap-2">
-                        {/* Kategori Etiketi */}
-                        <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-neutral-400 dark:text-neutral-500 font-light">
-                          {item.categoryLabel}
-                        </span>
+                    <Link
+                      to={`/news/${item.id}`}
+                      className="flex flex-col py-6 sm:py-7 px-2 sm:px-4 gap-3 focus:outline-none"
+                    >
+                      {/* Üst Kategori Etiketi */}
+                      <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-neutral-400 dark:text-neutral-500 font-light">
+                        {item.categoryLabel}
+                      </span>
 
-                        {/* Başlık */}
-                        <h2 className="text-lg sm:text-xl font-light text-[var(--text-primary)] group-hover:text-black dark:group-hover:text-white transition-colors duration-300 leading-snug uppercase tracking-tight font-sans line-clamp-2">
-                          {title}
-                        </h2>
-                      </div>
+                      {/* Haber Başlığı */}
+                      <h2
+                        className={`text-xl sm:text-2xl font-light uppercase tracking-tight font-sans transition-colors duration-200 leading-snug ${
+                          isSelected
+                            ? 'text-black dark:text-white'
+                            : 'text-[var(--text-primary)] group-hover:text-black dark:group-hover:text-white'
+                        }`}
+                      >
+                        {title}
+                      </h2>
 
                       {/* Haberi Oku Butonu */}
-                      <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between">
-                        <span className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] font-medium text-[var(--text-primary)]">
-                          <span>{isTr ? 'Haberi Oku' : 'Read Article'}</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-[var(--text-primary)]" />
-                        </span>
+                      <div className="pt-2 flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] font-medium text-[var(--text-primary)]">
+                        <span>{isTr ? 'Haberi Oku' : 'Read Article'}</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-[var(--text-primary)]" />
                       </div>
-                    </div>
-                  </Link>
-                </motion.article>
-              )
-            })}
+                    </Link>
+                  </article>
+                )
+              })}
+            </div>
           </div>
         )}
       </main>
@@ -329,5 +388,4 @@ export function NewsPageV2() {
   )
 }
 
-export default NewsPageV2
-
+export default NewsPageV3

@@ -694,10 +694,9 @@ export function FactoryPageV2() {
                             src={item.image || item.fallbackImage}
                             fallbackSrc={item.fallbackImage}
                             alt={item.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="w-full h-full object-cover brightness-[0.96] group-hover:brightness-100 transition-[filter] duration-500 ease-out"
                           />
                         </ProductCardReveal>
-                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300 pointer-events-none" />
                       </div>
 
                       {/* Açıklama Metni - Görselin altında */}
@@ -877,10 +876,9 @@ export function FactoryPageV2() {
                           src={currentDisciplineImage}
                           fallbackSrc={activeDiscipline.fallbackImage}
                           alt={activeDiscipline.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="w-full h-full object-cover brightness-[0.96] group-hover:brightness-100 transition-[filter] duration-500 ease-out"
                         />
                       </ProductCardReveal>
-                      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300 pointer-events-none" />
                     </div>
                   </div>
                 </motion.div>
@@ -1047,8 +1045,8 @@ export function FactoryPageV2() {
                               loop
                               playsInline
                             />
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-300 flex items-center justify-center">
-                              <div className="w-12 h-12 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-90 group-hover:scale-110 transition-transform">
+                            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-500 flex items-center justify-center">
+                              <div className="w-12 h-12 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-90 transition-opacity">
                                 <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
                               </div>
                             </div>
@@ -1061,15 +1059,14 @@ export function FactoryPageV2() {
                               srcMobile={m.urlMobile}
                               srcDesktop={m.urlDesktop}
                               alt={captionText || `${fallbackAlt} ${idx + 1}`}
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              className="w-full h-full object-cover brightness-[0.96] group-hover:brightness-100 transition-[filter] duration-500 ease-out"
                               crop={m.crop}
                               hotspot={m.hotspot}
                               origWidth={m.origWidth as number}
                               origHeight={m.origHeight as number}
                             />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                             {captionText && (
-                              <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/70 to-transparent text-white text-xs font-light opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/70 to-transparent text-white text-xs font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                                 {captionText}
                               </div>
                             )}

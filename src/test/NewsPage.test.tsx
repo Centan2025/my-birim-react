@@ -63,7 +63,7 @@ const renderComponent = (initialEntries = ['/news']) => {
   )
 }
 
-describe('NewsPage & Version Switching', () => {
+describe('NewsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
@@ -73,41 +73,43 @@ describe('NewsPage & Version Switching', () => {
     } as unknown as ReturnType<typeof newsHooks.useNews>)
   })
 
-  it('renders V1 Klasik by default', () => {
+  it('renders V1 by default', () => {
     renderComponent(['/news'])
-    // Switcher presence
-    expect(screen.getByText('V1')).toBeDefined()
-    expect(screen.getByText('V2')).toBeDefined()
-
-    // Title in V1
     expect(screen.getByRole('heading', {level: 1})).toBeDefined()
     expect(screen.getByText('Birim Yeni Koleksiyonu Milano Tasarım Haftasında')).toBeDefined()
+    expect(screen.getByText('V1')).toBeDefined()
+    expect(screen.getByText('V2')).toBeDefined()
+    expect(screen.getByText('V3')).toBeDefined()
   })
 
-  it('renders V2 Editoryal when query parameter v=2 is present', () => {
+  it('renders V2 (Dikey Kartlar) when query param v=2 is present', () => {
     renderComponent(['/news?v=2'])
-    // Should render V2 elements
-    expect(screen.getByText('Bento')).toBeDefined()
-    expect(screen.getByText('Dizin')).toBeDefined()
-    expect(screen.getByText(/EDİTÖRÜN SEÇTİKLERİ/i)).toBeDefined()
-    expect(screen.getByText(/HABERİ OKU/i)).toBeDefined()
+    expect(screen.getByRole('heading', {level: 1})).toBeDefined()
+    expect(screen.getByPlaceholderText('Haberlerde ara...')).toBeDefined()
+    expect(screen.getAllByText(/Haberi Oku/i).length).toBeGreaterThan(0)
   })
 
-  it('switches between V1 and V2 when switcher buttons are clicked', () => {
+  it('renders V3 (Dizin) when query param v=3 is present', () => {
+    renderComponent(['/news?v=3'])
+    expect(screen.getByRole('heading', {level: 1})).toBeDefined()
+    expect(screen.getByPlaceholderText('Haberlerde ara...')).toBeDefined()
+  })
+
+  it('switches between versions on switcher click', () => {
     renderComponent(['/news'])
 
-    // Click V2 button
-    const v2Button = screen.getByTitle('V2 (Editoryal)')
-    fireEvent.click(v2Button)
+    const v3Button = screen.getByTitle(/V3/i)
+    fireEvent.click(v3Button)
+    expect(localStorage.getItem('birim_news_view_version')).toBe('v3')
 
-    // Should now be on V2
-    expect(screen.getByText('Bento')).toBeDefined()
-    expect(screen.getByText('Dizin')).toBeDefined()
+    const v2Button = screen.getByTitle(/V2/i)
+    fireEvent.click(v2Button)
     expect(localStorage.getItem('birim_news_view_version')).toBe('v2')
 
-    // Click V1 button
-    const v1Button = screen.getByTitle('V1 (Klasik)')
+    const v1Button = screen.getByTitle(/V1/i)
     fireEvent.click(v1Button)
     expect(localStorage.getItem('birim_news_view_version')).toBe('v1')
   })
 })
+
+
