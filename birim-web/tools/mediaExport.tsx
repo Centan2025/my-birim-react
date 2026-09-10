@@ -1,6 +1,6 @@
 import {DownloadIcon} from '@sanity/icons'
 import {definePlugin} from 'sanity'
-import MediaExportTool from './mediaExport/MediaExportTool'
+import {MediaExportTool} from './mediaExport/MediaExportTool'
 
 export const mediaExportTool = definePlugin({
   name: 'media-export',

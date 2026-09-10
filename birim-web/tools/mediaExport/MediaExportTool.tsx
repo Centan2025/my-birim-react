@@ -218,7 +218,7 @@ interface ExportScope {
   news: boolean
 }
 
-export default function MediaExportTool() {
+export function MediaExportTool() {
   const client = useClient({apiVersion: '2025-01-01'})
   const toast = useToast()
 
@@ -1515,3 +1515,5 @@ export default function MediaExportTool() {
     </Box>
   )
 }
+
+export default MediaExportTool
