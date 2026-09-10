@@ -1,6 +1,6 @@
 import {useState, useEffect, useMemo} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
-import {getContactPageContent, mapImage} from '../services/cms'
+import {getContactPageContent, mapImage, type SanityImageLike} from '../services/cms'
 import type {ContactPageContent, ContactLocation, NewsMedia} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
@@ -179,8 +179,28 @@ export function ContactPageV2() {
   const activeLocation: ContactLocation =
     locations[selectedLocationIndex] ?? locations[0] ?? DEFAULT_FALLBACK_LOCATION
 
+  const getLocationCoverImage = (loc: ContactLocation): string => {
+    const directImage =
+      (loc as {imageR2?: unknown}).imageR2 || (loc as {image?: {url?: string}}).image
+    if (directImage) {
+      if (typeof directImage === 'string') return directImage
+      if (typeof (directImage as {url?: string})?.url === 'string') {
+        return (directImage as {url: string}).url
+      }
+      const mapped = mapImage(directImage as SanityImageLike)
+      if (mapped) return mapped
+    }
+    return ''
+  }
+
   const getLocationMedia = (loc: ContactLocation, idx: number): NewsMedia[] => {
-    if (loc?.media && loc.media.length > 0) {
+    const coverUrl = getLocationCoverImage(loc)
+    const mediaList: NewsMedia[] = []
+    if (coverUrl) {
+      mediaList.push({type: 'image', url: coverUrl})
+    }
+
+    if (loc?.media && loc.media.length > 0 && loc.isMediaVisible !== false) {
       const parsed = loc.media
         .map(m => {
           let url = m.url || ''
@@ -191,7 +211,7 @@ export function ContactPageV2() {
               (m as {imageMobileR2?: unknown}).imageMobileR2 ||
               m.image
             if (rawImage) {
-              url = mapImage(rawImage) || ''
+              url = mapImage(rawImage as SanityImageLike) || ''
             }
             if (!url && m.type === 'image' && m.image?.asset?.url) url = m.image.asset.url
             if (m.type === 'video' && m.videoFile?.asset?.url) url = m.videoFile.asset.url
@@ -202,22 +222,12 @@ export function ContactPageV2() {
           }
           return {type: m.type || 'image', url}
         })
-        .filter(m => Boolean(m.url)) as NewsMedia[]
+        .filter(m => Boolean(m.url) && m.url !== coverUrl) as NewsMedia[]
 
-      if (parsed.length > 0) return parsed
+      mediaList.push(...parsed)
     }
 
-    const directImage =
-      (loc as {imageR2?: unknown}).imageR2 || (loc as {image?: {url?: string}}).image
-    if (directImage) {
-      const url =
-        typeof (directImage as {url?: string})?.url === 'string'
-          ? (directImage as {url: string}).url
-          : mapImage(directImage)
-      if (url) {
-        return [{type: 'image', url}]
-      }
-    }
+    if (mediaList.length > 0) return mediaList
 
     const fallback: string =
       DEFAULT_SPACE_IMAGES[idx % DEFAULT_SPACE_IMAGES.length] ?? DEFAULT_SPACE_IMAGES[0] ?? ''
@@ -278,8 +288,10 @@ export function ContactPageV2() {
         {/* Section 1: Architectural Location Cards Grid */}
         <div className={gridClass}>
           {locations.map((loc, idx) => {
+            const coverUrl = getLocationCoverImage(loc)
             const media = getLocationMedia(loc, idx)
             const mainImg: string =
+              coverUrl ||
               media[0]?.url ||
               DEFAULT_SPACE_IMAGES[idx % DEFAULT_SPACE_IMAGES.length] ||
               DEFAULT_SPACE_IMAGES[0] ||
