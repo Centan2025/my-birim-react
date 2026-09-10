@@ -206,6 +206,66 @@ export function CategoriesPage() {
                                 : undefined)
                             : undefined
                         }
+                        cropMobile={
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? ((category.displayImage as Record<string, unknown>)[
+                                'cropMobile'
+                              ] as import('../types').R2ImageMetadata['crop'])
+                            : undefined
+                        }
+                        cropDesktop={
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? ((category.displayImage as Record<string, unknown>)[
+                                'cropDesktop'
+                              ] as import('../types').R2ImageMetadata['crop'])
+                            : undefined
+                        }
+                        hotspotMobile={
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? ((category.displayImage as Record<string, unknown>)[
+                                'hotspotMobile'
+                              ] as import('../types').R2ImageMetadata['hotspot'])
+                            : undefined
+                        }
+                        hotspotDesktop={
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? ((category.displayImage as Record<string, unknown>)[
+                                'hotspotDesktop'
+                              ] as import('../types').R2ImageMetadata['hotspot'])
+                            : undefined
+                        }
+                        origWidth={
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? Number(
+                                (category.displayImage as Record<string, unknown>)['origWidth']
+                              ) || undefined
+                            : undefined
+                        }
+                        origHeight={
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? Number(
+                                (category.displayImage as Record<string, unknown>)['origHeight']
+                              ) || undefined
+                            : undefined
+                        }
+                        origWidthMobile={
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? Number(
+                                (category.displayImage as Record<string, unknown>)[
+                                  'origWidthMobile'
+                                ]
+                              ) || undefined
+                            : undefined
+                        }
+                        origHeightMobile={
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? Number(
+                                (category.displayImage as Record<string, unknown>)[
+                                  'origHeightMobile'
+                                ]
+                              ) || undefined
+                            : undefined
+                        }
                         isMirrored={
                           typeof category.displayImage === 'object' && category.displayImage
                             ? Boolean(

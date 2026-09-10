@@ -195,4 +195,30 @@ describe('OptimizedImage Mobile Crop & Metadata', () => {
     expect(styleAttr).toContain('--crop-scale-x-mobile: 256.6076%')
     expect(styleAttr).toContain('--crop-left-mobile: -78.5219%')
   })
+
+  it('renders mobile hero image with container sizing and contain mode without distortion', () => {
+    const cropMobileTayra = {x: 0.3011, y: 0.1151, width: 0.3897, height: 0.8518}
+
+    const {container} = render(
+      <OptimizedImage
+        src="https://birim-assets.web-birim.workers.dev/migration/products/tk0251-tayra/1785758162137-tayra-katalog-site1.webp"
+        srcMobile="https://birim-assets.web-birim.workers.dev/migration/products/tk0251-tayra/1786364424281-1785758162137-tayra-katalog-site1.webp"
+        alt="Tayra Hero"
+        cropMobile={cropMobileTayra}
+        origWidth={6042}
+        origHeight={3402}
+        origWidthMobile={6042}
+        origHeightMobile={3402}
+        className="w-full h-full max-md:object-contain md:object-cover rounded-none select-none"
+      />
+    )
+
+    const cropWrapper = container.querySelector('.responsive-crop-wrapper')
+    expect(cropWrapper).toBeInTheDocument()
+    expect(cropWrapper).toHaveClass('is-contain-mobile')
+    expect(cropWrapper).toHaveClass('is-portrait-crop-mobile')
+
+    const outerDiv = container.firstElementChild as HTMLElement
+    expect(outerDiv.style.containerType).toBe('size')
+  })
 })

@@ -627,7 +627,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const scaleYDesk = (1 / cropHDesk) * 100
   const effectiveLeftDesk = effectiveIsMirroredDesktop
     ? 1 - ((cropDesk?.x || 0) + cropWDesk)
-    : (cropDesk?.x || 0)
+    : cropDesk?.x || 0
   const leftDesk = -(effectiveLeftDesk / cropWDesk) * 100
   const topDesk = -((cropDesk?.y || 0) / cropHDesk) * 100
 
@@ -650,7 +650,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const aspectDesk = (cropWDesk * imgWDesk) / (cropHDesk * imgHDesk)
 
   const classList = className.split(' ')
-  const hasExplicitContain = classList.some((c: string) => c === 'object-contain')
+  const hasExplicitContain = classList.some(
+    (c: string) =>
+      c === 'object-contain' || c.endsWith('object-contain') || c.includes('object-contain')
+  )
 
   const isOverflowingAspect =
     aspectDesk > 1.15 ||
@@ -687,7 +690,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const scaleYMob = (1 / cropHMob) * 100
   const effectiveLeftMob = effectiveIsMirroredMobile
     ? 1 - ((cropMob?.x || 0) + cropWMob)
-    : (cropMob?.x || 0)
+    : cropMob?.x || 0
   const leftMob = -(effectiveLeftMob / cropWMob) * 100
   const topMob = -((cropMob?.y || 0) / cropHMob) * 100
 
@@ -759,13 +762,19 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     const activeHsDesk = hotspotDesktop || hotspot
 
-    const rawFocalXDesk = activeHsDesk
-      ? activeHsDesk.x * 100
-      : ((cropDesk?.x || 0) + cropWDesk / 2) * 100
+    const rawFocalXDesk =
+      hasCropDesktop && cropDesk
+        ? ((cropDesk.x || 0) + cropWDesk / 2) * 100
+        : activeHsDesk
+          ? activeHsDesk.x * 100
+          : 50
     const focalXDesk = effectiveIsMirroredDesktop ? 100 - rawFocalXDesk : rawFocalXDesk
-    const focalYDesk = activeHsDesk
-      ? activeHsDesk.y * 100
-      : ((cropDesk?.y || 0) + cropHDesk / 2) * 100
+    const focalYDesk =
+      hasCropDesktop && cropDesk
+        ? ((cropDesk.y || 0) + cropHDesk / 2) * 100
+        : activeHsDesk
+          ? activeHsDesk.y * 100
+          : 50
 
     const rawFocalXMob = isCustomHotspot(hotspotMobile)
       ? hotspotMobile!.x * 100
@@ -889,6 +898,22 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       ? 'items-stretch h-full'
       : 'items-center'
 
+  const isContainerSized =
+    isHeightDefined ||
+    isCoverMode ||
+    classList.some(
+      c =>
+        c.includes('h-full') ||
+        c.includes('h-screen') ||
+        c.startsWith('h-[') ||
+        c.includes('aspect-')
+    )
+
+  const outerContainerStyle: React.CSSProperties = {
+    ...style,
+    ...(isContainerSized ? ({containerType: 'size'} as React.CSSProperties) : {}),
+  }
+
   if (useArtDirection) {
     const mobileSrcSet = (srcMobile ? generateSrcSet(srcMobile) : '') || undefined
     const desktopSrcSet = (activeDesktopSrc ? generateSrcSet(activeDesktopSrc) : '') || undefined
@@ -942,7 +967,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return (
       <div
         className={`relative overflow-hidden flex ${alignFlexClass} justify-center ${className}`}
-        style={style}
+        style={outerContainerStyle}
         onClick={onClick}
         onKeyDown={
           onClick
@@ -1002,7 +1027,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   return (
     <div
       className={`relative overflow-hidden flex ${alignFlexClass} justify-center ${className}`}
-      style={style}
+      style={outerContainerStyle}
       onClick={onClick}
       onKeyDown={
         onClick

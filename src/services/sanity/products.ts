@@ -444,7 +444,7 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
     let urlDesktop: string | undefined = undefined
 
     if (coverItem['type'] === 'image' || !coverItem['type']) {
-      url =
+      const desktopUrl =
         mapImage(coverItem['imageR2'] as SanityImageLike) ||
         mapImage(coverItem['image'] as SanityImageLike) ||
         rewriteR2Url(coverItem['url'] as string)
@@ -456,8 +456,9 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
       urlDesktop = (coverItem['imageDesktopR2'] as Record<string, string>)?.['url']
         ? mapImage(coverItem['imageDesktopR2'] as SanityImageLike)
         : undefined
+      url = desktopUrl || urlMobile || urlDesktop || ''
     } else if (coverItem['type'] === 'video') {
-      url =
+      const defaultVideoUrl =
         mapImage(coverItem['videoFileR2'] as SanityImageLike) ||
         rewriteR2Url(coverItem['url'] as string)
       urlMobile = (coverItem['videoFileMobileR2'] as Record<string, string>)?.['url']
@@ -466,6 +467,7 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
       urlDesktop = (coverItem['videoFileDesktopR2'] as Record<string, string>)?.['url']
         ? mapImage(coverItem['videoFileDesktopR2'] as SanityImageLike)
         : undefined
+      url = defaultVideoUrl || urlMobile || urlDesktop || ''
     } else if (coverItem['type'] === 'youtube') {
       url = (coverItem['url'] as string) || ''
     }
