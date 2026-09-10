@@ -735,40 +735,32 @@ export function HomePage() {
         return (
           <section
             id="home-quick-banner"
-            className={`w-full bg-[#484d54] text-white transition-colors duration-500 font-roboto ${
-              !hasTextContent ? 'py-3 md:py-4' : 'py-3.5 md:py-4'
+            className={`w-full bg-[#f2f3f5] dark:bg-[#18191b] border-y border-[var(--border-primary)] text-[var(--text-primary)] transition-colors duration-500 font-roboto ${
+              !hasTextContent ? 'py-6 md:py-8 lg:py-10' : 'py-6 md:py-8 lg:py-10'
             }`}
           >
-            <div
-              className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left ${
-                !hasTextContent ? 'justify-center min-h-[44px] md:min-h-0' : 'min-h-[44px]'
-              }`}
-            >
-              {hasTextContent ? (
-                <div className="space-y-1">
+            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex flex-col items-center justify-center gap-3 text-center min-h-[64px] md:min-h-[80px]">
+              {hasTextContent && (
+                <div className="space-y-1.5 text-center">
                   {title ? (
-                    <h3 className="text-sm md:text-lg font-medium uppercase tracking-[0.08em] text-white font-roboto">
+                    <h3 className="text-base md:text-xl lg:text-2xl font-medium uppercase tracking-[0.08em] text-[var(--text-primary)] font-roboto">
                       {title}
                     </h3>
                   ) : null}
                   {subtitle ? (
-                    <p className="text-[11px] md:text-sm text-gray-200 font-normal tracking-[0.06em]">
+                    <p className="text-xs md:text-sm lg:text-base text-[var(--text-secondary)] font-normal tracking-[0.06em]">
                       {subtitle}
                     </p>
                   ) : null}
                 </div>
-              ) : (
-                <div className="hidden md:block" />
               )}
               {buttonText ? (
                 <Link
                   to={link}
-                  className={`group inline-flex items-center gap-2.5 text-white text-xs md:text-base uppercase tracking-[0.08em] font-medium hover:text-gray-200 transition-colors duration-300 py-1 ${
-                    !hasTextContent ? 'my-auto md:my-0 md:ml-auto' : 'md:ml-auto'
-                  }`}
+                  className="group inline-flex items-center gap-3 text-[var(--text-primary)] text-sm md:text-lg lg:text-xl uppercase tracking-[0.1em] font-medium hover:text-[var(--text-secondary)] transition-colors duration-300 py-1"
                 >
                   <span>{buttonText}</span>
-                  <span className="text-base md:text-lg font-normal transition-transform duration-300 group-hover:translate-x-1.5">
+                  <span className="text-lg md:text-xl font-normal transition-transform duration-300 group-hover:translate-x-2">
                     &gt;
                   </span>
                 </Link>
