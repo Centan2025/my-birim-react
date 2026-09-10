@@ -147,10 +147,38 @@ export function NewsPageV2() {
         ).toLowerCase()
         const catLabel = (item.categoryLabel || '').toLowerCase()
 
-        if (cat.id === 'press') return catRaw.includes('press') || catRaw.includes('basın') || catLabel.includes('press') || catLabel.includes('basın')
-        if (cat.id === 'events') return catRaw.includes('event') || catRaw.includes('exhibition') || catRaw.includes('sergi') || catRaw.includes('etkinlik') || catLabel.includes('event') || catLabel.includes('exhibition') || catLabel.includes('sergi') || catLabel.includes('etkinlik')
-        if (cat.id === 'awards') return catRaw.includes('award') || catRaw.includes('ödül') || catLabel.includes('award') || catLabel.includes('ödül')
-        if (cat.id === 'launch') return catRaw.includes('launch') || catRaw.includes('lansman') || catLabel.includes('launch') || catLabel.includes('lansman')
+        if (cat.id === 'press')
+          return (
+            catRaw.includes('press') ||
+            catRaw.includes('basın') ||
+            catLabel.includes('press') ||
+            catLabel.includes('basın')
+          )
+        if (cat.id === 'events')
+          return (
+            catRaw.includes('event') ||
+            catRaw.includes('exhibition') ||
+            catRaw.includes('sergi') ||
+            catRaw.includes('etkinlik') ||
+            catLabel.includes('event') ||
+            catLabel.includes('exhibition') ||
+            catLabel.includes('sergi') ||
+            catLabel.includes('etkinlik')
+          )
+        if (cat.id === 'awards')
+          return (
+            catRaw.includes('award') ||
+            catRaw.includes('ödül') ||
+            catLabel.includes('award') ||
+            catLabel.includes('ödül')
+          )
+        if (cat.id === 'launch')
+          return (
+            catRaw.includes('launch') ||
+            catRaw.includes('lansman') ||
+            catLabel.includes('launch') ||
+            catLabel.includes('lansman')
+          )
         return catRaw.includes(cat.id) || catLabel.includes(cat.id)
       })
     })
@@ -164,7 +192,8 @@ export function NewsPageV2() {
     )
   }
 
-  const containerClass = 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
+  const containerClass =
+    'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
 
   return (
     <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-20 lg:pt-20 pb-28">
@@ -240,7 +269,9 @@ export function NewsPageV2() {
         {filteredNews.length === 0 ? (
           <div className="py-20 text-center flex flex-col items-center justify-center">
             <p className="text-sm font-mono text-neutral-400 uppercase tracking-widest mb-4">
-              {isTr ? 'Aramanızla eşleşen haber bulunamadı.' : 'No news found matching your criteria.'}
+              {isTr
+                ? 'Aramanızla eşleşen haber bulunamadı.'
+                : 'No news found matching your criteria.'}
             </p>
             <button
               onClick={() => {
@@ -271,10 +302,7 @@ export function NewsPageV2() {
                   }}
                   className="group relative flex flex-col h-full bg-transparent border border-black/[0.06] dark:border-white/[0.08] hover:border-black/20 dark:hover:border-white/25 transition-colors duration-300"
                 >
-                  <Link
-                    to={`/news/${item.id}`}
-                    className="flex flex-col h-full focus:outline-none"
-                  >
+                  <Link to={`/news/${item.id}`} className="flex flex-col h-full focus:outline-none">
                     {/* Dikey Kart Görsel Alanı (Sade, rozetsiz 4:5 Dikey Görsel) */}
                     <div className="relative w-full aspect-[4/5] overflow-hidden bg-neutral-100 dark:bg-neutral-900 select-none">
                       {cardImage ? (
@@ -284,10 +312,24 @@ export function NewsPageV2() {
                           className="w-full h-full object-cover object-center group-hover:opacity-95 transition-opacity duration-300"
                           quality={90}
                           loading={index < 3 ? 'eager' : 'lazy'}
-                          crop={typeof item.mainImage === 'object' ? item.mainImage.crop : undefined}
-                          hotspot={typeof item.mainImage === 'object' ? item.mainImage.hotspot : undefined}
-                          origWidth={typeof item.mainImage === 'object' ? ((item.mainImage as Record<string, unknown>)['origWidth'] as number) : undefined}
-                          origHeight={typeof item.mainImage === 'object' ? ((item.mainImage as Record<string, unknown>)['origHeight'] as number) : undefined}
+                          crop={
+                            typeof item.mainImage === 'object' ? item.mainImage.crop : undefined
+                          }
+                          hotspot={
+                            typeof item.mainImage === 'object' ? item.mainImage.hotspot : undefined
+                          }
+                          origWidth={
+                            typeof item.mainImage === 'object'
+                              ? ((item.mainImage as Record<string, unknown>)['origWidth'] as number)
+                              : undefined
+                          }
+                          origHeight={
+                            typeof item.mainImage === 'object'
+                              ? ((item.mainImage as Record<string, unknown>)[
+                                  'origHeight'
+                                ] as number)
+                              : undefined
+                          }
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-neutral-200 dark:bg-neutral-800 text-neutral-400 font-mono text-xs">
@@ -330,4 +372,3 @@ export function NewsPageV2() {
 }
 
 export default NewsPageV2
-

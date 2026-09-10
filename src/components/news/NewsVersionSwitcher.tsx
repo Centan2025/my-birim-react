@@ -62,5 +62,3 @@ export const NewsVersionSwitcher: React.FC<NewsVersionSwitcherProps> = ({
 }
 
 export default NewsVersionSwitcher
-
-

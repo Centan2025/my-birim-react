@@ -535,8 +535,7 @@ export function HomePage() {
                 left: 0 !important;
                 right: 0 !important;
               }
-              .hero-page-container-mobile > div:first-child,
-              .hero-page-container-mobile > div:first-child[class*="relative"],
+              #home-hero-section,
               .hero-container-mobile {
                 height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;

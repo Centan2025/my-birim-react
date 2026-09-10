@@ -111,5 +111,3 @@ describe('NewsPage', () => {
     expect(localStorage.getItem('birim_news_view_version')).toBe('v1')
   })
 })
-
-

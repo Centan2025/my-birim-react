@@ -60,5 +60,3 @@ export function NewsPage() {
 }
 
 export default NewsPage
-
-

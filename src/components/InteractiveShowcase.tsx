@@ -242,7 +242,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  if (!items || items.length === 0 || isMobile) {
+  if (!items || items.length === 0) {
     return null
   }
 
