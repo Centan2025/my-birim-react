@@ -20,6 +20,7 @@ import {
   WarningOutlineIcon,
   RefreshIcon,
   CloseIcon,
+  LaunchIcon,
 } from '@sanity/icons'
 import {useClient} from 'sanity'
 import JSZip from 'jszip'
@@ -241,6 +242,7 @@ export default function MediaExportTool() {
   const [logs, setLogs] = useState<Array<{type: 'info' | 'success' | 'error'; message: string}>>([])
 
   const cancelRef = useRef(false)
+  const isInIframe = typeof window !== 'undefined' && window.self !== window.top
 
   const handleToggleScope = (key: keyof ExportScope) => {
     setScope((prev) => ({...prev, [key]: !prev[key]}))
@@ -1028,11 +1030,28 @@ export default function MediaExportTool() {
       }
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
-        toast.push({
-          status: 'error',
-          title: 'Klasör Hatası',
-          description: err?.message || 'Klasör seçiminde hata oluştu.',
-        })
+        const errMsg = String(err?.message || '')
+        const isFrameError =
+          err?.name === 'SecurityError' ||
+          errMsg.toLowerCase().includes('sub frame') ||
+          errMsg.toLowerCase().includes('cross origin') ||
+          errMsg.toLowerCase().includes('not allowed to show a file picker')
+
+        if (isFrameError) {
+          toast.push({
+            status: 'warning',
+            title: 'Tarayıcı Güvenlik Kısıtlaması',
+            description:
+              'Stüdyo gömülü (iframe) olarak çalıştığı için tarayıcı doğrudan klasör seçimine izin vermiyor. Lütfen hemen yandaki "ZIP Arşivi Olarak İndir" seçeneğini kullanın.',
+            duration: 8000,
+          })
+        } else {
+          toast.push({
+            status: 'error',
+            title: 'Klasör Hatası',
+            description: errMsg || 'Klasör seçiminde hata oluştu.',
+          })
+        }
       }
     } finally {
       setIsExporting(false)
@@ -1285,22 +1304,37 @@ export default function MediaExportTool() {
               </Grid>
 
               {/* Dışa Aktarma Eylemleri */}
-              <Flex gap={3} wrap="wrap">
-                <Button
-                  icon={FolderIcon}
-                  text="Klasör Seç ve Doğrudan Diske Yaz"
-                  tone="positive"
-                  onClick={() => handleExportDirectory()}
-                  disabled={isExporting || plannedItems.length === 0}
-                />
-                <Button
-                  icon={DownloadIcon}
-                  text="ZIP Arşivi Olarak İndir (.zip)"
-                  tone="primary"
-                  onClick={() => handleExportZip()}
-                  disabled={isExporting || plannedItems.length === 0}
-                />
-              </Flex>
+              <Stack space={3}>
+                <Flex gap={3} wrap="wrap">
+                  <Button
+                    icon={FolderIcon}
+                    text="Klasör Seç ve Doğrudan Diske Yaz"
+                    tone="positive"
+                    onClick={() => handleExportDirectory()}
+                    disabled={isExporting || plannedItems.length === 0}
+                  />
+                  <Button
+                    icon={DownloadIcon}
+                    text="ZIP Arşivi Olarak İndir (.zip)"
+                    tone="primary"
+                    onClick={() => handleExportZip()}
+                    disabled={isExporting || plannedItems.length === 0}
+                  />
+                  {isInIframe && (
+                    <Button
+                      icon={LaunchIcon}
+                      text="Stüdyoyu Ayrı Sekmede Aç"
+                      mode="ghost"
+                      onClick={() => window.open(window.location.href, '_blank')}
+                    />
+                  )}
+                </Flex>
+                {isInIframe && (
+                  <Text size={1} muted>
+                    💡 <em>Not: Stüdyo gömülü (iframe / Sanity Manage / önizleme) penceresinde çalıştığında tarayıcı güvenlik kuralı klasör seçimine izin vermez. <strong>"ZIP Arşivi Olarak İndir"</strong> seçeneğini kullanabilir veya <strong>"Stüdyoyu Ayrı Sekmede Aç"</strong> butonuna tıklayarak klasör seçimini doğrudan yapabilirsiniz.</em>
+                  </Text>
+                )}
+              </Stack>
             </Stack>
           </Card>
         )}

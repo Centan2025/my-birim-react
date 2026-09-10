@@ -988,7 +988,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             delay={50}
             threshold={0.1}
             width={isFullWidth || isCenter ? 'w-full' : 'w-auto'}
-            className={`w-full ${isSideBySide && hasTextContent ? 'max-md:h-auto md:h-full' : 'h-full'} ${isFullWidth || isCenter ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
+            className={`w-full ${isSideBySide && hasTextContent ? 'max-md:h-auto md:h-full' : 'max-md:h-auto md:h-full'} ${isFullWidth || isCenter ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
           >
             {block.mediaType === 'youtube' ? (
               <div

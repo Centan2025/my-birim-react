@@ -770,17 +770,14 @@ export function HomePage() {
       })()}
 
       {/* Content Blocks & Interactive Showcase Section */}
-      {((content?.contentBlocks && content.contentBlocks.length > 0) ||
-        (content?.interactiveShowcase && content.interactiveShowcase.length > 0)) && (
-        <HomeContentBlocks
-          blocks={content.contentBlocks || []}
-          isMobile={isMobile}
-          imageBorderClass={imageBorderClass}
-          interactiveShowcase={content.interactiveShowcase}
-          interactiveShowcaseTitle={content.interactiveShowcaseTitle}
-          interactiveShowcaseBlockIndex={content.interactiveShowcaseBlockIndex}
-        />
-      )}
+      <HomeContentBlocks
+        blocks={content?.contentBlocks || []}
+        isMobile={isMobile}
+        imageBorderClass={imageBorderClass}
+        interactiveShowcase={content?.interactiveShowcase}
+        interactiveShowcaseTitle={content?.interactiveShowcaseTitle}
+        interactiveShowcaseBlockIndex={content?.interactiveShowcaseBlockIndex}
+      />
     </div>
   )
 }

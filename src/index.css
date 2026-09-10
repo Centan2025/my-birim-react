@@ -858,8 +858,7 @@ img.responsive-mirror {
   align-self: center !important;
   aspect-ratio: var(--crop-aspect-desktop, auto);
 }
-.responsive-crop-wrapper.has-aspect.is-portrait-crop-desktop,
-.responsive-crop-wrapper.is-portrait-crop-desktop {
+.responsive-crop-wrapper.is-cover.is-portrait-crop-desktop {
   width: auto !important;
   height: 100% !important;
   max-height: 100% !important;
@@ -915,7 +914,7 @@ img.responsive-mirror {
   .responsive-crop-wrapper.is-contain-mobile {
     width: 100% !important;
     height: auto !important;
-    max-height: 100% !important;
+    max-height: none !important;
     max-width: 100% !important;
     margin-left: auto !important;
     margin-right: auto !important;
@@ -924,25 +923,11 @@ img.responsive-mirror {
     align-self: center !important;
     aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
   }
-  .responsive-crop-wrapper.has-aspect:not(.is-contain-mobile) {
+  .responsive-crop-wrapper.has-aspect {
     width: 100% !important;
     max-width: 100% !important;
-    max-height: 100% !important;
+    max-height: none !important;
     height: auto !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    margin-top: auto !important;
-    margin-bottom: auto !important;
-    align-self: center !important;
-    aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
-  }
-  .responsive-crop-wrapper.is-portrait-crop-mobile,
-  .responsive-crop-wrapper.has-aspect.is-portrait-crop-mobile,
-  .responsive-crop-wrapper.is-contain-mobile.is-portrait-crop-mobile {
-    width: auto !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    max-width: 100% !important;
     margin-left: auto !important;
     margin-right: auto !important;
     margin-top: auto !important;
@@ -968,7 +953,8 @@ img.responsive-mirror {
     align-self: center !important;
     aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
   }
-  .responsive-crop-wrapper.is-cover.has-mobile-crop.is-portrait-crop-mobile {
+  .responsive-crop-wrapper.is-cover.has-mobile-crop.is-portrait-crop-mobile,
+  .responsive-crop-wrapper.is-cover.is-portrait-crop-mobile {
     width: auto !important;
     height: 100% !important;
     max-width: 100% !important;
