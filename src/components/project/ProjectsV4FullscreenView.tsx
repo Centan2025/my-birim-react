@@ -20,7 +20,6 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
   const containerRef = useRef<HTMLDivElement>(null)
   const isScrollingRef = useRef(false)
   const currentIndexRef = useRef(0)
-  const animFrameIdRef = useRef<number | null>(null)
   const scrollAnimRef = useRef<number | null>(null)
 
   // Header'ı şeffaf ve elemanlarını (logo, linkler, ikonlar) beyaz yap
@@ -32,31 +31,39 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
   }, [setBrightness, resetHeaderTheme])
 
   // Ultra-Smooth, Yavaşlatılmış ve Sinematik Bölüm Bölüm (Section by Section) Scroll Sistemi
-  // + Ekrandan Çıkan Projelerin Yavaşça Koyulaşması (Smooth Exit Darkening)
+  // Ultra-Smooth, Yavaşlatılmış ve Sinematik Bölüm Bölüm (Section by Section) Scroll Sistemi
+  // + Ekrandan Çıkan Projelerin Yavaşça Koyulaşması & Gelenlerin Açılarak Belirmesi
   useEffect(() => {
     const container = containerRef.current
     if (!container || projects.length === 0) return
 
+    let isAnimating = false
+    let lastScrollTime = 0
+    const COOLDOWN_MS = 950
+    let wheelDeltaAccumulator = 0
+    let wheelTimer: ReturnType<typeof setTimeout> | null = null
     let touchStartY = 0
+    let touchAccumulator = 0
 
-    // 60FPS Dinamik Koyulaşma Hesaplama (Ekran dışına doğru kayan projeleri yumuşakça karartır)
+    // 60FPS Dinamik Koyulaşma & Açılma Hesaplama (Gelen sayfalar koyudan başlayıp açılarak gelir, çıkanlar kararır)
     const updateDarkenCurtains = () => {
-      const viewHeight = window.innerHeight || container.clientHeight || 1
+      const viewHeight = container.clientHeight || window.innerHeight || 1
       const sections = container.querySelectorAll<HTMLElement>('[data-project-index]')
 
       sections.forEach(section => {
         const rect = section.getBoundingClientRect()
-        // Projenin üst sınırdan ne kadar yukarı kaydığı (ekrandan çıkış mesafesi)
         const distPastTop = -rect.top
         let darkenProgress = 0
 
         if (distPastTop > 0) {
-          // Üstten ekrandan dışarı doğru çıkarken kademeli olarak koyulaşır (%0 -> %85 siyah perde)
-          darkenProgress = Math.min(0.85, (distPastTop / viewHeight) * 0.95)
+          // Üstten ekrandan dışarı doğru çıkarken kademeli olarak koyulaşır (%0 -> %90)
+          darkenProgress = Math.min(0.9, (distPastTop / viewHeight) * 0.95)
         } else if (rect.top > 0) {
-          // Alttan ekrana doğru yaklaşırken hafif yumuşak geçiş
-          const distFromCenter = rect.top / viewHeight
-          darkenProgress = Math.min(0.35, distFromCenter * 0.35)
+          // Alttan ekrana doğru yaklaşırken koyudan başlayıp açılarak gelir (%90 -> %0)
+          const distRatio = Math.min(1, rect.top / viewHeight)
+          darkenProgress = Math.min(0.9, distRatio * 0.9)
+        } else {
+          darkenProgress = 0
         }
 
         const curtain = section.querySelector('.scroll-darken-curtain') as HTMLElement | null
@@ -66,21 +73,28 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
       })
     }
 
-    // Özel 900ms İpeksi & Dengeli Easing Interpolasyonu (Cinematic Smooth Transition)
-    const smoothScrollTo = (targetY: number, duration = 900) => {
+    // Özel 850ms İpeksi & Dengeli Easing Interpolasyonu (Cinematic Smooth Transition)
+    const smoothScrollTo = (targetY: number, duration = 850) => {
       const currentContainer = containerRef.current
       if (!currentContainer) return
 
       const startY = currentContainer.scrollTop
       const distance = targetY - startY
       if (Math.abs(distance) < 2) {
+        currentContainer.scrollTop = targetY
+        isAnimating = false
         isScrollingRef.current = false
+        updateDarkenCurtains()
         return
+      }
+
+      if (scrollAnimRef.current !== null) {
+        cancelAnimationFrame(scrollAnimRef.current)
       }
 
       const startTime = performance.now()
 
-      // Akıcı ve seri cubic ease-in-out eğrisi
+      // Akıcı cubic ease-in-out eğrisi
       const easeInOutCubic = (t: number) =>
         t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 
@@ -97,46 +111,64 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
         } else {
           currentContainer.scrollTop = targetY
           scrollAnimRef.current = null
+          updateDarkenCurtains()
           setTimeout(() => {
+            isAnimating = false
             isScrollingRef.current = false
-          }, 60)
+          }, 120)
         }
       }
 
-      if (scrollAnimRef.current !== null) {
-        cancelAnimationFrame(scrollAnimRef.current)
-      }
       scrollAnimRef.current = requestAnimationFrame(step)
     }
 
     const scrollToSection = (index: number) => {
       if (index < 0 || index >= projects.length) return
+      isAnimating = true
       isScrollingRef.current = true
+      lastScrollTime = performance.now()
       currentIndexRef.current = index
 
-      const targetY = index * window.innerHeight
-      smoothScrollTo(targetY, 900)
+      const targetSection = container.querySelector<HTMLElement>(`[data-project-index="${index}"]`)
+      const targetY = targetSection ? targetSection.offsetTop : index * container.clientHeight
+      smoothScrollTo(targetY, 850)
     }
 
     const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) < 16) return
       e.preventDefault()
 
-      if (isScrollingRef.current) return
+      const now = performance.now()
+      if (isAnimating || isScrollingRef.current || now - lastScrollTime < COOLDOWN_MS) {
+        wheelDeltaAccumulator = 0
+        return
+      }
 
-      if (e.deltaY > 0) {
+      wheelDeltaAccumulator += e.deltaY
+
+      if (wheelTimer) clearTimeout(wheelTimer)
+      wheelTimer = setTimeout(() => {
+        wheelDeltaAccumulator = 0
+      }, 100)
+
+      const INTENT_THRESHOLD = 30
+
+      if (wheelDeltaAccumulator >= INTENT_THRESHOLD) {
         if (currentIndexRef.current < projects.length - 1) {
+          wheelDeltaAccumulator = 0
           scrollToSection(currentIndexRef.current + 1)
         }
-      } else {
+      } else if (wheelDeltaAccumulator <= -INTENT_THRESHOLD) {
         if (currentIndexRef.current > 0) {
+          wheelDeltaAccumulator = 0
           scrollToSection(currentIndexRef.current - 1)
         }
       }
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isScrollingRef.current) return
+      const now = performance.now()
+      if (isAnimating || isScrollingRef.current || now - lastScrollTime < COOLDOWN_MS) return
+
       if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault()
         if (currentIndexRef.current < projects.length - 1) {
@@ -153,58 +185,68 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches[0]) {
         touchStartY = e.touches[0].clientY
+        touchAccumulator = 0
       }
     }
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (isScrollingRef.current || !e.changedTouches[0]) return
-      const touchEndY = e.changedTouches[0].clientY
-      const deltaY = touchStartY - touchEndY
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches[0]) {
+        touchAccumulator = touchStartY - e.touches[0].clientY
+      }
+    }
 
-      if (Math.abs(deltaY) > 40) {
-        if (deltaY > 0 && currentIndexRef.current < projects.length - 1) {
+    const handleTouchEnd = () => {
+      const now = performance.now()
+      if (isAnimating || isScrollingRef.current || now - lastScrollTime < COOLDOWN_MS) return
+
+      const TOUCH_THRESHOLD = 45
+      if (touchAccumulator >= TOUCH_THRESHOLD) {
+        if (currentIndexRef.current < projects.length - 1) {
           scrollToSection(currentIndexRef.current + 1)
-        } else if (deltaY < 0 && currentIndexRef.current > 0) {
+        }
+      } else if (touchAccumulator <= -TOUCH_THRESHOLD) {
+        if (currentIndexRef.current > 0) {
           scrollToSection(currentIndexRef.current - 1)
         }
       }
+      touchAccumulator = 0
     }
 
-    const handleScroll = () => {
-      if (animFrameIdRef.current !== null) {
-        cancelAnimationFrame(animFrameIdRef.current)
+    const handleResize = () => {
+      const currentContainer = containerRef.current
+      if (!currentContainer) return
+      const targetSection = currentContainer.querySelector<HTMLElement>(
+        `[data-project-index="${currentIndexRef.current}"]`
+      )
+      if (targetSection) {
+        currentContainer.scrollTop = targetSection.offsetTop
+      } else {
+        currentContainer.scrollTop = currentIndexRef.current * currentContainer.clientHeight
       }
-      animFrameIdRef.current = requestAnimationFrame(() => {
-        updateDarkenCurtains()
-        if (!isScrollingRef.current) {
-          const currentPos = container.scrollTop
-          const calculatedIndex = Math.round(currentPos / (window.innerHeight || 1))
-          currentIndexRef.current = calculatedIndex
-        }
-      })
+      updateDarkenCurtains()
     }
 
     // İlk mount anında perdeyi hesapla
     updateDarkenCurtains()
 
-    container.addEventListener('wheel', handleWheel, {passive: false})
+    window.addEventListener('wheel', handleWheel, {passive: false})
     window.addEventListener('keydown', handleKeyDown)
-    container.addEventListener('touchstart', handleTouchStart, {passive: true})
-    container.addEventListener('touchend', handleTouchEnd, {passive: true})
-    container.addEventListener('scroll', handleScroll, {passive: true})
+    window.addEventListener('touchstart', handleTouchStart, {passive: true})
+    window.addEventListener('touchmove', handleTouchMove, {passive: true})
+    window.addEventListener('touchend', handleTouchEnd, {passive: true})
+    window.addEventListener('resize', handleResize)
 
     return () => {
-      if (animFrameIdRef.current !== null) {
-        cancelAnimationFrame(animFrameIdRef.current)
-      }
       if (scrollAnimRef.current !== null) {
         cancelAnimationFrame(scrollAnimRef.current)
       }
-      container.removeEventListener('wheel', handleWheel)
+      if (wheelTimer) clearTimeout(wheelTimer)
+      window.removeEventListener('wheel', handleWheel)
       window.removeEventListener('keydown', handleKeyDown)
-      container.removeEventListener('touchstart', handleTouchStart)
-      container.removeEventListener('touchend', handleTouchEnd)
-      container.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchend', handleTouchEnd)
+      window.removeEventListener('resize', handleResize)
     }
   }, [projects.length])
 
@@ -212,7 +254,7 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
     <div
       ref={containerRef}
       data-lenis-prevent
-      className="h-screen w-full bg-black text-white selection:bg-white selection:text-black overflow-y-auto no-scrollbar"
+      className="h-screen h-[100dvh] w-full bg-black text-white selection:bg-white selection:text-black overflow-hidden select-none touch-none"
       style={{
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
@@ -245,7 +287,7 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
               onKeyDown={e => {
                 if (e.key === 'Enter') navigate(`/projects/${project.id}`)
               }}
-              className="relative w-full h-screen min-h-screen flex flex-col justify-end overflow-hidden cursor-pointer select-none focus:outline-none"
+              className="relative w-full h-screen h-[100dvh] min-h-[100dvh] max-h-[100dvh] flex-shrink-0 flex flex-col justify-end overflow-hidden cursor-pointer select-none focus:outline-none"
               style={{willChange: 'transform'}}
             >
               {/* Full-Screen Natural Brightness Visual Background */}
@@ -278,9 +320,10 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
                   <div className="w-full h-full bg-neutral-900" />
                 )}
 
-                {/* Soft, Transparent Lighter Gradient Overlays - Clear & Bright Visuals */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-85" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
+                {/* Subtle Cinematic Gradient: Yukarısı daha koyu, aşağısı daha açık */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/25 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-75 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none" />
 
                 {/* 60FPS Dynamic Exit Darkening Curtain (Ekrandan dışarı çıktıkça yavaşça koyulaşan sinematik katman) */}
                 <div
