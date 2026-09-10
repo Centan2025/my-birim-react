@@ -18,6 +18,11 @@ interface ProductMediaItem {
   isCover?: boolean
   isMirrored?: boolean
   imageR2?: {url: string; isMirrored?: boolean}
+  imageDesktopR2?: {url: string; isMirrored?: boolean}
+  imageMobileR2?: {url: string; isMirrored?: boolean}
+  videoFileR2?: {url: string; isMirrored?: boolean}
+  videoFileDesktopR2?: {url: string; isMirrored?: boolean}
+  videoFileMobileR2?: {url: string; isMirrored?: boolean}
   thumbnailR2?: {url: string; isMirrored?: boolean}
 }
 
@@ -48,6 +53,11 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
         isCover,
         isMirrored,
         imageR2 { url, isMirrored },
+        imageDesktopR2 { url, isMirrored },
+        imageMobileR2 { url, isMirrored },
+        videoFileR2 { url, isMirrored },
+        videoFileDesktopR2 { url, isMirrored },
+        videoFileMobileR2 { url, isMirrored },
         thumbnailR2 { url, isMirrored }
       }
     }`
@@ -195,12 +205,18 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
               const coverItem =
                 product.media?.find((m: ProductMediaItem) => m.isCover) || product.media?.[0]
               const rawUrl =
-                coverItem?.type === 'image'
-                  ? coverItem?.imageR2?.url
-                  : coverItem?.thumbnailR2?.url || coverItem?.imageR2?.url
+                coverItem?.imageR2?.url ||
+                coverItem?.imageDesktopR2?.url ||
+                coverItem?.imageMobileR2?.url ||
+                coverItem?.thumbnailR2?.url ||
+                coverItem?.videoFileR2?.url ||
+                coverItem?.videoFileDesktopR2?.url ||
+                coverItem?.videoFileMobileR2?.url
               const previewUrl = getPreviewUrl(rawUrl)
               const isMirrored =
-                !!coverItem?.imageR2?.isMirrored ||
+                (coverItem?.imageR2?.url && coverItem?.imageR2?.isMirrored) ||
+                (coverItem?.imageDesktopR2?.url && coverItem?.imageDesktopR2?.isMirrored) ||
+                (coverItem?.imageMobileR2?.url && coverItem?.imageMobileR2?.isMirrored) ||
                 !!coverItem?.thumbnailR2?.isMirrored ||
                 !!coverItem?.isMirrored
 

@@ -454,15 +454,24 @@ export function R2AssetInput(props: ObjectInputProps) {
   // Check if uploaded file is a video
   const isVideo = asset?.mimeType?.startsWith('video/')
 
-  const hotspotX = asset?.hotspotX
-  const hotspotY = asset?.hotspotY
-  const hasHotspot = typeof hotspotX === 'number' && typeof hotspotY === 'number'
+  const hotspotX = typeof asset?.hotspotX === 'number' ? asset.hotspotX : 0.5
+  const hotspotY = typeof asset?.hotspotY === 'number' ? asset.hotspotY : 0.5
+  const hasHotspot = typeof asset?.hotspotX === 'number' && typeof asset?.hotspotY === 'number'
 
-  const cropX = asset?.cropX
-  const cropY = asset?.cropY
-  const cropWidth = asset?.cropWidth
-  const cropHeight = asset?.cropHeight
-  const hasCrop = typeof cropX === 'number' && cropWidth > 0
+  const cropX = typeof asset?.cropX === 'number' ? asset.cropX : 0
+  const cropY = typeof asset?.cropY === 'number' ? asset.cropY : 0
+  const cropWidth = typeof asset?.cropWidth === 'number' ? asset.cropWidth : 1
+  const cropHeight = typeof asset?.cropHeight === 'number' ? asset.cropHeight : 1
+  const hasCrop =
+    (cropWidth > 0 && cropWidth < 0.999) ||
+    (cropHeight > 0 && cropHeight < 0.999) ||
+    cropX > 0.001 ||
+    cropY > 0.001
+
+  const naturalWidth = asset?.width || 1
+  const naturalHeight = asset?.height || 1
+  const croppedAspect = (naturalWidth * cropWidth) / Math.max(1, naturalHeight * cropHeight)
+  const effectiveLeft = isMirrored ? 1 - (cropX + cropWidth) : cropX
 
   // Contextual Aspect Ratio presets based on schema path and document type
   const presets = React.useMemo(
@@ -476,21 +485,22 @@ export function R2AssetInput(props: ObjectInputProps) {
     if (isEditMode) {
       if (hasCrop) {
         // Restore existing crop
+        // If image is visually mirrored, the visual X coordinate in ReactCrop is inverted from raw cropX
+        const visualX = isMirrored ? (1 - (cropX + cropWidth)) * 100 : cropX * 100
         setCrop({
           unit: '%',
-          x: cropX * 100,
-          y: cropY * 100,
-          width: cropWidth * 100,
-          height: cropHeight * 100,
+          x: Math.max(0, visualX),
+          y: Math.max(0, cropY * 100),
+          width: Math.min(100, cropWidth * 100),
+          height: Math.min(100, cropHeight * 100),
         })
         setAspect(undefined)
       } else {
-        // No crop exists, start clean without an automatic crop selection
         setCrop(undefined)
         setAspect(undefined)
       }
     }
-  }, [isEditMode]) // Only run when edit mode toggles
+  }, [isEditMode, hasCrop, cropX, cropY, cropWidth, cropHeight, isMirrored])
 
   const handleUpload = useCallback(
     async (file: File) => {
@@ -760,19 +770,34 @@ export function R2AssetInput(props: ObjectInputProps) {
 
   const handleImageClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!imageRef.current || !hasValue) return
-      if (isEditMode) return // Don't set hotspot in edit mode
+      if (!hasValue || isEditMode) return
+      if (e.button !== 0) return // Sadece sol tık ile çalışsın
 
-      // Sadece sol tık ile çalışsın
-      if (e.button !== 0) return
+      const container = e.currentTarget
+      const rect = container.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0) return
 
-      const rect = imageRef.current.getBoundingClientRect()
       const x = e.clientX - rect.left
       const y = e.clientY - rect.top
 
-      // Normalize coordinates (0-1)
+      // Normalize coordinates (0-1) inside the visible frame
       const relativeX = Math.max(0, Math.min(1, x / rect.width))
       const relativeY = Math.max(0, Math.min(1, y / rect.height))
+
+      let finalHotspotX: number
+      let finalHotspotY: number
+
+      if (hasCrop) {
+        const visualPointX = isMirrored ? 1 - relativeX : relativeX
+        finalHotspotX = cropX + visualPointX * cropWidth
+        finalHotspotY = cropY + relativeY * cropHeight
+      } else {
+        finalHotspotX = isMirrored ? 1 - relativeX : relativeX
+        finalHotspotY = relativeY
+      }
+
+      finalHotspotX = Math.max(0, Math.min(1, finalHotspotX))
+      finalHotspotY = Math.max(0, Math.min(1, finalHotspotY))
 
       // Update Sanity value directly
       onChange(
@@ -780,8 +805,8 @@ export function R2AssetInput(props: ObjectInputProps) {
           set({
             _type: 'r2Asset',
             ...asset,
-            hotspotX: Number(relativeX.toFixed(4)),
-            hotspotY: Number(relativeY.toFixed(4)),
+            hotspotX: Number(finalHotspotX.toFixed(4)),
+            hotspotY: Number(finalHotspotY.toFixed(4)),
           }),
         ),
       )
@@ -789,12 +814,24 @@ export function R2AssetInput(props: ObjectInputProps) {
       toast.push({
         status: 'info',
         title: 'Odaklandı',
-        description: `Odak noktası güncellendi: ${relativeX.toFixed(2)}, ${relativeY.toFixed(2)}`,
+        description: `Odak noktası güncellendi: %${(finalHotspotX * 100).toFixed(0)}, %${(finalHotspotY * 100).toFixed(0)}`,
       })
 
       e.stopPropagation()
     },
-    [asset, hasValue, onChange, toast, isEditMode],
+    [
+      asset,
+      hasValue,
+      onChange,
+      toast,
+      isEditMode,
+      hasCrop,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
+      isMirrored,
+    ],
   )
 
   const handleSaveCrop = useCallback(
@@ -805,23 +842,31 @@ export function R2AssetInput(props: ObjectInputProps) {
           e.preventDefault()
         }
       }
-      if (crop) {
+      if (crop && crop.width > 0 && crop.height > 0) {
+        const visualX = crop.x / 100
+        const visualWidth = crop.width / 100
+        const visualY = crop.y / 100
+        const visualHeight = crop.height / 100
+
+        // If mirrored, convert visual X to raw image X coordinate
+        const rawCropX = isMirrored ? Math.max(0, 1 - (visualX + visualWidth)) : visualX
+
         onChange(
           PatchEvent.from(
             set({
               _type: 'r2Asset',
               ...asset,
-              cropX: Number((crop.x / 100).toFixed(4)),
-              cropY: Number((crop.y / 100).toFixed(4)),
-              cropWidth: Number((crop.width / 100).toFixed(4)),
-              cropHeight: Number((crop.height / 100).toFixed(4)),
+              cropX: Number(rawCropX.toFixed(4)),
+              cropY: Number(visualY.toFixed(4)),
+              cropWidth: Number(visualWidth.toFixed(4)),
+              cropHeight: Number(visualHeight.toFixed(4)),
             }),
           ),
         )
         toast.push({status: 'success', title: 'Kırpma Kaydedildi'})
       } else {
         // Clear crop
-        const {cropX, cropY, cropWidth, cropHeight, ...rest} = asset
+        const {cropX: _cx, cropY: _cy, cropWidth: _cw, cropHeight: _ch, ...rest} = asset || {}
         onChange(
           PatchEvent.from([
             set({_type: 'r2Asset', ...rest}),
@@ -835,7 +880,7 @@ export function R2AssetInput(props: ObjectInputProps) {
       }
       handleCloseEditMode(e)
     },
-    [asset, crop, handleCloseEditMode, onChange, toast],
+    [asset, crop, handleCloseEditMode, onChange, toast, isMirrored],
   )
 
   const handleDragEnter = (e: React.DragEvent) => {
@@ -914,6 +959,30 @@ export function R2AssetInput(props: ObjectInputProps) {
     }
   }
 
+  const visualHotspot = React.useMemo(() => {
+    if (!hasHotspot || isEditMode) return null
+    if (hasCrop) {
+      const inCropX = (hotspotX - cropX) / cropWidth
+      const inCropY = (hotspotY - cropY) / cropHeight
+      if (inCropX < 0 || inCropX > 1 || inCropY < 0 || inCropY > 1) return null
+      const displayX = isMirrored ? 1 - inCropX : inCropX
+      return {left: `${(displayX * 100).toFixed(2)}%`, top: `${(inCropY * 100).toFixed(2)}%`}
+    }
+    const displayX = isMirrored ? 1 - hotspotX : hotspotX
+    return {left: `${(displayX * 100).toFixed(2)}%`, top: `${(hotspotY * 100).toFixed(2)}%`}
+  }, [
+    hasHotspot,
+    hotspotX,
+    hotspotY,
+    isEditMode,
+    hasCrop,
+    cropX,
+    cropY,
+    cropWidth,
+    cropHeight,
+    isMirrored,
+  ])
+
   return (
     <Stack space={3}>
       <DropZone
@@ -976,25 +1045,58 @@ export function R2AssetInput(props: ObjectInputProps) {
               </Box>
             ) : (
               // Image Preview with Crop/Hotspot
-              <ImageContainer onClick={handleImageClick} onDoubleClick={(e) => e.stopPropagation()}>
-                <PreviewImage
-                  ref={imageRef}
-                  src={previewUrl}
-                  alt={asset.alt}
-                  draggable={false}
-                  style={{
-                    // Apply crop preview if cropped
-                    clipPath:
-                      hasCrop && !isEditMode
-                        ? `inset(${cropY * 100}% ${100 - (cropX + cropWidth) * 100}% ${100 - (cropY + cropHeight) * 100}% ${cropX * 100}%)`
-                        : undefined,
-                    transform: isMirrored ? 'scaleX(-1)' : 'none',
-                    transition: 'transform 0.3s ease-in-out',
-                  }}
-                />
+              <ImageContainer
+                onClick={handleImageClick}
+                onDoubleClick={(e) => e.stopPropagation()}
+                style={
+                  hasCrop && !isEditMode
+                    ? {
+                        width: '100%',
+                        maxWidth: croppedAspect
+                          ? `min(100%, ${Math.round(400 * croppedAspect)}px)`
+                          : '100%',
+                        aspectRatio: `${croppedAspect.toFixed(4)}`,
+                        maxHeight: '400px',
+                        margin: '0 auto',
+                      }
+                    : undefined
+                }
+              >
+                {hasCrop && !isEditMode ? (
+                  <img
+                    ref={imageRef}
+                    src={previewUrl}
+                    alt={asset.alt}
+                    draggable={false}
+                    style={{
+                      position: 'absolute',
+                      width: `${((1 / cropWidth) * 100).toFixed(4)}%`,
+                      height: `${((1 / cropHeight) * 100).toFixed(4)}%`,
+                      left: `${((-effectiveLeft / cropWidth) * 100).toFixed(4)}%`,
+                      top: `${((-cropY / cropHeight) * 100).toFixed(4)}%`,
+                      maxWidth: 'none',
+                      maxHeight: 'none',
+                      display: 'block',
+                      transform: isMirrored ? 'scaleX(-1)' : 'none',
+                      transformOrigin: 'center center',
+                      userSelect: 'none',
+                    }}
+                  />
+                ) : (
+                  <PreviewImage
+                    ref={imageRef}
+                    src={previewUrl}
+                    alt={asset.alt}
+                    draggable={false}
+                    style={{
+                      transform: isMirrored ? 'scaleX(-1)' : 'none',
+                      transition: 'transform 0.3s ease-in-out',
+                    }}
+                  />
+                )}
 
-                {hasHotspot && !isEditMode && (
-                  <HotspotIndicator $left={`${hotspotX * 100}%`} $top={`${hotspotY * 100}%`} />
+                {visualHotspot && (
+                  <HotspotIndicator $left={visualHotspot.left} $top={visualHotspot.top} />
                 )}
 
                 {!isEditMode && (
@@ -1048,23 +1150,28 @@ export function R2AssetInput(props: ObjectInputProps) {
                       fontSize={1}
                       padding={2}
                       text="🎯 Odak Merkezle"
-                      title="Odak noktasını (hotspot) merkeze (%50, %50) getir"
+                      title="Odak noktasını (hotspot) kırpılan alanın merkezine getir"
                       onClick={(e) => {
                         e.stopPropagation()
+                        const centerHotspotX = hasCrop ? cropX + cropWidth / 2 : 0.5
+                        const centerHotspotY = hasCrop ? cropY + cropHeight / 2 : 0.5
+
                         onChange(
                           PatchEvent.from(
                             set({
                               _type: 'r2Asset',
                               ...asset,
-                              hotspotX: 0.5,
-                              hotspotY: 0.5,
+                              hotspotX: Number(centerHotspotX.toFixed(4)),
+                              hotspotY: Number(centerHotspotY.toFixed(4)),
                             }),
                           ),
                         )
                         toast.push({
                           status: 'info',
                           title: 'Odak Merkezlendi',
-                          description: 'Odak noktası %50, %50 (Merkez) olarak ayarlandı.',
+                          description: hasCrop
+                            ? `Odak noktası kırpılan alana göre merkezlendi: %${(centerHotspotX * 100).toFixed(0)}, %${(centerHotspotY * 100).toFixed(0)}`
+                            : 'Odak noktası %50, %50 (Merkez) olarak ayarlandı.',
                         })
                       }}
                     />

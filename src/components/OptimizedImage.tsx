@@ -625,7 +625,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const cropHDesk = cropDesk?.height || 1
   const scaleXDesk = (1 / cropWDesk) * 100
   const scaleYDesk = (1 / cropHDesk) * 100
-  const leftDesk = -((cropDesk?.x || 0) / cropWDesk) * 100
+  const effectiveLeftDesk = effectiveIsMirroredDesktop
+    ? 1 - ((cropDesk?.x || 0) + cropWDesk)
+    : (cropDesk?.x || 0)
+  const leftDesk = -(effectiveLeftDesk / cropWDesk) * 100
   const topDesk = -((cropDesk?.y || 0) / cropHDesk) * 100
 
   const imgWDesk =
@@ -682,7 +685,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const cropHMob = cropMob?.height || 1
   const scaleXMob = (1 / cropWMob) * 100
   const scaleYMob = (1 / cropHMob) * 100
-  const leftMob = -((cropMob?.x || 0) / cropWMob) * 100
+  const effectiveLeftMob = effectiveIsMirroredMobile
+    ? 1 - ((cropMob?.x || 0) + cropWMob)
+    : (cropMob?.x || 0)
+  const leftMob = -(effectiveLeftMob / cropWMob) * 100
   const topMob = -((cropMob?.y || 0) / cropHMob) * 100
 
   const imgWMob =
@@ -753,14 +759,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     const activeHsDesk = hotspotDesktop || hotspot
 
-    const focalXDesk = activeHsDesk
+    const rawFocalXDesk = activeHsDesk
       ? activeHsDesk.x * 100
       : ((cropDesk?.x || 0) + cropWDesk / 2) * 100
+    const focalXDesk = effectiveIsMirroredDesktop ? 100 - rawFocalXDesk : rawFocalXDesk
     const focalYDesk = activeHsDesk
       ? activeHsDesk.y * 100
       : ((cropDesk?.y || 0) + cropHDesk / 2) * 100
 
-    const focalXMob = isCustomHotspot(hotspotMobile)
+    const rawFocalXMob = isCustomHotspot(hotspotMobile)
       ? hotspotMobile!.x * 100
       : hasCropMobile && cropMob
         ? ((cropMob.x || 0) + cropWMob / 2) * 100
@@ -769,6 +776,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           : activeHsDesk
             ? activeHsDesk.x * 100
             : 50
+    const focalXMob = effectiveIsMirroredMobile ? 100 - rawFocalXMob : rawFocalXMob
     const focalYMob = isCustomHotspot(hotspotMobile)
       ? hotspotMobile!.y * 100
       : hasCropMobile && cropMob

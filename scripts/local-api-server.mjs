@@ -2276,6 +2276,92 @@ app.post(['/api/media/presigned-url', '/api/media'], async (req, res) => {
   }
 })
 
+// ─── /api/media/list ───────────────────────────────────────────────────────
+app.post('/api/media/list', async (req, res) => {
+  try {
+    const {continuationToken} = req.body || {}
+    const R2_ACCOUNT_ID = (process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID || '').trim()
+    const R2_ACCESS_KEY_ID = (process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || '').trim()
+    const R2_SECRET_ACCESS_KEY = (process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || '').trim()
+    const R2_BUCKET_NAME = (process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web').trim()
+
+    if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
+      return res.status(500).json({error: 'Cloudflare R2 kimlik bilgileri eksik.'})
+    }
+
+    const {S3Client, ListObjectsV2Command} = await import('@aws-sdk/client-s3')
+    const r2Client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: R2_ACCESS_KEY_ID,
+        secretAccessKey: R2_SECRET_ACCESS_KEY,
+      },
+    })
+
+    const command = new ListObjectsV2Command({
+      Bucket: R2_BUCKET_NAME,
+      ContinuationToken: continuationToken || undefined,
+    })
+
+    const response = await r2Client.send(command)
+    return res.status(200).json({
+      success: true,
+      contents: response.Contents || [],
+      nextContinuationToken: response.NextContinuationToken,
+    })
+  } catch (error) {
+    console.error('Local R2 list error:', error)
+    return res.status(500).json({error: `Dosyalar listelenemedi: ${error.message}`})
+  }
+})
+
+// ─── /api/media/delete-batch ───────────────────────────────────────────────
+app.post('/api/media/delete-batch', async (req, res) => {
+  try {
+    const {keys} = req.body || {}
+    if (!Array.isArray(keys) || keys.length === 0) {
+      return res.status(400).json({error: 'keys parametresi boş olamaz.'})
+    }
+
+    const R2_ACCOUNT_ID = (process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID || '').trim()
+    const R2_ACCESS_KEY_ID = (process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || '').trim()
+    const R2_SECRET_ACCESS_KEY = (process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || '').trim()
+    const R2_BUCKET_NAME = (process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web').trim()
+
+    if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
+      return res.status(500).json({error: 'Cloudflare R2 kimlik bilgileri eksik.'})
+    }
+
+    const {S3Client, DeleteObjectsCommand} = await import('@aws-sdk/client-s3')
+    const r2Client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: R2_ACCESS_KEY_ID,
+        secretAccessKey: R2_SECRET_ACCESS_KEY,
+      },
+    })
+
+    const command = new DeleteObjectsCommand({
+      Bucket: R2_BUCKET_NAME,
+      Delete: {
+        Objects: keys.map((key) => ({Key: key})),
+        Quiet: true,
+      },
+    })
+
+    await r2Client.send(command)
+    return res.status(200).json({
+      success: true,
+      deletedCount: keys.length,
+    })
+  } catch (error) {
+    console.error('Local R2 delete-batch error:', error)
+    return res.status(500).json({error: `Dosyalar silinemedi: ${error.message}`})
+  }
+})
+
 // ─── /api/analytics/activity ──────────────────────────────────────────────
 app.post('/api/analytics/activity', async (req, res) => {
   try {

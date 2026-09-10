@@ -82,19 +82,46 @@ export const productDimensionImage = defineType({
     select: {
       title: 'title.tr',
       imageUrl: 'imageR2.url',
+      imageDesktopUrl: 'imageDesktopR2.url',
+      imageMobileUrl: 'imageMobileR2.url',
       imageIsMirrored: 'imageR2.isMirrored',
+      imageDesktopIsMirrored: 'imageDesktopR2.isMirrored',
+      imageMobileIsMirrored: 'imageMobileR2.isMirrored',
       thumbUrl: 'thumbnailR2.url',
     },
     prepare(selection: Record<string, unknown>) {
-      const {title, imageUrl, imageIsMirrored, thumbUrl} = selection as any
-      const finalUrl = getPreviewUrl(thumbUrl || imageUrl)
+      const {
+        title,
+        imageUrl,
+        imageDesktopUrl,
+        imageMobileUrl,
+        imageIsMirrored,
+        imageDesktopIsMirrored,
+        imageMobileIsMirrored,
+        thumbUrl,
+      } = selection as {
+        title?: string
+        imageUrl?: string
+        imageDesktopUrl?: string
+        imageMobileUrl?: string
+        imageIsMirrored?: boolean
+        imageDesktopIsMirrored?: boolean
+        imageMobileIsMirrored?: boolean
+        thumbUrl?: string
+      }
+      const rawUrl = imageUrl || imageDesktopUrl || imageMobileUrl || thumbUrl
+      const finalUrl = getPreviewUrl(rawUrl)
+      const mirrored =
+        (imageUrl && imageIsMirrored) ||
+        (imageDesktopUrl && imageDesktopIsMirrored) ||
+        (imageMobileUrl && imageMobileIsMirrored)
 
       return {
         title: title || 'İsimsiz Ölçü Görseli',
         media: renderPreviewMedia(
           finalUrl,
-          (selection as any).mediaType || (selection as any).type,
-          !!imageIsMirrored,
+          (selection as Record<string, unknown>).mediaType as string || (selection as Record<string, unknown>).type as string,
+          !!mirrored,
         ),
       }
     },
@@ -326,10 +353,14 @@ export const heroMediaItem = defineType({
       title: 'title.tr',
       subtitle: 'subtitle.tr',
       imageR2Url: 'imageR2.url',
+      imageDesktopR2Url: 'imageDesktopR2.url',
+      imageMobileR2Url: 'imageMobileR2.url',
       imageR2IsMirrored: 'imageR2.isMirrored',
       imageMobileR2IsMirrored: 'imageMobileR2.isMirrored',
       imageDesktopR2IsMirrored: 'imageDesktopR2.isMirrored',
       videoR2Url: 'videoFileR2.url',
+      videoDesktopR2Url: 'videoFileDesktopR2.url',
+      videoMobileR2Url: 'videoFileMobileR2.url',
       thumbUrl: 'thumbnailR2.url',
       thumbIsMirrored: 'thumbnailR2.isMirrored',
     },
@@ -339,13 +370,32 @@ export const heroMediaItem = defineType({
         title,
         subtitle,
         imageR2Url,
+        imageDesktopR2Url,
+        imageMobileR2Url,
         imageR2IsMirrored,
         imageMobileR2IsMirrored,
         imageDesktopR2IsMirrored,
         videoR2Url,
+        videoDesktopR2Url,
+        videoMobileR2Url,
         thumbUrl,
         thumbIsMirrored,
-      } = selection as any
+      } = selection as {
+        type?: string
+        title?: string
+        subtitle?: string
+        imageR2Url?: string
+        imageDesktopR2Url?: string
+        imageMobileR2Url?: string
+        imageR2IsMirrored?: boolean
+        imageMobileR2IsMirrored?: boolean
+        imageDesktopR2IsMirrored?: boolean
+        videoR2Url?: string
+        videoDesktopR2Url?: string
+        videoMobileR2Url?: string
+        thumbUrl?: string
+        thumbIsMirrored?: boolean
+      }
       let mediaTitle = title
       if (!mediaTitle) {
         mediaTitle =
@@ -356,11 +406,19 @@ export const heroMediaItem = defineType({
               : 'YouTube Medyası'
       }
 
-      const finalUrl = getPreviewUrl(thumbUrl || imageR2Url || videoR2Url)
+      const rawUrl =
+        imageR2Url ||
+        imageDesktopR2Url ||
+        imageMobileR2Url ||
+        thumbUrl ||
+        videoR2Url ||
+        videoDesktopR2Url ||
+        videoMobileR2Url
+      const finalUrl = getPreviewUrl(rawUrl)
       const mirrored =
-        !!imageR2IsMirrored ||
-        !!imageMobileR2IsMirrored ||
-        !!imageDesktopR2IsMirrored ||
+        (imageR2Url && imageR2IsMirrored) ||
+        (imageDesktopR2Url && imageDesktopR2IsMirrored) ||
+        (imageMobileR2Url && imageMobileR2IsMirrored) ||
         !!thumbIsMirrored
 
       return {
@@ -492,7 +550,11 @@ export const productSimpleMediaItem = defineType({
       imageDesktopR2IsMirrored: 'imageDesktopR2.isMirrored',
       titleTr: 'title.tr',
       imageR2Url: 'imageR2.url',
+      imageDesktopR2Url: 'imageDesktopR2.url',
+      imageMobileR2Url: 'imageMobileR2.url',
       videoR2Url: 'videoFileR2.url',
+      videoDesktopR2Url: 'videoFileDesktopR2.url',
+      videoMobileR2Url: 'videoFileMobileR2.url',
       thumbUrl: 'thumbnailR2.url',
       thumbIsMirrored: 'thumbnailR2.isMirrored',
     },
@@ -506,16 +568,44 @@ export const productSimpleMediaItem = defineType({
         imageDesktopR2IsMirrored,
         titleTr,
         imageR2Url,
+        imageDesktopR2Url,
+        imageMobileR2Url,
         videoR2Url,
+        videoDesktopR2Url,
+        videoMobileR2Url,
         thumbUrl,
         thumbIsMirrored,
-      } = selection as any
-      const finalUrl = getPreviewUrl(thumbUrl || imageR2Url || videoR2Url)
+      } = selection as {
+        type?: string
+        isCover?: boolean
+        isMirrored?: boolean
+        imageR2IsMirrored?: boolean
+        imageMobileR2IsMirrored?: boolean
+        imageDesktopR2IsMirrored?: boolean
+        titleTr?: string
+        imageR2Url?: string
+        imageDesktopR2Url?: string
+        imageMobileR2Url?: string
+        videoR2Url?: string
+        videoDesktopR2Url?: string
+        videoMobileR2Url?: string
+        thumbUrl?: string
+        thumbIsMirrored?: boolean
+      }
+      const rawUrl =
+        imageR2Url ||
+        imageDesktopR2Url ||
+        imageMobileR2Url ||
+        thumbUrl ||
+        videoR2Url ||
+        videoDesktopR2Url ||
+        videoMobileR2Url
+      const finalUrl = getPreviewUrl(rawUrl)
       const mirrored =
         !!isMirrored ||
-        !!imageR2IsMirrored ||
-        !!imageMobileR2IsMirrored ||
-        !!imageDesktopR2IsMirrored ||
+        (imageR2Url && imageR2IsMirrored) ||
+        (imageDesktopR2Url && imageDesktopR2IsMirrored) ||
+        (imageMobileR2Url && imageMobileR2IsMirrored) ||
         !!thumbIsMirrored
 
       return {
@@ -621,10 +711,14 @@ export const productPanelMediaItem = defineType({
       type: 'type',
       title: 'title.tr',
       imageR2Url: 'imageR2.url',
+      imageDesktopR2Url: 'imageDesktopR2.url',
+      imageMobileR2Url: 'imageMobileR2.url',
       imageR2IsMirrored: 'imageR2.isMirrored',
       imageMobileR2IsMirrored: 'imageMobileR2.isMirrored',
       imageDesktopR2IsMirrored: 'imageDesktopR2.isMirrored',
       videoR2Url: 'videoFileR2.url',
+      videoDesktopR2Url: 'videoFileDesktopR2.url',
+      videoMobileR2Url: 'videoFileMobileR2.url',
       thumbUrl: 'thumbnailR2.url',
       thumbIsMirrored: 'thumbnailR2.isMirrored',
     },
@@ -633,18 +727,44 @@ export const productPanelMediaItem = defineType({
         type,
         title,
         imageR2Url,
+        imageDesktopR2Url,
+        imageMobileR2Url,
         imageR2IsMirrored,
         imageMobileR2IsMirrored,
         imageDesktopR2IsMirrored,
         videoR2Url,
+        videoDesktopR2Url,
+        videoMobileR2Url,
         thumbUrl,
         thumbIsMirrored,
-      } = selection as any
-      const finalUrl = getPreviewUrl(thumbUrl || imageR2Url || videoR2Url)
+      } = selection as {
+        type?: string
+        title?: string
+        imageR2Url?: string
+        imageDesktopR2Url?: string
+        imageMobileR2Url?: string
+        imageR2IsMirrored?: boolean
+        imageMobileR2IsMirrored?: boolean
+        imageDesktopR2IsMirrored?: boolean
+        videoR2Url?: string
+        videoDesktopR2Url?: string
+        videoMobileR2Url?: string
+        thumbUrl?: string
+        thumbIsMirrored?: boolean
+      }
+      const rawUrl =
+        imageR2Url ||
+        imageDesktopR2Url ||
+        imageMobileR2Url ||
+        thumbUrl ||
+        videoR2Url ||
+        videoDesktopR2Url ||
+        videoMobileR2Url
+      const finalUrl = getPreviewUrl(rawUrl)
       const mirrored =
-        !!imageR2IsMirrored ||
-        !!imageMobileR2IsMirrored ||
-        !!imageDesktopR2IsMirrored ||
+        (imageR2Url && imageR2IsMirrored) ||
+        (imageDesktopR2Url && imageDesktopR2IsMirrored) ||
+        (imageMobileR2Url && imageMobileR2IsMirrored) ||
         !!thumbIsMirrored
 
       const mediaTitle =

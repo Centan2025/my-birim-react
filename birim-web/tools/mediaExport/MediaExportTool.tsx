@@ -1331,7 +1331,14 @@ export default function MediaExportTool() {
                 </Flex>
                 {isInIframe && (
                   <Text size={1} muted>
-                    💡 <em>Not: Stüdyo gömülü (iframe / Sanity Manage / önizleme) penceresinde çalıştığında tarayıcı güvenlik kuralı klasör seçimine izin vermez. <strong>"ZIP Arşivi Olarak İndir"</strong> seçeneğini kullanabilir veya <strong>"Stüdyoyu Ayrı Sekmede Aç"</strong> butonuna tıklayarak klasör seçimini doğrudan yapabilirsiniz.</em>
+                    💡{' '}
+                    <em>
+                      Not: Stüdyo gömülü (iframe / Sanity Manage / önizleme) penceresinde
+                      çalıştığında tarayıcı güvenlik kuralı klasör seçimine izin vermez.{' '}
+                      <strong>"ZIP Arşivi Olarak İndir"</strong> seçeneğini kullanabilir veya{' '}
+                      <strong>"Stüdyoyu Ayrı Sekmede Aç"</strong> butonuna tıklayarak klasör
+                      seçimini doğrudan yapabilirsiniz.
+                    </em>
                   </Text>
                 )}
               </Stack>

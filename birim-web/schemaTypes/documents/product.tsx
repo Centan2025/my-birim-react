@@ -281,27 +281,44 @@ export default defineType({
       name: 'name',
       media: 'media',
     },
-    prepare(selection: any = {}) {
-      const {name, media} = selection
-      const coverItem = media?.find((m) => (m as any).isCover) || media?.[0]
+    prepare(selection: Record<string, unknown> = {}) {
+      const {name, media} = selection as {
+        name?: {tr?: string; en?: string}
+        media?: Array<{
+          type?: string
+          isCover?: boolean
+          isMirrored?: boolean
+          imageR2?: {url?: string; isMirrored?: boolean}
+          imageDesktopR2?: {url?: string; isMirrored?: boolean}
+          imageMobileR2?: {url?: string; isMirrored?: boolean}
+          videoFileR2?: {url?: string; isMirrored?: boolean}
+          videoFileDesktopR2?: {url?: string; isMirrored?: boolean}
+          videoFileMobileR2?: {url?: string; isMirrored?: boolean}
+          thumbnailR2?: {url?: string; isMirrored?: boolean}
+          url?: string
+        }>
+      }
+      const coverItem = media?.find((m) => m.isCover) || media?.[0]
       const r2Url =
-        (coverItem as any)?.imageR2?.url ||
-        (coverItem as any)?.imageMobileR2?.url ||
-        (coverItem as any)?.imageDesktopR2?.url ||
-        (coverItem as any)?.videoFileR2?.url ||
-        (coverItem as any)?.thumbnailR2?.url ||
-        (coverItem as any)?.url
-      let finalUrl = getPreviewUrl(r2Url)
+        coverItem?.imageR2?.url ||
+        coverItem?.imageDesktopR2?.url ||
+        coverItem?.imageMobileR2?.url ||
+        coverItem?.thumbnailR2?.url ||
+        coverItem?.videoFileR2?.url ||
+        coverItem?.videoFileDesktopR2?.url ||
+        coverItem?.videoFileMobileR2?.url ||
+        coverItem?.url
+      const finalUrl = getPreviewUrl(r2Url)
       const isMirrored =
-        !!(coverItem as any)?.imageR2?.isMirrored ||
-        !!(coverItem as any)?.imageMobileR2?.isMirrored ||
-        !!(coverItem as any)?.imageDesktopR2?.isMirrored ||
-        !!(coverItem as any)?.thumbnailR2?.isMirrored ||
-        !!(coverItem as any)?.isMirrored
+        (coverItem?.imageR2?.url && coverItem?.imageR2?.isMirrored) ||
+        (coverItem?.imageDesktopR2?.url && coverItem?.imageDesktopR2?.isMirrored) ||
+        (coverItem?.imageMobileR2?.url && coverItem?.imageMobileR2?.isMirrored) ||
+        !!coverItem?.thumbnailR2?.isMirrored ||
+        !!coverItem?.isMirrored
 
       return {
         title: name?.tr || name?.en || 'İsimsiz Ürün',
-        media: renderPreviewMedia(finalUrl, (coverItem as any)?.type, isMirrored),
+        media: renderPreviewMedia(finalUrl, coverItem?.type, isMirrored),
       }
     },
   },
