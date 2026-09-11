@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 
 /**
  * Medya önizlemeleri için yardımcı fonksiyon.
@@ -19,7 +19,13 @@ export const renderPreviewMedia = (
     return () =>
       React.createElement('video', {
         src: url,
-        style: {width: '100%', height: '100%', objectFit: 'cover', transform: transformStyle},
+        style: {
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          objectPosition: 'center',
+          transform: transformStyle,
+        },
         autoPlay: false,
         muted: true,
         playsInline: true,
@@ -30,6 +36,12 @@ export const renderPreviewMedia = (
   return () =>
     React.createElement('img', {
       src: url,
-      style: {width: '100%', height: '100%', objectFit: 'cover', transform: transformStyle},
+      style: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+        objectPosition: 'center',
+        transform: transformStyle,
+      },
     })
 }

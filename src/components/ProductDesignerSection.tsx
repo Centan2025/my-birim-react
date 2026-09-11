@@ -43,8 +43,7 @@ export function ProductDesignerSection({
 
   const hasMultiple = designers.length > 1
   const isSingleBirim =
-    !hasMultiple &&
-    (isBirimDesignStudio(designers[0]) || Boolean(designers[0]?.isCompanyLogo))
+    !hasMultiple && (isBirimDesignStudio(designers[0]) || Boolean(designers[0]?.isCompanyLogo))
 
   return (
     <ScrollReveal delay={400} threshold={0.05}>
