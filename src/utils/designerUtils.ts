@@ -19,8 +19,11 @@ export function isBirimDesignStudio(
       (idLower.includes('design') ||
         idLower.includes('dessign') ||
         idLower.includes('studio') ||
+        idLower.includes('stüdio') ||
+        idLower.includes('stüdyo') ||
         idLower.includes('tasarim') ||
-        idLower.includes('studyosu')))
+        idLower.includes('studyosu') ||
+        idLower.includes('stüdyosu')))
   ) {
     return true
   }
@@ -33,7 +36,17 @@ export function isBirimDesignStudio(
         : `${(rawName as {tr?: string; en?: string})?.tr || ''} ${(rawName as {tr?: string; en?: string})?.en || ''}`
     ).toLowerCase()
 
-    if (nameStr.includes('birim design') || nameStr.includes('birim tasarım')) {
+    if (
+      nameStr.includes('birim design') ||
+      nameStr.includes('birim dessign') ||
+      nameStr.includes('birim tasarım') ||
+      (nameStr.includes('birim') &&
+        (nameStr.includes('studio') ||
+          nameStr.includes('stüdio') ||
+          nameStr.includes('stüdyo') ||
+          nameStr.includes('studyosu') ||
+          nameStr.includes('stüdyosu')))
+    ) {
       return true
     }
   }
