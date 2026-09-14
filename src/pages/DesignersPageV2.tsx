@@ -389,15 +389,11 @@ export function DesignersPageV2() {
               {/* Full-Screen Luminous Black & White Visual Background */}
               <div className="absolute inset-0 w-full h-full overflow-hidden bg-neutral-900 pointer-events-none">
                 {isBirimStudio ? (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-8 sm:p-16 relative bg-gradient-to-br from-neutral-900 via-neutral-950 to-neutral-900">
-                    {/* Architectural Ambient Radiant Grid */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/[0.12] via-transparent to-transparent pointer-events-none" />
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
-
-                    <div className="relative z-10 w-full max-w-md sm:max-w-xl flex flex-col items-center justify-center text-center">
+                  <div className="w-full h-full flex flex-col items-center justify-center p-8 sm:p-16 relative bg-neutral-900">
+                    <div className="relative z-10 w-full max-w-lg sm:max-w-2xl flex flex-col items-center justify-center text-center">
                       <SiteLogo
                         logoUrl={settings?.logoUrl}
-                        className="w-full max-w-[240px] sm:max-w-[320px] h-auto object-contain brightness-110 grayscale mb-6 drop-shadow-[0_20px_50px_rgba(255,255,255,0.15)]"
+                        className="w-full max-w-[300px] sm:max-w-[420px] h-auto object-contain brightness-110 grayscale mb-6"
                       />
                       <p className="text-xs sm:text-sm font-light tracking-[0.4em] text-white/70 uppercase">
                         {t('design_studio') || 'Tasarım Stüdyosu'}
@@ -465,11 +461,14 @@ export function DesignersPageV2() {
                     />
                   </div>
                 )}
-
-                {/* Subtle Cinematic Gradient: Yukarısı daha koyu, aşağısı daha açık */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/25 to-transparent pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-75 pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none" />
+                {!isBirimStudio && (
+                  <>
+                    {/* Subtle Cinematic Gradient: Yukarısı daha koyu, aşağısı daha açık */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/25 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-75 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none" />
+                  </>
+                )}
 
                 {/* 60FPS Dynamic Exit Darkening Curtain (Ekrandan dışarı çıktıkça yavaşça koyulaşan sinematik katman) */}
                 <div
