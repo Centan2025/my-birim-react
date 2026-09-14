@@ -351,7 +351,12 @@ export function ProductsPage() {
                         className="mb-4 md:mb-6 pb-2 border-b border-[var(--border-primary)]/20 last:border-b-0 last:mb-2"
                       >
                         {/* Category Title */}
-                        <ScrollReveal key={`${sortBy}-${catId}`} delay={0} threshold={0.01} className="mb-2 md:mb-3">
+                        <ScrollReveal
+                          key={`${sortBy}-${catId}`}
+                          delay={0}
+                          threshold={0.01}
+                          className="mb-2 md:mb-3"
+                        >
                           <h2 className="font-oswald text-xl md:text-2xl lg:text-3xl uppercase font-light tracking-[0.1em] text-[var(--text-primary)]">
                             {categoryName}
                           </h2>

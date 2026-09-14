@@ -24,11 +24,7 @@ export const ProductRelated: React.FC<ProductRelatedProps> = ({products, show}) 
       </TextMaskReveal>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
         {products.map((related, index) => (
-          <ScrollReveal
-            key={related.id}
-            delay={index < 8 ? index * 100 : 0}
-            threshold={0.01}
-          >
+          <ScrollReveal key={related.id} delay={index < 8 ? index * 100 : 0} threshold={0.01}>
             <ProductCard product={related} priority={index < 4} />
           </ScrollReveal>
         ))}

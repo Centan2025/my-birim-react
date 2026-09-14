@@ -202,7 +202,7 @@ export function CategoriesPage() {
                                           'hotspotY'
                                         ]
                                       ) ?? 0.5,
-                                    }
+                                  }
                                 : undefined)
                             : undefined
                         }
