@@ -43,6 +43,24 @@ export default defineType({
       description: 'Web sayfasının üstünde gösterilecek kısa bilgi/not.',
     }),
     defineField({
+      name: 'isProjectsVisible',
+      title: 'Projeler Menüsünü Göster',
+      type: 'boolean',
+      fieldset: 'navigation',
+      initialValue: true,
+      description:
+        'Aktif edildiğinde menüde "Projeler" seçeneği belirir. Pasif edildiğinde Projeler menüsü gizlenir ve Haberler menüsü Projeler menüsünün yerine geçer.',
+    }),
+    defineField({
+      name: 'isFactoryVisible',
+      title: 'Üretim Menüsünü Göster',
+      type: 'boolean',
+      fieldset: 'navigation',
+      initialValue: false,
+      description:
+        'Aktif edildiğinde menüde "Üretim" seçeneği belirir ve ilgili sayfa erişilebilir olur.',
+    }),
+    defineField({
       name: 'showProductPrevNext',
       title: 'Önceki / Sonraki Düğmeleri (Ürünlerde, projelerde, haberlerde)',
       type: 'boolean',
@@ -143,15 +161,6 @@ export default defineType({
       initialValue: true,
       description:
         'Site genelindeki sayfa geçiş animasyonlarını açıp kapatır. (Ürün ve Tasarımcı detay genişleme animasyonları hariç)',
-    }),
-    defineField({
-      name: 'isFactoryVisible',
-      title: 'Üretim Menüsünü Göster',
-      type: 'boolean',
-      fieldset: 'navigation',
-      initialValue: false,
-      description:
-        'Aktif edildiğinde menüde "Üretim" seçeneği belirir ve ilgili sayfa erişilebilir olur.',
     }),
     defineField({
       name: 'enableAiRoomPlanner',

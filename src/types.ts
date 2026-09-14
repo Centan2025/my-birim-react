@@ -72,6 +72,8 @@ export interface SiteSettings {
   mobileHeaderAnimation?: 'default' | 'overlay'
   /** Toggles global page transition animations. */
   enablePageTransitions?: boolean
+  /** Whether the "Projects" (Projeler) menu and page are visible. */
+  isProjectsVisible?: boolean
   /** Whether the "Factory" (Fabrika) menu and page are visible. */
   isFactoryVisible?: boolean
   /** Whether the AI Room Planner (Oda Planlayıcı) feature is enabled. */

@@ -49,7 +49,9 @@ export const Footer = () => {
               {[
                 {to: '/products', label: t('view_all')},
                 {to: '/designers', label: t('designers')},
-                {to: '/projects', label: t('projects') || 'Projeler'},
+                ...(settings?.isProjectsVisible !== false
+                  ? [{to: '/projects', label: t('projects') || 'Projeler'}]
+                  : []),
                 ...(settings?.isFactoryVisible
                   ? [{to: '/factory', label: t('factory') || 'Fabrika'}]
                   : []),
@@ -159,7 +161,9 @@ export const Footer = () => {
                 {[
                   {to: '/products', label: t('view_all')},
                   {to: '/designers', label: t('designers')},
-                  {to: '/projects', label: t('projects') || 'Projeler'},
+                  ...(settings?.isProjectsVisible !== false
+                    ? [{to: '/projects', label: t('projects') || 'Projeler'}]
+                    : []),
                   ...(settings?.isFactoryVisible
                     ? [{to: '/uretim', label: t('factory') || 'Üretim'}]
                     : []),

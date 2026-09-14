@@ -1,8 +1,9 @@
 import {useState, useEffect} from 'react'
-import {useSearchParams} from 'react-router-dom'
+import {useSearchParams, useNavigate} from 'react-router-dom'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {useProjects} from '../hooks/useProjects'
+import {useSiteSettings} from '../hooks/useSiteData'
 import {useSEO} from '../hooks/useSEO'
 import {ProjectsV2VerticalView} from '../components/project/ProjectsV2VerticalView'
 import {ProjectsV3VerticalView} from '../components/project/ProjectsV3VerticalView'
@@ -10,9 +11,17 @@ import {ProjectsV4FullscreenView} from '../components/project/ProjectsV4Fullscre
 
 export function ProjectsPage() {
   const {data: projects = [], isLoading: loading} = useProjects()
+  const {data: settings, isLoading: settingsLoading} = useSiteSettings()
+  const navigate = useNavigate()
   const {t} = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
   const paramVersion = searchParams.get('v')
+
+  useEffect(() => {
+    if (!settingsLoading && settings && settings.isProjectsVisible === false) {
+      navigate('/', {replace: true})
+    }
+  }, [settings, settingsLoading, navigate])
 
   // Layout View Version: 'v2' | 'v3' | 'v4'
   const initialVersion: 'v2' | 'v3' | 'v4' =

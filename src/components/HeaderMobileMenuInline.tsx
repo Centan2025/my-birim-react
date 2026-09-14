@@ -233,13 +233,15 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
           >
             <CrossFadeText text={t('designers')} triggerKey={locale} />
           </NavLink>
-          <NavLink
-            to="/projects"
-            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
-            onClick={onCloseAll}
-          >
-            <CrossFadeText text={t('projects') || 'Projeler'} triggerKey={locale} />
-          </NavLink>
+          {settings?.isProjectsVisible !== false && (
+            <NavLink
+              to="/projects"
+              className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+              onClick={onCloseAll}
+            >
+              <CrossFadeText text={t('projects') || 'Projeler'} triggerKey={locale} />
+            </NavLink>
+          )}
           {settings?.enableSelections !== false && (
             <NavLink
               to="/seckim"

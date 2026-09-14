@@ -199,9 +199,12 @@ export function Header() {
   }, [])
 
   const upperLoc = locale === 'tr' ? 'tr-TR' : 'en-US'
+  const isProjectsVisible = settings?.isProjectsVisible !== false
   const mobileMenuLinks: {to: string; label: string}[] = [
     {to: '/designers', label: (t('designers') || '').toLocaleUpperCase(upperLoc)},
-    {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase(upperLoc)},
+    ...(isProjectsVisible
+      ? [{to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase(upperLoc)}]
+      : []),
     {to: '/news', label: (t('news') || '').toLocaleUpperCase(upperLoc)},
     {to: '/about', label: (t('about') || '').toLocaleUpperCase(upperLoc)},
     ...(settings?.isFactoryVisible
@@ -968,15 +971,27 @@ export function Header() {
                     {t('designers')}
                   </NavItem>
                 </div>
-                <div className="hidden lg:flex items-end">
-                  <NavItem
-                    to="/projects"
-                    onMouseEnter={handleCloseProducts}
-                    onClick={handleCloseProducts}
-                  >
-                    {t('projects') || 'Projeler'}
-                  </NavItem>
-                </div>
+                {isProjectsVisible ? (
+                  <div className="hidden lg:flex items-end">
+                    <NavItem
+                      to="/projects"
+                      onMouseEnter={handleCloseProducts}
+                      onClick={handleCloseProducts}
+                    >
+                      {t('projects') || 'Projeler'}
+                    </NavItem>
+                  </div>
+                ) : (
+                  <div className="hidden lg:flex items-end">
+                    <NavItem
+                      to="/news"
+                      onMouseEnter={handleCloseProducts}
+                      onClick={handleCloseProducts}
+                    >
+                      {t('news')}
+                    </NavItem>
+                  </div>
+                )}
               </div>
 
               {/* Orta - Logo (Tüm Ekranlar için Grid Sütun 2) */}
@@ -999,15 +1014,17 @@ export function Header() {
               {/* Sağ taraf - Logo'nun sağındaki linkler + ikonlar */}
               <div className="flex h-full items-center lg:items-end justify-end gap-3 lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition">
                 {/* Desktop Menü - Logo'nun sağındaki linkler (eşit aralıklarla dağıtılmış) */}
-                <div className="hidden lg:flex items-end">
-                  <NavItem
-                    to="/news"
-                    onMouseEnter={handleCloseProducts}
-                    onClick={handleCloseProducts}
-                  >
-                    {t('news')}
-                  </NavItem>
-                </div>
+                {isProjectsVisible && (
+                  <div className="hidden lg:flex items-end">
+                    <NavItem
+                      to="/news"
+                      onMouseEnter={handleCloseProducts}
+                      onClick={handleCloseProducts}
+                    >
+                      {t('news')}
+                    </NavItem>
+                  </div>
+                )}
                 <div className="hidden lg:flex items-end">
                   <NavItem
                     to="/about"
