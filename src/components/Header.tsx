@@ -99,11 +99,7 @@ export function Header() {
 
       const heroEl = document.querySelector('.hero-section') as HTMLElement | null
       if (!heroEl) {
-        if (headerTheme.mode === 'dark') {
-          setIsPastHero(false)
-        } else {
-          setIsPastHero(true)
-        }
+        setIsPastHero(true)
         return
       }
 
