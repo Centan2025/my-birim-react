@@ -129,4 +129,16 @@ describe('useHeaderBackgroundColor', () => {
     )
     expect(pastHero.result.current).toBe('rgba(248, 248, 248, 0.78)')
   })
+
+  it('hakkımızda veya üretim sayfasında hero görseli yoksa (isLightMode: true) header açık renk olmalı', () => {
+    const aboutNoHero = renderHook(
+      () =>
+        useHeaderBackgroundColor({
+          ...baseParams,
+          isLightMode: true,
+        }),
+      {wrapper: wrapper('/about')}
+    )
+    expect(aboutNoHero.result.current).toBe('rgba(248, 248, 248, 0.78)')
+  })
 })

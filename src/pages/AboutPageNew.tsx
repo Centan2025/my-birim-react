@@ -4,7 +4,6 @@ import {motion, AnimatePresence} from 'framer-motion'
 import {getAboutPageContent, getDesigners} from '../services/cms'
 import type {AboutPageContent, NewsMedia, Designer, R2ImageMetadata} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useSEO} from '../hooks/useSEO'
@@ -21,14 +20,18 @@ const containerClass =
   'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
 
 const DEFAULT_IMAGES = {
-  hero: 'https://assets.birim.com/migration/about/hero-1788417284053.jpg',
-  history: 'https://assets.birim.com/migration/about/history-1788417454936.jpg',
-  identity: 'https://assets.birim.com/migration/about/identity-1788417450030.jpg',
-  quality: 'https://assets.birim.com/migration/about/quality-1788417453056.jpg',
+  hero: '',
+  history: '',
+  identity: '',
+  quality: '',
 }
 
 const isBrokenUrl = (url?: string): boolean =>
-  !url || url.includes('1772637182314') || url.includes('BF006_CAB_06')
+  !url ||
+  url.includes('1772637182314') ||
+  url.includes('1788417') ||
+  url.includes('migration/about') ||
+  url.includes('BF006_CAB_06')
 
 const getSanitizedImage = (img: unknown, fallback: string = ''): string => {
   const rawUrl =
@@ -193,7 +196,6 @@ const MediaGallery = ({media, alt}: MediaGalleryProps) => {
 export function AboutPageNew() {
   const [content, setContent] = useState<AboutPageContent | null>(null)
   const [designers, setDesigners] = useState<Designer[]>([])
-  const [loading, setLoading] = useState(true)
   const [activeEraIndex, setActiveEraIndex] = useState(0)
   const [activeDesignerIndex, setActiveDesignerIndex] = useState(0)
   const {t, locale} = useTranslation()
@@ -202,7 +204,6 @@ export function AboutPageNew() {
   useEffect(() => {
     let isMounted = true
     const fetchData = async () => {
-      setLoading(true)
       try {
         const [pageContent, designerList] = await Promise.all([
           getAboutPageContent(),
@@ -212,8 +213,8 @@ export function AboutPageNew() {
           setContent(pageContent || null)
           setDesigners(designerList || [])
         }
-      } finally {
-        if (isMounted) setLoading(false)
+      } catch (err) {
+        console.error('Error fetching about page content:', err)
       }
     }
     fetchData()
@@ -254,14 +255,16 @@ export function AboutPageNew() {
   )
 
   useEffect(() => {
-    if (loading) return
     if (heroImageUrl) {
       setBrightness(0)
     } else {
       setBrightness(1)
     }
+  }, [heroImageUrl, setBrightness])
+
+  useEffect(() => {
     return () => reset()
-  }, [loading, heroImageUrl, setBrightness, reset])
+  }, [reset])
 
   const heroImgMeta = getImageMeta(content?.heroImage)
   const heroImgMobMeta = getImageMeta(content?.heroImageMobile)
@@ -324,14 +327,6 @@ export function AboutPageNew() {
     locale: 'tr_TR',
     section: 'About',
   })
-
-  if (loading) {
-    return (
-      <div className="pt-24 min-h-screen bg-[var(--bg-primary)]">
-        <PageLoading message={t('loading')} />
-      </div>
-    )
-  }
 
   const renderContentText = (val: unknown) => {
     if (!val) return null
@@ -518,6 +513,32 @@ export function AboutPageNew() {
             <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('about')}]} />
           </TextMaskReveal>
         </div>
+
+        {!heroImageUrl && (heroTitleText || heroBadgeText) ? (
+          <div className="pt-6 sm:pt-10 pb-6 sm:pb-8 text-center px-4 max-w-5xl mx-auto">
+            {heroBadgeText ? (
+              <TextMaskReveal delay={60} display="inline-block">
+                <span className="font-outfit text-[10px] sm:text-xs md:text-sm uppercase tracking-[0.25em] sm:tracking-[0.35em] text-[var(--text-secondary)] mb-3 sm:mb-4 inline-block font-light">
+                  {heroBadgeText}
+                </span>
+              </TextMaskReveal>
+            ) : null}
+            {heroTitleText ? (
+              <TextMaskReveal delay={100}>
+                <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight uppercase leading-tight md:leading-[1.1] text-[var(--text-primary)] max-w-5xl mx-auto text-balance break-words">
+                  {heroTitleText}
+                </h1>
+              </TextMaskReveal>
+            ) : null}
+            {heroSubtitleText ? (
+              <TextMaskReveal delay={160}>
+                <p className="font-outfit mt-4 sm:mt-6 text-sm sm:text-base md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto font-light leading-relaxed tracking-wide px-2 sm:px-0">
+                  {heroSubtitleText}
+                </p>
+              </TextMaskReveal>
+            ) : null}
+          </div>
+        ) : null}
 
         {/* SECTION 1: ARCHITECTURAL MANIFESTO QUOTE */}
         {manifestoQuote ? (

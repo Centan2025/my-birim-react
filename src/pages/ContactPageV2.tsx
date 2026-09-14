@@ -15,12 +15,7 @@ import ScrollReveal from '../components/ScrollReveal'
 const containerClass =
   'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
 
-const DEFAULT_SPACE_IMAGES = [
-  'https://assets.birim.com/migration/about/hero-1788417284053.jpg',
-  'https://assets.birim.com/migration/about/history-1788417454936.jpg',
-  'https://assets.birim.com/migration/about/quality-1788417453056.jpg',
-  'https://assets.birim.com/migration/about/identity-1788417450030.jpg',
-]
+const DEFAULT_SPACE_IMAGES: string[] = []
 
 const DEFAULT_FALLBACK_LOCATION: ContactLocation = {
   title: {tr: 'Nişantaşı Showroom', en: 'Nişantaşı Showroom'},

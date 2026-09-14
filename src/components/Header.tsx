@@ -83,22 +83,23 @@ export function Header() {
   const [isPastHero, setIsPastHero] = useState(false)
 
   useEffect(() => {
-    setIsPastHero(false)
     if (!isDarkHero) {
+      setIsPastHero(false)
       return
     }
     const update = () => {
+      const heroEl = document.querySelector('.hero-section') as HTMLElement | null
+      if (!heroEl) {
+        setIsPastHero(true)
+        return
+      }
+
       const currentY = window.scrollY || document.documentElement.scrollTop || 0
       if (currentY === 0) {
         setIsPastHero(false)
         return
       }
-      const heroEl = document.querySelector('.hero-section') as HTMLElement | null
-      const heroBottom = heroEl
-        ? heroEl.offsetTop + heroEl.offsetHeight
-        : typeof window !== 'undefined'
-          ? window.innerHeight
-          : 800
+      const heroBottom = heroEl.offsetTop + heroEl.offsetHeight
       setIsPastHero(currentY >= heroBottom - headerHeight)
     }
     update()
@@ -219,7 +220,6 @@ export function Header() {
     lastScrollForHeader.current = 0
     opacitySetByHandleScrollRef.current = false
     setIsHeaderVisible(true)
-    resetHeaderTheme()
 
     // Eğer mobil menü açıkken veya kapanma sürecindeyken sayfa değiştiyse (menüdeki bir linke tıklandıysa),
     // kapanma animasyonunu yarıda kesip header'ı aniden beyaza döndürme.
@@ -256,8 +256,17 @@ export function Header() {
     setIsSearchOpen(false)
     setIsProductsOpen(false)
 
-    // Header opacity'yi sayfa türüne göre ayarla (koyu hero varsa 0, ürün detayı gibi standart sayfalarda 0.7)
-    setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
+    // Header opacity'yi sayfa türüne göre ayarla (koyu hero varsa 0, yoksa veya hero-section DOM'da yoksa 0.7)
+    const heroEl =
+      typeof document !== 'undefined'
+        ? (document.querySelector('.hero-section') as HTMLElement | null)
+        : null
+    const initialOpacity =
+      isDarkHeroPageUtil(location.pathname) &&
+      (heroEl !== null || location.pathname === '/' || location.pathname === '')
+        ? 0
+        : 0.7
+    setHeaderOpacity(initialOpacity)
 
     const checkScroll = () => {
       if (currentRouteRef.current !== location.pathname) {
@@ -266,7 +275,13 @@ export function Header() {
 
       const currentScrollY = window.scrollY
       if (isMobile && currentScrollY === 0) {
-        setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
+        const currentHeroEl = document.querySelector('.hero-section')
+        setHeaderOpacity(
+          isDarkHeroPageUtil(location.pathname) &&
+            (currentHeroEl !== null || location.pathname === '/' || location.pathname === '')
+            ? 0
+            : 0.7
+        )
         setIsHeaderVisible(true)
       }
     }

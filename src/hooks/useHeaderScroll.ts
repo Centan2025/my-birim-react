@@ -114,16 +114,16 @@ export function useHeaderScroll({
             setHeaderOpacity(0.7)
             opacitySetByHandleScrollRef.current = true
           } else {
-            opacitySetByHandleScrollRef.current = false
-            // Hero yüksekliğini dinamik olarak al (sabit 800 veya innerHeight yerine)
             const heroEl = document.querySelector('.hero-section')
-            const maxScroll = heroEl
-              ? heroEl.getBoundingClientRect().height
-              : typeof window !== 'undefined'
-                ? window.innerHeight
-                : 800
-            const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
-            setHeaderOpacity(opacity)
+            if (!heroEl) {
+              setHeaderOpacity(0.7)
+              opacitySetByHandleScrollRef.current = true
+            } else {
+              opacitySetByHandleScrollRef.current = false
+              const maxScroll = heroEl.getBoundingClientRect().height
+              const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
+              setHeaderOpacity(opacity)
+            }
           }
 
           const timeSinceLastChange = now - (headerVisibilityLastChanged.current || 0)
@@ -150,21 +150,22 @@ export function useHeaderScroll({
           // Koyu hero bulunan sayfalar dahil: scroll'a göre opacity artır
           // Hero yüksekliğini dinamik olarak al
           const heroEl = document.querySelector('.hero-section')
-          const maxScroll = heroEl
-            ? heroEl.getBoundingClientRect().height
-            : typeof window !== 'undefined'
-              ? window.innerHeight
-              : 800
-          let opacity = 0
-
-          if (currentScrollY > 0) {
-            opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
-            opacitySetByHandleScrollRef.current = false
-          } else {
+          if (!heroEl) {
+            setHeaderOpacity(0.7)
             opacitySetByHandleScrollRef.current = true
-          }
+          } else {
+            const maxScroll = heroEl.getBoundingClientRect().height
+            let opacity = 0
 
-          setHeaderOpacity(opacity)
+            if (currentScrollY > 0) {
+              opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
+              opacitySetByHandleScrollRef.current = false
+            } else {
+              opacitySetByHandleScrollRef.current = true
+            }
+
+            setHeaderOpacity(opacity)
+          }
         }
       }
 
@@ -208,7 +209,10 @@ export function useHeaderScroll({
         if (isDarkHero) {
           // Koyu hero görseli olan sayfalarda (Ana Sayfa, Hakkımızda, Proje Detay)
           // Eğer hero çok açıksa (parlaksa) biraz opaklık ver, değilse tam şeffaf yap.
-          if (heroBrightnessRef.current !== null && heroBrightnessRef.current >= 0.5) {
+          const heroEl = document.querySelector('.hero-section')
+          if (!heroEl) {
+            setHeaderOpacity(0.7)
+          } else if (heroBrightnessRef.current !== null && heroBrightnessRef.current >= 0.5) {
             setHeaderOpacity(0.7)
           } else {
             setHeaderOpacity(0)

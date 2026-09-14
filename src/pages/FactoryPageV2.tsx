@@ -5,7 +5,6 @@ import {getFactoryPageContent} from '../services/cms'
 import {mapImage} from '../services/sanity/client'
 import type {FactoryPageContent, NewsMedia, LocalizedString} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useSEO} from '../hooks/useSEO'
@@ -55,11 +54,11 @@ const containerClass =
   'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[82vw] mx-auto px-4 md:px-8 lg:px-0'
 
 const DEFAULT_FACTORY_IMAGES = {
-  hero: 'https://assets.birim.com/migration/about/quality-1788417453056.jpg',
-  wood: 'https://assets.birim.com/migration/about/history-1788417454936.jpg',
-  metal: 'https://assets.birim.com/migration/about/hero-1788417284053.jpg',
-  upholstery: 'https://assets.birim.com/migration/about/identity-1788417450030.jpg',
-  finishing: 'https://assets.birim.com/migration/about/quality-1788417453056.jpg',
+  hero: '',
+  wood: '',
+  metal: '',
+  upholstery: '',
+  finishing: '',
 }
 
 interface DisciplineItem {
@@ -168,7 +167,6 @@ const DISCIPLINES: DisciplineItem[] = [
 
 export function FactoryPageV2() {
   const [content, setContent] = useState<FactoryPageContent | null>(null)
-  const [loading, setLoading] = useState(true)
   const [activeDisciplineIndex, setActiveDisciplineIndex] = useState(0)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [initialViewerIndex, setInitialViewerIndex] = useState(0)
@@ -221,14 +219,13 @@ export function FactoryPageV2() {
   useEffect(() => {
     let isMounted = true
     const fetchContent = async () => {
-      setLoading(true)
       try {
         const pageContent = await getFactoryPageContent()
         if (isMounted) {
           setContent(pageContent || null)
         }
-      } finally {
-        if (isMounted) setLoading(false)
+      } catch (err) {
+        console.error('Error fetching factory page content:', err)
       }
     }
     fetchContent()
@@ -261,14 +258,16 @@ export function FactoryPageV2() {
       : ''
 
   useEffect(() => {
-    if (loading) return
     if (heroImageUrl) {
       setBrightness(0)
     } else {
       setBrightness(1)
     }
+  }, [heroImageUrl, setBrightness])
+
+  useEffect(() => {
     return () => reset()
-  }, [loading, heroImageUrl, setBrightness, reset])
+  }, [reset])
 
   const resolveCmsText = (
     field: LocalizedString | undefined,
@@ -479,14 +478,6 @@ export function FactoryPageV2() {
     crop: m.crop,
     hotspot: m.hotspot,
   }))
-
-  if (loading) {
-    return (
-      <div className="pt-24 min-h-screen bg-[var(--bg-primary)]">
-        <PageLoading message={t('loading')} />
-      </div>
-    )
-  }
 
   const defaultDiscipline = {
     id: 'wood',
