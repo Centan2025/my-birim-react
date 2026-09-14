@@ -60,7 +60,7 @@ describe('useHeaderBackgroundColor', () => {
     const {result} = renderHook(() => useHeaderBackgroundColor({...baseParams}), {
       wrapper: wrapper('/contact'),
     })
-    expect(result.current).toBe('rgba(255, 255, 255, 0.78)')
+    expect(result.current).toBe('rgba(248, 248, 248, 0.78)')
   })
 
   it('inline mobil menü açıkken opacity 0.85 ile sınırlandırılmalı', () => {
@@ -88,7 +88,7 @@ describe('useHeaderBackgroundColor', () => {
         }),
       {wrapper: wrapper('/contact')}
     )
-    expect(result.current).toBe('rgba(255, 255, 255, 0.95)')
+    expect(result.current).toBe('rgba(248, 248, 248, 0.95)')
   })
 
   it('overlay mobil menü kapanırken de aynı arka plan rengini korumalı', () => {
@@ -103,6 +103,30 @@ describe('useHeaderBackgroundColor', () => {
         }),
       {wrapper: wrapper('/contact')}
     )
-    expect(result.current).toBe('rgba(255, 255, 255, 0.95)')
+    expect(result.current).toBe('rgba(248, 248, 248, 0.95)')
+  })
+
+  it('üretim sayfasında hero üzerindeyken şeffaf, hero geçildikten sonra açık buzlu cam arka plan döndürmeli', () => {
+    // Hero üzerinde (isLightMode: false)
+    const onHero = renderHook(
+      () =>
+        useHeaderBackgroundColor({
+          ...baseParams,
+          isLightMode: false,
+        }),
+      {wrapper: wrapper('/uretim')}
+    )
+    expect(onHero.result.current).toBe('transparent')
+
+    // Hero altında (isLightMode: true)
+    const pastHero = renderHook(
+      () =>
+        useHeaderBackgroundColor({
+          ...baseParams,
+          isLightMode: true,
+        }),
+      {wrapper: wrapper('/uretim')}
+    )
+    expect(pastHero.result.current).toBe('rgba(248, 248, 248, 0.78)')
   })
 })

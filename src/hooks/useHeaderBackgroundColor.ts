@@ -32,8 +32,14 @@ export function useHeaderBackgroundColor({
     const isDarkHeroMatched = isDarkHeroPage(path)
     const effectiveIsLight = isLightMode ?? !isDarkHeroMatched
 
+    const isProductDetailPage = path.startsWith('/product/') || path === '/product'
+
     if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
-      return isDarkMode || !effectiveIsLight ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'
+      return isDarkMode || !effectiveIsLight
+        ? 'rgba(0, 0, 0, 0.85)'
+        : isProductDetailPage
+          ? 'rgba(255, 255, 255, 0.95)'
+          : 'rgba(248, 248, 248, 0.95)'
     }
 
     if (isMobileMenuOpen && !isOverlayMobileMenu) {
@@ -49,13 +55,11 @@ export function useHeaderBackgroundColor({
       return 'rgba(0, 0, 0, 0.85)'
     }
 
-    // Üstte koyu hero görseli bulunmayan sayfalar (Tasarımcılar, Haberler vb.):
+    // Üstte koyu hero görseli bulunmayan sayfalar (Tasarımcılar, Haberler, Ürün Detay vb.):
     if (!isDarkHeroMatched) {
-      if (!effectiveIsLight && !isDarkMode) {
-        return 'rgba(0, 0, 0, 0.75)'
-      }
-      // Yarı şeffaf beyaz buz efekti: bg-white/78 + backdrop-blur-[4px]
-      const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : 'rgba(255, 255, 255, '
+      // Ürün detay sayfasında beyaz, diğer açık sayfalarda soluk gri buz efekti
+      const lightRgb = isProductDetailPage ? '255, 255, 255' : '248, 248, 248'
+      const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : `rgba(${lightRgb}, `
       return `${baseColor}${Math.max(Math.min(headerOpacity, 0.82), 0.78)})`
     }
 
@@ -63,8 +67,9 @@ export function useHeaderBackgroundColor({
     // Hero üzerindeyken (ve lightMode değilken) tam şeffaf:
     if (!effectiveIsLight) return 'transparent'
 
-    // Hero altından itibaren: yarı şeffaf beyaz buz efekti
-    const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : 'rgba(255, 255, 255, '
+    // Hero altından itibaren: yarı şeffaf buz efekti
+    const lightRgb = isProductDetailPage ? '255, 255, 255' : '248, 248, 248'
+    const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : `rgba(${lightRgb}, `
     return `${baseColor}${Math.max(Math.min(headerOpacity, 0.82), 0.78)})`
   }
 

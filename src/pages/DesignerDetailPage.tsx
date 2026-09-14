@@ -158,7 +158,7 @@ export function DesignerDetailPage() {
 
   return (
     <div
-      className={`h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-secondary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20 md:pt-20 lg:pt-20 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}
+      className={`h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-primary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20 md:pt-20 lg:pt-20 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}
     >
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
@@ -257,7 +257,7 @@ export function DesignerDetailPage() {
 
         {/* Sağ Taraf: Bilgiler ve Tasarımlar (Scroll Edilebilir) */}
         <div
-          className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full lg:overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] lg:border-l border-[var(--border-primary)] scroll-smooth pb-20 lg:pb-0"
+          className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full lg:overflow-y-auto custom-scrollbar bg-[var(--bg-primary)] lg:border-l border-[var(--border-primary)] scroll-smooth pb-20 lg:pb-0"
           {...(!isMobile ? {'data-lenis-prevent': true} : {})}
         >
           <div className="pt-4 lg:pt-10 xl:pt-16 pb-12 lg:pb-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">

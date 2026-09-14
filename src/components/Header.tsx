@@ -83,8 +83,8 @@ export function Header() {
   const [isPastHero, setIsPastHero] = useState(false)
 
   useEffect(() => {
+    setIsPastHero(false)
     if (!isDarkHero) {
-      setIsPastHero(false)
       return
     }
     const update = () => {
@@ -120,11 +120,9 @@ export function Header() {
   // Search open: always dark text (white panel bg).
   // Mobile overlay menu: always dark text.
   const isLightMode =
-    headerTheme.mode === 'dark'
-      ? false
-      : (!isDarkHero || headerTheme.mode === 'light' || isPastHero || isSearchOpen) &&
-        !(isMobile && (isMobileMenuOpen || isMobileMenuClosing)) &&
-        !isProductsHovered
+    !isProductsHovered &&
+    !(isMobile && (isMobileMenuOpen || isMobileMenuClosing)) &&
+    (isSearchOpen || isPastHero || (headerTheme.mode ? headerTheme.mode === 'light' : !isDarkHero))
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
   const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
@@ -701,7 +699,7 @@ export function Header() {
         } ${
           headerBgColor === 'transparent' && !isProductsOpen
             ? ''
-            : 'header-frosted-glass backdrop-blur-[4px] border-b border-black/[0.06] dark:border-white/[0.08]'
+            : 'header-frosted-glass backdrop-blur-[4px]'
         }`}
         style={{
           transform: isHeaderVisible ? 'none' : 'translateY(-100%)',

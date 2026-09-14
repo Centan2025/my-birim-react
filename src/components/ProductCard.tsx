@@ -81,8 +81,8 @@ export const ProductCard: React.FC<{
 
   return (
     <Link to={`/product/${product.id}`} className="group block w-full" onClick={handleClick}>
-      <div className={`bg-[var(--bg-primary)] ${imageBorderClass} overflow-hidden`}>
-        <div className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-[var(--bg-primary)]">
+      <div className={`bg-white dark:bg-neutral-900 ${imageBorderClass} overflow-hidden`}>
+        <div className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white dark:bg-neutral-900">
           <OptimizedImage
             src={mainImageUrl}
             srcMobile={mainImageMobile}
