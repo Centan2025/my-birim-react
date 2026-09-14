@@ -1,5 +1,5 @@
 import {useLocation} from 'react-router-dom'
-import {isDarkHeroPage} from '../utils/headerUtils'
+import {isDarkHeroPage, isFullscreenDarkPage} from '../utils/headerUtils'
 
 interface HeaderBackgroundParams {
   isMobile: boolean
@@ -28,8 +28,10 @@ export function useHeaderBackgroundColor({
 
   const calculateBackgroundColor = () => {
     const path = location.pathname
+    const search = location.search
 
-    const isDarkHeroMatched = isDarkHeroPage(path)
+    const isDarkHeroMatched = isDarkHeroPage(path, search)
+    const isFullscreen = isFullscreenDarkPage(path, search)
     const effectiveIsLight = isLightMode ?? !isDarkHeroMatched
 
     const isProductDetailPage = path.startsWith('/product/') || path === '/product'
@@ -53,6 +55,10 @@ export function useHeaderBackgroundColor({
 
     if (isProductsOpen && !isMobile) {
       return 'rgba(0, 0, 0, 0.85)'
+    }
+
+    if (isFullscreen) {
+      return 'transparent'
     }
 
     // Üstte koyu hero görseli bulunmayan sayfalar (Tasarımcılar, Haberler, Ürün Detay vb.):

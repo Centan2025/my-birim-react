@@ -141,4 +141,16 @@ describe('useHeaderBackgroundColor', () => {
     )
     expect(aboutNoHero.result.current).toBe('rgba(248, 248, 248, 0.78)')
   })
+
+  it('projeler V4 sayfasında header şeffaf (transparent) arka plan döndürmeli', () => {
+    const projectsV4 = renderHook(
+      () =>
+        useHeaderBackgroundColor({
+          ...baseParams,
+          isLightMode: false,
+        }),
+      {wrapper: wrapper('/projects?v=4')}
+    )
+    expect(projectsV4.result.current).toBe('transparent')
+  })
 })

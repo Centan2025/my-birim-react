@@ -1,5 +1,5 @@
 import {useEffect, useRef, MutableRefObject} from 'react'
-import {isDarkHeroPage} from '../utils/headerUtils'
+import {isDarkHeroPage, isFullscreenDarkPage} from '../utils/headerUtils'
 
 type MenuState = {
   isLangOpen: boolean
@@ -11,6 +11,7 @@ type MenuState = {
 interface UseHeaderScrollOptions {
   isMobile: boolean
   locationPathname: string
+  locationSearch?: string
   closeSearch: () => void
   currentRouteRef: MutableRefObject<string>
   heroBrightnessRef: MutableRefObject<number | null>
@@ -34,6 +35,7 @@ interface UseHeaderScrollOptions {
 export function useHeaderScroll({
   isMobile,
   locationPathname,
+  locationSearch = '',
   closeSearch,
   currentRouteRef,
   heroBrightnessRef,
@@ -73,6 +75,7 @@ export function useHeaderScroll({
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       const path = locationPathname
+      const search = locationSearch
       const currentPath = currentRouteRef.current
       const {
         isMobileMenuOpen: menuOpen,
@@ -106,12 +109,15 @@ export function useHeaderScroll({
         if (currentScrollY === 0 || isRecentlyNavigated) {
           setIsHeaderVisible(true)
           if (currentScrollY === 0) {
-            setHeaderOpacity(isDarkHeroPage(path) ? 0 : 0.7)
+            setHeaderOpacity(isDarkHeroPage(path, search) ? 0 : 0.7)
             opacitySetByHandleScrollRef.current = true
           }
         } else {
-          if (!isDarkHeroPage(path)) {
+          if (!isDarkHeroPage(path, search)) {
             setHeaderOpacity(0.7)
+            opacitySetByHandleScrollRef.current = true
+          } else if (isFullscreenDarkPage(path, search)) {
+            setHeaderOpacity(0)
             opacitySetByHandleScrollRef.current = true
           } else {
             const heroEl = document.querySelector('.hero-section')
@@ -143,8 +149,11 @@ export function useHeaderScroll({
         // Desktop'ta arama açıkken header'ı zorla görünür tutma kısıtlaması kaldırıldı.
         // Böylece scroll yapıldığında header normal gizlenme mantığını izleyebilir.
 
-        if (!isDarkHeroPage(path)) {
+        if (!isDarkHeroPage(path, search)) {
           setHeaderOpacity(0.7)
+          opacitySetByHandleScrollRef.current = true
+        } else if (isFullscreenDarkPage(path, search)) {
+          setHeaderOpacity(0)
           opacitySetByHandleScrollRef.current = true
         } else {
           // Koyu hero bulunan sayfalar dahil: scroll'a göre opacity artır
@@ -204,18 +213,23 @@ export function useHeaderScroll({
       const currentScrollY = window.scrollY || document.documentElement.scrollTop
       if (currentScrollY <= 10) {
         const path = locationPathname
-        const isDarkHero = isDarkHeroPage(path)
+        const search = locationSearch
+        const isDarkHero = isDarkHeroPage(path, search)
 
         if (isDarkHero) {
-          // Koyu hero görseli olan sayfalarda (Ana Sayfa, Hakkımızda, Proje Detay)
-          // Eğer hero çok açıksa (parlaksa) biraz opaklık ver, değilse tam şeffaf yap.
-          const heroEl = document.querySelector('.hero-section')
-          if (!heroEl) {
-            setHeaderOpacity(0.7)
-          } else if (heroBrightnessRef.current !== null && heroBrightnessRef.current >= 0.5) {
-            setHeaderOpacity(0.7)
-          } else {
+          if (isFullscreenDarkPage(path, search)) {
             setHeaderOpacity(0)
+          } else {
+            // Koyu hero görseli olan sayfalarda (Ana Sayfa, Hakkımızda, Proje Detay)
+            // Eğer hero çok açıksa (parlaksa) biraz opaklık ver, değilse tam şeffaf yap.
+            const heroEl = document.querySelector('.hero-section')
+            if (!heroEl) {
+              setHeaderOpacity(0.7)
+            } else if (heroBrightnessRef.current !== null && heroBrightnessRef.current >= 0.5) {
+              setHeaderOpacity(0.7)
+            } else {
+              setHeaderOpacity(0)
+            }
           }
         } else {
           // Sabit beyaz sayfalarda (veya liste sayfalarında)
@@ -263,6 +277,7 @@ export function useHeaderScroll({
   }, [
     isMobile,
     locationPathname,
+    locationSearch,
     closeSearch,
     currentRouteRef,
     heroBrightnessRef,

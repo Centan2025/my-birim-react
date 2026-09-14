@@ -27,6 +27,9 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
     setBrightness(0)
     return () => {
       resetHeaderTheme()
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('setHeaderVisibility', {detail: true}))
+      }
     }
   }, [setBrightness, resetHeaderTheme])
 
@@ -124,10 +127,19 @@ export const ProjectsV4FullscreenView: React.FC<ProjectsV4FullscreenViewProps> =
 
     const scrollToSection = (index: number) => {
       if (index < 0 || index >= projects.length) return
+      const isScrollingDown = index > currentIndexRef.current
       isAnimating = true
       isScrollingRef.current = true
       lastScrollTime = performance.now()
       currentIndexRef.current = index
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('setHeaderVisibility', {
+            detail: !isScrollingDown || index === 0,
+          })
+        )
+      }
 
       const targetSection = container.querySelector<HTMLElement>(`[data-project-index="${index}"]`)
       const targetY = targetSection ? targetSection.offsetTop : index * container.clientHeight

@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef, FC, Fragment, useCallback, ReactNode} from 'react'
 import {Link, NavLink, useLocation} from 'react-router-dom'
-import {isDarkHeroPage as isDarkHeroPageUtil} from '../utils/headerUtils'
+import {isDarkHeroPage as isDarkHeroPageUtil, isFullscreenDarkPage} from '../utils/headerUtils'
 import type {SiteSettings, Product, FooterContent} from '../types'
 import {
   getSiteSettings,
@@ -65,18 +65,21 @@ export function Header() {
   const {cartCount, toggleCart} = useCart()
   const {selectionCount, openDrawer, isSelectionEnabled} = useSelection()
   const [headerOpacity, setHeaderOpacity] = useState(() =>
-    isDarkHeroPageUtil(location.pathname) ? 0 : 0.7
+    isDarkHeroPageUtil(location.pathname, location.search) ? 0 : 0.7
   )
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
 
   // Logic to determine if we are on a "Dark Hero" page (transparent header potential)
-  const isDarkHeroPage = useCallback((p: string) => isDarkHeroPageUtil(p), [])
+  const isDarkHeroPage = useCallback(
+    (p: string, search?: string) => isDarkHeroPageUtil(p, search),
+    []
+  )
 
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
   )
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
-  const isDarkHero = isDarkHeroPage(location.pathname)
+  const isDarkHero = isDarkHeroPage(location.pathname, location.search)
   const isProductsHovered = isProductsOpen && !isSearchOpen && !isMobile
 
   // Track whether scroll has passed the hero bottom boundary
@@ -88,9 +91,19 @@ export function Header() {
       return
     }
     const update = () => {
+      const isFullscreen = isFullscreenDarkPage(location.pathname, location.search)
+      if (isFullscreen || headerTheme.mode === 'dark') {
+        setIsPastHero(false)
+        return
+      }
+
       const heroEl = document.querySelector('.hero-section') as HTMLElement | null
       if (!heroEl) {
-        setIsPastHero(true)
+        if (headerTheme.mode === 'dark') {
+          setIsPastHero(false)
+        } else {
+          setIsPastHero(true)
+        }
         return
       }
 
@@ -114,7 +127,7 @@ export function Header() {
       window.removeEventListener('resize', update)
       observer.disconnect()
     }
-  }, [isDarkHero, headerHeight, location.pathname])
+  }, [isDarkHero, headerHeight, location.pathname, location.search, headerTheme.mode])
 
   // isDarkHero pages: white text at top, black after hero bottom boundary.
   // Standard pages: always dark text.
@@ -123,7 +136,7 @@ export function Header() {
   const isLightMode =
     !isProductsHovered &&
     !(isMobile && (isMobileMenuOpen || isMobileMenuClosing)) &&
-    (isSearchOpen || isPastHero || (headerTheme.mode ? headerTheme.mode === 'light' : !isDarkHero))
+    (isSearchOpen || (headerTheme.mode ? headerTheme.mode === 'light' : isPastHero || !isDarkHero))
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
   const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
@@ -261,9 +274,14 @@ export function Header() {
       typeof document !== 'undefined'
         ? (document.querySelector('.hero-section') as HTMLElement | null)
         : null
+    const isFullscreen = isFullscreenDarkPage(location.pathname, location.search)
     const initialOpacity =
-      isDarkHeroPageUtil(location.pathname) &&
-      (heroEl !== null || location.pathname === '/' || location.pathname === '')
+      isDarkHeroPageUtil(location.pathname, location.search) &&
+      (heroEl !== null ||
+        location.pathname === '/' ||
+        location.pathname === '' ||
+        isFullscreen ||
+        headerTheme.mode === 'dark')
         ? 0
         : 0.7
     setHeaderOpacity(initialOpacity)
@@ -277,8 +295,12 @@ export function Header() {
       if (isMobile && currentScrollY === 0) {
         const currentHeroEl = document.querySelector('.hero-section')
         setHeaderOpacity(
-          isDarkHeroPageUtil(location.pathname) &&
-            (currentHeroEl !== null || location.pathname === '/' || location.pathname === '')
+          isDarkHeroPageUtil(location.pathname, location.search) &&
+            (currentHeroEl !== null ||
+              location.pathname === '/' ||
+              location.pathname === '' ||
+              isFullscreen ||
+              headerTheme.mode === 'dark')
             ? 0
             : 0.7
         )
@@ -288,7 +310,14 @@ export function Header() {
     checkScroll()
     const timeoutId = setTimeout(checkScroll, 50)
     return () => clearTimeout(timeoutId)
-  }, [location.pathname, isMobile, resetHeaderTheme, mobileMenuCloseDelay])
+  }, [
+    location.pathname,
+    location.search,
+    isMobile,
+    resetHeaderTheme,
+    mobileMenuCloseDelay,
+    headerTheme.mode,
+  ])
 
   // Mobil kontrolü
   useEffect(() => {
@@ -334,6 +363,20 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleHeaderVisibility)
   }, [isMobile])
 
+  // Listen to custom header visibility events (e.g. from fullscreen vertical sliders like Projects V4 / Designers V2)
+  useEffect(() => {
+    const handleCustomVisibility = (e: Event) => {
+      const customEvent = e as CustomEvent<boolean | {visible: boolean}>
+      if (typeof customEvent.detail === 'boolean') {
+        setIsHeaderVisible(customEvent.detail)
+      } else if (customEvent.detail && typeof customEvent.detail.visible === 'boolean') {
+        setIsHeaderVisible(customEvent.detail.visible)
+      }
+    }
+    window.addEventListener('setHeaderVisibility', handleCustomVisibility)
+    return () => window.removeEventListener('setHeaderVisibility', handleCustomVisibility)
+  }, [])
+
   // Header kaybolduğunda products dropdown'ı kapat
   useEffect(() => {
     if (!isHeaderVisible && isProductsOpen) {
@@ -354,6 +397,7 @@ export function Header() {
   useHeaderScroll({
     isMobile,
     locationPathname: location.pathname,
+    locationSearch: location.search,
     closeSearch,
     currentRouteRef,
     heroBrightnessRef,

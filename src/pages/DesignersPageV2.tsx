@@ -31,6 +31,9 @@ export function DesignersPageV2() {
     setBrightness(0)
     return () => {
       resetHeaderTheme()
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('setHeaderVisibility', {detail: true}))
+      }
     }
   }, [setBrightness, resetHeaderTheme])
 
@@ -156,10 +159,19 @@ export function DesignersPageV2() {
 
     const scrollToSection = (index: number) => {
       if (index < 0 || index >= designers.length) return
+      const isScrollingDown = index > currentIndexRef.current
       isAnimating = true
       isScrollingRef.current = true
       lastScrollTime = performance.now()
       currentIndexRef.current = index
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('setHeaderVisibility', {
+            detail: !isScrollingDown || index === 0,
+          })
+        )
+      }
 
       const targetSection = container.querySelector<HTMLElement>(`[data-designer-index="${index}"]`)
       const targetY = targetSection ? targetSection.offsetTop : index * container.clientHeight
