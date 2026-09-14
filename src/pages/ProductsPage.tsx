@@ -11,11 +11,6 @@ import {useCategory, useCategories} from '../hooks/useCategories'
 import {useSiteSettings} from '../hooks/useSiteData'
 import type {Product, Category} from '../types'
 import ScrollReveal from '../components/ScrollReveal'
-import {
-  ProductCardReveal,
-  CategoryTitleReveal,
-  getProductCardStaggerDelay,
-} from '../components/ProductCardReveal'
 import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 
@@ -356,20 +351,21 @@ export function ProductsPage() {
                         className="mb-4 md:mb-6 pb-2 border-b border-[var(--border-primary)]/20 last:border-b-0 last:mb-2"
                       >
                         {/* Category Title */}
-                        <CategoryTitleReveal key={`${sortBy}-${catId}`} className="mb-2 md:mb-3">
+                        <ScrollReveal key={`${sortBy}-${catId}`} delay={0} threshold={0.01} className="mb-2 md:mb-3">
                           <h2 className="font-oswald text-xl md:text-2xl lg:text-3xl uppercase font-light tracking-[0.1em] text-[var(--text-primary)]">
                             {categoryName}
                           </h2>
-                        </CategoryTitleReveal>
+                        </ScrollReveal>
                         {/* Products Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-2">
                           {products.map((product, idx) => (
-                            <ProductCardReveal
+                            <ScrollReveal
                               key={`${sortBy}-${product.id}`}
-                              delay={getProductCardStaggerDelay(idx)}
+                              delay={idx < 8 ? idx * 100 : 0}
+                              threshold={0.01}
                             >
                               <ProductCard product={product} priority={catIndex === 0 && idx < 6} />
-                            </ProductCardReveal>
+                            </ScrollReveal>
                           ))}
                         </div>
                       </div>
@@ -382,12 +378,13 @@ export function ProductsPage() {
             // Eğer kategori seçiliyse, normal grid göster
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
               {sortedProducts.map((product, index) => (
-                <ProductCardReveal
+                <ScrollReveal
                   key={`${sortBy}-${product.id}`}
-                  delay={getProductCardStaggerDelay(index)}
+                  delay={index < 8 ? index * 100 : 0}
+                  threshold={0.01}
                 >
                   <ProductCard product={product} priority={index < 6} />
-                </ProductCardReveal>
+                </ScrollReveal>
               ))}
             </div>
           )

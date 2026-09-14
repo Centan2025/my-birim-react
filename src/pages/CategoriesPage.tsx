@@ -8,7 +8,6 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useCategories} from '../hooks/useCategories'
 import {useProducts} from '../hooks/useProducts'
 import ScrollReveal from '../components/ScrollReveal'
-import {ProductCardReveal, getProductCardStaggerDelay} from '../components/ProductCardReveal'
 import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 
@@ -118,9 +117,10 @@ export function CategoriesPage() {
         {categoriesWithImages.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2">
             {categoriesWithImages.map((category, index) => (
-              <ProductCardReveal
+              <ScrollReveal
                 key={category.id}
-                delay={getProductCardStaggerDelay(index, 3)}
+                delay={index < 8 ? index * 100 : 0}
+                threshold={0.01}
                 className="h-[300px] sm:h-[350px] lg:h-[450px]"
               >
                 <Link
@@ -202,7 +202,7 @@ export function CategoriesPage() {
                                           'hotspotY'
                                         ]
                                       ) ?? 0.5,
-                                  }
+                                    }
                                 : undefined)
                             : undefined
                         }
@@ -313,7 +313,7 @@ export function CategoriesPage() {
                     </div>
                   </div>
                 </Link>
-              </ProductCardReveal>
+              </ScrollReveal>
             ))}
           </div>
         ) : (
