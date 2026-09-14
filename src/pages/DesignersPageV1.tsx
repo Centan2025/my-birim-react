@@ -232,59 +232,29 @@ export function DesignersPageV1() {
                       <OptimizedImage
                         alt={t(designer.name)}
                         className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0 brightness-[1.08] contrast-[1.02]"
-                        src={getImageUrl(designer)}
-                        srcMobile={
-                          typeof designer.image === 'object' ? designer.image.urlMobile : undefined
+                        src={
+                          typeof designer.image === 'object' && designer.image?.urlDesktop
+                            ? designer.image.urlDesktop
+                            : getImageUrl(designer)
                         }
-                        srcDesktop={
-                          typeof designer.image === 'object' ? designer.image.urlDesktop : undefined
+                        crop={
+                          typeof designer.image === 'object'
+                            ? designer.image.cropDesktop || designer.image.crop
+                            : undefined
                         }
-                        crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
                         hotspot={
-                          typeof designer.image === 'object' ? designer.image.hotspot : undefined
+                          typeof designer.image === 'object'
+                            ? designer.image.hotspotDesktop || designer.image.hotspot
+                            : undefined
                         }
                         origWidth={
-                          typeof designer.image === 'object' ? designer.image.origWidth : undefined
+                          typeof designer.image === 'object'
+                            ? designer.image.origWidthDesktop || designer.image.origWidth
+                            : undefined
                         }
                         origHeight={
-                          typeof designer.image === 'object' ? designer.image.origHeight : undefined
-                        }
-                        cropMobile={
-                          typeof designer.image === 'object' ? designer.image.cropMobile : undefined
-                        }
-                        hotspotMobile={
                           typeof designer.image === 'object'
-                            ? designer.image.hotspotMobile
-                            : undefined
-                        }
-                        origWidthMobile={
-                          typeof designer.image === 'object'
-                            ? designer.image.origWidthMobile
-                            : undefined
-                        }
-                        origHeightMobile={
-                          typeof designer.image === 'object'
-                            ? designer.image.origHeightMobile
-                            : undefined
-                        }
-                        cropDesktop={
-                          typeof designer.image === 'object'
-                            ? designer.image.cropDesktop
-                            : undefined
-                        }
-                        hotspotDesktop={
-                          typeof designer.image === 'object'
-                            ? designer.image.hotspotDesktop
-                            : undefined
-                        }
-                        origWidthDesktop={
-                          typeof designer.image === 'object'
-                            ? designer.image.origWidthDesktop
-                            : undefined
-                        }
-                        origHeightDesktop={
-                          typeof designer.image === 'object'
-                            ? designer.image.origHeightDesktop
+                            ? designer.image.origHeightDesktop || designer.image.origHeight
                             : undefined
                         }
                       />

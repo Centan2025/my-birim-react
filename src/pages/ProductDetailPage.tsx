@@ -252,21 +252,21 @@ export function ProductDetailPage() {
   // Loading / Not found
   if (productLoading && !product)
     return (
-      <div className="pt-20 bg-[var(--bg-primary)] min-h-screen">
+      <div className="pt-20 bg-white min-h-screen">
         <PageLoading message={t('loading')} />
       </div>
     )
 
   if (!product) {
     return (
-      <div className="pt-20 text-center bg-[var(--bg-primary)] min-h-screen">
+      <div className="pt-20 text-center bg-white min-h-screen">
         <p className="text-[var(--text-secondary)]">{t('product_not_found')}</p>
       </div>
     )
   }
 
   return (
-    <div data-product-detail className="min-h-screen bg-[var(--bg-primary)]">
+    <div data-product-detail className="min-h-screen bg-white">
       <style>{`
         @keyframes dot-grow { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
         @keyframes fill-line { from { width: 0; } to { width: 100%; } }
@@ -329,7 +329,7 @@ export function ProductDetailPage() {
       )}
 
       <main
-        className={`bg-[var(--bg-secondary)] pb-12 transition-all duration-700 ease-out ${
+        className={`bg-white pb-12 transition-all duration-700 ease-out ${
           !isMainContentVisible ? 'opacity-0 translate-y-12' : 'opacity-100 translate-y-0 delay-75'
         }`}
       >
