@@ -543,7 +543,7 @@ export function DesignersPageV2() {
       {designers.length > 1 && (
         <aside
           aria-label={t('designers') || 'Tasarımcılar'}
-          className="group/index fixed right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none p-3 -mr-3"
+          className="hidden md:block group/index fixed right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none p-3 -mr-3"
         >
           <div className="relative flex items-center justify-end">
             {/* Ambient Collapsed State (Ultra-minimalist vertical dash bar) */}
