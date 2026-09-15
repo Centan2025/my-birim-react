@@ -268,7 +268,7 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
     dimensions: [{name: 'country'}],
     metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
     orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
-    limit: 50,
+    limit: 100,
   })
   await sleep(60)
 
@@ -278,7 +278,7 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
     dimensions: [{name: 'country'}, {name: 'city'}],
     metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
     orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
-    limit: 60,
+    limit: 250,
   })
   await sleep(60)
 

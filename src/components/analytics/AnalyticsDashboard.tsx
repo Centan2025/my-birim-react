@@ -29,6 +29,8 @@ import {
   ExternalLink,
 } from 'lucide-react'
 
+import {getCountryFlag, COUNTRY_META} from '../../lib/geo-coords'
+
 const TurkeyMapChart = React.lazy(() => import('./TurkeyMapChart'))
 const WorldMapChart = React.lazy(() => import('./WorldMapChart'))
 
@@ -848,16 +850,30 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 {(data?.cityData || []).slice(0, 8).map((city, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl hover transition text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition text-xs"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-5 h-5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 flex items-center justify-center">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
-                      <span className="font-medium text-slate-700">{city.city}</span>
+                      <span className="text-base shrink-0">
+                        {getCountryFlag(city.country || '')}
+                      </span>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-slate-800 truncate block">
+                          {city.city}
+                        </span>
+                        {city.country && (
+                          <span className="text-[10px] text-slate-400 truncate block">
+                            {COUNTRY_META[city.country]?.nameTr || city.country}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4 text-slate-500">
-                      <span>{city.users.toLocaleString('tr-TR')} kullanıcı</span>
+                    <div className="flex items-center gap-4 text-slate-500 shrink-0">
+                      <span className="font-medium text-slate-800">
+                        {city.users.toLocaleString('tr-TR')} kullanıcı
+                      </span>
                       <span className="font-mono text-slate-400">({city.sessions} oturum)</span>
                     </div>
                   </div>
@@ -879,16 +895,28 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 {(data?.countryData || []).slice(0, 8).map((country, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl hover transition text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition text-xs"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-5 h-5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 flex items-center justify-center">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
-                      <span className="font-medium text-slate-700">{country.country}</span>
+                      <span className="text-base shrink-0">{getCountryFlag(country.country)}</span>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-slate-800 truncate block">
+                          {COUNTRY_META[country.country]?.nameTr || country.country}
+                        </span>
+                        {COUNTRY_META[country.country] && (
+                          <span className="text-[10px] text-slate-400 truncate block">
+                            {country.country}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4 text-slate-500">
-                      <span>{country.users.toLocaleString('tr-TR')} kullanıcı</span>
+                    <div className="flex items-center gap-4 text-slate-500 shrink-0">
+                      <span className="font-medium text-slate-800">
+                        {country.users.toLocaleString('tr-TR')} kullanıcı
+                      </span>
                       <span className="font-mono text-slate-400">({country.sessions} oturum)</span>
                     </div>
                   </div>
@@ -1047,11 +1075,30 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 {(data?.cityData || []).map((city, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl hover text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition text-xs"
                   >
-                    <span className="font-medium text-slate-800">{city.city}</span>
-                    <div className="flex items-center gap-3 text-slate-500">
-                      <span>{city.users.toLocaleString('tr-TR')} kullanıcı</span>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      <span className="text-base shrink-0">
+                        {getCountryFlag(city.country || '')}
+                      </span>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-slate-800 truncate block">
+                          {city.city}
+                        </span>
+                        {city.country && (
+                          <span className="text-[10px] text-slate-400 truncate block">
+                            {COUNTRY_META[city.country]?.nameTr || city.country}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-500 shrink-0">
+                      <span className="font-medium text-slate-800">
+                        {city.users.toLocaleString('tr-TR')} kullanıcı
+                      </span>
                       <span className="font-mono text-slate-400">({city.sessions} oturum)</span>
                     </div>
                   </div>
@@ -1065,11 +1112,28 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 {(data?.countryData || []).map((country, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl hover text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition text-xs"
                   >
-                    <span className="font-medium text-slate-800">{country.country}</span>
-                    <div className="flex items-center gap-3 text-slate-500">
-                      <span>{country.users.toLocaleString('tr-TR')} kullanıcı</span>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      <span className="text-base shrink-0">{getCountryFlag(country.country)}</span>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-slate-800 truncate block">
+                          {COUNTRY_META[country.country]?.nameTr || country.country}
+                        </span>
+                        {COUNTRY_META[country.country] && (
+                          <span className="text-[10px] text-slate-400 truncate block">
+                            {country.country}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-500 shrink-0">
+                      <span className="font-medium text-slate-800">
+                        {country.users.toLocaleString('tr-TR')} kullanıcı
+                      </span>
                       <span className="font-mono text-slate-400">({country.sessions} oturum)</span>
                     </div>
                   </div>

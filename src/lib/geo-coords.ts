@@ -693,37 +693,52 @@ export function getCountryFlag(countryName: string): string {
 }
 
 /**
- * Normalizes GA4 country names to TopoJSON geography names for polygon mapping
+ * Robust bidirectional match for country names across GA4, TopoJSON, ISO codes, and aliases
  */
-export function isCountryMatch(geoName: string, targetCountry: string): boolean {
-  if (!geoName || !targetCountry) return false
-  if (geoName.toLowerCase() === targetCountry.toLowerCase()) return true
+export function isCountryMatch(nameA: string, nameB: string): boolean {
+  if (!nameA || !nameB) return false
+  const a = nameA.trim().toLowerCase()
+  const b = nameB.trim().toLowerCase()
+  if (a === b) return true
 
-  const meta = COUNTRY_META[targetCountry]
-  if (meta) {
-    if (meta.aliases.some(a => a.toLowerCase() === geoName.toLowerCase())) {
+  // Check aliases from COUNTRY_META in both directions
+  const metaA =
+    COUNTRY_META[nameA] ||
+    Object.values(COUNTRY_META).find(m => m.aliases.some(al => al.toLowerCase() === a))
+  const metaB =
+    COUNTRY_META[nameB] ||
+    Object.values(COUNTRY_META).find(m => m.aliases.some(al => al.toLowerCase() === b))
+
+  if (metaA && metaB && metaA === metaB) return true
+  if (metaA && metaA.aliases.some(al => al.toLowerCase() === b)) return true
+  if (metaB && metaB.aliases.some(al => al.toLowerCase() === a)) return true
+
+  // Common synonym groups
+  const SYNONYM_GROUPS: string[][] = [
+    ['united states', 'united states of america', 'usa', 'us', 'u.s.', 'u.s.a.'],
+    ['united kingdom', 'uk', 'great britain', 'britain', 'u.k.'],
+    ['turkey', 'türkiye', 'turkiye', 'tr'],
+    ['germany', 'deutschland', 'de'],
+    ['france', 'french republic', 'fr'],
+    ['netherlands', 'the netherlands', 'holland', 'nl'],
+    ['russia', 'russian federation', 'ru'],
+    ['south korea', 'korea, republic of', 'republic of korea', 'korea', 'kr'],
+    ['united arab emirates', 'uae', 'u.a.e.', 'ae'],
+    ['saudi arabia', 'ksa', 'kingdom of saudi arabia', 'sa'],
+    ['czechia', 'czech republic', 'czech rep.', 'cz'],
+    ['bosnia and herzegovina', 'bosnia & herzegovina', 'bosnia', 'ba'],
+    ['north macedonia', 'macedonia', 'mk'],
+    ['switzerland', 'swiss confederation', 'ch'],
+    ['austria', 'österreich', 'at'],
+    ['belgium', 'belgique', 'be'],
+    ['italy', 'italia', 'it'],
+    ['spain', 'españa', 'es'],
+  ]
+
+  for (const group of SYNONYM_GROUPS) {
+    if (group.includes(a) && group.includes(b)) {
       return true
     }
-  }
-
-  // Handle common discrepancies
-  if (
-    (targetCountry === 'United States' || targetCountry === 'USA') &&
-    geoName === 'United States of America'
-  ) {
-    return true
-  }
-  if (
-    (targetCountry === 'Turkey' || targetCountry === 'Türkiye') &&
-    (geoName === 'Turkey' || geoName === 'Türkiye')
-  ) {
-    return true
-  }
-  if (targetCountry === 'Czechia' && (geoName === 'Czech Rep.' || geoName === 'Czech Republic')) {
-    return true
-  }
-  if (targetCountry === 'United Kingdom' && (geoName === 'United Kingdom' || geoName === 'UK')) {
-    return true
   }
 
   return false

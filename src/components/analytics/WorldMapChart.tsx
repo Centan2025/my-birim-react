@@ -18,6 +18,7 @@ import {
   MapPin,
   ChevronRight,
   Sparkles,
+  X,
 } from 'lucide-react'
 
 const WORLD_GEO_URL = '/data/countries-110m.json'
@@ -227,22 +228,51 @@ function WorldMapChart({countries, cities = []}: Props) {
       .filter(Boolean) as (CountryData & {lng: number; lat: number})[]
   }, [countries])
 
-  // Active cities to display
-  const activeCityMarkers = useMemo(() => {
-    if (selectedCountry) {
-      // Find cities in selected country
-      const matched = cities.filter(
+  // Selected country cities sorted by chosen metric
+  const selectedCountryCities = useMemo(() => {
+    if (!selectedCountry) return []
+    return cities
+      .filter(
         c =>
           (c.country && isCountryMatch(selectedCountry, c.country)) ||
+          (c.country && isCountryMatch(c.country, selectedCountry)) ||
           c.country?.toLowerCase() === selectedCountry.toLowerCase()
       )
-      return matched
-        .map(c => {
+      .sort((a, b) => (metric === 'users' ? b.users - a.users : b.sessions - a.sessions))
+  }, [selectedCountry, cities, metric])
+
+  // Selected country data object (with fallback calculation)
+  const selectedCountryData = useMemo(() => {
+    if (!selectedCountry) return null
+    const found = countries.find(
+      c => isCountryMatch(selectedCountry, c.country) || isCountryMatch(c.country, selectedCountry)
+    )
+    if (found) return found
+
+    return {
+      country: selectedCountry,
+      users: selectedCountryCities.reduce((acc, c) => acc + c.users, 0),
+      sessions: selectedCountryCities.reduce((acc, c) => acc + c.sessions, 0),
+    }
+  }, [selectedCountry, countries, selectedCountryCities])
+
+  // Active cities to display on map
+  const activeCityMarkers = useMemo(() => {
+    if (selectedCountry) {
+      return selectedCountryCities
+        .map((c, i) => {
           const coords = getCityCoordinates(c.city, c.country)
           if (!coords) {
             const countryCoords = getCountryCoordinates(c.country || selectedCountry)
             if (!countryCoords) return null
-            return {...c, lat: countryCoords[1], lng: countryCoords[0]}
+            // Slight offset so multiple unknown cities in same country don't overlap completely
+            const angle = (i * 2 * Math.PI) / Math.max(1, selectedCountryCities.length)
+            const dist = selectedCountryCities.length > 1 ? 0.35 + (i % 3) * 0.15 : 0
+            return {
+              ...c,
+              lat: countryCoords[1] + Math.sin(angle) * dist,
+              lng: countryCoords[0] + Math.cos(angle) * dist,
+            }
           }
           return {...c, lat: coords[0], lng: coords[1]}
         })
@@ -257,7 +287,7 @@ function WorldMapChart({countries, cities = []}: Props) {
         return {...c, lat: coords[0], lng: coords[1]}
       })
       .filter(Boolean) as (CityData & {lat: number; lng: number})[]
-  }, [selectedCountry, cities])
+  }, [selectedCountry, selectedCountryCities, cities])
 
   // Top 5 countries for quick filter chips
   const topCountries = useMemo(() => {
@@ -338,6 +368,136 @@ function WorldMapChart({countries, cities = []}: Props) {
           </button>
         </div>
       </div>
+
+      {/* Floating Selected Country City Details Panel (Drill-down Inspector) */}
+      {selectedCountry && selectedCountryData && (
+        <div className="absolute top-14 right-3 z-30 w-72 sm:w-80 max-h-[380px] bg-white/95 backdrop-blur-md rounded-2xl p-3.5 border border-slate-200/90 shadow-2xl flex flex-col pointer-events-auto animate-in fade-in zoom-in-95 duration-200">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-2xl leading-none">{getCountryFlag(selectedCountry)}</span>
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-slate-900 truncate">
+                  {COUNTRY_META[selectedCountry]?.nameTr || selectedCountry}
+                </h3>
+                <p className="text-[10px] text-slate-500 truncate">{selectedCountry}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleReset}
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              title="Kapat ve Dünya Görünümüne Dön"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Quick Metrics */}
+          <div className="grid grid-cols-2 gap-2 my-2.5">
+            <div className="bg-indigo-50/80 rounded-xl p-2 border border-indigo-100/60">
+              <span className="text-[10px] text-indigo-600 font-medium block">
+                Toplam Kullanıcı
+              </span>
+              <span className="text-sm font-extrabold text-indigo-950">
+                {selectedCountryData.users.toLocaleString('tr-TR')}
+              </span>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-2 border border-slate-200/60">
+              <span className="text-[10px] text-slate-500 font-medium block">Toplam Oturum</span>
+              <span className="text-sm font-extrabold text-slate-900">
+                {selectedCountryData.sessions.toLocaleString('tr-TR')}
+              </span>
+            </div>
+          </div>
+
+          {/* City Breakdown List */}
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5 px-0.5">
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-rose-500" />
+              <span>Şehir Dağılımı ({selectedCountryCities.length})</span>
+            </span>
+            <span className="text-[10px] font-normal text-slate-400">
+              {metric === 'users' ? 'Kullanıcıya göre' : 'Oturuma göre'}
+            </span>
+          </div>
+
+          <div className="overflow-y-auto space-y-1.5 pr-1 max-h-48">
+            {selectedCountryCities.length > 0 ? (
+              selectedCountryCities.map((city, idx) => {
+                const val = metric === 'users' ? city.users : city.sessions
+                const maxVal = Math.max(
+                  ...selectedCountryCities.map(c => (metric === 'users' ? c.users : c.sessions)),
+                  1
+                )
+                const pct = Math.round((val / maxVal) * 100)
+                const coords = getCityCoordinates(city.city, city.country || selectedCountry)
+
+                return (
+                  <button
+                    type="button"
+                    key={`panel-city-${city.city}-${idx}`}
+                    onClick={() => {
+                      if (coords) {
+                        setCenter([coords[1], coords[0]])
+                        setZoom(6.0)
+                      }
+                    }}
+                    className="w-full text-left p-2 rounded-xl bg-slate-50/80 hover:bg-indigo-50/70 border border-slate-100 transition-colors cursor-pointer group block"
+                    title={coords ? 'Haritada şehre odaklan' : undefined}
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </span>
+                        <span className="font-semibold text-slate-800 truncate group-hover:text-indigo-700">
+                          {city.city}
+                        </span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="font-bold text-slate-900">
+                          {val.toLocaleString('tr-TR')}
+                        </span>
+                        <span className="text-[10px] text-slate-400 ml-1">
+                          {metric === 'users' ? 'kull.' : 'otur.'}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Share bar */}
+                    <div className="w-full h-1 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
+                      <div
+                        className="h-full bg-indigo-600 rounded-full transition-all duration-300"
+                        style={{width: `${pct}%`}}
+                      />
+                    </div>
+                  </button>
+                )
+              })
+            ) : (
+              <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 text-center space-y-1">
+                <p className="text-[11px] font-semibold text-slate-700">📍 Genel Ülke Trafiği</p>
+                <p className="text-[10px] text-slate-500 leading-snug">
+                  GA4 bu ülkedeki ziyaretçileri ({selectedCountryData.users} kullanıcı) şehir ayrımı
+                  olmaksızın ülke geneli olarak raporlamıştır.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer Reset button */}
+          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <button
+              onClick={handleReset}
+              className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+            >
+              <span>🌍 Küresel Görünüm</span>
+            </button>
+            <span className="text-[10px] text-slate-400">
+              Pay: %{((selectedCountryData.users / totalMetric) * 100).toFixed(1)}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Floating Zoom Controls (Left) */}
       <div className="absolute top-16 left-3 z-10 flex flex-col gap-1.5">

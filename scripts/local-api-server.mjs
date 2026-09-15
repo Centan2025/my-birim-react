@@ -1977,17 +1977,17 @@ async function getLocalAllAnalyticsData(startDate, endDate) {
     dimensions: [{name: 'country'}],
     metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
     orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
-    limit: 15,
+    limit: 100,
   })
   await sleep(60)
 
-  // 7. Cities
+  // 7. Cities with Country
   const cityRes = await runGaReport({
     dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'city'}],
+    dimensions: [{name: 'country'}, {name: 'city'}],
     metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
     orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
-    limit: 15,
+    limit: 250,
   })
   await sleep(60)
 
