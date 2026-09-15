@@ -196,103 +196,84 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
     return cached.data
   }
 
-  // Run sequentially / small batches with a tiny delay to respect Google concurrent quota
-  const sleep = (ms: number) => new Promise(res => setTimeout(res, ms))
+  // Run in 2 concurrent batches to stay well within GA4 concurrency limit (max 10) while minimizing latency
+  // Batch 1: Primary metrics and trends
+  const [overviewRes, dailyRes, topPagesRes, sourcesRes] = await Promise.all([
+    runReport({
+      dateRanges: [{startDate, endDate}],
+      metrics: [
+        {name: 'activeUsers'},
+        {name: 'sessions'},
+        {name: 'screenPageViews'},
+        {name: 'bounceRate'},
+        {name: 'averageSessionDuration'},
+        {name: 'newUsers'},
+        {name: 'engagedSessions'},
+      ],
+    }),
+    runReport({
+      dateRanges: [{startDate, endDate}],
+      dimensions: [{name: 'date'}],
+      metrics: [
+        {name: 'activeUsers'},
+        {name: 'sessions'},
+        {name: 'screenPageViews'},
+        {name: 'newUsers'},
+      ],
+      orderBys: [{dimension: {dimensionName: 'date'}}],
+    }),
+    runReport({
+      dateRanges: [{startDate, endDate}],
+      dimensions: [{name: 'pagePath'}, {name: 'pageTitle'}],
+      metrics: [
+        {name: 'screenPageViews'},
+        {name: 'activeUsers'},
+        {name: 'averageSessionDuration'},
+        {name: 'bounceRate'},
+      ],
+      orderBys: [{metric: {metricName: 'screenPageViews'}, desc: true}],
+      limit: 15,
+    }),
+    runReport({
+      dateRanges: [{startDate, endDate}],
+      dimensions: [{name: 'sessionDefaultChannelGroup'}],
+      metrics: [{name: 'sessions'}, {name: 'activeUsers'}, {name: 'bounceRate'}],
+      orderBys: [{metric: {metricName: 'sessions'}, desc: true}],
+      limit: 10,
+    }),
+  ])
 
-  // 1. Overview
-  const overviewRes = await runReport({
-    dateRanges: [{startDate, endDate}],
-    metrics: [
-      {name: 'activeUsers'},
-      {name: 'sessions'},
-      {name: 'screenPageViews'},
-      {name: 'bounceRate'},
-      {name: 'averageSessionDuration'},
-      {name: 'newUsers'},
-      {name: 'engagedSessions'},
-    ],
-  })
-  await sleep(60)
-
-  // 2. Daily Visitors
-  const dailyRes = await runReport({
-    dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'date'}],
-    metrics: [
-      {name: 'activeUsers'},
-      {name: 'sessions'},
-      {name: 'screenPageViews'},
-      {name: 'newUsers'},
-    ],
-    orderBys: [{dimension: {dimensionName: 'date'}}],
-  })
-  await sleep(60)
-
-  // 3. Top Pages
-  const topPagesRes = await runReport({
-    dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'pagePath'}, {name: 'pageTitle'}],
-    metrics: [
-      {name: 'screenPageViews'},
-      {name: 'activeUsers'},
-      {name: 'averageSessionDuration'},
-      {name: 'bounceRate'},
-    ],
-    orderBys: [{metric: {metricName: 'screenPageViews'}, desc: true}],
-    limit: 15,
-  })
-  await sleep(60)
-
-  // 4. Sources
-  const sourcesRes = await runReport({
-    dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'sessionDefaultChannelGroup'}],
-    metrics: [{name: 'sessions'}, {name: 'activeUsers'}, {name: 'bounceRate'}],
-    orderBys: [{metric: {metricName: 'sessions'}, desc: true}],
-    limit: 10,
-  })
-  await sleep(60)
-
-  // 5. Devices
-  const devicesRes = await runReport({
-    dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'deviceCategory'}],
-    metrics: [{name: 'sessions'}, {name: 'activeUsers'}],
-    orderBys: [{metric: {metricName: 'sessions'}, desc: true}],
-  })
-  await sleep(60)
-
-  // 6. Countries
-  const countryRes = await runReport({
-    dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'country'}],
-    metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
-    orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
-    limit: 100,
-  })
-  await sleep(60)
-
-  // 7. Cities & Regions with Country
-  const cityRes = await runReport({
-    dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'country'}, {name: 'region'}, {name: 'city'}],
-    metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
-    orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
-    limit: 500,
-  })
-  await sleep(60)
-
-  // 8. Browsers
-  const browserRes = await runReport({
-    dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'browser'}],
-    metrics: [{name: 'sessions'}, {name: 'activeUsers'}],
-    orderBys: [{metric: {metricName: 'sessions'}, desc: true}],
-    limit: 8,
-  })
-
-  // 9. Realtime
-  const realtime = await getRealtimeData()
+  // Batch 2: Secondary breakdowns and realtime
+  const [devicesRes, countryRes, cityRes, browserRes, realtime] = await Promise.all([
+    runReport({
+      dateRanges: [{startDate, endDate}],
+      dimensions: [{name: 'deviceCategory'}],
+      metrics: [{name: 'sessions'}, {name: 'activeUsers'}],
+      orderBys: [{metric: {metricName: 'sessions'}, desc: true}],
+    }),
+    runReport({
+      dateRanges: [{startDate, endDate}],
+      dimensions: [{name: 'country'}],
+      metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
+      orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
+      limit: 100,
+    }),
+    runReport({
+      dateRanges: [{startDate, endDate}],
+      dimensions: [{name: 'country'}, {name: 'region'}, {name: 'city'}],
+      metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
+      orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
+      limit: 500,
+    }),
+    runReport({
+      dateRanges: [{startDate, endDate}],
+      dimensions: [{name: 'browser'}],
+      metrics: [{name: 'sessions'}, {name: 'activeUsers'}],
+      orderBys: [{metric: {metricName: 'sessions'}, desc: true}],
+      limit: 8,
+    }),
+    getRealtimeData(),
+  ])
 
   const ovRow = overviewRes.rows?.[0]
   const overview = {
