@@ -2,10 +2,9 @@ import {useState, useRef, useEffect} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {motion} from 'framer-motion'
 import {ArrowRight, ChevronDown} from 'lucide-react'
-import type {Designer, Product} from '../types'
+import type {Designer} from '../types'
 import {useTranslation} from '../i18n'
 import {useDesigners} from '../hooks/useDesigners'
-import {useProducts} from '../hooks/useProducts'
 import {useSiteSettings} from '../hooks/useSiteData'
 import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
@@ -16,9 +15,8 @@ import {isBirimDesignStudio} from '../utils/designerUtils'
 
 export function DesignersPageV2() {
   const {data: designers = [], isLoading: loading} = useDesigners()
-  const {data: products = []} = useProducts()
   const {data: settings} = useSiteSettings()
-  const {t, locale} = useTranslation()
+  const {t} = useTranslation()
   const navigate = useNavigate()
   const {setBrightness, reset: resetHeaderTheme} = useHeaderTheme()
 
@@ -311,51 +309,6 @@ export function DesignersPageV2() {
     return typeof designer.image === 'string' ? designer.image : designer.image?.url || ''
   }
 
-  const getBioText = (bio: unknown) => {
-    if (!bio) return ''
-    const raw = bio as Record<string, unknown> | unknown[]
-    let blocks: unknown[] | null = null
-    if (Array.isArray(raw)) {
-      blocks = raw
-    } else if (raw && typeof raw === 'object') {
-      const localizedMap = raw as Record<string, unknown[]>
-      if (Array.isArray(localizedMap[locale])) {
-        blocks = localizedMap[locale]
-      } else if (Array.isArray(localizedMap['tr'])) {
-        blocks = localizedMap['tr']
-      } else if (Array.isArray(localizedMap['en'])) {
-        blocks = localizedMap['en']
-      }
-    }
-
-    if (blocks && Array.isArray(blocks) && blocks.length > 0) {
-      return blocks
-        .map((b: unknown) => {
-          if (b && typeof b === 'object' && (b as {children?: unknown[]}).children) {
-            return ((b as {children: {text?: string}[]}).children || [])
-              .map(c => c.text || '')
-              .join('')
-              .trim()
-          }
-          return ''
-        })
-        .filter(Boolean)
-        .join('\n')
-    }
-
-    const bioVal = t(bio as Parameters<typeof t>[0])
-    if (typeof bioVal === 'string') return bioVal.trim()
-    return ''
-  }
-
-  const getDesignerProducts = (designerId: string): Product[] => {
-    return products.filter(
-      p =>
-        p.designerId === designerId ||
-        (Array.isArray(p.designerIds) && p.designerIds.includes(designerId))
-    )
-  }
-
   return (
     <div
       ref={containerRef}
@@ -370,13 +323,6 @@ export function DesignersPageV2() {
       <main className="w-full flex flex-col gap-0 p-0 m-0">
         {designers.map((designer, index) => {
           const isBirimStudio = isBirimDesignStudio(designer) || Boolean(designer.isCompanyLogo)
-          const designerProducts = getDesignerProducts(designer.id)
-          const bioExcerpt =
-            getBioText(designer.bio) ||
-            (isBirimStudio
-              ? t('birim_studio_bio_short') ||
-                "Birim'in yenilikçi ve zamansız tasarım vizyonunu yansıtan iç tasarım stüdyosu."
-              : '')
 
           return (
             <section
@@ -499,37 +445,11 @@ export function DesignersPageV2() {
                     )}
                   </div>
 
-                  {/* Right Column: Transparent Floating Info Panel */}
-                  <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-end bg-transparent p-0">
-                    {bioExcerpt ? (
-                      <p className="text-xs sm:text-sm text-white/85 font-light leading-relaxed line-clamp-3 sm:line-clamp-4 mb-4 drop-shadow-sm">
-                        {bioExcerpt}
-                      </p>
-                    ) : null}
-
-                    {/* Designer's Products - Direct Transparent Inline Typography without prefix */}
-                    {designerProducts.length > 0 && (
-                      <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-light tracking-wider uppercase text-white/85">
-                        {designerProducts.slice(0, 4).map((p, pIdx) => (
-                          <span key={p.id} className="text-white/95">
-                            {t(p.name)}
-                            {pIdx < Math.min(designerProducts.length, 4) - 1 ? (
-                              <span className="text-white/35 ml-2">/</span>
-                            ) : null}
-                          </span>
-                        ))}
-                        {designerProducts.length > 4 && (
-                          <span className="text-white/50 text-[10px] font-mono ml-1">
-                            +{designerProducts.length - 4}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* CTA Button without underline */}
-                    <div className="inline-flex items-center gap-2.5 text-xs sm:text-sm uppercase tracking-[0.25em] font-medium text-white/90 hover:text-white w-fit">
+                  {/* Right Column: Only Explore Designer CTA */}
+                  <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-end lg:items-end bg-transparent p-0">
+                    <div className="inline-flex items-center gap-2.5 text-xs sm:text-sm uppercase tracking-[0.25em] font-medium text-white/90 hover:text-white w-fit group-hover:text-white transition-colors">
                       <span>{t('explore_designer') || 'Tasarımcıyı Keşfet'}</span>
-                      <ArrowRight className="w-4 h-4 text-white/80" />
+                      <ArrowRight className="w-4 h-4 text-white/80 transition-transform duration-300 group-hover:translate-x-1" />
                     </div>
                   </div>
                 </div>

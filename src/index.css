@@ -165,7 +165,7 @@ select[class*='focus-visible:outline-none']:focus-visible {
 }
 
 .portrait-frame {
-  filter: grayscale(100%) contrast(1.1);
+  filter: grayscale(100%) contrast(0.95) brightness(1.07);
 }
 
 .outline-text {

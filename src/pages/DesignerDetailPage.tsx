@@ -212,7 +212,7 @@ export function DesignerDetailPage() {
                       : designer.imageDesktop
                   }
                   alt={t(designer.name)}
-                  className={`w-full h-full object-cover portrait-frame filter grayscale transition-all duration-700 group-hover:grayscale-0 ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
+                  className={`w-full h-full object-cover grayscale contrast-[0.95] brightness-[1.07] ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
                   loading="eager"
                   quality={90}
                   crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
