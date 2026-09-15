@@ -680,7 +680,12 @@ export function FactoryPageV2() {
                         role="button"
                         tabIndex={0}
                       >
-                        <ProductCardReveal direction="left" duration={1.1} delay={0.1}>
+                        <ProductCardReveal
+                          direction="left"
+                          duration={1.1}
+                          delay={0.1}
+                          className="w-full h-full"
+                        >
                           <OptimizedImage
                             src={item.image || item.fallbackImage}
                             fallbackSrc={item.fallbackImage}
