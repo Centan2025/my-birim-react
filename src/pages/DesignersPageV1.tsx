@@ -268,7 +268,9 @@ export function DesignersPageV1() {
                             : undefined
                         }
                         cropDesktop={
-                          typeof designer.image === 'object' ? designer.image.cropDesktop : undefined
+                          typeof designer.image === 'object'
+                            ? designer.image.cropDesktop
+                            : undefined
                         }
                         hotspotDesktop={
                           typeof designer.image === 'object'
