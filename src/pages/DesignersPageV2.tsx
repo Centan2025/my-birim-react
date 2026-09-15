@@ -82,34 +82,6 @@ export function DesignersPageV2() {
     let touchStartY = 0
     let touchAccumulator = 0
 
-    // 60FPS Dinamik Koyulaşma & Açılma Hesaplama (Gelen sayfalar hafif koyudan başlayıp açılarak gelir, çıkanlar yumuşakça kararır)
-    const updateDarkenCurtains = () => {
-      const viewHeight = container.clientHeight || window.innerHeight || 1
-      const sections = container.querySelectorAll<HTMLElement>('[data-designer-index]')
-
-      sections.forEach(section => {
-        const rect = section.getBoundingClientRect()
-        const distPastTop = -rect.top
-        let darkenProgress = 0
-
-        if (distPastTop > 0) {
-          // Üstten ekrandan dışarı doğru çıkarken hafifçe koyulaşır (%0 -> %40)
-          darkenProgress = Math.min(0.4, (distPastTop / viewHeight) * 0.45)
-        } else if (rect.top > 0) {
-          // Alttan ekrana doğru yaklaşırken yumuşakça açılarak gelir (%40 -> %0)
-          const distRatio = Math.min(1, rect.top / viewHeight)
-          darkenProgress = Math.min(0.4, distRatio * 0.4)
-        } else {
-          darkenProgress = 0
-        }
-
-        const curtain = section.querySelector('.scroll-darken-curtain') as HTMLElement | null
-        if (curtain) {
-          curtain.style.opacity = `${darkenProgress.toFixed(3)}`
-        }
-      })
-    }
-
     // Özel 850ms İpeksi & Dengeli Easing Interpolasyonu (Cinematic Smooth Transition)
     const smoothScrollTo = (targetY: number, duration = 850) => {
       const currentContainer = containerRef.current
@@ -121,7 +93,6 @@ export function DesignersPageV2() {
         currentContainer.scrollTop = targetY
         isAnimating = false
         isScrollingRef.current = false
-        updateDarkenCurtains()
         return
       }
 
@@ -141,14 +112,12 @@ export function DesignersPageV2() {
         const easedProgress = easeInOutCubic(progress)
 
         currentContainer.scrollTop = startY + distance * easedProgress
-        updateDarkenCurtains()
 
         if (progress < 1) {
           scrollAnimRef.current = requestAnimationFrame(step)
         } else {
           currentContainer.scrollTop = targetY
           scrollAnimRef.current = null
-          updateDarkenCurtains()
           setTimeout(() => {
             isAnimating = false
             isScrollingRef.current = false
@@ -161,7 +130,6 @@ export function DesignersPageV2() {
 
     const scrollToSection = (index: number) => {
       if (index < 0 || index >= designers.length) return
-      const isScrollingDown = index > currentIndexRef.current
       isAnimating = true
       isScrollingRef.current = true
       lastScrollTime = performance.now()
@@ -171,7 +139,7 @@ export function DesignersPageV2() {
       if (typeof window !== 'undefined') {
         window.dispatchEvent(
           new CustomEvent('setHeaderVisibility', {
-            detail: !isScrollingDown || index === 0,
+            detail: true,
           })
         )
       }
@@ -272,10 +240,7 @@ export function DesignersPageV2() {
       } else {
         currentContainer.scrollTop = currentIndexRef.current * currentContainer.clientHeight
       }
-      updateDarkenCurtains()
     }
-
-    updateDarkenCurtains()
 
     window.addEventListener('wheel', handleWheel, {passive: false})
     window.addEventListener('keydown', handleKeyDown)
@@ -358,6 +323,9 @@ export function DesignersPageV2() {
                     <OptimizedImage
                       alt={t(designer.name)}
                       className="w-full h-full object-cover object-center grayscale contrast-[0.96] brightness-[1.08]"
+                      loading="eager"
+                      fetchPriority={index <= 1 ? 'high' : 'auto'}
+                      fadeOnLoad={false}
                       src={getImageUrl(designer)}
                       srcMobile={
                         typeof designer.image === 'object' ? designer.image.urlMobile : undefined
@@ -422,12 +390,6 @@ export function DesignersPageV2() {
                     <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
                   </>
                 )}
-
-                {/* 60FPS Dynamic Exit Darkening Curtain (Ekrandan dışarı çıktıkça yavaşça koyulaşan sinematik katman) */}
-                <div
-                  className="scroll-darken-curtain absolute inset-0 bg-black pointer-events-none will-change-[opacity]"
-                  style={{opacity: 0, transition: 'opacity 0.1s ease-out'}}
-                />
               </div>
 
               {/* Bottom Architectural Presentation & Transparent Info Panel */}
