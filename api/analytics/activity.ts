@@ -1,6 +1,6 @@
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {handleCors} from '../../lib/server/cors.js'
-import {getClientIp} from '../../lib/server/rateLimiter.js'
+import {getClientIp, isRateLimitedAsync} from '../../lib/server/rateLimiter.js'
 import {getSafeSupabaseAdmin} from '../../lib/server/supabaseAdmin.js'
 
 interface ActivityPayload {
@@ -27,11 +27,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
+  const ip = getClientIp(req)
+  if (await isRateLimitedAsync(`activity_req_${ip}`, {limit: 60, windowMs: 60000})) {
+    return res.status(429).json({error: 'Çok fazla aktivite isteği. Lütfen bekleyin.'})
+  }
+
   try {
     let bodyData: unknown = req.body
 
     // Parse if sendBeacon sent string payload
     if (typeof bodyData === 'string') {
+      if (bodyData.length > 32768) {
+        return res.status(400).json({error: 'Payload boyutu 32KB sınırını aşıyor'})
+      }
       try {
         bodyData = JSON.parse(bodyData)
       } catch {
@@ -43,16 +51,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({error: 'Missing payload'})
     }
 
-    const payloadList: ActivityPayload[] = Array.isArray(bodyData)
+    const rawPayloadList: ActivityPayload[] = Array.isArray(bodyData)
       ? (bodyData as ActivityPayload[])
       : [bodyData as ActivityPayload]
+
+    const payloadList = rawPayloadList.slice(0, 15)
 
     if (payloadList.length === 0) {
       return res.status(400).json({error: 'Empty payload list'})
     }
 
     // Capture request context
-    const ip = getClientIp(req)
     const country =
       (req.headers['x-vercel-ip-country'] as string) ||
       (req.headers['cf-ipcountry'] as string) ||

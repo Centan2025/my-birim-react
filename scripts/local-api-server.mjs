@@ -2088,7 +2088,6 @@ async function getLocalAllAnalyticsData(startDate, endDate) {
 app.get('/api/analytics', async (req, res) => {
   const expectedPin = (
     process.env.ANALYTICS_PIN ||
-    process.env.VITE_ANALYTICS_PIN ||
     'birim2026'
   ).trim()
   const rawProvidedPin = req.headers['x-analytics-pin']

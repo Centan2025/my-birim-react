@@ -387,10 +387,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Server-side authentication: valid PIN or valid Admin JWT
-  const rawExpectedPin =
-    process.env['ANALYTICS_PIN']?.trim() ||
-    process.env['VITE_ANALYTICS_PIN']?.trim() ||
-    (process.env['NODE_ENV'] !== 'production' ? 'birim2026' : '')
+  const rawExpectedPin = process.env['ANALYTICS_PIN']?.trim()
   if (!rawExpectedPin) {
     console.error('[Analytics Security] ANALYTICS_PIN environment variable is not configured!')
     return res.status(500).json({
