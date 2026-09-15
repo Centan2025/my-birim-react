@@ -31,6 +31,7 @@ export interface CountryData {
 
 export interface CityData {
   country?: string
+  region?: string
   city: string
   users: number
   sessions: number
@@ -261,7 +262,7 @@ function WorldMapChart({countries, cities = []}: Props) {
     if (selectedCountry) {
       return selectedCountryCities
         .map((c, i) => {
-          const coords = getCityCoordinates(c.city, c.country)
+          const coords = getCityCoordinates(c.city, c.country, c.region)
           if (!coords) {
             const countryCoords = getCountryCoordinates(c.country || selectedCountry)
             if (!countryCoords) return null
@@ -282,7 +283,7 @@ function WorldMapChart({countries, cities = []}: Props) {
     // Global view: show all available resolved cities
     return cities
       .map(c => {
-        const coords = getCityCoordinates(c.city, c.country)
+        const coords = getCityCoordinates(c.city, c.country, c.region)
         if (!coords) return null
         return {...c, lat: coords[0], lng: coords[1]}
       })

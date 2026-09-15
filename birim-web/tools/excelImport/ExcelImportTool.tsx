@@ -412,14 +412,32 @@ export function ExcelImportTool() {
     const folder = key.substring(0, lastSlash)
     const filename = key.substring(lastSlash + 1)
 
+    const studioToken =
+      (typeof import.meta !== 'undefined' &&
+        (import.meta as any).env?.['SANITY_STUDIO_SANITY_TOKEN']) ||
+      (typeof import.meta !== 'undefined' &&
+        (import.meta as any).env?.['SANITY_STUDIO_MEDIA_ADMIN_SECRET']) ||
+      (typeof import.meta !== 'undefined' &&
+        (import.meta as any).env?.['SANITY_STUDIO_API_SECRET']) ||
+      (typeof process !== 'undefined' && process.env?.['SANITY_STUDIO_SANITY_TOKEN']) ||
+      (typeof process !== 'undefined' && process.env?.['SANITY_STUDIO_MEDIA_ADMIN_SECRET']) ||
+      (typeof process !== 'undefined' && process.env?.['SANITY_STUDIO_API_SECRET']) ||
+      ''
+
+    const reqHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+    if (studioToken) {
+      reqHeaders['Authorization'] = `Bearer ${studioToken}`
+    }
+
     let res: Response
     try {
       // 1. Try Production API first
       res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: reqHeaders,
+        credentials: 'include',
         body: JSON.stringify({
           filename,
           contentType,
@@ -431,9 +449,8 @@ export function ExcelImportTool() {
       try {
         res = await fetch(getApiUrl('/api/media/presigned-url'), {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: reqHeaders,
+          credentials: 'include',
           body: JSON.stringify({
             filename,
             contentType,

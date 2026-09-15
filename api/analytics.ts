@@ -272,13 +272,13 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
   })
   await sleep(60)
 
-  // 7. Cities with Country
+  // 7. Cities & Regions with Country
   const cityRes = await runReport({
     dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'country'}, {name: 'city'}],
+    dimensions: [{name: 'country'}, {name: 'region'}, {name: 'city'}],
     metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
     orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
-    limit: 250,
+    limit: 500,
   })
   await sleep(60)
 
@@ -346,17 +346,46 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
     sessions: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
   }))
 
+  const regionMap = new Map<
+    string,
+    {country: string; region: string; users: number; sessions: number}
+  >()
+
   const cityData = (cityRes.rows || [])
-    .filter(
-      r =>
-        r.dimensionValues?.[1]?.value !== '(not set)' && r.dimensionValues?.[1]?.value !== 'Unknown'
-    )
-    .map(r => ({
-      country: r.dimensionValues?.[0]?.value || 'Unknown',
-      city: r.dimensionValues?.[1]?.value || 'Unknown',
-      users: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
-      sessions: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
-    }))
+    .map(r => {
+      const country = r.dimensionValues?.[0]?.value || 'Unknown'
+      const region = r.dimensionValues?.[1]?.value || ''
+      const rawCity = r.dimensionValues?.[2]?.value || ''
+      const isCityValid = rawCity && rawCity !== '(not set)' && rawCity !== 'Unknown'
+      const isRegionValid = region && region !== '(not set)' && region !== 'Unknown'
+
+      const city = isCityValid ? rawCity : isRegionValid ? region : country
+      const users = parseInt(r.metricValues?.[0]?.value || '0', 10) || 0
+      const sessions = parseInt(r.metricValues?.[1]?.value || '0', 10) || 0
+
+      // Aggregate region stats
+      if (isRegionValid) {
+        const rKey = `${country}_${region}`
+        const existingR = regionMap.get(rKey)
+        if (existingR) {
+          existingR.users += users
+          existingR.sessions += sessions
+        } else {
+          regionMap.set(rKey, {country, region, users, sessions})
+        }
+      }
+
+      return {
+        country,
+        region: isRegionValid ? region : undefined,
+        city,
+        users,
+        sessions,
+      }
+    })
+    .filter(c => c.users > 0 || c.sessions > 0)
+
+  const regionData = Array.from(regionMap.values()).sort((a, b) => b.users - a.users)
 
   const browserData = (browserRes.rows || []).map(r => ({
     browser: r.dimensionValues?.[0]?.value || 'Other',
@@ -372,6 +401,7 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
     deviceBreakdown,
     countryData,
     cityData,
+    regionData,
     browserData,
     realtime,
   }

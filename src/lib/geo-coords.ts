@@ -255,27 +255,87 @@ export const GLOBAL_CITY_COORDS: Record<string, [number, number]> = {
   Nuremberg: [49.45, 11.08],
   Nürnberg: [49.45, 11.08],
 
-  // United States
-  'New York': [40.71, -74.01],
-  'Los Angeles': [34.05, -118.24],
-  Chicago: [41.88, -87.63],
-  Houston: [29.76, -95.37],
-  Phoenix: [33.45, -112.07],
-  Philadelphia: [39.95, -75.17],
-  'San Antonio': [29.42, -98.49],
-  'San Diego': [32.72, -117.16],
-  Dallas: [32.78, -96.8],
-  'San Jose': [37.34, -121.89],
-  Austin: [30.27, -97.74],
-  Jacksonville: [30.33, -81.66],
-  'San Francisco': [37.77, -122.42],
-  Seattle: [47.61, -122.33],
-  Denver: [39.74, -104.99],
-  Washington: [38.91, -77.04],
-  Boston: [42.36, -71.06],
-  Miami: [25.76, -80.19],
-  Atlanta: [33.75, -84.39],
-  Detroit: [42.33, -83.05],
+  // United States - GA4 Active & Major Metros
+  'New York': [40.7128, -74.006],
+  'Los Angeles': [34.0522, -118.2437],
+  Chicago: [41.8781, -87.6298],
+  Houston: [29.7604, -95.3698],
+  Phoenix: [33.4484, -112.074],
+  Philadelphia: [39.9526, -75.1652],
+  'San Antonio': [29.4241, -98.4936],
+  'San Diego': [32.7157, -117.1611],
+  Dallas: [32.7767, -96.797],
+  'Fort Worth': [32.7555, -97.3308],
+  'San Jose': [37.3382, -121.8863],
+  'Santa Clara': [37.3541, -121.9552],
+  'San Francisco': [37.7749, -122.4194],
+  Austin: [30.2672, -97.7431],
+  Jacksonville: [30.3322, -81.6557],
+  Seattle: [47.6062, -122.3321],
+  Denver: [39.7392, -104.9903],
+  Washington: [38.9072, -77.0369],
+  Boston: [42.3601, -71.0589],
+  Miami: [25.7617, -80.1918],
+  Orlando: [28.5383, -81.3792],
+  Atlanta: [33.749, -84.388],
+  Detroit: [42.3314, -83.0458],
+
+  // GA4 Active Specific US Cities
+  'Council Bluffs': [41.2619, -95.8608],
+  'North Charleston': [32.8546, -79.9748],
+  Charleston: [32.7765, -79.9311],
+  Ashburn: [39.0438, -77.4874],
+  Reston: [38.9586, -77.357],
+  Charlottesville: [38.0293, -78.4767],
+  Manassas: [38.7509, -77.4753],
+  Norfolk: [36.8508, -76.2859],
+  'Forest City': [35.334, -81.8651],
+  Charlotte: [35.2271, -80.8431],
+  Boardman: [45.8399, -119.7006],
+  Prineville: [44.2999, -120.8345],
+  Aspen: [39.1911, -106.8175],
+  Golden: [39.7555, -105.2211],
+  Gunnison: [38.5458, -106.9253],
+  'Idaho Springs': [39.7425, -105.5136],
+  Glenview: [42.0698, -87.7878],
+  Altoona: [41.6447, -93.463],
+  Atlantic: [41.4036, -95.0139],
+  'Des Moines': [41.5868, -93.625],
+  Springfield: [41.0839, -96.1342],
+  Columbus: [39.9612, -82.9988],
+  Cleveland: [41.4993, -81.6944],
+  'Moses Lake': [47.1301, -119.2781],
+  Gallatin: [36.3884, -86.4467],
+  Foley: [30.4066, -87.6836],
+  'Long Beach': [33.7701, -118.1937],
+  Murrieta: [33.5539, -117.2139],
+  'Palm Springs': [33.8303, -116.5453],
+  Pomona: [34.0551, -117.7499],
+  Sacramento: [38.5816, -121.4944],
+  Torrance: [33.8358, -118.3406],
+  Willits: [39.4096, -123.3556],
+  Hartford: [41.7658, -72.6734],
+  Buchanan: [33.8018, -85.1822],
+  Honolulu: [21.3069, -157.8583],
+  Jackson: [37.5537, -83.3835],
+  Lexington: [42.4473, -71.2272],
+  Byhalia: [34.8695, -89.6918],
+  'Las Vegas': [36.1699, -115.1398],
+  'Las Vegas Valley': [36.1699, -115.1398],
+  Newark: [40.7357, -74.1724],
+  'North Bergen': [40.8043, -74.0121],
+  Teaneck: [40.8979, -74.0129],
+  Canajoharie: [42.9062, -74.5715],
+  Guilderland: [42.6931, -73.9312],
+  Poughkeepsie: [41.7004, -73.921],
+  Shawnee: [35.3273, -96.9253],
+  Berwick: [41.0545, -76.2333],
+  McKeesport: [40.3473, -79.8648],
+  Abilene: [32.4487, -99.7331],
+  Greenville: [33.1384, -96.1108],
+  'Little Elm': [33.1626, -96.9378],
+  Southlake: [32.9412, -97.1342],
+  'Salt Lake City': [40.7608, -111.891],
 
   // France
   Paris: [48.86, 2.35],
@@ -636,37 +696,447 @@ export const COUNTRY_META: Record<string, CountryMeta> = {
   },
 }
 
+export interface USStateInfo {
+  name: string
+  nameTr: string
+  code: string
+  fips: string
+  center: [number, number] // [lat, lng]
+}
+
+export const US_STATE_META: Record<string, USStateInfo> = {
+  Alabama: {
+    name: 'Alabama',
+    nameTr: 'Alabama',
+    code: 'AL',
+    fips: '01',
+    center: [32.806671, -86.79113],
+  },
+  Alaska: {
+    name: 'Alaska',
+    nameTr: 'Alaska',
+    code: 'AK',
+    fips: '02',
+    center: [61.370716, -152.404419],
+  },
+  Arizona: {
+    name: 'Arizona',
+    nameTr: 'Arizona',
+    code: 'AZ',
+    fips: '04',
+    center: [33.729759, -111.431221],
+  },
+  Arkansas: {
+    name: 'Arkansas',
+    nameTr: 'Arkansas',
+    code: 'AR',
+    fips: '05',
+    center: [34.969704, -92.373123],
+  },
+  California: {
+    name: 'California',
+    nameTr: 'Kaliforniya',
+    code: 'CA',
+    fips: '06',
+    center: [36.116203, -119.681564],
+  },
+  Colorado: {
+    name: 'Colorado',
+    nameTr: 'Kolorado',
+    code: 'CO',
+    fips: '08',
+    center: [39.059811, -105.311104],
+  },
+  Connecticut: {
+    name: 'Connecticut',
+    nameTr: 'Connecticut',
+    code: 'CT',
+    fips: '09',
+    center: [41.597782, -72.755371],
+  },
+  Delaware: {
+    name: 'Delaware',
+    nameTr: 'Delaware',
+    code: 'DE',
+    fips: '10',
+    center: [39.318523, -75.507141],
+  },
+  'District of Columbia': {
+    name: 'District of Columbia',
+    nameTr: 'Washington D.C.',
+    code: 'DC',
+    fips: '11',
+    center: [38.897438, -77.026817],
+  },
+  Florida: {
+    name: 'Florida',
+    nameTr: 'Florida',
+    code: 'FL',
+    fips: '12',
+    center: [27.766279, -81.686783],
+  },
+  Georgia: {
+    name: 'Georgia',
+    nameTr: 'Georgia',
+    code: 'GA',
+    fips: '13',
+    center: [33.040619, -83.643074],
+  },
+  Hawaii: {
+    name: 'Hawaii',
+    nameTr: 'Hawaii',
+    code: 'HI',
+    fips: '15',
+    center: [21.094318, -157.498337],
+  },
+  Idaho: {name: 'Idaho', nameTr: 'Idaho', code: 'ID', fips: '16', center: [44.240459, -114.478828]},
+  Illinois: {
+    name: 'Illinois',
+    nameTr: 'Illinois',
+    code: 'IL',
+    fips: '17',
+    center: [40.349457, -88.986137],
+  },
+  Indiana: {
+    name: 'Indiana',
+    nameTr: 'Indiana',
+    code: 'IN',
+    fips: '18',
+    center: [39.849426, -86.258278],
+  },
+  Iowa: {name: 'Iowa', nameTr: 'Iowa', code: 'IA', fips: '19', center: [42.011539, -93.210526]},
+  Kansas: {name: 'Kansas', nameTr: 'Kansas', code: 'KS', fips: '20', center: [38.5266, -96.726486]},
+  Kentucky: {
+    name: 'Kentucky',
+    nameTr: 'Kentucky',
+    code: 'KY',
+    fips: '21',
+    center: [37.66814, -84.670067],
+  },
+  Louisiana: {
+    name: 'Louisiana',
+    nameTr: 'Louisiana',
+    code: 'LA',
+    fips: '22',
+    center: [31.169546, -91.867805],
+  },
+  Maine: {name: 'Maine', nameTr: 'Maine', code: 'ME', fips: '23', center: [44.693947, -69.381927]},
+  Maryland: {
+    name: 'Maryland',
+    nameTr: 'Maryland',
+    code: 'MD',
+    fips: '24',
+    center: [39.063946, -76.802101],
+  },
+  Massachusetts: {
+    name: 'Massachusetts',
+    nameTr: 'Massachusetts',
+    code: 'MA',
+    fips: '25',
+    center: [42.230171, -71.530106],
+  },
+  Michigan: {
+    name: 'Michigan',
+    nameTr: 'Michigan',
+    code: 'MI',
+    fips: '26',
+    center: [43.326618, -84.536095],
+  },
+  Minnesota: {
+    name: 'Minnesota',
+    nameTr: 'Minnesota',
+    code: 'MN',
+    fips: '27',
+    center: [45.694454, -93.900192],
+  },
+  Mississippi: {
+    name: 'Mississippi',
+    nameTr: 'Mississippi',
+    code: 'MS',
+    fips: '28',
+    center: [32.741646, -89.678696],
+  },
+  Missouri: {
+    name: 'Missouri',
+    nameTr: 'Missouri',
+    code: 'MO',
+    fips: '29',
+    center: [38.456085, -92.288368],
+  },
+  Montana: {
+    name: 'Montana',
+    nameTr: 'Montana',
+    code: 'MT',
+    fips: '30',
+    center: [46.921925, -110.454353],
+  },
+  Nebraska: {
+    name: 'Nebraska',
+    nameTr: 'Nebraska',
+    code: 'NE',
+    fips: '31',
+    center: [41.12537, -98.268082],
+  },
+  Nevada: {
+    name: 'Nevada',
+    nameTr: 'Nevada',
+    code: 'NV',
+    fips: '32',
+    center: [38.313515, -117.055374],
+  },
+  'New Hampshire': {
+    name: 'New Hampshire',
+    nameTr: 'New Hampshire',
+    code: 'NH',
+    fips: '33',
+    center: [43.452492, -71.563896],
+  },
+  'New Jersey': {
+    name: 'New Jersey',
+    nameTr: 'New Jersey',
+    code: 'NJ',
+    fips: '34',
+    center: [40.298904, -74.521011],
+  },
+  'New Mexico': {
+    name: 'New Mexico',
+    nameTr: 'New Mexico',
+    code: 'NM',
+    fips: '35',
+    center: [34.840515, -106.248482],
+  },
+  'New York': {
+    name: 'New York',
+    nameTr: 'New York',
+    code: 'NY',
+    fips: '36',
+    center: [42.165726, -74.948051],
+  },
+  'North Carolina': {
+    name: 'North Carolina',
+    nameTr: 'Kuzey Karolina',
+    code: 'NC',
+    fips: '37',
+    center: [35.630066, -79.806419],
+  },
+  'North Dakota': {
+    name: 'North Dakota',
+    nameTr: 'Kuzey Dakota',
+    code: 'ND',
+    fips: '38',
+    center: [47.528912, -99.784012],
+  },
+  Ohio: {name: 'Ohio', nameTr: 'Ohio', code: 'OH', fips: '39', center: [40.388783, -82.764915]},
+  Oklahoma: {
+    name: 'Oklahoma',
+    nameTr: 'Oklahoma',
+    code: 'OK',
+    fips: '40',
+    center: [35.565342, -96.928917],
+  },
+  Oregon: {
+    name: 'Oregon',
+    nameTr: 'Oregon',
+    code: 'OR',
+    fips: '41',
+    center: [44.572021, -122.070938],
+  },
+  Pennsylvania: {
+    name: 'Pennsylvania',
+    nameTr: 'Pensilvanya',
+    code: 'PA',
+    fips: '42',
+    center: [40.590752, -77.209755],
+  },
+  'Rhode Island': {
+    name: 'Rhode Island',
+    nameTr: 'Rhode Island',
+    code: 'RI',
+    fips: '44',
+    center: [41.680893, -71.51178],
+  },
+  'South Carolina': {
+    name: 'South Carolina',
+    nameTr: 'Güney Karolina',
+    code: 'SC',
+    fips: '45',
+    center: [33.856892, -80.945007],
+  },
+  'South Dakota': {
+    name: 'South Dakota',
+    nameTr: 'Güney Dakota',
+    code: 'SD',
+    fips: '46',
+    center: [44.299782, -99.438828],
+  },
+  Tennessee: {
+    name: 'Tennessee',
+    nameTr: 'Tennessee',
+    code: 'TN',
+    fips: '47',
+    center: [35.747845, -86.692345],
+  },
+  Texas: {name: 'Texas', nameTr: 'Teksas', code: 'TX', fips: '48', center: [31.054487, -97.563461]},
+  Utah: {name: 'Utah', nameTr: 'Utah', code: 'UT', fips: '49', center: [40.150032, -111.862434]},
+  Vermont: {
+    name: 'Vermont',
+    nameTr: 'Vermont',
+    code: 'VT',
+    fips: '50',
+    center: [44.045876, -72.710686],
+  },
+  Virginia: {
+    name: 'Virginia',
+    nameTr: 'Virjinya',
+    code: 'VA',
+    fips: '51',
+    center: [37.769337, -78.169968],
+  },
+  Washington: {
+    name: 'Washington',
+    nameTr: 'Vaşington (Eyalet)',
+    code: 'WA',
+    fips: '53',
+    center: [47.400902, -121.490494],
+  },
+  'West Virginia': {
+    name: 'West Virginia',
+    nameTr: 'Batı Virjinya',
+    code: 'WV',
+    fips: '54',
+    center: [38.491226, -80.954453],
+  },
+  Wisconsin: {
+    name: 'Wisconsin',
+    nameTr: 'Viskonsin',
+    code: 'WI',
+    fips: '55',
+    center: [44.268543, -89.616508],
+  },
+  Wyoming: {
+    name: 'Wyoming',
+    nameTr: 'Wyoming',
+    code: 'WY',
+    fips: '56',
+    center: [42.755966, -107.30249],
+  },
+}
+
 /**
- * Resolves city coordinates by looking into Turkey cities and Global cities
+ * Returns [lat, lng] coordinates for a US State
+ */
+export function getUSStateCoordinates(stateNameOrCode: string): [number, number] | null {
+  if (!stateNameOrCode) return null
+  const clean = stateNameOrCode.trim().toLowerCase()
+
+  for (const [name, meta] of Object.entries(US_STATE_META)) {
+    if (
+      name.toLowerCase() === clean ||
+      meta.code.toLowerCase() === clean ||
+      meta.nameTr.toLowerCase() === clean ||
+      meta.fips === clean
+    ) {
+      return meta.center
+    }
+  }
+  return null
+}
+
+/**
+ * Look up US State Info by name, code, or FIPS
+ */
+export function getUSStateMeta(identifier: string): USStateInfo | undefined {
+  if (!identifier) return undefined
+  const clean = identifier.trim().toLowerCase()
+
+  for (const [name, meta] of Object.entries(US_STATE_META)) {
+    if (
+      name.toLowerCase() === clean ||
+      meta.code.toLowerCase() === clean ||
+      meta.nameTr.toLowerCase() === clean ||
+      meta.fips === clean
+    ) {
+      return meta
+    }
+  }
+  return undefined
+}
+
+/**
+ * Convert FIPS code to State Name
+ */
+export function getUSStateFromFips(fipsCode: string): string | undefined {
+  const norm = String(fipsCode).padStart(2, '0')
+  for (const meta of Object.values(US_STATE_META)) {
+    if (meta.fips === norm) {
+      return meta.name
+    }
+  }
+  return undefined
+}
+
+/**
+ * Resolves city coordinates by looking into Turkey cities, US cities, and Global cities,
+ * with intelligent fallback to Region (State) or Country coordinates.
  */
 export function getCityCoordinates(
   cityName: string,
-  countryName?: string
+  countryName?: string,
+  regionName?: string
 ): [number, number] | null {
-  if (!cityName || cityName === 'Unknown' || cityName === '(not set)') return null
+  if (!cityName || cityName === 'Unknown') {
+    if (regionName && regionName !== '(not set)' && regionName !== 'Unknown') {
+      const stateCoords = getUSStateCoordinates(regionName)
+      if (stateCoords) return stateCoords
+    }
+    if (countryName && COUNTRY_COORDS[countryName]) {
+      return COUNTRY_COORDS[countryName]
+    }
+    return null
+  }
+
+  // Clean name
+  const cleanCity = cityName.trim()
+  const cleanLower = cleanCity.toLowerCase()
 
   // 1. Exact match in TURKEY_CITY_COORDS
-  if (TURKEY_CITY_COORDS[cityName]) {
-    return TURKEY_CITY_COORDS[cityName]
+  if (TURKEY_CITY_COORDS[cleanCity]) {
+    return TURKEY_CITY_COORDS[cleanCity]
   }
 
   // 2. Exact match in GLOBAL_CITY_COORDS
-  if (GLOBAL_CITY_COORDS[cityName]) {
-    return GLOBAL_CITY_COORDS[cityName]
+  if (GLOBAL_CITY_COORDS[cleanCity]) {
+    return GLOBAL_CITY_COORDS[cleanCity]
   }
 
-  // 3. Case-insensitive / normalized lookup
-  const cleanCity = cityName.trim().toLowerCase()
-
+  // 3. Case-insensitive lookup in TURKEY_CITY_COORDS
   for (const [k, v] of Object.entries(TURKEY_CITY_COORDS)) {
-    if (k.toLowerCase() === cleanCity) return v
+    if (k.toLowerCase() === cleanLower) return v
   }
 
+  // 4. Case-insensitive lookup in GLOBAL_CITY_COORDS
   for (const [k, v] of Object.entries(GLOBAL_CITY_COORDS)) {
-    if (k.toLowerCase() === cleanCity) return v
+    if (k.toLowerCase() === cleanLower) return v
   }
 
-  // 4. Fallback to Country Coords if country is given
+  // 5. Clean common suffixes like " County", " Valley", " City" and retry
+  const stripped = cleanCity
+    .replace(/\s+(County|Valley|City|Town|Township|Metropolitan Area)$/i, '')
+    .trim()
+  if (stripped && stripped !== cleanCity) {
+    const strippedLower = stripped.toLowerCase()
+    for (const [k, v] of Object.entries(GLOBAL_CITY_COORDS)) {
+      if (k.toLowerCase() === strippedLower) return v
+    }
+  }
+
+  // 6. Fallback to Region (State) if region is given (e.g. US state)
+  if (regionName && regionName !== '(not set)' && regionName !== 'Unknown') {
+    const stateCoords = getUSStateCoordinates(regionName)
+    if (stateCoords) return stateCoords
+  }
+
+  // 7. Fallback to Country Coords if country is given
   if (countryName && COUNTRY_COORDS[countryName]) {
     return COUNTRY_COORDS[countryName]
   }

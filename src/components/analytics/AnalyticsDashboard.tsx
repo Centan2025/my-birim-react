@@ -32,6 +32,7 @@ import {
 import {getCountryFlag, COUNTRY_META} from '../../lib/geo-coords'
 
 const TurkeyMapChart = React.lazy(() => import('./TurkeyMapChart'))
+const USMapChart = React.lazy(() => import('./USMapChart'))
 const WorldMapChart = React.lazy(() => import('./WorldMapChart'))
 
 export interface AnalyticsData {
@@ -75,8 +76,15 @@ export interface AnalyticsData {
     users: number
     sessions: number
   }[]
+  regionData?: {
+    country?: string
+    region: string
+    users: number
+    sessions: number
+  }[]
   cityData: {
     country?: string
+    region?: string
     city: string
     users: number
     sessions: number
@@ -157,7 +165,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<
     'overview' | 'realtime' | 'pages' | 'geography' | 'sources'
   >('overview')
-  const [mapSubTab, setMapSubTab] = useState<'turkey' | 'world'>('turkey')
+  const [mapSubTab, setMapSubTab] = useState<'turkey' | 'us' | 'world'>('turkey')
   const [pageSearch, setPageSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -668,6 +676,17 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   Türkiye Haritası
                 </button>
                 <button
+                  onClick={() => setMapSubTab('us')}
+                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1 ${
+                    mapSubTab === 'us'
+                      ? 'bg-white text-slate-900 shadow-sm font-bold'
+                      : 'text-slate-600 hover'
+                  }`}
+                >
+                  <span>🇺🇸</span>
+                  <span>ABD Haritası</span>
+                </button>
+                <button
                   onClick={() => setMapSubTab('world')}
                   className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition ${
                     mapSubTab === 'world'
@@ -690,6 +709,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               >
                 {mapSubTab === 'turkey' ? (
                   <TurkeyMapChart turkishCities={turkishCitiesForMap} />
+                ) : mapSubTab === 'us' ? (
+                  <USMapChart cities={data?.cityData || []} regions={data?.regionData || []} />
                 ) : (
                   <WorldMapChart
                     countries={data?.countryData || []}
@@ -1010,6 +1031,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {/* TAB: GEOGRAPHY & FULL MAPS */}
       {activeTab === 'geography' && (
         <div className="space-y-8">
+          {/* Turkey Map */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm text-slate-800">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -1020,7 +1042,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   </h2>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  Şehirlere göre kullanıcı yoğunluk noktaları (Yakınlaştırma ve kaydırma destekli)
+                  Türkiye genelindeki il ve ilçe bazlı kullanıcı yoğunluk noktaları (Yakınlaştırma
+                  ve kaydırma destekli)
                 </p>
               </div>
             </div>
@@ -1038,6 +1061,37 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </div>
           </div>
 
+          {/* USA Map */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm text-slate-800">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl leading-none">🇺🇸</span>
+                  <h2 className="text-xl font-bold tracking-tight text-slate-900">
+                    Amerika Birleşik Devletleri (ABD) Ziyaretçi Haritası
+                  </h2>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Eyalet (State) sıcaklık haritası ve nokta atışı şehir pinleri (Albers Projeksiyonu
+                  & Yakınlaştırma)
+                </p>
+              </div>
+            </div>
+
+            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden min-h-[300px]">
+              <React.Suspense
+                fallback={
+                  <div className="h-64 flex items-center justify-center text-slate-400 text-xs">
+                    ABD Haritası yükleniyor...
+                  </div>
+                }
+              >
+                <USMapChart cities={data?.cityData || []} regions={data?.regionData || []} />
+              </React.Suspense>
+            </div>
+          </div>
+
+          {/* World Map */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm text-slate-800">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -1048,7 +1102,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   </h2>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  Uluslararası ziyaretçilerin ülke bazlı dağılımı
+                  Uluslararası ziyaretçilerin küresel ölçekte ülke ve şehir bazlı dağılımı
                 </p>
               </div>
             </div>
@@ -1066,13 +1120,18 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          {/* 3-Column Breakdown: Cities, Regions/States, Countries */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Cities Table */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h3 className="text-base font-semibold text-slate-900 mb-4">
-                Şehirlere Göre Dağılım
-              </h3>
+              <div className="flex items-center gap-2 mb-1">
+                <MapPin className="w-4 h-4 text-rose-500" />
+                <h3 className="text-base font-semibold text-slate-900">Şehirlere Göre Dağılım</h3>
+              </div>
+              <p className="text-xs text-slate-400 mb-4">En çok ziyaretçi alan şehirler</p>
+
               <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
-                {(data?.cityData || []).map((city, idx) => (
+                {(data?.cityData || []).slice(0, 50).map((city, idx) => (
                   <div
                     key={idx}
                     className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition text-xs"
@@ -1088,26 +1147,76 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                         <span className="font-semibold text-slate-800 truncate block">
                           {city.city}
                         </span>
-                        {city.country && (
-                          <span className="text-[10px] text-slate-400 truncate block">
-                            {COUNTRY_META[city.country]?.nameTr || city.country}
-                          </span>
-                        )}
+                        <span className="text-[10px] text-slate-400 truncate block">
+                          {city.region ? `${city.region} • ` : ''}
+                          {COUNTRY_META[city.country || '']?.nameTr || city.country}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-slate-500 shrink-0">
+                    <div className="flex items-center gap-2 text-slate-500 shrink-0 text-right">
                       <span className="font-medium text-slate-800">
-                        {city.users.toLocaleString('tr-TR')} kullanıcı
+                        {city.users.toLocaleString('tr-TR')}
                       </span>
-                      <span className="font-mono text-slate-400">({city.sessions} oturum)</span>
+                      <span className="font-mono text-slate-400 text-[10px]">
+                        ({city.sessions})
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Regions / US States Table */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h3 className="text-base font-semibold text-slate-900 mb-4">Ülkelere Göre Dağılım</h3>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-base leading-none">🏛️</span>
+                <h3 className="text-base font-semibold text-slate-900">Eyalet & Bölgeler</h3>
+              </div>
+              <p className="text-xs text-slate-400 mb-4">ABD Eyaletleri ve bölge dağılımları</p>
+
+              <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                {(data?.regionData || []).slice(0, 50).map((region, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition text-xs"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      <span className="text-base shrink-0">
+                        {getCountryFlag(region.country || '')}
+                      </span>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-slate-800 truncate block">
+                          {region.region}
+                        </span>
+                        <span className="text-[10px] text-slate-400 truncate block">
+                          {COUNTRY_META[region.country || '']?.nameTr || region.country}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-500 shrink-0 text-right">
+                      <span className="font-medium text-slate-800">
+                        {region.users.toLocaleString('tr-TR')}
+                      </span>
+                      <span className="font-mono text-slate-400 text-[10px]">
+                        ({region.sessions})
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Countries Table */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-1">
+                <Globe className="w-4 h-4 text-indigo-500" />
+                <h3 className="text-base font-semibold text-slate-900">Ülkelere Göre Dağılım</h3>
+              </div>
+              <p className="text-xs text-slate-400 mb-4">Uluslararası ülke toplamları</p>
+
               <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
                 {(data?.countryData || []).map((country, idx) => (
                   <div
@@ -1130,11 +1239,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-slate-500 shrink-0">
+                    <div className="flex items-center gap-2 text-slate-500 shrink-0 text-right">
                       <span className="font-medium text-slate-800">
-                        {country.users.toLocaleString('tr-TR')} kullanıcı
+                        {country.users.toLocaleString('tr-TR')}
                       </span>
-                      <span className="font-mono text-slate-400">({country.sessions} oturum)</span>
+                      <span className="font-mono text-slate-400 text-[10px]">
+                        ({country.sessions})
+                      </span>
                     </div>
                   </div>
                 ))}

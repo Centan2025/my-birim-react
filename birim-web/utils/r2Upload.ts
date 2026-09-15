@@ -52,12 +52,27 @@ export async function uploadToR2(
   const folder = key.substring(0, lastSlash)
   const filename = key.substring(lastSlash + 1)
 
-  const studioToken =
+  let studioToken =
+    (typeof import.meta !== 'undefined' &&
+      (import.meta as any).env?.['SANITY_STUDIO_SANITY_TOKEN']) ||
+    (typeof import.meta !== 'undefined' &&
+      (import.meta as any).env?.['SANITY_STUDIO_MEDIA_ADMIN_SECRET']) ||
+    (typeof import.meta !== 'undefined' &&
+      (import.meta as any).env?.['SANITY_STUDIO_API_SECRET']) ||
     (typeof process !== 'undefined' && process.env
       ? process.env.SANITY_STUDIO_SANITY_TOKEN ||
         process.env.SANITY_STUDIO_MEDIA_ADMIN_SECRET ||
         process.env.SANITY_STUDIO_API_SECRET
-      : '') || ''
+      : '') ||
+    ''
+
+  if (!studioToken && typeof window !== 'undefined' && window.localStorage) {
+    studioToken =
+      window.localStorage.getItem('SANITY_STUDIO_SANITY_TOKEN') ||
+      window.localStorage.getItem('SANITY_TOKEN') ||
+      window.localStorage.getItem('sanity_admin_token') ||
+      ''
+  }
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

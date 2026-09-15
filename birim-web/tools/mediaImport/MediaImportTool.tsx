@@ -170,21 +170,84 @@ async function isGenuineWebP(file: File | Blob): Promise<boolean> {
   }
 }
 
+const getStudioAuthHeaders = (): Record<string, string> => {
+  let token =
+    (typeof import.meta !== 'undefined' &&
+      (import.meta as any).env?.['SANITY_STUDIO_SANITY_TOKEN']) ||
+    (typeof import.meta !== 'undefined' &&
+      (import.meta as any).env?.['SANITY_STUDIO_MEDIA_ADMIN_SECRET']) ||
+    (typeof import.meta !== 'undefined' &&
+      (import.meta as any).env?.['SANITY_STUDIO_API_SECRET']) ||
+    (typeof process !== 'undefined' && process.env?.['SANITY_STUDIO_SANITY_TOKEN']) ||
+    (typeof process !== 'undefined' && process.env?.['SANITY_STUDIO_MEDIA_ADMIN_SECRET']) ||
+    (typeof process !== 'undefined' && process.env?.['SANITY_STUDIO_API_SECRET']) ||
+    ''
+
+  if (!token && typeof window !== 'undefined' && window.localStorage) {
+    token =
+      window.localStorage.getItem('SANITY_STUDIO_SANITY_TOKEN') ||
+      window.localStorage.getItem('SANITY_TOKEN') ||
+      window.localStorage.getItem('sanity_admin_token') ||
+      ''
+  }
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+  return headers
+}
+
 const fetchApiWithFallback = async (path: string, init?: RequestInit): Promise<Response> => {
   const isLocal =
     typeof window !== 'undefined' &&
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 
+  const defaultHeaders = getStudioAuthHeaders()
+  const customHeaders = (init?.headers as Record<string, string>) || {}
+  const mergedHeaders = {
+    ...defaultHeaders,
+    ...customHeaders,
+  }
+
+  const mergedInit: RequestInit = {
+    ...init,
+    headers: mergedHeaders,
+    credentials: init?.credentials || 'include',
+  }
+
+  let res: Response
   if (isLocal) {
     try {
-      const res = await fetch(`http://localhost:3002${path}`, init)
-      return res
+      res = await fetch(`http://localhost:3002${path}`, mergedInit)
+      if (res.ok || res.status !== 404) return res
     } catch {
       // Local port 3002 is not running, fallback to production Vercel deployment
     }
   }
 
-  return fetch(`https://birim-web-antigravity.vercel.app${path}`, init)
+  res = await fetch(`https://birim-web-antigravity.vercel.app${path}`, mergedInit)
+
+  if (res.status === 401 && typeof window !== 'undefined' && typeof window.prompt === 'function') {
+    const userToken = window.prompt(
+      'Bu işlem için SANITY_TOKEN yetkilendirmesi gereklidir. Lütfen Sanity Token değerinizi girin:',
+    )
+    if (userToken && userToken.trim()) {
+      window.localStorage.setItem('SANITY_STUDIO_SANITY_TOKEN', userToken.trim())
+      const retryHeaders = {
+        ...mergedHeaders,
+        Authorization: `Bearer ${userToken.trim()}`,
+      }
+      return fetch(`https://birim-web-antigravity.vercel.app${path}`, {
+        ...mergedInit,
+        headers: retryHeaders,
+      })
+    }
+  }
+
+  return res
 }
 
 const uploadFileViaPresignedUrl = directUploadToR2
