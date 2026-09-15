@@ -36,7 +36,10 @@ Disallow: /login
 Disallow: /profile
 Disallow: /verify-email
 Disallow: /reset-password
-Crawl-delay: 1
+Disallow: /*?*bypass=*
+Disallow: /*?*debug=*
+Disallow: /*?*token=*
+Disallow: /*?*dev=*
 
 # ----------------------------------------------------------------
 # Google Botları

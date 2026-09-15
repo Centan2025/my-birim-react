@@ -87,7 +87,7 @@ export const ProductCard: React.FC<{
             src={mainImageUrl}
             srcMobile={mainImageMobile}
             srcDesktop={mainImageDesktop}
-            alt={t(product.name)}
+            alt={`Birim ${t(product.name)}`}
             width={480}
             height={480}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

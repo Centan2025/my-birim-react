@@ -11,7 +11,7 @@
   --font-accent: 'Oswald', sans-serif;
   --font-michroma: 'Michroma', sans-serif;
 
-  --color-primary: #c5a059;
+  --color-primary: #171717;
   --color-charcoal: #121212;
   --color-dark-charcoal: #0d0d0d;
   --color-paper: #f5f5f0;
@@ -90,15 +90,25 @@ html.lenis body {
 
 /* Accessibility Focus Ring Styles */
 *:focus-visible {
-  outline: 2px solid #c5a059;
+  outline: 1.5px solid rgba(0, 0, 0, 0.4);
   outline-offset: 2px;
+}
+
+.dark *:focus-visible {
+  outline: 1.5px solid rgba(255, 255, 255, 0.4);
 }
 
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid #c5a059;
+  outline: 1.5px solid rgba(0, 0, 0, 0.4);
   outline-offset: 1px;
+}
+
+.dark input:focus-visible,
+.dark textarea:focus-visible,
+.dark select:focus-visible {
+  outline: 1.5px solid rgba(255, 255, 255, 0.4);
 }
 
 /* Explicit outline-none overrides for inputs with custom focus styles */
@@ -199,7 +209,7 @@ select[class*='focus-visible:outline-none']:focus-visible {
 }
 
 .designer-name-link.active-designer {
-  color: var(--color-primary) !important;
+  color: var(--text-primary) !important;
   opacity: 1 !important;
 }
 

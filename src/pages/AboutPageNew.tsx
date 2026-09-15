@@ -316,16 +316,38 @@ export function AboutPageNew() {
     return !!imgUrl && typeof imgUrl === 'string' && imgUrl.trim() !== ''
   })
 
+  const siteOrigin =
+    typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
+  const aboutDescription =
+    (content && (t(content.heroSubtitle) || t(content.storyTitle))) ||
+    t('about_meta_description_default') ||
+    'Birim, 1978 yılında kurulmuş, özel üretim mobilya, contract furniture ve mimari projelere yönelik tasarım ve üretim yapan Türkiye merkezli bir mobilya markasıdır.'
+
   useSEO({
-    title: `BIRIM - ${t('about') || 'Hakkımızda'}`,
-    description:
-      (content && (t(content.heroSubtitle) || t(content.storyTitle))) ||
-      t('about_meta_description_default'),
+    title: t('about_meta_title') || `Birim — ${t('about') || 'Hakkımızda'}`,
+    description: aboutDescription,
     image: heroImageUrl,
-    type: 'article',
+    type: 'website',
     siteName: 'BIRIM',
-    locale: 'tr_TR',
+    locale: locale === 'en' ? 'en_US' : 'tr_TR',
     section: 'About',
+    schema: {
+      '@context': 'https://schema.org',
+      '@type': 'AboutPage',
+      '@id': `${siteOrigin}/about#webpage`,
+      name: `Birim — ${t('about') || 'Hakkımızda'}`,
+      url: `${siteOrigin}/about`,
+      description: aboutDescription,
+      isPartOf: {
+        '@id': `${siteOrigin}/#website`,
+      },
+      about: {
+        '@id': `${siteOrigin}/#organization`,
+      },
+      mainEntity: {
+        '@id': `${siteOrigin}/#organization`,
+      },
+    },
   })
 
   const renderContentText = (val: unknown) => {
@@ -417,7 +439,7 @@ export function AboutPageNew() {
         })
       : [
           {
-            year: '1970',
+            year: '1978',
             title: 'Temeller ve Kuruluş',
             description:
               'İstanbul’da geleneksel mobilya zanaatını mimari hassasiyetle birleştiren ilk atölyenin kuruluşu.',

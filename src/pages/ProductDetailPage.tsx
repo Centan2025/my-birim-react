@@ -142,29 +142,39 @@ export function ProductDetailPage() {
   const [isAiPlannerOpen, setIsAiPlannerOpen] = useState(false)
 
   // SEO & Analytics
+  const siteOrigin =
+    typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
+  const productNameText = product ? t(product.name) : ''
+  const categoryNameText = category ? t(category.name) : ''
+  const rawPrice = (product as any)?.price
+  const hasValidPrice = typeof rawPrice === 'number' && rawPrice > 0
+
   useSEO({
     title: product
-      ? category
-        ? `${t(category.name)} - ${t(product.name)}`
-        : t(product.name)
-      : 'BIRIM',
-    description: product ? t(product.description) : 'BIRIM - Modern tasarım ve mimari çözümler',
+      ? `${productNameText}${categoryNameText ? ` | ${categoryNameText}` : ''} — Birim`
+      : 'Birim',
+    description: product
+      ? t(product.description) ||
+        `${productNameText}, Birim tarafından üretilen çağdaş mobilya koleksiyonunun bir parçasıdır.`
+      : 'Birim, 1978 yılında kurulmuş, özel üretim mobilya, contract furniture ve mimari projelere yönelik tasarım ve üretim yapan Türkiye merkezli bir mobilya markasıdır.',
     image:
       typeof product?.mainImage === 'string'
         ? product.mainImage
         : (product?.mainImage as any)?.url || '',
     type: 'product',
     siteName: 'BIRIM',
-    locale: 'tr_TR',
+    locale: locale === 'en' ? 'en_US' : 'tr_TR',
     schema: product
       ? {
           '@context': 'https://schema.org',
           '@type': 'Product',
-          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/product/${productId}#product`,
-          name: t(product.name),
-          description: t(product.description) || t(product.name),
+          '@id': `${siteOrigin}/product/${productId}#product`,
+          name: productNameText,
+          description:
+            t(product.description) ||
+            `${productNameText}, Birim tarafından üretilen çağdaş mobilya tasarımı.`,
           sku: product.id,
-          category: category ? t(category.name) : undefined,
+          category: categoryNameText || undefined,
           material:
             mergedGroups && mergedGroups.length > 0
               ? mergedGroups.map(g => t(g.groupTitle)).join(', ')
@@ -177,21 +187,38 @@ export function ProductDetailPage() {
           ].filter((url, index, self) => url && self.indexOf(url) === index),
           brand: {
             '@type': 'Brand',
-            name: designer ? t(designer.name) : 'BIRIM',
+            name: 'Birim',
           },
-          offers: {
-            '@type': 'Offer',
-            price: (product as any).price?.toString() || '0.00',
-            priceCurrency: 'TRY',
-            availability: 'https://schema.org/InStock',
-            url: typeof window !== 'undefined' ? window.location.href : '',
-            seller: {
-              '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
-            },
+          manufacturer: {
+            '@type': 'Organization',
+            '@id': `${siteOrigin}/#organization`,
+            name: 'Birim',
           },
+          ...(designer
+            ? {
+                creator: {
+                  '@type': 'Person',
+                  name: t(designer.name),
+                  url: `${siteOrigin}/designer/${designer.id}`,
+                },
+              }
+            : {}),
+          ...(hasValidPrice
+            ? {
+                offers: {
+                  '@type': 'Offer',
+                  price: String(rawPrice),
+                  priceCurrency: 'TRY',
+                  url: `${siteOrigin}/product/${productId}`,
+                  seller: {
+                    '@id': `${siteOrigin}/#organization`,
+                  },
+                },
+              }
+            : {}),
           mainEntityOfPage: {
             '@type': 'WebPage',
-            '@id': typeof window !== 'undefined' ? window.location.href : '',
+            '@id': `${siteOrigin}/product/${productId}`,
           },
         }
       : undefined,

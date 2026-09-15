@@ -155,11 +155,17 @@ export default {
   cookie_policy: 'Cookie Policy',
   terms_of_service: 'Terms of Service',
   legal_information: 'Legal Information',
-  home_meta_title: 'BIRIM - Home',
-  home_meta_description: 'BIRIM - Modern design and architectural solutions',
-  projects_meta_title: 'BIRIM - Projects',
-  projects_meta_description: 'BIRIM projects, reference works and application examples',
-  about_meta_description_default: 'Information about BIRIM',
+  home_meta_title: 'Birim — Furniture Design & Manufacturing',
+  home_meta_description:
+    'Birim is a Turkish furniture design and manufacturing company founded in 1978, specializing in custom furniture, contract furniture and architectural projects.',
+  projects_meta_title: 'Birim — Architectural Projects & Contract Furniture',
+  projects_meta_description:
+    'Birim architectural projects, contract furniture solutions, hospitality, corporate and residential interior references.',
+  about_meta_title: 'Birim — About Us',
+  about_meta_description_default:
+    'Founded in 1978, Birim unites contemporary design vision with master craftsmanship and advanced manufacturing technologies.',
+  brand_entity_description:
+    'Birim is a Turkish furniture design and manufacturing company founded in 1978, specializing in custom furniture, contract furniture and architectural projects.',
   welcome_back: 'Welcome Back',
   sign_up: 'Sign Up',
   register_subtitle: 'Create a new account',
@@ -187,10 +193,12 @@ export default {
   password_hint:
     'Password must be at least 8 characters and include uppercase/lowercase letters and numbers',
   too_many_attempts: 'Too many attempts. Please try again in {0} minutes.',
-  contact_meta_title: 'BIRIM - Contact',
-  contact_meta_description_default: 'BIRIM contact and showroom information',
-  products_meta_title: 'BIRIM - Products',
-  products_meta_description_default: 'BIRIM - All products and collections',
+  contact_meta_title: 'Birim — Contact & Showrooms',
+  contact_meta_description_default:
+    'Contact Birim Nişantaşı and Fenerbahçe showrooms, manufacturing facility, and project teams.',
+  products_meta_title: 'Birim — Furniture Collection',
+  products_meta_description_default:
+    'Birim, founded in 1978, designs and manufactures contemporary furniture collections and architectural solutions.',
   cart: 'Cart',
   items: 'items',
   open_search: 'Search',

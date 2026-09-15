@@ -1,7 +1,7 @@
 # ================================================================
 # BIRIM - robots.txt
 # Modern tasarım ve mobilya markası
-# Güncellenme tarihi: 2026-09-11
+# Güncellenme tarihi: 2026-09-15
 # ================================================================
 
 # ----------------------------------------------------------------
@@ -15,7 +15,10 @@ Disallow: /login
 Disallow: /profile
 Disallow: /verify-email
 Disallow: /reset-password
-Crawl-delay: 1
+Disallow: /*?*bypass=*
+Disallow: /*?*debug=*
+Disallow: /*?*token=*
+Disallow: /*?*dev=*
 
 # ----------------------------------------------------------------
 # Google Botları

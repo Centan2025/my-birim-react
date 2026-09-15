@@ -44,75 +44,72 @@ export function HomePage() {
       'https://www.linkedin.com/company/birim',
     ]
 
+    const siteOrigin =
+      typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
+
     return {
-      title: t('home_meta_title') || 'BIRIM - Ana Sayfa',
-      description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
+      title: t('home_meta_title') || 'Birim — Furniture Design & Manufacturing',
+      description:
+        t('home_meta_description') ||
+        'Birim, 1978 yılında kurulmuş, özel üretim mobilya, contract furniture ve mimari projelere yönelik tasarım ve üretim yapan Türkiye merkezli bir mobilya markasıdır.',
       image: content?.heroMedia?.[0]?.url || undefined,
       type: 'website' as const,
       siteName: 'BIRIM',
-      locale: 'tr_TR',
+      locale: locale === 'en' ? 'en_US' : 'tr_TR',
       schema: [
         {
           '@context': 'https://schema.org',
           '@type': 'Organization',
-          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
-          name: 'BIRIM',
-          url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
+          '@id': `${siteOrigin}/#organization`,
+          name: 'Birim',
+          legalName: 'Birim Mobilya',
+          url: siteOrigin,
           logo: {
             '@type': 'ImageObject',
-            url:
-              typeof window !== 'undefined'
-                ? `${window.location.origin}/logo.png`
-                : 'https://www.birim.com/logo.png',
+            url: `${siteOrigin}/logo.png`,
             width: '180',
             height: '60',
           },
-          image:
-            typeof window !== 'undefined'
-              ? `${window.location.origin}/logo.png`
-              : 'https://www.birim.com/logo.png',
-          description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
+          image: `${siteOrigin}/logo.png`,
+          description:
+            t('home_meta_description') ||
+            'Birim, 1978 yılında kurulmuş, özel üretim mobilya, contract furniture ve mimari projelere yönelik tasarım ve üretim yapan Türkiye merkezli bir mobilya markasıdır.',
+          foundingDate: '1978',
+          brand: {
+            '@type': 'Brand',
+            name: 'Birim',
+          },
+          knowsAbout: [
+            'Furniture Design',
+            'Contract Furniture',
+            'Architectural Projects',
+            'Custom Manufacturing',
+          ],
           sameAs: socialLinks,
           contactPoint: {
             '@type': 'ContactPoint',
             email: s?.contactEmail || 'info@birim.com',
-            telephone: s?.contactPhone || '+90 216 123 45 67',
+            ...(s?.contactPhone ? {telephone: s.contactPhone} : {}),
             contactType: 'customer service',
             areaServed: 'TR',
             availableLanguage: ['Turkish', 'English'],
-          },
-          address: {
-            '@type': 'PostalAddress',
-            streetAddress: 'Modern Sanat Sokak No:12',
-            addressLocality: 'Istanbul',
-            addressRegion: 'Istanbul',
-            postalCode: '34000',
-            addressCountry: 'TR',
           },
         },
         {
           '@context': 'https://schema.org',
           '@type': 'WebSite',
-          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#website`,
-          name: 'BIRIM',
-          url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
-          description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
+          '@id': `${siteOrigin}/#website`,
+          name: 'Birim',
+          url: siteOrigin,
+          description: t('home_meta_description') || 'Birim - Furniture Design & Manufacturing',
           publisher: {
-            '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
+            '@id': `${siteOrigin}/#organization`,
           },
-          potentialAction: {
-            '@type': 'SearchAction',
-            target: {
-              '@type': 'EntryPoint',
-              urlTemplate: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/products?q={search_term_string}`,
-            },
-            'query-input': 'required name=search_term_string',
-          },
-          inLanguage: 'tr-TR',
+          inLanguage: locale === 'en' ? 'en-US' : 'tr-TR',
         },
       ],
     }
-  }, [content?.heroMedia, t, settings])
+  }, [content?.heroMedia, t, locale, settings])
 
   useSEO(seoData)
 

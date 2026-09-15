@@ -24,13 +24,14 @@ export function CategoriesPage() {
     description: t('products_page_subtitle') || t('products') || 'Ürün kategorileri',
     siteName: 'BIRIM',
     type: 'website',
-    locale: 'tr_TR',
+    locale:
+      typeof window !== 'undefined' && document.documentElement.lang === 'en' ? 'en_US' : 'tr_TR',
     schema: {
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
       name: t('categories') || t('products') || 'Kategoriler',
       description: t('products_page_subtitle') || 'Ürün kategorileri',
-      url: `${baseUrl}/#/categories`,
+      url: `${baseUrl}/categories`,
       mainEntity: {
         '@type': 'ItemList',
         numberOfItems: categories.length,
@@ -38,7 +39,7 @@ export function CategoriesPage() {
           '@type': 'ListItem',
           position: index + 1,
           name: t(c.name),
-          url: `${baseUrl}/#/products/${c.id}`,
+          url: `${baseUrl}/products/${c.id}`,
         })),
       },
     },

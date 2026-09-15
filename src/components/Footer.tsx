@@ -53,7 +53,7 @@ export const Footer = () => {
                   ? [{to: '/projects', label: t('projects') || 'Projeler'}]
                   : []),
                 ...(settings?.isFactoryVisible
-                  ? [{to: '/factory', label: t('factory') || 'Fabrika'}]
+                  ? [{to: '/uretim', label: t('factory') || 'Üretim'}]
                   : []),
                 {to: '/news', label: t('news')},
                 {to: '/about', label: t('about')},

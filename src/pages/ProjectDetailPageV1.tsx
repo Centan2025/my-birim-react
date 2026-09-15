@@ -545,7 +545,7 @@ export function ProjectDetailPageV1() {
       ? {
           '@context': 'https://schema.org',
           '@type': 'CreativeWork',
-          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/projects/${projectId}#project`,
+          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/projects/${projectId}#project`,
           name: t(project.title),
           description: t(project.excerpt || '') || t(project.title),
           ...(coverUrl && {image: coverUrl}),

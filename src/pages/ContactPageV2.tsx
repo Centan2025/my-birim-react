@@ -99,19 +99,27 @@ export function ContactPageV2() {
     resetHeaderTheme()
   }, [resetHeaderTheme])
 
+  const siteOrigin =
+    typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
+
   useSEO({
-    title: t('contact_meta_title') || `BIRIM - ${t('contact')}`,
+    title: t('contact_meta_title') || `Birim — ${t('contact')}`,
     description: t(content?.subtitle) || t('contact_meta_description_default'),
     type: 'website',
     siteName: 'BIRIM',
     locale: isTr ? 'tr_TR' : 'en_US',
     section: 'Contact',
+    url: `${siteOrigin}/contact`,
     schema: {
       '@context': 'https://schema.org',
       '@type': 'ContactPage',
+      '@id': `${siteOrigin}/contact#webpage`,
       name: t('contact') || 'İletişim',
-      url: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/contact?v=2`,
+      url: `${siteOrigin}/contact`,
       description: t(content?.subtitle) || t('contact_meta_description_default'),
+      mainEntity: {
+        '@id': `${siteOrigin}/#organization`,
+      },
     },
   })
 

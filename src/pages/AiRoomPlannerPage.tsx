@@ -66,7 +66,7 @@ export function AiRoomPlannerPage() {
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Header Section */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <span className="px-3.5 py-1 text-xs font-sans tracking-widest text-[#c5a059] uppercase bg-[#c5a059]/10 border border-[#c5a059]/30 rounded-full inline-block">
+          <span className="px-3.5 py-1 text-xs font-sans tracking-widest text-white uppercase bg-white/10 border border-white/20 rounded-full inline-block">
             AI 3D Mekan Tasarımı
           </span>
           <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-white">
@@ -96,7 +96,7 @@ export function AiRoomPlannerPage() {
                 return (
                   <div
                     key={prod.id}
-                    className="group relative bg-neutral-900/60 rounded-xl overflow-hidden border border-neutral-800/80 hover:border-[#c5a059]/50 transition-all duration-300 flex flex-col"
+                    className="group relative bg-neutral-900/60 rounded-xl overflow-hidden border border-neutral-800/80 hover:border-white/50 transition-all duration-300 flex flex-col"
                   >
                     <div className="aspect-square relative overflow-hidden bg-neutral-950">
                       {imgUrl ? (
@@ -135,7 +135,7 @@ export function AiRoomPlannerPage() {
 
                     <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
                       <div>
-                        <h3 className="text-sm font-medium text-white group-hover:text-[#c5a059] transition-colors font-sans">
+                        <h3 className="text-sm font-medium text-white group-hover:text-neutral-300 transition-colors font-sans">
                           {t(prod.name)}
                         </h3>
                       </div>
@@ -148,7 +148,7 @@ export function AiRoomPlannerPage() {
                         </Link>
                         <button
                           onClick={() => handleOpenPlanner(prod)}
-                          className="text-xs text-[#c5a059] hover:underline font-medium cursor-pointer"
+                          className="text-xs text-neutral-300 hover:text-white hover:underline font-medium cursor-pointer"
                         >
                           Visualizer
                         </button>

@@ -122,11 +122,17 @@ export default {
   cookie_policy: 'Çerez Politikası',
   terms_of_service: 'Kullanım Koşulları',
   legal_information: 'Yasal Bilgiler',
-  home_meta_title: 'BIRIM - Ana Sayfa',
-  home_meta_description: 'BIRIM - Modern tasarım ve mimari çözümler',
-  projects_meta_title: 'BIRIM - Projeler',
-  projects_meta_description: 'BIRIM projeleri, referans işleri ve uygulama örnekleri',
-  about_meta_description_default: 'BIRIM hakkında bilgiler',
+  home_meta_title: 'Birim — Furniture Design & Manufacturing',
+  home_meta_description:
+    'Birim, 1978 yılında kurulmuş, özel üretim mobilya, contract furniture ve mimari projelere yönelik tasarım ve üretim yapan Türkiye merkezli bir mobilya markasıdır.',
+  projects_meta_title: 'Birim — Mimari Projeler & Contract Furniture',
+  projects_meta_description:
+    'Birim mimari projeleri, contract furniture çözümleri, otel, ofis ve özel konut uygulamaları.',
+  about_meta_title: 'Birim — Hakkımızda',
+  about_meta_description_default:
+    'Birim, 1978 yılından bu yana çağdaş tasarım vizyonunu zanaat ve ileri üretim teknolojileriyle buluşturan mobilya markasıdır.',
+  brand_entity_description:
+    'Birim, 1978 yılında kurulmuş, özel üretim mobilya, contract furniture ve mimari projelere yönelik tasarım ve üretim yapan Türkiye merkezli bir mobilya markasıdır.',
   welcome_back: 'Hoş Geldiniz',
   sign_up: 'Üye Ol',
   register_subtitle: 'Yeni hesap oluşturun',
@@ -152,11 +158,12 @@ export default {
   medium: 'Orta',
   strong: 'Güçlü',
   password_hint: 'Şifre en az 8 karakter olmalı ve büyük/küçük harf, rakam içermelidir',
-  too_many_attempts: 'Çok fazla deneme yapıldı. Lütfen {0} dakika sonra tekrar deneyin.',
-  contact_meta_title: 'BIRIM - İletişim',
-  contact_meta_description_default: 'BIRIM iletişim ve showroom bilgileri',
-  products_meta_title: 'BIRIM - Ürünler',
-  products_meta_description_default: 'BIRIM - Tüm ürünler ve koleksiyonlar',
+  contact_meta_title: 'Birim — İletişim',
+  contact_meta_description_default:
+    'Birim Nişantaşı ve Fenerbahçe showroomları, üretim tesisi ve proje ekipleriyle iletişime geçin.',
+  products_meta_title: 'Birim — Ürün Koleksiyonu',
+  products_meta_description_default:
+    'Birim, 1978 yılından beri çağdaş mobilya koleksiyonları ve mimari çözümler tasarlar ve üretir.',
   cart: 'Sepet',
   items: 'ürün',
   open_search: 'Ara',

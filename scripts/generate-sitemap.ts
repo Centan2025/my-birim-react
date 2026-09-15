@@ -46,7 +46,7 @@ const staticPages: SitemapUrl[] = [
   {loc: '/projects', changefreq: 'weekly', priority: 0.9, lastmod: TODAY},
   {loc: '/news', changefreq: 'daily', priority: 0.8, lastmod: TODAY},
   {loc: '/categories', changefreq: 'weekly', priority: 0.7, lastmod: TODAY},
-  {loc: '/factory', changefreq: 'monthly', priority: 0.6, lastmod: TODAY},
+  {loc: '/uretim', changefreq: 'monthly', priority: 0.7, lastmod: TODAY},
   {loc: '/cookies', changefreq: 'yearly', priority: 0.3, lastmod: TODAY},
   {loc: '/privacy', changefreq: 'yearly', priority: 0.3, lastmod: TODAY},
   {loc: '/terms', changefreq: 'yearly', priority: 0.3, lastmod: TODAY},

@@ -28,9 +28,13 @@ export function LoadingSpinner({
     <div className={`${containerClass} ${className}`}>
       <div className="text-center">
         <div
-          className={`inline-block animate-spin rounded-full border-b-2 border-primary ${spinnerSize} mb-4`}
+          className={`inline-block animate-spin rounded-full border-2 border-neutral-900 dark:border-white border-t-transparent ${spinnerSize} mb-4`}
         ></div>
-        {message && <p className="text-gray-600 text-sm md:text-base font-medium">{message}</p>}
+        {message && (
+          <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base font-medium">
+            {message}
+          </p>
+        )}
       </div>
     </div>
   )
@@ -42,7 +46,7 @@ export function LoadingSpinner({
 export function InlineLoadingSpinner({className = ''}: {className?: string}) {
   return (
     <div className={`inline-flex items-center justify-center ${className}`}>
-      <div className="inline-block animate-spin rounded-full border-b-2 border-current h-4 w-4"></div>
+      <div className="inline-block animate-spin rounded-full border-2 border-current border-t-transparent h-4 w-4"></div>
     </div>
   )
 }
@@ -53,7 +57,7 @@ export function InlineLoadingSpinner({className = ''}: {className?: string}) {
  */
 export function PageLoading({message}: {message?: string}) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)]">
       <LoadingSpinner message={message || 'Yükleniyor...'} />
     </div>
   )

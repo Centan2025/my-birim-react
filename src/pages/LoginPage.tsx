@@ -74,7 +74,7 @@ export function LoginPage() {
           </p>
           <Link
             to="/profile"
-            className="inline-block w-full bg-[#111827] dark:bg-white text-white dark:text-black py-3 text-xs font-semibold uppercase tracking-widest hover:bg-[#c5a059] transition-colors"
+            className="inline-block w-full bg-[#111827] dark:bg-white text-white dark:text-black py-3 text-xs font-semibold uppercase tracking-widest hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
           >
             {t('profile') || 'Profil Sayfama Git'}
           </Link>
@@ -242,7 +242,7 @@ export function LoginPage() {
               {isLoginMode && (
                 <motion.div
                   layoutId="tabUnderline"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c5a059]"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--text-primary)]"
                 />
               )}
             </button>
@@ -271,7 +271,7 @@ export function LoginPage() {
               {!isLoginMode && (
                 <motion.div
                   layoutId="tabUnderline"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c5a059]"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--text-primary)]"
                 />
               )}
             </button>
@@ -303,7 +303,7 @@ export function LoginPage() {
                       })
                     }
                   }}
-                  className={`w-full px-3.5 py-3 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
+                  className={`w-full px-3.5 py-3 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[var(--text-primary)] transition-colors ${
                     validationErrors['email'] ? 'border-red-500' : 'border-[var(--border-primary)]'
                   }`}
                   placeholder="e-posta@adresiniz.com"
@@ -336,7 +336,7 @@ export function LoginPage() {
                       })
                     }
                   }}
-                  className={`w-full px-3.5 py-3 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
+                  className={`w-full px-3.5 py-3 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[var(--text-primary)] transition-colors ${
                     validationErrors['password']
                       ? 'border-red-500'
                       : 'border-[var(--border-primary)]'
@@ -351,7 +351,7 @@ export function LoginPage() {
               <div className="flex justify-end pt-1">
                 <Link
                   to="/reset-password"
-                  className="text-xs text-[var(--text-secondary)] hover:text-[#c5a059] transition-colors font-light"
+                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-light"
                 >
                   {t('forgot_password') || 'Şifremi unuttum'}
                 </Link>
@@ -371,7 +371,7 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-[#111827] dark:bg-white text-white dark:text-black hover:bg-[#c5a059] dark:hover:bg-[#c5a059] dark:hover:text-black font-semibold text-xs uppercase tracking-widest py-3.5 transition-colors flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
+                className="w-full bg-[#111827] dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 font-semibold text-xs uppercase tracking-widest py-3.5 transition-colors flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
               >
                 {isLoading ? (
                   <span>Giriş Yapılıyor...</span>
@@ -408,7 +408,7 @@ export function LoginPage() {
                         })
                       }
                     }}
-                    className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
+                    className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[var(--text-primary)] transition-colors ${
                       validationErrors['firstName']
                         ? 'border-red-500'
                         : 'border-[var(--border-primary)]'
@@ -442,7 +442,7 @@ export function LoginPage() {
                         })
                       }
                     }}
-                    className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
+                    className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[var(--text-primary)] transition-colors ${
                       validationErrors['lastName']
                         ? 'border-red-500'
                         : 'border-[var(--border-primary)]'
@@ -478,7 +478,7 @@ export function LoginPage() {
                       })
                     }
                   }}
-                  className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
+                  className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[var(--text-primary)] transition-colors ${
                     validationErrors['email'] ? 'border-red-500' : 'border-[var(--border-primary)]'
                   }`}
                   placeholder="e-posta@adresiniz.com"
@@ -513,7 +513,7 @@ export function LoginPage() {
                       })
                     }
                   }}
-                  className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
+                  className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[var(--text-primary)] transition-colors ${
                     validationErrors['password']
                       ? 'border-red-500'
                       : 'border-[var(--border-primary)]'
@@ -558,7 +558,7 @@ export function LoginPage() {
                     onClick={() => setRole('consumer')}
                     className={`py-2.5 px-3 border text-xs text-center transition-colors ${
                       role === 'consumer'
-                        ? 'border-[#c5a059] bg-[#c5a059]/10 text-[var(--text-primary)] font-medium'
+                        ? 'border-[var(--text-primary)] bg-[var(--text-primary)]/10 text-[var(--text-primary)] font-medium'
                         : 'border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-gray-400'
                     }`}
                   >
@@ -569,7 +569,7 @@ export function LoginPage() {
                     onClick={() => setRole('architect')}
                     className={`py-2.5 px-3 border text-xs text-center transition-colors ${
                       role === 'architect'
-                        ? 'border-[#c5a059] bg-[#c5a059]/10 text-[var(--text-primary)] font-medium'
+                        ? 'border-[var(--text-primary)] bg-[var(--text-primary)]/10 text-[var(--text-primary)] font-medium'
                         : 'border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-gray-400'
                     }`}
                   >
@@ -578,8 +578,8 @@ export function LoginPage() {
                 </div>
 
                 {role === 'architect' && (
-                  <div className="mt-2 p-2.5 bg-[#c5a059]/10 border border-[#c5a059]/30 text-xs text-[var(--text-primary)] flex items-start gap-2">
-                    <UserCheck className="w-4 h-4 text-[#c5a059] shrink-0 mt-0.5" />
+                  <div className="mt-2 p-2.5 bg-neutral-500/10 border border-neutral-500/30 text-xs text-[var(--text-primary)] flex items-start gap-2">
+                    <UserCheck className="w-4 h-4 text-[var(--text-primary)] shrink-0 mt-0.5" />
                     <span>
                       <strong>Mimar Programı:</strong> Üyeliğiniz doğrulanınca CAD/BIM çizimleri
                       erişime açılır.
@@ -589,7 +589,7 @@ export function LoginPage() {
               </div>
 
               <div className="pt-1 text-[11px] text-[var(--text-secondary)] flex items-center gap-1.5 font-light">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#c5a059] shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[var(--text-primary)] shrink-0" />
                 <span>
                   E-posta bülten abonesi olmak için alt bilgideki bülteni kullanabilirsiniz.
                 </span>
@@ -609,7 +609,7 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-[#111827] dark:bg-white text-white dark:text-black hover:bg-[#c5a059] dark:hover:bg-[#c5a059] dark:hover:text-black font-semibold text-xs uppercase tracking-widest py-3.5 transition-colors flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
+                className="w-full bg-[#111827] dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 font-semibold text-xs uppercase tracking-widest py-3.5 transition-colors flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
               >
                 {isLoading ? (
                   <span>Kaydolunuyor...</span>

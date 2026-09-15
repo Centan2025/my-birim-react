@@ -32,7 +32,7 @@ export function DesignersPageV1() {
       '@type': 'CollectionPage',
       name: t('designers') || 'Tasarımcılar',
       description: 'BIRIM ile çalışan vizyoner tasarımcılar ve yaratıcı küratörler.',
-      url: `${baseUrl}/#/designers`,
+      url: `${baseUrl}/designers`,
       mainEntity: {
         '@type': 'ItemList',
         numberOfItems: designers.length,
@@ -40,7 +40,7 @@ export function DesignersPageV1() {
           '@type': 'ListItem',
           position: index + 1,
           name: t(d.name),
-          url: `${baseUrl}/#/designer/${d.id}`,
+          url: `${baseUrl}/designer/${d.id}`,
         })),
       },
     },

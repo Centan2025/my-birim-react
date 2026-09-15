@@ -163,16 +163,50 @@ export const getOrganizationSchema = (data: {
   url: string
   logo?: string
   description?: string
+  foundingDate?: string
+  email?: string
+  telephone?: string
   sameAs?: string[]
+  brand?: string
+  knowsAbout?: string[]
 }): Record<string, unknown> => {
+  const orgUrl = data.url || 'https://www.birim.com'
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': `${orgUrl}/#organization`,
     name: data.name,
-    url: data.url,
-    ...(data.logo && {logo: data.logo}),
-    ...(data.description && {description: data.description}),
-    ...(data.sameAs && data.sameAs.length > 0 && {sameAs: data.sameAs}),
+    legalName: 'Birim Mobilya',
+    url: orgUrl,
+    ...(data.logo && {
+      logo: {
+        '@type': 'ImageObject',
+        url: data.logo,
+        width: 180,
+        height: 60,
+      },
+    }),
+    description:
+      data.description ||
+      'Birim is a Turkish furniture design and manufacturing company founded in 1978, specializing in custom furniture, contract furniture and architectural projects.',
+    foundingDate: data.foundingDate || '1978',
+    brand: {
+      '@type': 'Brand',
+      name: data.brand || 'Birim',
+    },
+    ...(data.knowsAbout && data.knowsAbout.length > 0 && {knowsAbout: data.knowsAbout}),
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: data.email || 'info@birim.com',
+      ...(data.telephone && {telephone: data.telephone}),
+      contactType: 'customer service',
+      areaServed: 'TR',
+      availableLanguage: ['Turkish', 'English'],
+    },
+    sameAs: data.sameAs || [
+      'https://www.instagram.com/birim',
+      'https://www.linkedin.com/company/birim',
+    ],
   }
 }
 
@@ -233,6 +267,10 @@ export const getProductSchema = (data: {
   material?: string
   color?: string
   manufacturer?: string
+  creator?: {
+    name: string
+    url?: string
+  }
   offers?: {
     price: string
     priceCurrency: string
@@ -252,27 +290,73 @@ export const getProductSchema = (data: {
     ...(data.image && {
       image: Array.isArray(data.image) ? data.image : [data.image],
     }),
-    ...(data.brand && {
-      brand: {
-        '@type': 'Brand',
-        name: data.brand,
+    brand: {
+      '@type': 'Brand',
+      name: data.brand || 'Birim',
+    },
+    manufacturer: {
+      '@type': 'Organization',
+      name: data.manufacturer || 'Birim',
+      '@id': 'https://www.birim.com/#organization',
+    },
+    ...(data.creator && {
+      creator: {
+        '@type': 'Person',
+        name: data.creator.name,
+        ...(data.creator.url && {url: data.creator.url}),
       },
     }),
-    ...(data.manufacturer && {
-      manufacturer: {
-        '@type': 'Organization',
-        name: data.manufacturer,
-      },
-    }),
-    ...(data.offers && {
-      offers: {
-        '@type': 'Offer',
-        price: data.offers.price,
-        priceCurrency: data.offers.priceCurrency,
-        ...(data.offers.availability && {availability: data.offers.availability}),
-        ...(data.offers.url && {url: data.offers.url}),
-      },
-    }),
+    ...(data.offers &&
+      data.offers.price &&
+      data.offers.price !== '0.00' &&
+      data.offers.price !== '0' && {
+        offers: {
+          '@type': 'Offer',
+          price: data.offers.price,
+          priceCurrency: data.offers.priceCurrency || 'TRY',
+          ...(data.offers.availability && {availability: data.offers.availability}),
+          ...(data.offers.url && {url: data.offers.url}),
+        },
+      }),
+  }
+}
+
+/**
+ * BreadcrumbList Schema.org data
+ */
+export const getBreadcrumbSchema = (
+  items: {name: string; url?: string}[]
+): Record<string, unknown> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      ...(item.url && {item: item.url}),
+    })),
+  }
+}
+
+/**
+ * AboutPage Schema.org data
+ */
+export const getAboutPageSchema = (data: {
+  name: string
+  url: string
+  description?: string
+  mainEntityUrl?: string
+}): Record<string, unknown> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: data.name,
+    url: data.url,
+    ...(data.description && {description: data.description}),
+    mainEntity: {
+      '@id': data.mainEntityUrl || 'https://www.birim.com/#organization',
+    },
   }
 }
 
@@ -288,12 +372,19 @@ export const getWebSiteSchema = (data: {
     queryInput: string
   }
 }): Record<string, unknown> => {
+  const siteUrl = data.url || 'https://www.birim.com'
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: data.name,
-    url: data.url,
-    ...(data.description && {description: data.description}),
+    '@id': `${siteUrl}/#website`,
+    name: data.name || 'Birim',
+    url: siteUrl,
+    description:
+      data.description ||
+      'Birim is a Turkish furniture design and manufacturing company founded in 1978.',
+    publisher: {
+      '@id': `${siteUrl}/#organization`,
+    },
     ...(data.potentialAction && {
       potentialAction: {
         '@type': 'SearchAction',
