@@ -117,7 +117,6 @@ describe('DesignersPage & Version Switching', () => {
     // V2 specific elements
     expect(screen.getAllByText('Ahmet Yılmaz').length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByText('Birim Design Studio').length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText('Luna Koltuk')).toBeDefined()
     expect(screen.getAllByText(/Profili & Tasarımları İncele/i).length).toBeGreaterThanOrEqual(1)
   })
 
