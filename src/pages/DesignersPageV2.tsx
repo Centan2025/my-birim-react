@@ -1,6 +1,7 @@
-import {useRef, useEffect} from 'react'
+import {useState, useRef, useEffect} from 'react'
 import {useNavigate} from 'react-router-dom'
-import {ArrowRight} from 'lucide-react'
+import {motion} from 'framer-motion'
+import {ArrowRight, ChevronDown} from 'lucide-react'
 import type {Designer, Product} from '../types'
 import {useTranslation} from '../i18n'
 import {useDesigners} from '../hooks/useDesigners'
@@ -24,6 +25,8 @@ export function DesignersPageV2() {
   const containerRef = useRef<HTMLDivElement>(null)
   const isScrollingRef = useRef(false)
   const currentIndexRef = useRef(0)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const scrollToSectionRef = useRef<(index: number) => void>(() => {})
   const scrollAnimRef = useRef<number | null>(null)
 
   // Header'ı şeffaf ve elemanlarını (logo, ikonlar, linkler) beyaz yap
@@ -80,7 +83,7 @@ export function DesignersPageV2() {
     let touchStartY = 0
     let touchAccumulator = 0
 
-    // 60FPS Dinamik Koyulaşma & Açılma Hesaplama (Gelen sayfalar koyudan başlayıp açılarak gelir, çıkanlar kararır)
+    // 60FPS Dinamik Koyulaşma & Açılma Hesaplama (Gelen sayfalar hafif koyudan başlayıp açılarak gelir, çıkanlar yumuşakça kararır)
     const updateDarkenCurtains = () => {
       const viewHeight = container.clientHeight || window.innerHeight || 1
       const sections = container.querySelectorAll<HTMLElement>('[data-designer-index]')
@@ -91,12 +94,12 @@ export function DesignersPageV2() {
         let darkenProgress = 0
 
         if (distPastTop > 0) {
-          // Üstten ekrandan dışarı doğru çıkarken kademeli olarak koyulaşır (%0 -> %90)
-          darkenProgress = Math.min(0.9, (distPastTop / viewHeight) * 0.95)
+          // Üstten ekrandan dışarı doğru çıkarken hafifçe koyulaşır (%0 -> %40)
+          darkenProgress = Math.min(0.4, (distPastTop / viewHeight) * 0.45)
         } else if (rect.top > 0) {
-          // Alttan ekrana doğru yaklaşırken koyudan başlayıp açılarak gelir (%90 -> %0)
+          // Alttan ekrana doğru yaklaşırken yumuşakça açılarak gelir (%40 -> %0)
           const distRatio = Math.min(1, rect.top / viewHeight)
-          darkenProgress = Math.min(0.9, distRatio * 0.9)
+          darkenProgress = Math.min(0.4, distRatio * 0.4)
         } else {
           darkenProgress = 0
         }
@@ -164,6 +167,7 @@ export function DesignersPageV2() {
       isScrollingRef.current = true
       lastScrollTime = performance.now()
       currentIndexRef.current = index
+      setActiveIndex(index)
 
       if (typeof window !== 'undefined') {
         window.dispatchEvent(
@@ -177,6 +181,8 @@ export function DesignersPageV2() {
       const targetY = targetSection ? targetSection.offsetTop : index * container.clientHeight
       smoothScrollTo(targetY, 850)
     }
+
+    scrollToSectionRef.current = scrollToSection
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault()
@@ -404,7 +410,7 @@ export function DesignersPageV2() {
                   <div className="w-full h-full relative">
                     <OptimizedImage
                       alt={t(designer.name)}
-                      className="w-full h-full object-cover object-center grayscale contrast-[1.04] brightness-[1.04]"
+                      className="w-full h-full object-cover object-center grayscale contrast-[0.96] brightness-[1.08]"
                       src={getImageUrl(designer)}
                       srcMobile={
                         typeof designer.image === 'object' ? designer.image.urlMobile : undefined
@@ -463,10 +469,10 @@ export function DesignersPageV2() {
                 )}
                 {!isBirimStudio && (
                   <>
-                    {/* Subtle Cinematic Gradient: Yukarısı daha koyu, aşağısı daha açık */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/25 to-transparent pointer-events-none" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-75 pointer-events-none" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none" />
+                    {/* Balanced subtle gradients */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent opacity-45 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
                   </>
                 )}
 
@@ -532,6 +538,108 @@ export function DesignersPageV2() {
           )
         })}
       </main>
+
+      {/* Right-Side Architectural Level / Progress Indicator (Yan Yana Karşılaştırma - Düz Kenarlar) */}
+      {designers.length > 1 && (
+        <aside
+          aria-label={t('designers') || 'Tasarımcılar'}
+          className="fixed right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-30 flex items-center gap-3.5 pointer-events-auto select-none"
+        >
+          {/* SEÇENEK 1: Geniş Panel (Düz Kenar) */}
+          <div className="flex flex-col items-center">
+            {/* Geniş Kapsül - Düz Kenar */}
+            <div className="flex flex-col items-center gap-1.5 py-2.5 px-1.5 rounded-none bg-black/40 backdrop-blur-md border border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
+              {designers.map((d, idx) => {
+                const isActive = activeIndex === idx
+                return (
+                  <button
+                    key={`wide-${d.id}`}
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation()
+                      scrollToSectionRef.current(idx)
+                    }}
+                    className="group relative flex items-center justify-center p-1 focus:outline-none cursor-pointer"
+                    aria-label={`Geniş - ${t(d.name)} (${idx + 1}/${designers.length})`}
+                  >
+                    {/* Tooltip on hover */}
+                    <span className="hidden md:block absolute right-full mr-3.5 px-2.5 py-1 bg-black/90 backdrop-blur-md text-white text-[9px] uppercase font-mono tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg">
+                      {t(d.name)} (Geniş)
+                    </span>
+                    {/* Geniş Indicator Dash */}
+                    <span
+                      className={`block rounded-none transition-all duration-500 ${
+                        isActive
+                          ? 'w-1.5 h-6 bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)]'
+                          : 'w-1 h-1.5 bg-white/40 group-hover:bg-white/90 group-hover:scale-125'
+                      }`}
+                    />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* SEÇENEK 2: İnce Panel (Düz Kenar) */}
+          <div className="flex flex-col items-center">
+            {/* İnce Kapsül - Düz Kenar */}
+            <div className="flex flex-col items-center gap-1.5 py-2 px-1 rounded-none bg-black/30 backdrop-blur-md border border-white/10 shadow-[0_2px_16px_rgba(0,0,0,0.3)]">
+              {designers.map((d, idx) => {
+                const isActive = activeIndex === idx
+                return (
+                  <button
+                    key={`slim-${d.id}`}
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation()
+                      scrollToSectionRef.current(idx)
+                    }}
+                    className="group relative flex items-center justify-center p-0.5 focus:outline-none cursor-pointer"
+                    aria-label={`İnce - ${t(d.name)} (${idx + 1}/${designers.length})`}
+                  >
+                    {/* Tooltip on hover */}
+                    <span className="hidden md:block absolute right-full mr-3 px-2 py-0.5 bg-black/90 backdrop-blur-md text-white text-[9px] uppercase font-mono tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg">
+                      {t(d.name)} (İnce)
+                    </span>
+                    {/* Slim Indicator Dash */}
+                    <span
+                      className={`block rounded-none transition-all duration-500 ${
+                        isActive
+                          ? 'w-[2px] h-5 bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]'
+                          : 'w-[2px] h-1.5 bg-white/40 group-hover:bg-white/90 group-hover:h-2.5'
+                      }`}
+                    />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </aside>
+      )}
+
+      {/* Bottom Scroll Down Hint with Animated Arrow */}
+      {designers.length > 1 && (
+        <button
+          type="button"
+          onClick={() => {
+            if (activeIndex < designers.length - 1) {
+              scrollToSectionRef.current(activeIndex + 1)
+            }
+          }}
+          className={`fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center text-white/80 hover:text-white transition-all duration-500 cursor-pointer focus:outline-none group p-1.5 ${
+            activeIndex === designers.length - 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+          aria-label={t('scroll_down') || 'Aşağı Kaydır'}
+        >
+          <motion.div
+            animate={{y: [0, 4, 0]}}
+            transition={{duration: 1.5, repeat: Infinity, ease: 'easeInOut'}}
+            className="p-1 rounded-full bg-black/30 border border-white/15 backdrop-blur-md group-hover:border-white/40 group-hover:bg-black/50 transition-all shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+          >
+            <ChevronDown className="w-3.5 h-3.5 text-white" />
+          </motion.div>
+        </button>
+      )}
     </div>
   )
 }

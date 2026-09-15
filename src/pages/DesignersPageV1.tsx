@@ -231,38 +231,66 @@ export function DesignersPageV1() {
                     <motion.div variants={imageVariants} className="w-full h-full">
                       <OptimizedImage
                         alt={t(designer.name)}
-                        className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0 brightness-[1.08] contrast-[1.02]"
-                        src={
-                          typeof designer.image === 'object' && designer.image?.urlDesktop
-                            ? designer.image.urlDesktop
-                            : getImageUrl(designer)
+                        className="w-full h-full object-cover object-center grayscale contrast-[0.96] brightness-[1.08] transition-transform duration-1000 ease-out group-hover:scale-105"
+                        src={getImageUrl(designer)}
+                        srcMobile={
+                          typeof designer.image === 'object' ? designer.image.urlMobile : undefined
                         }
-                        crop={
-                          typeof designer.image === 'object'
-                            ? designer.image.cropDesktop || designer.image.crop
-                            : undefined
+                        srcDesktop={
+                          typeof designer.image === 'object' ? designer.image.urlDesktop : undefined
                         }
+                        crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
                         hotspot={
-                          typeof designer.image === 'object'
-                            ? designer.image.hotspotDesktop || designer.image.hotspot
-                            : undefined
+                          typeof designer.image === 'object' ? designer.image.hotspot : undefined
                         }
                         origWidth={
-                          typeof designer.image === 'object'
-                            ? designer.image.origWidthDesktop || designer.image.origWidth
-                            : undefined
+                          typeof designer.image === 'object' ? designer.image.origWidth : undefined
                         }
                         origHeight={
+                          typeof designer.image === 'object' ? designer.image.origHeight : undefined
+                        }
+                        cropMobile={
+                          typeof designer.image === 'object' ? designer.image.cropMobile : undefined
+                        }
+                        hotspotMobile={
                           typeof designer.image === 'object'
-                            ? designer.image.origHeightDesktop || designer.image.origHeight
+                            ? designer.image.hotspotMobile
+                            : undefined
+                        }
+                        origWidthMobile={
+                          typeof designer.image === 'object'
+                            ? designer.image.origWidthMobile
+                            : undefined
+                        }
+                        origHeightMobile={
+                          typeof designer.image === 'object'
+                            ? designer.image.origHeightMobile
+                            : undefined
+                        }
+                        cropDesktop={
+                          typeof designer.image === 'object' ? designer.image.cropDesktop : undefined
+                        }
+                        hotspotDesktop={
+                          typeof designer.image === 'object'
+                            ? designer.image.hotspotDesktop
+                            : undefined
+                        }
+                        origWidthDesktop={
+                          typeof designer.image === 'object'
+                            ? designer.image.origWidthDesktop
+                            : undefined
+                        }
+                        origHeightDesktop={
+                          typeof designer.image === 'object'
+                            ? designer.image.origHeightDesktop
                             : undefined
                         }
                       />
                     </motion.div>
                   )}
 
-                  {/* Refined Overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-50 group-hover:opacity-25 transition-opacity duration-700"></div>
+                  {/* Refined Overlays - Lightened for clearer visual presentation */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-30 group-hover:opacity-15 transition-opacity duration-700"></div>
                   <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 </div>
 
