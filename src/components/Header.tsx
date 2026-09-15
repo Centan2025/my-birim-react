@@ -1148,6 +1148,10 @@ export function Header() {
                         <Fragment key={langCode}>
                           <button
                             onClick={() => setLocale(langCode)}
+                            aria-label={
+                              langCode === 'tr' ? 'Türkçe diline geç' : 'Switch to English'
+                            }
+                            aria-current={isActive ? 'true' : undefined}
                             className={`relative lowercase transition-opacity duration-300 hover:opacity-100`}
                             style={{
                               fontWeight: 500,

@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import {createPortal} from 'react-dom'
 import {motion, AnimatePresence} from 'framer-motion'
+import {useFocusTrap} from '../../hooks/useFocusTrap'
 import {useSelection} from '../../context/SelectionContext'
 import {CreateProjectModal} from './CreateProjectModal'
 
@@ -21,6 +22,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
     useSelection()
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const modalFocusTrap = useFocusTrap(isOpen, onClose)
 
   const handleToggleProject = async (projectId: string) => {
     if (isProductInProject(projectId, productId)) {
@@ -40,6 +42,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
             className="fixed inset-0 z-[999] flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
+            aria-label="Projeye Ekle"
           >
             <motion.div
               initial={{opacity: 0}}
@@ -50,11 +53,13 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
             />
 
             <motion.div
+              ref={modalFocusTrap as React.RefObject<HTMLDivElement>}
               initial={{opacity: 0, scale: 0.96, y: 15}}
               animate={{opacity: 1, scale: 1, y: 0}}
               exit={{opacity: 0, scale: 0.96, y: 15}}
               transition={{duration: 0.28, ease: [0.16, 1, 0.3, 1]}}
-              className="relative w-full max-w-sm bg-[var(--bg-primary)] text-[var(--text-primary)] p-6 shadow-2xl border border-[var(--border-primary)] z-10"
+              className="relative w-full max-w-sm bg-[var(--bg-primary)] text-[var(--text-primary)] p-6 shadow-2xl border border-[var(--border-primary)] z-10 focus:outline-none"
+              tabIndex={-1}
             >
               <div className="flex items-center justify-between pb-4 border-b border-[var(--border-primary)]">
                 <div>

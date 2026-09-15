@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import {createPortal} from 'react-dom'
 import {motion, AnimatePresence} from 'framer-motion'
+import {useFocusTrap} from '../../hooks/useFocusTrap'
 import {useAuth} from '../../context/AuthContext'
 import {submitInquiry} from '../../services/supabase/seckim'
 import {analytics} from '../../lib/analytics'
@@ -111,6 +112,8 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
     onClose()
   }
 
+  const modalFocusTrap = useFocusTrap(isOpen, handleClose)
+
   if (typeof document === 'undefined') return null
 
   return createPortal(
@@ -120,6 +123,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
           className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
+          aria-label="Bilgi ve Teklif Talebi"
         >
           <motion.div
             initial={{opacity: 0}}
@@ -130,11 +134,13 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
           />
 
           <motion.div
+            ref={modalFocusTrap as React.RefObject<HTMLDivElement>}
             initial={{opacity: 0, scale: 0.96, y: 15}}
             animate={{opacity: 1, scale: 1, y: 0}}
             exit={{opacity: 0, scale: 0.96, y: 15}}
             transition={{duration: 0.3, ease: [0.16, 1, 0.3, 1]}}
-            className="relative w-full max-w-xl max-h-[90vh] bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-2xl overflow-y-auto border border-[var(--border-primary)]"
+            className="relative w-full max-w-xl max-h-[90vh] bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-2xl overflow-y-auto border border-[var(--border-primary)] focus:outline-none"
+            tabIndex={-1}
           >
             {/* Header */}
             <div className="px-6 py-5 border-b border-[var(--border-primary)] flex items-center justify-between sticky top-0 bg-[var(--bg-primary)] z-10">

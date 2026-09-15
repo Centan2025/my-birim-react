@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import {createPortal} from 'react-dom'
 import {motion, AnimatePresence} from 'framer-motion'
+import {useFocusTrap} from '../../hooks/useFocusTrap'
 import {useSelection} from '../../context/SelectionContext'
 import type {UserProject} from '../../types/seckim'
 
@@ -22,6 +23,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const modalFocusTrap = useFocusTrap(isOpen, onClose)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,6 +60,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
+          aria-label="Yeni Proje Oluştur"
         >
           <motion.div
             initial={{opacity: 0}}
@@ -68,11 +71,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           />
 
           <motion.div
+            ref={modalFocusTrap as React.RefObject<HTMLDivElement>}
             initial={{opacity: 0, scale: 0.96, y: 15}}
             animate={{opacity: 1, scale: 1, y: 0}}
             exit={{opacity: 0, scale: 0.96, y: 15}}
             transition={{duration: 0.28, ease: [0.16, 1, 0.3, 1]}}
-            className="relative w-full max-w-md bg-[var(--bg-primary)] text-[var(--text-primary)] p-6 shadow-2xl border border-[var(--border-primary)] z-10"
+            className="relative w-full max-w-md bg-[var(--bg-primary)] text-[var(--text-primary)] p-6 shadow-2xl border border-[var(--border-primary)] z-10 focus:outline-none"
+            tabIndex={-1}
           >
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border-primary)]">
               <h3 className="text-base font-light uppercase tracking-wider text-[var(--text-primary)]">

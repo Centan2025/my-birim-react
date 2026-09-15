@@ -1,4 +1,5 @@
 import React, {useState, useRef, useEffect, useCallback} from 'react'
+import {useFocusTrap} from '../hooks/useFocusTrap'
 import {BeforeAfterSlider} from './BeforeAfterSlider'
 import {
   getDailyQuota,
@@ -64,6 +65,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     stopCamera()
     onClose()
   }, [stopCamera, onClose])
+
+  const modalFocusTrap = useFocusTrap(isOpen, handleCloseModal)
 
   useEffect(() => {
     return () => {
@@ -408,7 +411,14 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       )}
 
       {/* Main Dialog Container */}
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-neutral-900 text-white rounded-none border border-neutral-800 shadow-none flex flex-col">
+      <div
+        ref={modalFocusTrap as React.RefObject<HTMLDivElement>}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Odamda Gör • AI Oda Tasarımı"
+        tabIndex={-1}
+        className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-neutral-900 text-white rounded-none border border-neutral-800 shadow-none flex flex-col focus:outline-none"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-neutral-800">
           <div className="flex items-center gap-3">
@@ -451,7 +461,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 className="w-16 h-16 object-cover rounded-none border border-neutral-700"
               />
               <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-sans uppercase tracking-widest text-[#c5a059] font-medium">
+                <span className="text-[10px] font-sans uppercase tracking-widest text-neutral-300 font-medium">
                   Seçilen Mobilya
                 </span>
                 <h4 className="text-sm font-medium text-white truncate">{activeProd.name}</h4>
@@ -466,11 +476,11 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-16 px-4 space-y-6 text-center animate-pulse">
               <div className="relative w-20 h-20 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-none border-4 border-[#c5a059]/20 animate-ping" />
-                <div className="w-16 h-16 rounded-none border-4 border-t-[#c5a059] border-r-[#c5a059] border-b-transparent border-l-transparent animate-spin" />
+                <div className="absolute inset-0 rounded-none border-4 border-white/20 animate-ping" />
+                <div className="w-16 h-16 rounded-none border-4 border-t-white border-r-white border-b-transparent border-l-transparent animate-spin" />
               </div>
               <div className="space-y-2 max-w-md">
-                <h4 className="text-base font-medium text-[#c5a059]">
+                <h4 className="text-base font-medium text-white">
                   Odanızın ışığı ve perspektifi AI motoru ile analiz ediliyor...
                 </h4>
                 <p className="text-xs text-neutral-400 leading-relaxed font-light font-sans">
@@ -495,8 +505,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 {/* Skeleton Loader / Blur Overlay when updating angle/position */}
                 {isUpdating && (
                   <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center space-y-3 z-30 transition-all">
-                    <div className="w-12 h-12 rounded-none border-3 border-t-[#c5a059] border-r-[#c5a059] border-b-transparent border-l-transparent animate-spin" />
-                    <span className="text-xs font-medium text-[#c5a059] tracking-wide bg-neutral-900/80 px-3 py-1.5 rounded-none border border-[#c5a059]/30">
+                    <div className="w-12 h-12 rounded-none border-3 border-t-white border-r-white border-b-transparent border-l-transparent animate-spin" />
+                    <span className="text-xs font-medium text-white tracking-wide bg-neutral-900/80 px-3 py-1.5 rounded-none border border-neutral-700">
                       Açı ve ışık yeniden hesaplanıyor...
                     </span>
                   </div>
@@ -506,9 +516,9 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               {/* Interactive Controls Panel */}
               <div className="p-4 rounded-none bg-neutral-850 border border-neutral-800 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-sans uppercase tracking-widest text-[#c5a059] font-semibold flex items-center gap-2">
+                  <span className="text-xs font-sans uppercase tracking-widest text-neutral-200 font-semibold flex items-center gap-2">
                     <svg
-                      className="w-4 h-4 text-[#c5a059]"
+                      className="w-4 h-4 text-neutral-200"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -523,7 +533,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                     Arayüz Kontrol Paneli (Interactive Controls)
                   </span>
                   {isUpdating && (
-                    <span className="text-[10px] text-[#c5a059]/80 animate-pulse font-sans">
+                    <span className="text-[10px] text-neutral-400 animate-pulse font-sans">
                       Yeniden hesaplanıyor...
                     </span>
                   )}
@@ -608,10 +618,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                   <button
                     disabled={isUpdating}
                     onClick={() => handleGenerate(selectedAngle, selectedAlignment)}
-                    className="w-full sm:w-auto px-5 py-2 text-xs font-medium text-white bg-[#c5a059] hover:bg-[#b08d48] rounded-none transition-colors border border-[#c5a059] flex items-center justify-center gap-2 font-sans cursor-pointer shadow-none disabled:opacity-50"
+                    className="w-full sm:w-auto px-5 py-2 text-xs font-medium text-black bg-white hover:bg-neutral-200 rounded-none transition-colors border border-white flex items-center justify-center gap-2 font-sans cursor-pointer shadow-none disabled:opacity-50"
                   >
                     <svg
-                      className="w-3.5 h-3.5 text-white"
+                      className="w-3.5 h-3.5 text-black"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -862,7 +872,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
             </div>
             <div className="space-y-2.5 pt-2">
               <a
-                href="/#/contact"
+                href="/contact"
                 onClick={() => {
                   setShowQuotaModal(false)
                   onClose()
@@ -906,7 +916,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
             </div>
             <div className="space-y-2.5 pt-2">
               <a
-                href="/#/login"
+                href="/login"
                 onClick={() => {
                   setShowAuthRequiredModal(false)
                   onClose()
