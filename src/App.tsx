@@ -1,4 +1,4 @@
-import {Suspense, useEffect} from 'react'
+import {Suspense, useEffect, useState} from 'react'
 import {BrowserRouter, Routes, Route, useLocation, useNavigate} from 'react-router-dom'
 import {QueryClientProvider} from '@tanstack/react-query'
 
@@ -49,7 +49,10 @@ function getBypassCookie(): string | null {
 function setBypassCookie(value: string) {
   if (typeof document === 'undefined') return
   try {
-    document.cookie = `maintenance_bypass=${encodeURIComponent(value)}; path=/; max-age=86400; SameSite=Lax`
+    const isProd = import.meta.env.PROD
+    document.cookie = `maintenance_bypass=${encodeURIComponent(value)}; path=/; max-age=86400; SameSite=Strict${
+      isProd ? '; Secure' : ''
+    }`
   } catch {
     // ignore
   }
@@ -58,7 +61,7 @@ function setBypassCookie(value: string) {
 function clearBypassCookie() {
   if (typeof document === 'undefined') return
   try {
-    document.cookie = `maintenance_bypass=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`
+    document.cookie = `maintenance_bypass=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict`
   } catch {
     // ignore
   }
@@ -193,48 +196,78 @@ const AppContent = () => {
   const enableTransitions = settings?.enablePageTransitions ?? true
 
   const isProduction = import.meta.env.PROD
-  const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET']
-  const allowedBypassSecrets = [
-    ...(envBypassSecret ? [envBypassSecret] : []),
-    'birim-dev-2025',
-    'birim2025',
-    'birim-preview',
-    ...(import.meta.env.DEV ? ['birim-dev-local'] : []),
-  ]
 
-  const searchParams = new URLSearchParams(window.location.search || location.search)
-  let urlBypass = searchParams.get('bypass')
+  const [hasServerBypass, setHasServerBypass] = useState<boolean>(() => {
+    return Boolean(getStoredBypass())
+  })
 
-  if (!urlBypass && typeof window !== 'undefined' && window.location.hash) {
-    const hash = window.location.hash
-    const queryPart = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : ''
-    if (queryPart) {
-      urlBypass = new URLSearchParams(queryPart).get('bypass')
+  // URL bypass parametresi kontrolü ve sunucu doğrulaması
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const searchParams = new URLSearchParams(window.location.search)
+    let urlBypass = searchParams.get('bypass')
+
+    if (!urlBypass && window.location.hash) {
+      const hash = window.location.hash
+      const queryPart = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : ''
+      if (queryPart) {
+        urlBypass = new URLSearchParams(queryPart).get('bypass')
+      }
     }
-  }
 
-  let bypassParam: string | null = null
+    if (!urlBypass) return
 
-  if (urlBypass) {
     const normalized = urlBypass.trim()
+
+    // 1. Temizleme komutu
     if (normalized === 'clear' || normalized === 'off' || normalized === 'false') {
       clearBypassStorage()
-      bypassParam = null
-    } else if (allowedBypassSecrets.some(s => s.toLowerCase() === normalized.toLowerCase())) {
-      persistBypass(normalized)
-      bypassParam = normalized
+      setHasServerBypass(false)
+      const cleanUrl = window.location.pathname + window.location.hash.split('?')[0]
+      window.history.replaceState({}, document.title, cleanUrl)
+      return
     }
-  }
 
-  if (!bypassParam) {
-    const stored = getStoredBypass()
-    if (stored && allowedBypassSecrets.some(s => s.toLowerCase() === stored.trim().toLowerCase())) {
-      bypassParam = stored.trim()
-      inMemoryBypass = bypassParam
+    // 2. Yerel geliştirme ortamı bypass'ı
+    if (import.meta.env.DEV && normalized === 'birim-dev-local') {
+      persistBypass('local-dev')
+      setHasServerBypass(true)
+      return
     }
-  }
 
-  const hasBypass = !!bypassParam
+    // 3. Sunucu doğrulaması (Secret istemci kodunda tutulmaz)
+    fetch('/api/maintenance/verify', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({secret: normalized}),
+      credentials: 'same-origin',
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success) {
+          persistBypass(data.bypassToken || 'server-verified')
+          setHasServerBypass(true)
+          // URL'den bypass parametresini temizle (history / referer sızıntısını önler)
+          const cleanSearch = new URLSearchParams(window.location.search)
+          cleanSearch.delete('bypass')
+          const queryStr = cleanSearch.toString() ? `?${cleanSearch.toString()}` : ''
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname + queryStr + window.location.hash
+          )
+        } else {
+          clearBypassStorage()
+          setHasServerBypass(false)
+        }
+      })
+      .catch(() => {
+        // Ağ hatası durumunda mevcut depolanmış oturumu koru
+      })
+  }, [])
+
+  const hasBypass = hasServerBypass || Boolean(getStoredBypass())
   const isMaintenanceMode = isProduction && maintenanceModeEnabled && !hasBypass
 
   const debugInfo =

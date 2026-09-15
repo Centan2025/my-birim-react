@@ -1,8 +1,20 @@
-﻿import type {VercelRequest, VercelResponse} from '@vercel/node'
+import crypto from 'crypto'
+import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {handleCors} from '../../lib/server/cors.js'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 import {getSafeSupabaseAdmin} from '../../lib/server/supabaseAdmin.js'
 import {verifyToken, getAuthTokenFromReq} from '../../lib/server/token.js'
+
+function isBreakGlassAuthorized(adminSecretHeader?: string | string[]): boolean {
+  const expectedSecret = process.env['ADMIN_SECRET']?.trim()
+  if (!expectedSecret || !adminSecretHeader || typeof adminSecretHeader !== 'string') {
+    return false
+  }
+  const providedBuf = Buffer.from(adminSecretHeader.trim())
+  const expectedBuf = Buffer.from(expectedSecret)
+  if (providedBuf.length !== expectedBuf.length) return false
+  return crypto.timingSafeEqual(providedBuf, expectedBuf)
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (
@@ -20,34 +32,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(429).json({error: 'Çok fazla istek. Lütfen biraz bekleyin.'})
   }
 
-  // Admin yetki kontrolü: Token veya x-admin-secret ile doğrulanabilir
-  const adminSecretHeader = req.headers['x-admin-secret']
-  const expectedSecret =
-    process.env['ADMIN_SECRET'] || process.env['VITE_MAINTENANCE_BYPASS_SECRET'] || 'birim-dev-2025'
-
+  // Canonical admin authorization:
+  // 1. Primary: Verified Admin JWT token
+  // 2. Break-Glass: Secure ADMIN_SECRET header matching process.env['ADMIN_SECRET']
   let isAuthorized = false
-  if (adminSecretHeader && adminSecretHeader === expectedSecret) {
-    isAuthorized = true
-  } else {
-    const token = getAuthTokenFromReq(req)
-    if (token) {
-      const payload = verifyToken(token)
-      if (payload && (payload.role === 'admin' || payload.email?.endsWith('@birim.com'))) {
-        isAuthorized = true
-      }
+
+  const token = getAuthTokenFromReq(req)
+  if (token) {
+    const payload = verifyToken(token)
+    if (payload && payload.role === 'admin') {
+      isAuthorized = true
     }
   }
 
-  // Development ortamında veya Sanity Studio yerel çalışmasında kolay erişim
-  const isDev = process.env['NODE_ENV'] !== 'production'
-  const origin = (req.headers.origin as string) || ''
-  if (
-    isDev ||
-    origin.includes('localhost') ||
-    origin.includes('127.0.0.1') ||
-    origin === 'https://birim.sanity.studio'
-  ) {
-    isAuthorized = true
+  if (!isAuthorized) {
+    const adminSecretHeader = req.headers['x-admin-secret']
+    if (isBreakGlassAuthorized(adminSecretHeader)) {
+      isAuthorized = true
+    }
   }
 
   if (!isAuthorized) {

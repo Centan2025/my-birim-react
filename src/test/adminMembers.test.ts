@@ -89,11 +89,72 @@ function createMockReqRes(overrides?: {
 }
 
 describe('api/admin/members', () => {
-  it('GET /api/admin/members üyeleri listelemeli', async () => {
+  const TEST_ADMIN_SECRET = 'test_secret_for_admin_break_glass_12345'
+
+  beforeEach(() => {
+    process.env['ADMIN_SECRET'] = TEST_ADMIN_SECRET
+  })
+
+  afterEach(() => {
+    delete process.env['ADMIN_SECRET']
+  })
+
+  it('Auth olmadan istek atıldığında 401 dönmeli', async () => {
+    const {req, res} = createMockReqRes({
+      method: 'GET',
+    })
+
+    await membersHandler(req, res)
+
+    expect(res.statusCode).toBe(401)
+    const body = res.body as AdminMembersResponse
+    expect(body.error).toContain('Yetkisiz erişim')
+  })
+
+  it('Sahte Origin (localhost) başlığı tek başına yetki VERMEMELİ (401 dönmeli)', async () => {
+    const {req, res} = createMockReqRes({
+      method: 'GET',
+      headers: {
+        origin: 'http://localhost:3000',
+      },
+    })
+
+    await membersHandler(req, res)
+
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('Sahte Origin (Sanity Studio) başlığı tek başına yetki VERMEMELİ (401 dönmeli)', async () => {
+    const {req, res} = createMockReqRes({
+      method: 'GET',
+      headers: {
+        origin: 'https://birim.sanity.studio',
+      },
+    })
+
+    await membersHandler(req, res)
+
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('Eski hardcoded secret (birim-dev-2025) artık kabul EDİLMEMELİ (401 dönmeli)', async () => {
     const {req, res} = createMockReqRes({
       method: 'GET',
       headers: {
         'x-admin-secret': 'birim-dev-2025',
+      },
+    })
+
+    await membersHandler(req, res)
+
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('Doğru break-glass ADMIN_SECRET ile üyeleri listelemeli (200)', async () => {
+    const {req, res} = createMockReqRes({
+      method: 'GET',
+      headers: {
+        'x-admin-secret': TEST_ADMIN_SECRET,
       },
     })
 
@@ -110,7 +171,7 @@ describe('api/admin/members', () => {
     const {req, res} = createMockReqRes({
       method: 'POST',
       headers: {
-        'x-admin-secret': 'birim-dev-2025',
+        'x-admin-secret': TEST_ADMIN_SECRET,
       },
       body: {
         id: 'prof-1',
@@ -130,7 +191,7 @@ describe('api/admin/members', () => {
     const {req, res} = createMockReqRes({
       method: 'POST',
       headers: {
-        'x-admin-secret': 'birim-dev-2025',
+        'x-admin-secret': TEST_ADMIN_SECRET,
       },
       body: {},
     })

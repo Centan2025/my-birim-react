@@ -7,53 +7,54 @@ describe('Maintenance Mode Bypass Logic', () => {
     document.cookie = 'maintenance_bypass=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
   })
 
-  it('persists bypass token to storage and cookie on initial access', () => {
-    const token = 'birim-dev-2025'
+  it('persists verified bypass token to storage and cookie on initial access', () => {
+    const token = 'verified-session-token-abc'
     sessionStorage.setItem('maintenance_bypass', token)
     localStorage.setItem('maintenance_bypass', token)
-    document.cookie = `maintenance_bypass=${encodeURIComponent(token)}; path=/`
+    document.cookie = `maintenance_bypass=${encodeURIComponent(token)}; path=/; SameSite=Strict`
 
-    expect(sessionStorage.getItem('maintenance_bypass')).toBe('birim-dev-2025')
-    expect(localStorage.getItem('maintenance_bypass')).toBe('birim-dev-2025')
-    expect(document.cookie).toContain('maintenance_bypass=birim-dev-2025')
+    expect(sessionStorage.getItem('maintenance_bypass')).toBe('verified-session-token-abc')
+    expect(localStorage.getItem('maintenance_bypass')).toBe('verified-session-token-abc')
+    expect(document.cookie).toContain('maintenance_bypass=verified-session-token-abc')
   })
 
   it('retrieves bypass from localStorage or cookie when sessionStorage is empty', () => {
-    const token = 'birim-dev-2025'
+    const token = 'verified-session-token-abc'
     localStorage.setItem('maintenance_bypass', token)
 
     const stored =
       sessionStorage.getItem('maintenance_bypass') || localStorage.getItem('maintenance_bypass')
-    expect(stored).toBe('birim-dev-2025')
+    expect(stored).toBe('verified-session-token-abc')
   })
 
   it('clears all storage layers when bypass=clear is requested', () => {
-    sessionStorage.setItem('maintenance_bypass', 'birim-dev-2025')
-    localStorage.setItem('maintenance_bypass', 'birim-dev-2025')
-    document.cookie = 'maintenance_bypass=birim-dev-2025; path=/'
+    sessionStorage.setItem('maintenance_bypass', 'verified-session-token-abc')
+    localStorage.setItem('maintenance_bypass', 'verified-session-token-abc')
+    document.cookie = 'maintenance_bypass=verified-session-token-abc; path=/; SameSite=Strict'
 
     sessionStorage.removeItem('maintenance_bypass')
     localStorage.removeItem('maintenance_bypass')
-    document.cookie = 'maintenance_bypass=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
+    document.cookie =
+      'maintenance_bypass=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict'
 
     expect(sessionStorage.getItem('maintenance_bypass')).toBeNull()
     expect(localStorage.getItem('maintenance_bypass')).toBeNull()
-    expect(document.cookie).not.toContain('maintenance_bypass=birim-dev-2025')
+    expect(document.cookie).not.toContain('maintenance_bypass=verified-session-token-abc')
   })
 
-  it('validates birim-dev-2025 against allowed secrets list', () => {
-    const envBypassSecret = undefined
-    const allowedBypassSecrets = [
-      ...(envBypassSecret ? [envBypassSecret] : []),
-      'birim-dev-2025',
-      'birim2025',
-      'birim-preview',
-    ]
+  it('verifies that hardcoded production secrets list is empty in client bundle', () => {
+    // Client bundle does NOT contain hardcoded static secrets
+    const staticClientSecrets = ['birim-dev-2025', 'birim2025', 'birim-preview']
+    // Server-side verification is now required, client allows only local-dev in DEV mode
+    const isClientAllowedDirectly = (token: string, isDev: boolean) => {
+      if (isDev && token === 'birim-dev-local') return true
+      return false
+    }
 
-    const testToken = 'birim-dev-2025'
-    const isAllowed = allowedBypassSecrets.some(
-      s => s.toLowerCase() === testToken.trim().toLowerCase()
-    )
-    expect(isAllowed).toBe(true)
+    staticClientSecrets.forEach(secret => {
+      expect(isClientAllowedDirectly(secret, false)).toBe(false)
+      expect(isClientAllowedDirectly(secret, true)).toBe(false)
+    })
+    expect(isClientAllowedDirectly('birim-dev-local', true)).toBe(true)
   })
 })

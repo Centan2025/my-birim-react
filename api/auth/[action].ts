@@ -133,16 +133,10 @@ async function handleLogin(req: VercelRequest, res: VercelResponse) {
 
   try {
     const supabaseAdmin = getSafeSupabaseAdmin()
-    const anonKey =
-      process.env['VITE_SUPABASE_ANON_KEY'] ||
-      process.env['SUPABASE_ANON_KEY'] ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrbXBmeGVydndxbGVpYmhiaXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3OTM1ODQsImV4cCI6MjEwNDM2OTU4NH0.nQJwhU1hxIjem6pxdJSQ8PNfmahd-bn9Z2CEkwf1Yi0'
-    const supabaseUrl =
-      process.env['SUPABASE_URL'] ||
-      process.env['VITE_SUPABASE_URL'] ||
-      'https://rkmpfxervwqleibhbiqv.supabase.co'
+    const anonKey = process.env['VITE_SUPABASE_ANON_KEY'] || process.env['SUPABASE_ANON_KEY']
+    const supabaseUrl = process.env['SUPABASE_URL'] || process.env['VITE_SUPABASE_URL']
 
-    if (!supabaseAdmin || !anonKey) {
+    if (!supabaseAdmin || !anonKey || !supabaseUrl) {
       return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
     }
 

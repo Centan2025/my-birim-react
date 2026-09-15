@@ -34,6 +34,26 @@ CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
+-- Ayrıcalıklı kolonların (role, architect_verification_status, is_verified)
+-- normal kullanıcılar tarafından değiştirilmesini engelleyen koruma tetikleyicisi (Defense-in-Depth)
+CREATE OR REPLACE FUNCTION public.protect_privileged_profile_fields()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (COALESCE(current_setting('request.jwt.claim.role', true), '') <> 'service_role' 
+      AND current_user <> 'service_role') THEN
+    NEW.role = OLD.role;
+    NEW.architect_verification_status = OLD.architect_verification_status;
+    NEW.is_verified = OLD.is_verified;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_protect_privileged_profile_fields ON public.profiles;
+CREATE TRIGGER on_protect_privileged_profile_fields
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE PROCEDURE public.protect_privileged_profile_fields();
+
 -- Onaylı mimarları herkese açık kılma (Mimar vitrini / rehberi için)
 CREATE POLICY "Public can view approved architects"
   ON public.profiles FOR SELECT

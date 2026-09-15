@@ -1,23 +1,31 @@
-import {createClient} from '@supabase/supabase-js'
+import {createClient, type SupabaseClient} from '@supabase/supabase-js'
 
-const supabaseUrl =
-  process.env['SUPABASE_URL'] ||
-  process.env['VITE_SUPABASE_URL'] ||
-  'https://rkmpfxervwqleibhbiqv.supabase.co'
+function getSupabaseServerConfig(): {url: string; serviceKey: string} | null {
+  const rawUrl = process.env['SUPABASE_URL'] || process.env['VITE_SUPABASE_URL']
+  const rawKey = process.env['SUPABASE_SERVICE_ROLE_KEY']
 
-const DEFAULT_SUPABASE_SERVICE_ROLE_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrbXBmeGVydndxbGVpYmhiaXF2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODc5MzU4NCwiZXhwIjoyMTA0MzY5NTg0fQ.4Bglk8zupMO9ooUDL0u4-9TpRZg7kMDM0MxwqALlVa8'
+  if (!rawUrl || !rawKey) {
+    return null
+  }
 
-const supabaseServiceKey =
-  process.env['SUPABASE_SERVICE_ROLE_KEY'] || DEFAULT_SUPABASE_SERVICE_ROLE_KEY
+  const url = rawUrl.trim().replace(/^["']|["']$/g, '')
+  const serviceKey = rawKey.trim().replace(/^["']|["']$/g, '')
 
-export function getSupabaseAdmin() {
-  if (!supabaseServiceKey) {
+  if (!url || !serviceKey) {
+    return null
+  }
+
+  return {url, serviceKey}
+}
+
+export function getSupabaseAdmin(): SupabaseClient {
+  const config = getSupabaseServerConfig()
+  if (!config) {
     throw new Error(
-      '[Supabase Admin] SUPABASE_SERVICE_ROLE_KEY is required for server-side administrative operations.'
+      '[Supabase Admin] SUPABASE_SERVICE_ROLE_KEY and SUPABASE_URL environment variables are required for server-side operations.'
     )
   }
-  return createClient(supabaseUrl, supabaseServiceKey, {
+  return createClient(config.url, config.serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -25,10 +33,10 @@ export function getSupabaseAdmin() {
   })
 }
 
-export function getSafeSupabaseAdmin() {
-  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'] || DEFAULT_SUPABASE_SERVICE_ROLE_KEY
-  if (!key) return null
-  return createClient(supabaseUrl, key, {
+export function getSafeSupabaseAdmin(): SupabaseClient | null {
+  const config = getSupabaseServerConfig()
+  if (!config) return null
+  return createClient(config.url, config.serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

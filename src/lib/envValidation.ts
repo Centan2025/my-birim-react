@@ -33,7 +33,6 @@ const envSchema = z.object({
     .transform((val: string) => val === 'true')
     .optional()
     .default('false'),
-  VITE_MAINTENANCE_BYPASS_SECRET: z.string().optional(),
 
   // Feature Flags
   VITE_ENABLE_LOCAL_FALLBACK: z

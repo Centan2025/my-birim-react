@@ -5,7 +5,7 @@ const sanitizeEnv = (val?: string) => val?.trim().replace(/^["']|["']$/g, '') ||
 const rawUrl = sanitizeEnv(import.meta.env['VITE_SUPABASE_URL'] as string | undefined)
 const rawKey = sanitizeEnv(import.meta.env['VITE_SUPABASE_ANON_KEY'] as string | undefined)
 
-const fallbackUrl = 'https://drertbtypneggtjjbiiu.supabase.co'
+const fallbackUrl = 'https://placeholder.supabase.co'
 
 function isValidHttpUrl(url: string): boolean {
   if (!url) return false
