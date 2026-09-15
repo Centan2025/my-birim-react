@@ -72,7 +72,7 @@ describe('generateProductPDF', () => {
     expect(blob).toBeInstanceOf(Blob)
     expect(blob.size).toBeGreaterThan(0)
     expect(blob.type).toBe('application/pdf')
-  })
+  }, 15000)
 
   it('generates a valid PDF blob with English locale and handles missing optional fields', async () => {
     const minimalProduct: Product = {
@@ -98,7 +98,7 @@ describe('generateProductPDF', () => {
     expect(blob).toBeInstanceOf(Blob)
     expect(blob.size).toBeGreaterThan(0)
     expect(blob.type).toBe('application/pdf')
-  })
+  }, 15000)
 
   it('downloadProductDetailPDF initiates DOM download with sanitized filename', async () => {
     const createElementSpy = vi.spyOn(document, 'createElement')

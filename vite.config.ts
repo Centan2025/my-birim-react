@@ -217,6 +217,8 @@ export default defineConfig({
           'utils-vendor': ['zod', 'dompurify'],
           'sentry-vendor': ['@sentry/react'],
           'posthog-vendor': ['posthog-js'],
+          'pdf-vendor': ['jspdf', 'html2canvas'],
+          'chart-vendor': ['recharts', 'react-simple-maps'],
         },
       },
     },
