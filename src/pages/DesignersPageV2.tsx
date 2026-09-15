@@ -469,9 +469,9 @@ export function DesignersPageV2() {
                 )}
                 {!isBirimStudio && (
                   <>
-                    {/* Balanced subtle gradients */}
+                    {/* Subtle, balanced gradients */}
                     <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent pointer-events-none" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent opacity-45 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent pointer-events-none" />
                     <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
                   </>
                 )}
@@ -539,80 +539,42 @@ export function DesignersPageV2() {
         })}
       </main>
 
-      {/* Right-Side Architectural Level / Progress Indicator (Yan Yana Karşılaştırma - Düz Kenarlar) */}
+      {/* Right-Side Architectural Level / Progress Indicator */}
       {designers.length > 1 && (
         <aside
           aria-label={t('designers') || 'Tasarımcılar'}
-          className="fixed right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-30 flex items-center gap-3.5 pointer-events-auto select-none"
+          className="fixed right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-30 flex items-center pointer-events-auto select-none"
         >
-          {/* SEÇENEK 1: Geniş Panel (Düz Kenar) */}
-          <div className="flex flex-col items-center">
-            {/* Geniş Kapsül - Düz Kenar */}
-            <div className="flex flex-col items-center gap-1.5 py-2.5 px-1.5 rounded-none bg-black/40 backdrop-blur-md border border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
-              {designers.map((d, idx) => {
-                const isActive = activeIndex === idx
-                return (
-                  <button
-                    key={`wide-${d.id}`}
-                    type="button"
-                    onClick={e => {
-                      e.stopPropagation()
-                      scrollToSectionRef.current(idx)
-                    }}
-                    className="group relative flex items-center justify-center p-1 focus:outline-none cursor-pointer"
-                    aria-label={`Geniş - ${t(d.name)} (${idx + 1}/${designers.length})`}
-                  >
-                    {/* Tooltip on hover */}
-                    <span className="hidden md:block absolute right-full mr-3.5 px-2.5 py-1 bg-black/90 backdrop-blur-md text-white text-[9px] uppercase font-mono tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg">
-                      {t(d.name)} (Geniş)
-                    </span>
-                    {/* Geniş Indicator Dash */}
-                    <span
-                      className={`block rounded-none transition-all duration-500 ${
-                        isActive
-                          ? 'w-1.5 h-6 bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)]'
-                          : 'w-1 h-1.5 bg-white/40 group-hover:bg-white/90 group-hover:scale-125'
-                      }`}
-                    />
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* SEÇENEK 2: İnce Panel (Düz Kenar) */}
-          <div className="flex flex-col items-center">
-            {/* İnce Kapsül - Düz Kenar */}
-            <div className="flex flex-col items-center gap-1.5 py-2 px-1 rounded-none bg-black/30 backdrop-blur-md border border-white/10 shadow-[0_2px_16px_rgba(0,0,0,0.3)]">
-              {designers.map((d, idx) => {
-                const isActive = activeIndex === idx
-                return (
-                  <button
-                    key={`slim-${d.id}`}
-                    type="button"
-                    onClick={e => {
-                      e.stopPropagation()
-                      scrollToSectionRef.current(idx)
-                    }}
-                    className="group relative flex items-center justify-center p-0.5 focus:outline-none cursor-pointer"
-                    aria-label={`İnce - ${t(d.name)} (${idx + 1}/${designers.length})`}
-                  >
-                    {/* Tooltip on hover */}
-                    <span className="hidden md:block absolute right-full mr-3 px-2 py-0.5 bg-black/90 backdrop-blur-md text-white text-[9px] uppercase font-mono tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg">
-                      {t(d.name)} (İnce)
-                    </span>
-                    {/* Slim Indicator Dash */}
-                    <span
-                      className={`block rounded-none transition-all duration-500 ${
-                        isActive
-                          ? 'w-[2px] h-5 bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]'
-                          : 'w-[2px] h-1.5 bg-white/40 group-hover:bg-white/90 group-hover:h-2.5'
-                      }`}
-                    />
-                  </button>
-                )
-              })}
-            </div>
+          {/* İnce Kapsül - Yuvarlak Kenarlar */}
+          <div className="flex flex-col items-center gap-1.5 py-2 px-1 rounded-full bg-black/30 backdrop-blur-md border border-white/10 shadow-[0_2px_16px_rgba(0,0,0,0.3)]">
+            {designers.map((d, idx) => {
+              const isActive = activeIndex === idx
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation()
+                    scrollToSectionRef.current(idx)
+                  }}
+                  className="group relative flex items-center justify-center p-0.5 focus:outline-none cursor-pointer"
+                  aria-label={`${t(d.name)} (${idx + 1}/${designers.length})`}
+                >
+                  {/* Tooltip on hover */}
+                  <span className="hidden md:block absolute right-full mr-3 px-2.5 py-1 rounded bg-black/90 backdrop-blur-md text-white text-[9px] uppercase font-mono tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg">
+                    {t(d.name)}
+                  </span>
+                  {/* Slim Indicator Dash */}
+                  <span
+                    className={`block rounded-full transition-all duration-500 ${
+                      isActive
+                        ? 'w-[2px] h-5 bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]'
+                        : 'w-[2px] h-1.5 bg-white/40 group-hover:bg-white/90 group-hover:h-2.5'
+                    }`}
+                  />
+                </button>
+              )
+            })}
           </div>
         </aside>
       )}
