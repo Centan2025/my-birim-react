@@ -550,81 +550,82 @@ function USMapChart({cities = [], regions = []}: Props) {
       {/* Tooltip */}
       {tooltip && !isDragging && (
         <div
-          className="absolute z-50 pointer-events-none bg-slate-900/95 text-white backdrop-blur-xl border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl transform -translate-x-1/2 -translate-y-full min-w-[220px] animate-in fade-in zoom-in-95 duration-150"
+          className="absolute z-50 pointer-events-none bg-white/95 text-slate-900 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-3.5 shadow-2xl transform -translate-x-1/2 -translate-y-full min-w-[230px] animate-in fade-in zoom-in-95 duration-150"
           style={{left: tooltipPos.x, top: tooltipPos.y - 12}}
         >
           {tooltip.type === 'state' ? (
             <div className="space-y-2">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-xl leading-none">🇺🇸</span>
                   <div>
-                    <h4 className="text-xs font-bold text-white leading-tight">
+                    <h4 className="text-xs font-bold text-slate-900 leading-tight">
                       {tooltip.stateNameTr || tooltip.stateName} ({tooltip.stateCode})
                     </h4>
-                    <p className="text-[10px] text-slate-400 leading-tight">{tooltip.stateName}</p>
+                    <p className="text-[10px] text-slate-500 leading-tight">{tooltip.stateName}</p>
                   </div>
                 </div>
                 {tooltip.percentage && (
-                  <span className="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded-md">
+                  <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80 px-1.5 py-0.5 rounded-md">
                     %{tooltip.percentage}
                   </span>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-[11px] pt-0.5">
-                <div className="bg-slate-800/80 rounded-lg p-1.5">
-                  <p className="text-[9px] text-slate-400 font-medium">Kullanıcı</p>
-                  <p className="text-xs font-bold text-indigo-300">
+                <div className="bg-indigo-50/70 border border-indigo-100/60 rounded-xl p-2">
+                  <p className="text-[9px] text-indigo-600 font-semibold">Kullanıcı</p>
+                  <p className="text-xs font-extrabold text-indigo-950">
                     {tooltip.users.toLocaleString('tr-TR')}
                   </p>
                 </div>
-                <div className="bg-slate-800/80 rounded-lg p-1.5">
-                  <p className="text-[9px] text-slate-400 font-medium">Oturum</p>
-                  <p className="text-xs font-bold text-slate-200">
+                <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-2">
+                  <p className="text-[9px] text-slate-500 font-semibold">Oturum</p>
+                  <p className="text-xs font-extrabold text-slate-900">
                     {tooltip.sessions.toLocaleString('tr-TR')}
                   </p>
                 </div>
               </div>
 
               {tooltip.citiesInState && tooltip.citiesInState.length > 0 && (
-                <div className="pt-1 border-t border-slate-800/80">
-                  <p className="text-[9px] text-slate-400 font-medium mb-1 flex items-center gap-1">
-                    <MapPin className="w-2.5 h-2.5 text-indigo-400" />
+                <div className="pt-1 border-t border-slate-100">
+                  <p className="text-[9px] text-slate-500 font-medium mb-1 flex items-center gap-1">
+                    <MapPin className="w-2.5 h-2.5 text-indigo-600" />
                     <span>Şehirler:</span>
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {tooltip.citiesInState.slice(0, 4).map((tc, idx) => (
                       <span
                         key={idx}
-                        className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-300"
+                        className="text-[10px] bg-slate-100 border border-slate-200/60 px-1.5 py-0.5 rounded-md text-slate-700"
                       >
-                        {tc.city}{' '}
-                        <span className="text-indigo-400 font-semibold">({tc.users})</span>
+                        {tc.city} <span className="text-indigo-600 font-bold">({tc.users})</span>
                       </span>
                     ))}
                   </div>
                 </div>
               )}
 
-              <p className="text-[9px] text-indigo-300/80 font-medium text-center pt-1 border-t border-slate-800">
+              <p className="text-[9px] text-indigo-600 font-medium text-center pt-1 border-t border-slate-100">
                 🔍 Şehirlere ve detaylara odaklanmak için tıklayın
               </p>
             </div>
           ) : (
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
                 <div>
-                  <h4 className="text-xs font-bold text-white leading-tight">{tooltip.cityName}</h4>
-                  <p className="text-[10px] text-slate-400 leading-tight">
+                  <h4 className="text-xs font-bold text-slate-900 leading-tight">
+                    {tooltip.cityName}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 leading-tight">
                     {tooltip.stateNameTr || tooltip.stateName} &bull; ABD
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800">
-                <span className="text-slate-400">Trafik:</span>
-                <span className="font-bold text-rose-300">
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+                <span className="text-slate-500">Trafik:</span>
+                <span className="font-bold text-rose-600">
                   {tooltip.users.toLocaleString('tr-TR')} kullanıcı &bull;{' '}
                   {tooltip.sessions.toLocaleString('tr-TR')} oturum
                 </span>

@@ -123,26 +123,31 @@ function TurkeyMapChart({turkishCities}: Props) {
       {/* Tooltip */}
       {tooltipData && !isDragging && (
         <div
-          className="absolute z-50 pointer-events-none bg-white/95 backdrop-blur-xl border border-slate-200 rounded-xl px-4 py-3 shadow-xl transform -translate-x-1/2 -translate-y-full text-slate-800"
+          className="absolute z-50 pointer-events-none bg-white/95 text-slate-900 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-3.5 shadow-2xl transform -translate-x-1/2 -translate-y-full min-w-[220px] animate-in fade-in zoom-in-95 duration-150"
           style={{left: tooltipPos.x, top: tooltipPos.y - 10}}
         >
-          <p className="text-xs font-black text-slate-900 mb-1">{tooltipData.city}</p>
-          <div className="flex items-center gap-3">
-            <div>
-              <p className="text-[10px] text-slate-400 font-medium">Kullanıcı</p>
-              <p className="text-sm font-bold text-indigo-600">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
+            <p className="text-xs font-bold text-slate-900">{tooltipData.city}</p>
+            {tooltipData.region && (
+              <span className="text-[10px] text-slate-500 font-medium">{tooltipData.region}</span>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 text-center">
+            <div className="bg-indigo-50/70 border border-indigo-100/60 rounded-xl p-1.5">
+              <p className="text-[9px] text-indigo-600 font-semibold">Kullanıcı</p>
+              <p className="text-xs font-extrabold text-indigo-950">
                 {tooltipData.users.toLocaleString('tr-TR')}
               </p>
             </div>
-            <div>
-              <p className="text-[10px] text-slate-400 font-medium">Oturum</p>
-              <p className="text-sm font-bold text-cyan-600">
+            <div className="bg-cyan-50/70 border border-cyan-100/60 rounded-xl p-1.5">
+              <p className="text-[9px] text-cyan-700 font-semibold">Oturum</p>
+              <p className="text-xs font-extrabold text-cyan-950">
                 {tooltipData.sessions.toLocaleString('tr-TR')}
               </p>
             </div>
-            <div>
-              <p className="text-[10px] text-slate-400 font-medium">Sayfa Gör.</p>
-              <p className="text-sm font-bold text-pink-600">
+            <div className="bg-pink-50/70 border border-pink-100/60 rounded-xl p-1.5">
+              <p className="text-[9px] text-pink-700 font-semibold">Sayfa Gör.</p>
+              <p className="text-xs font-extrabold text-pink-950">
                 {tooltipData.pageViews.toLocaleString('tr-TR')}
               </p>
             </div>
