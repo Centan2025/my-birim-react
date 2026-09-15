@@ -2056,9 +2056,14 @@ async function getLocalAllAnalyticsData(startDate, endDate) {
   }))
 
   const cityData = (cityRes.rows || [])
-    .filter(r => r.dimensionValues?.[0]?.value !== '(not set)')
+    .filter(
+      r =>
+        r.dimensionValues?.[1]?.value !== '(not set)' &&
+        r.dimensionValues?.[1]?.value !== 'Unknown'
+    )
     .map(r => ({
-      city: r.dimensionValues?.[0]?.value || 'Unknown',
+      country: r.dimensionValues?.[0]?.value || 'Unknown',
+      city: r.dimensionValues?.[1]?.value || 'Unknown',
       users: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
       sessions: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
     }))
@@ -2180,11 +2185,15 @@ app.get('/api/analytics', async (req, res) => {
           {country: 'Italy', users: 35, sessions: 50},
         ],
         cityData: [
-          {city: 'İstanbul', users: 740, sessions: 1120},
-          {city: 'Ankara', users: 190, sessions: 280},
-          {city: 'İzmir', users: 120, sessions: 190},
-          {city: 'Bursa', users: 60, sessions: 95},
-          {city: 'Antalya', users: 40, sessions: 65},
+          {country: 'Turkey', city: 'İstanbul', users: 740, sessions: 1120},
+          {country: 'Turkey', city: 'Ankara', users: 190, sessions: 280},
+          {country: 'Turkey', city: 'İzmir', users: 120, sessions: 190},
+          {country: 'Turkey', city: 'Bursa', users: 60, sessions: 95},
+          {country: 'Germany', city: 'Berlin', users: 45, sessions: 65},
+          {country: 'United Kingdom', city: 'London', users: 40, sessions: 55},
+          {country: 'United States', city: 'New York', users: 30, sessions: 45},
+          {country: 'Italy', city: 'Milan', users: 25, sessions: 35},
+          {country: 'Turkey', city: 'Antalya', users: 40, sessions: 65},
         ],
         browserData: [
           {browser: 'Chrome', sessions: 1280, users: 850},

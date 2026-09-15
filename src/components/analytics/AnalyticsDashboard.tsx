@@ -74,6 +74,7 @@ export interface AnalyticsData {
     sessions: number
   }[]
   cityData: {
+    country?: string
     city: string
     users: number
     sessions: number
@@ -688,7 +689,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 {mapSubTab === 'turkey' ? (
                   <TurkeyMapChart turkishCities={turkishCitiesForMap} />
                 ) : (
-                  <WorldMapChart countries={data?.countryData || []} />
+                  <WorldMapChart
+                    countries={data?.countryData || []}
+                    cities={data?.cityData || []}
+                  />
                 )}
               </React.Suspense>
             </div>
@@ -1029,7 +1033,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   </div>
                 }
               >
-                <WorldMapChart countries={data?.countryData || []} />
+                <WorldMapChart countries={data?.countryData || []} cities={data?.cityData || []} />
               </React.Suspense>
             </div>
           </div>

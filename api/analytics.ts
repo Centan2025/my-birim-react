@@ -268,17 +268,17 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
     dimensions: [{name: 'country'}],
     metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
     orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
-    limit: 15,
+    limit: 50,
   })
   await sleep(60)
 
-  // 7. Cities
+  // 7. Cities with Country
   const cityRes = await runReport({
     dateRanges: [{startDate, endDate}],
-    dimensions: [{name: 'city'}],
+    dimensions: [{name: 'country'}, {name: 'city'}],
     metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
     orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
-    limit: 15,
+    limit: 60,
   })
   await sleep(60)
 
@@ -347,9 +347,13 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
   }))
 
   const cityData = (cityRes.rows || [])
-    .filter(r => r.dimensionValues?.[0]?.value !== '(not set)')
+    .filter(
+      r =>
+        r.dimensionValues?.[1]?.value !== '(not set)' && r.dimensionValues?.[1]?.value !== 'Unknown'
+    )
     .map(r => ({
-      city: r.dimensionValues?.[0]?.value || 'Unknown',
+      country: r.dimensionValues?.[0]?.value || 'Unknown',
+      city: r.dimensionValues?.[1]?.value || 'Unknown',
       users: parseInt(r.metricValues?.[0]?.value || '0', 10) || 0,
       sessions: parseInt(r.metricValues?.[1]?.value || '0', 10) || 0,
     }))
