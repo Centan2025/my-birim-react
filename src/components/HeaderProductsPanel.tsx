@@ -55,7 +55,7 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
       ></div>
 
       <div
-        className="pt-4 pb-3 grid grid-cols-[auto_1fr] gap-24"
+        className="pt-4 pb-3 grid grid-cols-[auto_1fr] gap-16 lg:gap-24 items-stretch"
         style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}
       >
         {/* Sol taraf - Kategoriler */}
@@ -94,23 +94,17 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
           </div>
         </div>
 
-        {/* Sağ taraf - Görsel */}
-        <div
-          className="relative w-[600px] self-stretch overflow-hidden"
-          style={{
-            backgroundColor: 'transparent',
-          }}
-        >
+        {/* Sağ taraf - Sabit Boyutlu Beyaz Görsel Alanı (En üst kategoriden en alt kategoriye kadar uzanır) */}
+        <div className="relative w-[500px] lg:w-[600px] h-full self-stretch bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-none overflow-hidden flex items-center justify-center p-3">
           {(() => {
             const hoveredCategory = categories.find(c => c.id === hoveredCategoryId)
 
-            // Hover edilmediyse boş alan göster
+            // Hover edilmediyse boş beyaz alan göster
             if (!hoveredCategory) {
               return null
             }
 
             let imageUrl = ''
-            let imageClass = 'w-full h-full object-cover'
             let isMirrored = false
 
             // Önce menuImage'i kontrol et
@@ -157,7 +151,6 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
 
                   if (tempImageUrl && tempImageUrl.trim() !== '') {
                     imageUrl = tempImageUrl
-                    imageClass = 'max-w-full max-h-full object-contain'
                     isMirrored = tempIsMirrored
                     break
                   }
@@ -165,17 +158,17 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
               }
             }
 
-            // Görsel bulunduysa göster
+            // Görsel bulunduysa beyaz alan içerisinde kırpılmadan tam sığacak şekilde göster
             if (imageUrl) {
               return (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
                   <img
                     key={hoveredCategory.id}
                     src={imageUrl}
                     alt={t(hoveredCategory.name)}
-                    className={`${imageClass} image-transition`}
+                    className="w-full h-full max-w-full max-h-full object-contain object-center image-transition"
                     style={{
-                      animation: 'crossFade 0.5s ease-in-out',
+                      animation: 'crossFade 0.35s ease-in-out',
                       transform: isMirrored ? 'scaleX(-1)' : 'none',
                     }}
                   />

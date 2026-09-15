@@ -2,13 +2,11 @@ import {useState, useMemo, useEffect, useRef} from 'react'
 import {useParams} from 'react-router-dom'
 import {motion} from 'framer-motion'
 import {ProductCard} from '../components/ProductCard'
-import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useProducts, useProductsByCategory} from '../hooks/useProducts'
 import {useCategory, useCategories} from '../hooks/useCategories'
-import {useSiteSettings} from '../hooks/useSiteData'
 import type {Product, Category} from '../types'
 import ScrollReveal from '../components/ScrollReveal'
 import {useSEO} from '../hooks/useSEO'
@@ -37,8 +35,6 @@ export function ProductsPage() {
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [sortBy, setSortBy] = useState('year-desc') // Default sort by newest
   const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
-  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const sortRef = useRef<HTMLDivElement | null>(null)
 
   // React Query hooks - always call both, use enabled to control
@@ -203,53 +199,7 @@ export function ProductsPage() {
   }
 
   return (
-    <div
-      className={`bg-[var(--bg-primary)] min-h-screen transition-colors duration-500 ${!heroImageUrl ? 'pt-20 md:pt-20 lg:pt-20' : ''}`}
-    >
-      {/* Category Hero Image */}
-      {heroImageUrl ? (
-        <div className="relative h-[450px] animate-fade-in-down hero-section">
-          <div className="absolute inset-0">
-            <OptimizedImage
-              src={heroImageUrl}
-              alt={t(category?.name) || t('products')}
-              className={`w-full h-full object-cover ${imageBorderClass}`}
-              loading="eager"
-              quality={90}
-              crop={typeof category?.heroImage === 'object' ? category.heroImage.crop : undefined}
-              hotspot={
-                typeof category?.heroImage === 'object' ? category.heroImage.hotspot : undefined
-              }
-              origWidth={
-                typeof category?.heroImage === 'object'
-                  ? ((category.heroImage as Record<string, unknown>)['origWidth'] as number)
-                  : undefined
-              }
-              origHeight={
-                typeof category?.heroImage === 'object'
-                  ? ((category.heroImage as Record<string, unknown>)['origHeight'] as number)
-                  : undefined
-              }
-            />
-            <div className="absolute inset-0 bg-black/40"></div>
-          </div>
-          <div className="relative h-full flex items-center justify-center text-center text-white pt-20 landscape:pt-12">
-            <motion.div
-              initial={{opacity: 0, y: 20}}
-              animate={{opacity: 1, y: 0}}
-              transition={{duration: 1, ease: 'easeOut'}}
-            >
-              <h1 className="text-4xl md:text-6xl font-oswald font-light tracking-[0.1em] uppercase drop-shadow-md">
-                {category ? t(category.name) : t('view_all')}
-              </h1>
-              <p className="mt-4 text-lg max-w-2xl mx-auto font-light drop-shadow-md">
-                {category ? t(category.subtitle) : t('all_products_subtitle')}
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      ) : null}
-
+    <div className="bg-[var(--bg-primary)] min-h-screen transition-colors duration-500 pt-20 md:pt-20 lg:pt-20">
       {/* Breadcrumb and Sort Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 flex flex-row flex-wrap items-center justify-between gap-4">
@@ -293,24 +243,20 @@ export function ProductsPage() {
         </div>
       </div>
 
-      {/* Sayfa Başlığı (CMS'te görsel yoksa gösterilir) */}
-      {!heroImageUrl && (
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
-          <motion.div
-            initial={{opacity: 0, y: 20}}
-            animate={{opacity: 1, y: 0}}
-            transition={{duration: 1, ease: 'easeOut'}}
-          >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
-              {category ? t(category.name) : t('view_all')}
-            </h1>
-          </motion.div>
-        </div>
-      )}
+      {/* Sayfa Başlığı */}
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
+        <motion.div
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 1, ease: 'easeOut'}}
+        >
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+            {category ? t(category.name) : t('view_all')}
+          </h1>
+        </motion.div>
+      </div>
 
-      <div
-        className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 ${!heroImageUrl ? 'pb-16 md:pb-24' : 'py-12 md:py-16'}`}
-      >
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pb-16 md:pb-24">
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
           !categoryId && allProducts.length > 0 ? (

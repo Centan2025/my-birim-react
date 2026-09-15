@@ -24,6 +24,7 @@ export function DesignersPageV2() {
   const isScrollingRef = useRef(false)
   const currentIndexRef = useRef(0)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [hoveredPanelIndex, setHoveredPanelIndex] = useState<number | null>(null)
   const scrollToSectionRef = useRef<(index: number) => void>(() => {})
   const scrollAnimRef = useRef<number | null>(null)
 
@@ -493,29 +494,63 @@ export function DesignersPageV2() {
               })}
             </div>
 
-            {/* Expanded Editorial Index (Daha şeffaf, yumuşak süzülen panel) */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 min-w-[210px] sm:min-w-[240px] max-h-[80vh] overflow-y-auto py-2.5 px-2.5 rounded-xl bg-black/40 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] antialiased opacity-0 translate-x-4 scale-95 pointer-events-none origin-right transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/index:opacity-100 group-hover/index:translate-x-0 group-hover/index:scale-100 group-hover/index:pointer-events-auto">
-              <div className="flex flex-col gap-0.5">
+            {/* Expanded Editorial Index (3D tekerlek / silindir yüzeyi efektli panel) */}
+            <div
+              onMouseLeave={() => setHoveredPanelIndex(null)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 min-w-[155px] sm:min-w-[175px] max-h-[75vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-2 px-1.5 rounded-lg bg-black/60 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] antialiased opacity-0 translate-x-3 scale-[0.97] pointer-events-none origin-right transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/index:opacity-100 group-hover/index:translate-x-0 group-hover/index:scale-100 group-hover/index:pointer-events-auto [perspective:500px]"
+            >
+              <div className="flex flex-col gap-0.5 [transform-style:preserve-3d]">
                 {designers.map((d, idx) => {
                   const isActive = activeIndex === idx
+                  const isItemHovered = hoveredPanelIndex === idx
+                  const diff = hoveredPanelIndex !== null ? idx - hoveredPanelIndex : 0
+                  const absDiff = Math.abs(diff)
+
+                  // 3D cylindrical roll calculation
+                  const rotateX =
+                    hoveredPanelIndex !== null ? Math.max(-50, Math.min(50, diff * 16)) : 0
+                  const translateZ =
+                    hoveredPanelIndex !== null ? (isItemHovered ? 10 : -absDiff * 4.5) : 0
+                  const scale =
+                    hoveredPanelIndex !== null
+                      ? isItemHovered
+                        ? 1.04
+                        : Math.max(0.85, 1 - absDiff * 0.035)
+                      : 1
+                  const opacity =
+                    hoveredPanelIndex !== null
+                      ? isItemHovered
+                        ? 1
+                        : Math.max(0.35, 1 - absDiff * 0.16)
+                      : 1
+
                   return (
                     <button
                       key={`expanded-${d.id}`}
                       type="button"
+                      onMouseEnter={() => setHoveredPanelIndex(idx)}
                       onClick={e => {
                         e.stopPropagation()
                         scrollToSectionRef.current(idx)
                       }}
-                      className={`group/item flex items-center justify-between py-1.5 px-2.5 rounded-lg text-left transition-colors duration-150 cursor-pointer focus:outline-none ${
+                      style={{
+                        transform: `rotateX(${rotateX}deg) translateZ(${translateZ}px) scale(${scale})`,
+                        opacity,
+                        transformOrigin:
+                          diff < 0 ? 'center bottom' : diff > 0 ? 'center top' : 'center center',
+                      }}
+                      className={`group/item flex items-center justify-between py-1 px-2 rounded-md text-left transition-all duration-200 ease-out transform-gpu will-change-transform cursor-pointer focus:outline-none select-none ${
                         isActive
                           ? 'bg-white/20 text-white'
-                          : 'text-white/80 hover:text-white hover:bg-white/10'
+                          : isItemHovered
+                            ? 'bg-white/15 text-white'
+                            : 'text-white/80 hover:text-white hover:bg-white/10'
                       }`}
                     >
                       <div className="flex items-center min-w-0 pr-2">
                         <span
-                          className={`text-xs uppercase tracking-wider truncate ${
-                            isActive ? 'text-white font-medium' : 'font-normal'
+                          className={`text-[11px] uppercase tracking-wider truncate transition-colors duration-150 ${
+                            isActive || isItemHovered ? 'text-white font-medium' : 'font-normal'
                           }`}
                         >
                           {t(d.name)}
@@ -525,8 +560,10 @@ export function DesignersPageV2() {
                       <span
                         className={`block rounded-full transition-all duration-200 flex-shrink-0 ${
                           isActive
-                            ? 'w-1.5 h-1.5 bg-white shadow-[0_0_6px_rgba(255,255,255,1)]'
-                            : 'w-1 h-1 bg-transparent group-hover/item:bg-white/60'
+                            ? 'w-1 h-1 bg-white shadow-[0_0_4px_rgba(255,255,255,1)]'
+                            : isItemHovered
+                              ? 'w-1 h-1 bg-white/90 shadow-[0_0_3px_rgba(255,255,255,0.8)]'
+                              : 'w-0.5 h-0.5 bg-transparent group-hover/item:bg-white/60'
                         }`}
                       />
                     </button>
