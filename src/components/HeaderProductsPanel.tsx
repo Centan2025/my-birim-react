@@ -59,7 +59,10 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
         style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}
       >
         {/* Sol taraf - Kategoriler */}
-        <div className="overflow-y-auto hide-scrollbar pr-6">
+        <div
+          className="overflow-y-auto hide-scrollbar pr-6"
+          onMouseLeave={() => onHoveredCategoryChange(null)}
+        >
           <div className="flex flex-col gap-3">
             {categories.map(category => (
               <NavLink
@@ -94,12 +97,15 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
           </div>
         </div>
 
-        {/* Sağ taraf - Sabit Boyutlu Beyaz Görsel Alanı (En üst kategoriden en alt kategoriye kadar uzanır) */}
-        <div className="relative w-[500px] lg:w-[600px] h-full self-stretch bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-none overflow-hidden flex items-center justify-center p-3">
+        {/* Sağ taraf - Görsel Alanı (Sadece kategori üzerine gelindiğinde görünür) */}
+        <div
+          className="relative w-[500px] lg:w-[600px] h-full self-stretch flex items-center justify-center"
+          onMouseEnter={() => onHoveredCategoryChange(null)}
+        >
           {(() => {
             const hoveredCategory = categories.find(c => c.id === hoveredCategoryId)
 
-            // Hover edilmediyse boş beyaz alan göster
+            // Hover edilmediyse hiçbir şey gösterme
             if (!hoveredCategory) {
               return null
             }
@@ -161,17 +167,24 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
             // Görsel bulunduysa beyaz alan içerisinde kırpılmadan tam sığacak şekilde göster
             if (imageUrl) {
               return (
-                <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-                  <img
-                    key={hoveredCategory.id}
-                    src={imageUrl}
-                    alt={t(hoveredCategory.name)}
-                    className="w-full h-full max-w-full max-h-full object-contain object-center image-transition"
-                    style={{
-                      animation: 'crossFade 0.35s ease-in-out',
-                      transform: isMirrored ? 'scaleX(-1)' : 'none',
-                    }}
-                  />
+                <div
+                  className="w-full h-full bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-none overflow-hidden flex items-center justify-center p-3"
+                  style={{
+                    animation: 'crossFade 0.25s ease-in-out',
+                  }}
+                >
+                  <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+                    <img
+                      key={hoveredCategory.id}
+                      src={imageUrl}
+                      alt={t(hoveredCategory.name)}
+                      className="w-full h-full max-w-full max-h-full object-contain object-center image-transition"
+                      style={{
+                        animation: 'crossFade 0.35s ease-in-out',
+                        transform: isMirrored ? 'scaleX(-1)' : 'none',
+                      }}
+                    />
+                  </div>
                 </div>
               )
             }
@@ -184,7 +197,11 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
       <div
         className={`w-full border-t mt-3 ${isLightMode ? 'border-black/10' : 'border-white/50'}`}
       ></div>
-      <div className="pt-3 pb-3" style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}>
+      <div
+        className="pt-3 pb-3"
+        style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}
+        onMouseEnter={() => onHoveredCategoryChange(null)}
+      >
         <NavLink
           to="/products"
           className={`group relative inline-block px-0 py-2 font-medium uppercase ${
