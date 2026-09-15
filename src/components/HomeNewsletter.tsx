@@ -203,14 +203,14 @@ export const HomeNewsletter: FC = () => {
   return (
     <section
       id="home-newsletter"
-      className="bg-[#2c2c2c] w-full relative overflow-hidden text-white leading-none font-inter no-scroll-snap"
+      className="bg-[#292929] w-full relative overflow-hidden text-white leading-none font-inter no-scroll-snap"
     >
       {/* Collapse Trigger Button - Band Style */}
       <button
         onClick={handleToggle}
         type="button"
         aria-expanded={isExpanded}
-        className="block w-full bg-[#363636] transition-colors group z-30 relative border-t border-white/10 font-inter text-left cursor-pointer"
+        className="block w-full bg-[#292929] transition-colors group z-30 relative border-t border-white/10 font-inter text-left cursor-pointer"
       >
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6 md:py-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
           <div className="flex-1 flex flex-col items-center text-center md:items-start md:text-left justify-center">
