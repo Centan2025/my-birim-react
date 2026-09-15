@@ -213,25 +213,39 @@ select[class*='focus-visible:outline-none']:focus-visible {
 }
 
 /* İnce ve şık kaydırma çubuğu tasarımı */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
-  /* Çubuğun genişliği */
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
-  /* Arka plan şeffaf */
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(197, 160, 89, 0.2);
-  /* Çubuğun rengi (Altın tonu) */
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(197, 160, 89, 0.5);
-  /* Üzerine gelince belirginleşir */
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
 }
 
 html {
