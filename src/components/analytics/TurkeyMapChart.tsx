@@ -3,7 +3,7 @@ import {memo, useState, useCallback, useRef} from 'react'
 import {ComposableMap, Geographies, Geography, Marker} from 'react-simple-maps'
 import {TURKEY_CITY_COORDS} from '../../lib/geo-coords'
 import {ZoomIn, ZoomOut, RotateCcw, Move} from 'lucide-react'
-const WORLD_GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
+const WORLD_GEO_URL = '/data/countries-110m.json'
 interface TurkishCityData {
   city: string
   region: string
