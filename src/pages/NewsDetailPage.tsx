@@ -353,7 +353,7 @@ export function NewsDetailPage() {
 
       {/* Breadcrumbs */}
       <div className="w-full relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-3">
           <Breadcrumbs
             items={[
               {label: t('homepage'), to: '/'},
@@ -364,10 +364,10 @@ export function NewsDetailPage() {
         </div>
       </div>
 
-      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-8 pb-24">
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-2 md:pt-4 pb-24">
         {/* Article Meta Bar */}
         <ScrollReveal delay={50} threshold={0.05} direction="up" distance={15}>
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-primary)] pb-6 mb-8 md:mb-12">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-primary)] pb-4 mb-6 md:mb-8">
             <TextMaskReveal delay={80}>
               <div className="flex items-center gap-4 text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider">
                 <span>{formatDate(item.date, locale)}</span>
@@ -407,19 +407,19 @@ export function NewsDetailPage() {
 
         {/* Title */}
         <TextMaskReveal delay={100} duration={1.15}>
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-light text-[var(--text-primary)] uppercase tracking-tight leading-tight mb-10 md:mb-16">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] uppercase tracking-tight leading-tight mb-6 md:mb-10">
             {t(item.title)}
           </h1>
         </TextMaskReveal>
 
         {/* Main Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+        <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-10 w-full">
           {/* Main Cover & Media */}
-          <div className="lg:col-span-7 flex flex-col w-full">
+          <div className="w-full lg:w-[980px] lg:max-w-[65%] shrink-0 flex flex-col">
             {mainImageUrl && (
               /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
               <div
-                className="cursor-zoom-in overflow-hidden mb-8 border border-[var(--border-primary)]/40"
+                className="cursor-zoom-in overflow-hidden mb-8 border border-[var(--border-primary)]/40 relative group"
                 onClick={() => openFullscreenViewer(mainImageUrl)}
               >
                 <ProductCardReveal direction="down" duration={1.2} delay={0.1} className="w-full">
@@ -428,7 +428,7 @@ export function NewsDetailPage() {
                     srcMobile={mainImageObj?.urlMobile}
                     srcDesktop={mainImageObj?.urlDesktop}
                     alt={t(item.title)}
-                    className="w-full h-auto object-cover transition-transform duration-700 hover:scale-102"
+                    className="aspect-[1/1] w-full object-cover transition-transform duration-700 group-hover:scale-102"
                     width={1920}
                     height={1080}
                     loading="eager"
@@ -464,7 +464,7 @@ export function NewsDetailPage() {
           </div>
 
           {/* Article Text Content */}
-          <div className="lg:col-span-5 lg:sticky lg:top-28 flex flex-col w-full">
+          <div className="flex-1 min-w-0 lg:sticky lg:top-28 flex flex-col w-full">
             <ScrollReveal delay={150} threshold={0.05} direction="up" distance={20}>
               <div className="text-[var(--text-primary)] leading-relaxed font-light text-base md:text-lg space-y-6">
                 {(() => {
