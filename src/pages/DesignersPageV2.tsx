@@ -26,6 +26,7 @@ export function DesignersPageV2() {
   const isScrollingRef = useRef(false)
   const currentIndexRef = useRef(0)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [isIndexHovered, setIsIndexHovered] = useState(false)
   const scrollToSectionRef = useRef<(index: number) => void>(() => {})
   const scrollAnimRef = useRef<number | null>(null)
 
@@ -539,42 +540,140 @@ export function DesignersPageV2() {
         })}
       </main>
 
-      {/* Right-Side Architectural Level / Progress Indicator */}
+      {/* Right-Side Dynamic Editorial Micro-Index (Konsept 2) */}
       {designers.length > 1 && (
         <aside
           aria-label={t('designers') || 'Tasarımcılar'}
-          className="fixed right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-30 flex items-center pointer-events-auto select-none"
+          className="fixed right-3 sm:right-5 lg:right-7 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none"
         >
-          {/* İnce Kapsül - Yuvarlak Kenarlar */}
-          <div className="flex flex-col items-center gap-1.5 py-2 px-1 rounded-full bg-black/30 backdrop-blur-md border border-white/10 shadow-[0_2px_16px_rgba(0,0,0,0.3)]">
-            {designers.map((d, idx) => {
-              const isActive = activeIndex === idx
-              return (
-                <button
-                  key={d.id}
-                  type="button"
-                  onClick={e => {
-                    e.stopPropagation()
-                    scrollToSectionRef.current(idx)
-                  }}
-                  className="group relative flex items-center justify-center p-0.5 focus:outline-none cursor-pointer"
-                  aria-label={`${t(d.name)} (${idx + 1}/${designers.length})`}
-                >
-                  {/* Tooltip on hover */}
-                  <span className="hidden md:block absolute right-full mr-3 px-2.5 py-1 rounded bg-black/90 backdrop-blur-md text-white text-[9px] uppercase font-mono tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg">
-                    {t(d.name)}
-                  </span>
-                  {/* Slim Indicator Dash */}
-                  <span
-                    className={`block rounded-full transition-all duration-500 ${
-                      isActive
-                        ? 'w-[2px] h-5 bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]'
-                        : 'w-[2px] h-1.5 bg-white/40 group-hover:bg-white/90 group-hover:h-2.5'
-                    }`}
-                  />
-                </button>
-              )
-            })}
+          <div
+            onMouseEnter={() => setIsIndexHovered(true)}
+            onMouseLeave={() => setIsIndexHovered(false)}
+            className="relative flex items-center justify-end p-2 -mr-2"
+          >
+            {/* Ambient Collapsed State (Ultra-minimalist vertical dash bar) */}
+            <motion.div
+              animate={{
+                opacity: isIndexHovered ? 0 : 1,
+                x: isIndexHovered ? 12 : 0,
+                scale: isIndexHovered ? 0.9 : 1,
+              }}
+              transition={{
+                duration: 0.2,
+                delay: isIndexHovered ? 0 : 0.25,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              style={{pointerEvents: isIndexHovered ? 'none' : 'auto'}}
+              className="flex flex-col items-center gap-1.5 py-2.5 px-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 shadow-[0_2px_16px_rgba(0,0,0,0.3)]"
+            >
+              {designers.map((d, idx) => {
+                const isActive = activeIndex === idx
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation()
+                      scrollToSectionRef.current(idx)
+                    }}
+                    className="flex items-center justify-center p-0.5 focus:outline-none cursor-pointer"
+                    aria-label={`${t(d.name)} (${idx + 1}/${designers.length})`}
+                  >
+                    <span
+                      className={`block rounded-full transition-all duration-500 ${
+                        isActive
+                          ? 'w-[2px] h-5 bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]'
+                          : 'w-[2px] h-1.5 bg-white/40'
+                      }`}
+                    />
+                  </button>
+                )
+              })}
+            </motion.div>
+
+            {/* Expanded Editorial Index (1. Enine ince hatta daralır -> 2. Dikine büzülüp merkeze kapanır) */}
+            <motion.div
+              initial={false}
+              animate={isIndexHovered ? 'open' : 'closed'}
+              variants={{
+                closed: {
+                  scaleX: [1, 0.04, 0],
+                  scaleY: [1, 1, 0],
+                  opacity: [1, 0.45, 0],
+                  x: [0, 4, 10],
+                  transition: {
+                    duration: 0.38,
+                    times: [0, 0.45, 1],
+                    ease: 'easeInOut',
+                  },
+                },
+                open: {
+                  scaleY: [0, 1, 1],
+                  scaleX: [0.04, 0.04, 1],
+                  opacity: [0, 0.5, 1],
+                  x: [10, 4, 0],
+                  transition: {
+                    duration: 0.34,
+                    times: [0, 0.4, 1],
+                    ease: 'easeOut',
+                  },
+                },
+              }}
+              style={{
+                transformOrigin: 'right center',
+                pointerEvents: isIndexHovered ? 'auto' : 'none',
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 min-w-[210px] sm:min-w-[240px] max-h-[80vh] overflow-y-auto py-2.5 px-2.5 rounded-xl bg-black/60 backdrop-blur-xl border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.6)] antialiased"
+            >
+              <div className="flex flex-col gap-0.5">
+                {designers.map((d, idx) => {
+                  const isActive = activeIndex === idx
+                  const formattedIdx = String(idx + 1).padStart(2, '0')
+                  return (
+                    <button
+                      key={`expanded-${d.id}`}
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation()
+                        scrollToSectionRef.current(idx)
+                      }}
+                      className={`group/item flex items-center justify-between py-1.5 px-2.5 rounded-lg text-left transition-colors duration-150 cursor-pointer focus:outline-none ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : 'text-white/80 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                        <span
+                          className={`font-mono text-[10px] tracking-wider transition-colors ${
+                            isActive
+                              ? 'text-white font-semibold'
+                              : 'text-white/50 group-hover/item:text-white/90'
+                          }`}
+                        >
+                          {formattedIdx}
+                        </span>
+                        <span
+                          className={`text-xs uppercase tracking-wider truncate ${
+                            isActive ? 'text-white font-medium' : 'font-normal'
+                          }`}
+                        >
+                          {t(d.name)}
+                        </span>
+                      </div>
+
+                      <span
+                        className={`block rounded-full transition-all duration-200 flex-shrink-0 ${
+                          isActive
+                            ? 'w-1.5 h-1.5 bg-white shadow-[0_0_6px_rgba(255,255,255,1)]'
+                            : 'w-1 h-1 bg-transparent group-hover/item:bg-white/60'
+                        }`}
+                      />
+                    </button>
+                  )
+                })}
+              </div>
+            </motion.div>
           </div>
         </aside>
       )}
