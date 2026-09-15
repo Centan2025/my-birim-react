@@ -127,7 +127,7 @@ describe('useHeaderBackgroundColor', () => {
         }),
       {wrapper: wrapper('/uretim')}
     )
-    expect(pastHero.result.current).toBe('rgba(248, 248, 248, 0.78)')
+    expect(pastHero.result.current).toBe('rgba(255, 255, 255, 0.78)')
   })
 
   it('hakkımızda veya üretim sayfasında hero görseli yoksa (isLightMode: true) header açık renk olmalı', () => {

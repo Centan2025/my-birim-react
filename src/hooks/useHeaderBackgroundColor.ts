@@ -74,7 +74,8 @@ export function useHeaderBackgroundColor({
     if (!effectiveIsLight) return 'transparent'
 
     // Hero altından itibaren: yarı şeffaf buz efekti
-    const lightRgb = isProductDetailPage ? '255, 255, 255' : '248, 248, 248'
+    const isFactoryPage = path.startsWith('/uretim') || path.startsWith('/factory')
+    const lightRgb = isProductDetailPage || isFactoryPage ? '255, 255, 255' : '248, 248, 248'
     const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : `rgba(${lightRgb}, `
     return `${baseColor}${Math.max(Math.min(headerOpacity, 0.82), 0.78)})`
   }

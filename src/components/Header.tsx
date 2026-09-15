@@ -92,7 +92,7 @@ export function Header() {
     }
     const update = () => {
       const isFullscreen = isFullscreenDarkPage(location.pathname, location.search)
-      if (isFullscreen || headerTheme.mode === 'dark') {
+      if (isFullscreen) {
         setIsPastHero(false)
         return
       }
@@ -123,7 +123,9 @@ export function Header() {
       window.removeEventListener('resize', update)
       observer.disconnect()
     }
-  }, [isDarkHero, headerHeight, location.pathname, location.search, headerTheme.mode])
+  }, [isDarkHero, headerHeight, location.pathname, location.search])
+
+  const isFullscreen = isFullscreenDarkPage(location.pathname, location.search)
 
   // isDarkHero pages: white text at top, black after hero bottom boundary.
   // Standard pages: always dark text.
@@ -132,7 +134,7 @@ export function Header() {
   const isLightMode =
     !isProductsHovered &&
     !(isMobile && (isMobileMenuOpen || isMobileMenuClosing)) &&
-    (isSearchOpen || (headerTheme.mode ? headerTheme.mode === 'light' : isPastHero || !isDarkHero))
+    (isSearchOpen || (isFullscreen ? false : isPastHero || !isDarkHero))
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
   const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
