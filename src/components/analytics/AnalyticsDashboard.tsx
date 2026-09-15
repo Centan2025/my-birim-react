@@ -369,131 +369,145 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     <div
       className={`w-full ${isEmbeddedInStudio ? 'p-6 bg-slate-50 min-h-screen text-slate-800' : 'text-inherit'}`}
     >
-      {/* Top Header & Controls */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm font-light tracking-tight font-outfit">
-              Site Analitiği & Ziyaretçi Raporu
-            </h1>
-            {isEmbeddedInStudio && (
-              <span className="px-2.5 py-1 bg-slate-200 text-slate-700 rounded text-[11px] font-medium tracking-wide">
-                Sanity CMS
-              </span>
-            )}
+      {/* Sticky Top Header, Filter & Controls Bar */}
+      <div className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md pt-3 pb-4 -mx-2 px-2 sm:-mx-4 sm:px-4 border-b border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] mb-6 transition-all">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl font-light tracking-tight font-outfit text-slate-900">
+                Site Analitiği & Ziyaretçi Raporu
+              </h1>
+              {isEmbeddedInStudio && (
+                <span className="px-2.5 py-1 bg-slate-200 text-slate-700 rounded text-[11px] font-medium tracking-wide">
+                  Sanity CMS
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-500 font-light mt-0.5">
+              Google Analytics (GA4) mülküne bağlı gerçek zamanlı ve dönemsel trafik göstergeleri
+            </p>
           </div>
-          <p className="text-xs sm text-slate-500 font-light mt-1">
-            Google Analytics (GA4) mülküne bağlı gerçek zamanlı ve dönemsel trafik göstergeleri
-          </p>
+
+          {/* Action Controls & Date Range Filter */}
+          <div className="flex items-center flex-wrap gap-2 w-full md:w-auto">
+            <div className="flex bg-slate-200/80 p-1 rounded-xl border border-slate-300/70 shadow-xs">
+              <button
+                onClick={() => setDateRange('7daysAgo')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                  dateRange === '7daysAgo'
+                    ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Son 7 Gün
+              </button>
+              <button
+                onClick={() => setDateRange('30daysAgo')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                  dateRange === '30daysAgo'
+                    ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Son 30 Gün
+              </button>
+              <button
+                onClick={() => setDateRange('90daysAgo')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                  dateRange === '90daysAgo'
+                    ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Son 3 Ay
+              </button>
+              <button
+                onClick={() => setDateRange('365daysAgo')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                  dateRange === '365daysAgo'
+                    ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Son 1 Yıl
+              </button>
+            </div>
+
+            <button
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+              title="Verileri Yenile"
+              className="p-2 bg-slate-200/80 hover:bg-slate-300/80 border border-slate-300/70 rounded-xl transition flex items-center justify-center text-slate-700 shadow-xs cursor-pointer"
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${refreshing ? 'animate-spin text-indigo-600' : ''}`}
+              />
+            </button>
+          </div>
         </div>
 
-        {/* Action Controls & Date Range */}
-        <div className="flex items-center flex-wrap gap-2 w-full md:w-auto">
-          <div className="flex bg-slate-200/70 p-1 rounded-xl border border-slate-300/60">
-            <button
-              onClick={() => setDateRange('7daysAgo')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                dateRange === '7daysAgo'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover'
-              }`}
-            >
-              Son 7 Gün
-            </button>
-            <button
-              onClick={() => setDateRange('30daysAgo')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                dateRange === '30daysAgo'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover'
-              }`}
-            >
-              Son 30 Gün
-            </button>
-            <button
-              onClick={() => setDateRange('90daysAgo')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                dateRange === '90daysAgo'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover'
-              }`}
-            >
-              Son 3 Ay
-            </button>
-            <button
-              onClick={() => setDateRange('365daysAgo')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                dateRange === '365daysAgo'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover'
-              }`}
-            >
-              Son 1 Yıl
-            </button>
-          </div>
+        {/* Tabs Navigation */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === 'overview'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-900'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>Genel Bakış</span>
+          </button>
 
           <button
-            onClick={handleManualRefresh}
-            disabled={refreshing}
-            title="Verileri Yenile"
-            className="p-2 bg-slate-200/70 hover border border-slate-300/60 rounded-xl transition flex items-center justify-center text-slate-700"
+            onClick={() => setActiveTab('realtime')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === 'realtime'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-900'
+            }`}
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-indigo-600' : ''}`} />
+            <Radio className="w-4 h-4 text-emerald-400" />
+            <span>Canlı İzleme ({activeOnline})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('geography')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === 'geography'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-900'
+            }`}
+          >
+            <Globe className="w-4 h-4 text-indigo-400" />
+            <span>Haritalar & Coğrafya</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('pages')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === 'pages'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-900'
+            }`}
+          >
+            <FileText className="w-4 h-4 text-amber-400" />
+            <span>Sayfalar & Modeller</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('sources')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === 'sources'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-900'
+            }`}
+          >
+            <Compass className="w-4 h-4 text-cyan-400" />
+            <span>Kaynaklar & Cihazlar</span>
           </button>
         </div>
-      </div>
-
-      {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-8 border-b border-slate-200">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'overview' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
-          }`}
-        >
-          <Layers className="w-4 h-4" />
-          <span>Genel Bakış</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('realtime')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'realtime' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
-          }`}
-        >
-          <Radio className="w-4 h-4 text-emerald-400" />
-          <span>Canlı İzleme ({activeOnline})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('geography')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'geography' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
-          }`}
-        >
-          <Globe className="w-4 h-4 text-indigo-400" />
-          <span>Haritalar & Coğrafya</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('pages')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'pages' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
-          }`}
-        >
-          <FileText className="w-4 h-4 text-amber-400" />
-          <span>Sayfalar & Modeller</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('sources')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'sources' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
-          }`}
-        >
-          <Compass className="w-4 h-4 text-cyan-400" />
-          <span>Kaynaklar & Cihazlar</span>
-        </button>
       </div>
 
       {/* Realtime Live Pulse Bar */}
