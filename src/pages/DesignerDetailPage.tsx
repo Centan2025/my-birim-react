@@ -158,7 +158,7 @@ export function DesignerDetailPage() {
 
   return (
     <div
-      className={`h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-primary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20 md:pt-20 lg:pt-20 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}
+      className={`h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-primary)] transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20 md:pt-20 lg:pt-20 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}
     >
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">

@@ -78,7 +78,7 @@ export const Footer = () => {
 
             {/* İnce çizgi */}
             <ScrollReveal delay={105} threshold={0.1} width="w-full" className="h-auto">
-              <div className="w-full border-t border-gray-700"></div>
+              <div className="w-full border-t border-gray-500/80"></div>
             </ScrollReveal>
 
             {/* Dil seçenekleri */}
@@ -105,7 +105,7 @@ export const Footer = () => {
 
             {/* İnce çizgi */}
             <ScrollReveal delay={135} threshold={0.1} width="w-full" className="h-auto">
-              <div className="w-full border-t border-gray-700"></div>
+              <div className="w-full border-t border-gray-500/80"></div>
             </ScrollReveal>
           </div>
 
@@ -236,7 +236,7 @@ export const Footer = () => {
               <ScrollReveal delay={210} threshold={0.1} width="w-full" className="h-auto">
                 <div className="mt-2 flex flex-col items-center justify-center space-y-6 w-full">
                   {/* Üst çizgi (sosyal medya altı) */}
-                  <div className="w-full border-t border-gray-700" />
+                  <div className="w-full border-t border-gray-500/80" />
 
                   {/* Partnerler - çizgiler arasında, butonlar/logolar */}
                   <div className="flex items-center justify-center flex-wrap gap-6">
@@ -274,7 +274,7 @@ export const Footer = () => {
                   </div>
 
                   {/* Alt çizgi (partnerler altı) */}
-                  <div className="w-full border-t border-gray-700" />
+                  <div className="w-full border-t border-gray-500/80" />
                 </div>
               </ScrollReveal>
             </div>
@@ -284,7 +284,7 @@ export const Footer = () => {
               sol: telif, sağ: yasal düğmeler */}
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
             <div
-              className="lg:mt-10 pt-2 lg:pt-8 w-full lg:border-t lg:border-t-2 lg:border-gray-600"
+              className="lg:mt-10 pt-2 lg:pt-8 w-full lg:border-t lg:border-t-2 lg:border-gray-500/80"
               style={{overflow: 'visible', width: '100%'}}
             >
               <div className="flex flex-col items-center justify-center gap-4 text-xs w-full lg:flex-row lg:items-start lg:justify-between">

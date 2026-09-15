@@ -45,6 +45,21 @@ html {
   scroll-behavior: auto !important;
 }
 
+::selection {
+  background-color: #262626;
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background-color: #262626;
+  color: #ffffff;
+}
+
+.dark ::selection {
+  background-color: #404040;
+  color: #ffffff;
+}
+
 html.lenis,
 html.lenis body {
   height: auto;
