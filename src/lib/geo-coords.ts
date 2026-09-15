@@ -728,3 +728,32 @@ export function isCountryMatch(geoName: string, targetCountry: string): boolean 
 
   return false
 }
+
+/**
+ * Returns [lng, lat] coordinates for a country
+ */
+export function getCountryCoordinates(countryName: string): [number, number] | null {
+  if (!countryName || countryName === 'Unknown') return null
+  const meta = COUNTRY_META[countryName]
+  if (meta) return meta.center // [lng, lat]
+
+  if (COUNTRY_COORDS[countryName]) {
+    const [lat, lng] = COUNTRY_COORDS[countryName]
+    return [lng, lat]
+  }
+
+  const clean = countryName.trim().toLowerCase()
+  for (const [k, v] of Object.entries(COUNTRY_COORDS)) {
+    if (k.toLowerCase() === clean) {
+      return [v[1], v[0]]
+    }
+  }
+
+  for (const item of Object.values(COUNTRY_META)) {
+    if (item.aliases.some(a => a.toLowerCase() === clean)) {
+      return item.center
+    }
+  }
+
+  return null
+}

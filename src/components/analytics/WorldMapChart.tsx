@@ -2,10 +2,10 @@
 import {memo, useState, useCallback, useRef, useMemo} from 'react'
 import {ComposableMap, Geographies, Geography, Marker} from 'react-simple-maps'
 import {
-  COUNTRY_COORDS,
   COUNTRY_META,
   getCountryFlag,
   getCityCoordinates,
+  getCountryCoordinates,
   isCountryMatch,
 } from '../../lib/geo-coords'
 import {
@@ -148,9 +148,9 @@ function WorldMapChart({countries, cities = []}: Props) {
       setZoom(meta.zoom)
       setSelectedCountry(countryName)
     } else {
-      const coords = COUNTRY_COORDS[countryName]
+      const coords = getCountryCoordinates(countryName)
       if (coords) {
-        setCenter([coords[1], coords[0]])
+        setCenter(coords)
         setZoom(4.0)
         setSelectedCountry(countryName)
       }
@@ -212,6 +212,21 @@ function WorldMapChart({countries, cities = []}: Props) {
     dragStart.current = null
   }, [])
 
+  // Country markers for ALL active countries (ensures EVERY country has a point on the map)
+  const countryMarkers = useMemo(() => {
+    return countries
+      .map(c => {
+        const coords = getCountryCoordinates(c.country)
+        if (!coords) return null
+        return {
+          ...c,
+          lng: coords[0],
+          lat: coords[1],
+        }
+      })
+      .filter(Boolean) as (CountryData & {lng: number; lat: number})[]
+  }, [countries])
+
   // Active cities to display
   const activeCityMarkers = useMemo(() => {
     if (selectedCountry) {
@@ -224,15 +239,18 @@ function WorldMapChart({countries, cities = []}: Props) {
       return matched
         .map(c => {
           const coords = getCityCoordinates(c.city, c.country)
-          if (!coords) return null
+          if (!coords) {
+            const countryCoords = getCountryCoordinates(c.country || selectedCountry)
+            if (!countryCoords) return null
+            return {...c, lat: countryCoords[1], lng: countryCoords[0]}
+          }
           return {...c, lat: coords[0], lng: coords[1]}
         })
         .filter(Boolean) as (CityData & {lat: number; lng: number})[]
     }
 
-    // Global view: show top cities overall (up to 15)
+    // Global view: show all available resolved cities
     return cities
-      .slice(0, 15)
       .map(c => {
         const coords = getCityCoordinates(c.city, c.country)
         if (!coords) return null
@@ -351,7 +369,7 @@ function WorldMapChart({countries, cities = []}: Props) {
       {/* Rich Tooltip */}
       {tooltip && !isDragging && (
         <div
-          className="absolute z-50 pointer-events-none bg-slate-900/95 text-white backdrop-blur-xl border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl transform -translate-x-1/2 -translate-y-full min-w-[210px] animate-in fade-in zoom-in-95 duration-150"
+          className="absolute z-50 pointer-events-none bg-slate-900/95 text-white backdrop-blur-xl border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl transform -translate-x-1/2 -translate-y-full min-w-[220px] animate-in fade-in zoom-in-95 duration-150"
           style={{left: tooltipPos.x, top: tooltipPos.y - 12}}
         >
           {tooltip.type === 'country' ? (
@@ -394,11 +412,11 @@ function WorldMapChart({countries, cities = []}: Props) {
                 </div>
               </div>
 
-              {tooltip.topCities && tooltip.topCities.length > 0 && (
+              {tooltip.topCities && tooltip.topCities.length > 0 ? (
                 <div className="pt-1 border-t border-slate-800/80">
                   <p className="text-[9px] text-slate-400 font-medium mb-1 flex items-center gap-1">
                     <MapPin className="w-2.5 h-2.5 text-indigo-400" />
-                    <span>Öne Çıkan Şehirler:</span>
+                    <span>Şehir Dağılımı:</span>
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {tooltip.topCities.slice(0, 3).map((tc, idx) => (
@@ -412,16 +430,23 @@ function WorldMapChart({countries, cities = []}: Props) {
                     ))}
                   </div>
                 </div>
+              ) : (
+                <div className="pt-1 border-t border-slate-800/80">
+                  <p className="text-[10px] text-slate-400 flex items-center gap-1 font-medium">
+                    <MapPin className="w-2.5 h-2.5 text-indigo-400" />
+                    <span>Şehir Detayı: Genel Ülke Trafiği</span>
+                  </p>
+                </div>
               )}
 
               <p className="text-[9px] text-indigo-300/80 font-medium text-center pt-1 border-t border-slate-800">
-                🔍 Şehir detayları için tıklayın
+                🔍 Şehirlere yakınlaşmak için tıklayın
               </p>
             </div>
           ) : (
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                 <div>
                   <h4 className="text-xs font-bold text-white leading-tight">{tooltip.cityName}</h4>
                   {tooltip.countryName && (
@@ -433,7 +458,7 @@ function WorldMapChart({countries, cities = []}: Props) {
               </div>
               <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800">
                 <span className="text-slate-400">Trafik:</span>
-                <span className="font-bold text-indigo-300">
+                <span className="font-bold text-rose-300">
                   {tooltip.users.toLocaleString('tr-TR')} kullanıcı •{' '}
                   {tooltip.sessions.toLocaleString('tr-TR')} oturum
                 </span>
@@ -548,7 +573,68 @@ function WorldMapChart({countries, cities = []}: Props) {
           }
         </Geographies>
 
-        {/* City Markers Layer */}
+        {/* 1. Country Center Markers Layer (Guarantees EVERY country with traffic has a point) */}
+        {!selectedCountry &&
+          countryMarkers.map((c, idx) => {
+            const val = metric === 'users' ? c.users : c.sessions
+            const markerSize = Math.max(3.5, Math.min(15, (val / maxMetric) * 14 + 3))
+            const intensity = Math.max(0.35, val / maxMetric)
+
+            return (
+              <Marker
+                key={`country-point-${c.country}-${idx}`}
+                coordinates={[c.lng, c.lat]}
+                onMouseEnter={(e: React.MouseEvent) => {
+                  if (isDragging) return
+                  const rect = e.currentTarget?.closest('svg')?.getBoundingClientRect()
+                  if (rect) {
+                    setTooltipPos({
+                      x: e.clientX - rect.left,
+                      y: e.clientY - rect.top,
+                    })
+                  }
+                  const pct = ((val / totalMetric) * 100).toFixed(1)
+                  const countryCities = citiesByCountry.get(c.country.toLowerCase()) || []
+
+                  setTooltip({
+                    type: 'country',
+                    countryName: c.country,
+                    users: c.users,
+                    sessions: c.sessions,
+                    percentage: pct,
+                    topCities: countryCities.slice(0, 3),
+                  })
+                }}
+                onMouseLeave={() => setTooltip(null)}
+                onClick={() => handleCountryClick(c.country)}
+              >
+                {/* Glowing ring */}
+                <circle
+                  r={markerSize + 4}
+                  fill="none"
+                  stroke={`rgba(99, 102, 241, ${intensity * 0.4})`}
+                  strokeWidth={1}
+                  className="animate-ping"
+                  style={{animationDuration: `${2.2 + (idx % 4) * 0.4}s`}}
+                />
+                <circle
+                  r={markerSize + 2}
+                  fill={`rgba(99, 102, 241, ${intensity * 0.2})`}
+                  filter="url(#city-glow)"
+                />
+                <circle
+                  r={markerSize}
+                  fill={`rgba(79, 70, 229, ${intensity * 0.9})`}
+                  stroke="#ffffff"
+                  strokeWidth={1.2}
+                  className="cursor-pointer transition-transform hover:scale-125"
+                />
+                <circle r={Math.max(1.8, markerSize * 0.35)} fill="white" opacity={0.95} />
+              </Marker>
+            )
+          })}
+
+        {/* 2. City Markers Layer (Rendered for specific cities with vibrant dots) */}
         {activeCityMarkers.map((city, idx) => {
           const val = metric === 'users' ? city.users : city.sessions
           const markerSize = Math.max(
@@ -558,7 +644,7 @@ function WorldMapChart({countries, cities = []}: Props) {
 
           return (
             <Marker
-              key={`${city.city}-${idx}`}
+              key={`city-point-${city.city}-${idx}`}
               coordinates={[city.lng, city.lat]}
               onMouseEnter={(e: React.MouseEvent) => {
                 if (isDragging) return
@@ -626,6 +712,53 @@ function WorldMapChart({countries, cities = []}: Props) {
             </Marker>
           )
         })}
+
+        {/* 3. Fallback Country Center Label in Drill-down mode if no city breakdown exists */}
+        {selectedCountry &&
+          activeCityMarkers.length === 0 &&
+          (() => {
+            const coords = getCountryCoordinates(selectedCountry)
+            if (!coords) return null
+            const countryObj = countries.find(c => isCountryMatch(selectedCountry, c.country))
+            const val = countryObj
+              ? metric === 'users'
+                ? countryObj.users
+                : countryObj.sessions
+              : 0
+
+            return (
+              <Marker coordinates={[coords[0], coords[1]]}>
+                <circle
+                  r={12}
+                  fill="none"
+                  stroke="rgba(79, 70, 229, 0.5)"
+                  strokeWidth={1.5}
+                  className="animate-ping"
+                />
+                <circle r={8} fill="#4f46e5" stroke="#ffffff" strokeWidth={1.5} />
+                <circle r={3} fill="#ffffff" />
+                <text
+                  textAnchor="middle"
+                  y={-14}
+                  style={{
+                    fontFamily: 'system-ui, sans-serif',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    fill: '#0f172a',
+                    paintOrder: 'stroke',
+                    stroke: '#ffffff',
+                    strokeWidth: 3,
+                    strokeLinecap: 'round',
+                    strokeLinejoin: 'round',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {COUNTRY_META[selectedCountry]?.nameTr || selectedCountry} (Genel Trafik:{' '}
+                  {val.toLocaleString('tr-TR')})
+                </text>
+              </Marker>
+            )
+          })()}
       </ComposableMap>
 
       {/* Bottom Bar: Quick Filter Chips & Heat Legend */}
