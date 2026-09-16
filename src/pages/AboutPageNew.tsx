@@ -987,7 +987,7 @@ export function AboutPageNew() {
                       const dImgUrl =
                         typeof designer.image === 'string'
                           ? designer.image
-                          : (designer.image as {url: string}).url
+                          : designer.image?.urlDesktop || (designer.image as {url: string})?.url
 
                       return (
                         <div
@@ -1000,80 +1000,32 @@ export function AboutPageNew() {
                                 direction="down"
                                 duration={1.2}
                                 delay={0.08 + idx * 0.05}
+                                className="w-full h-full"
                               >
                                 <OptimizedImage
                                   src={dImgUrl}
-                                  srcMobile={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.urlMobile
-                                      : undefined
-                                  }
-                                  srcDesktop={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.urlDesktop
-                                      : undefined
-                                  }
                                   fallbackSrc={DEFAULT_IMAGES.identity}
                                   alt={dName}
                                   className="w-full h-full object-cover grayscale"
                                   crop={
                                     typeof designer.image === 'object'
-                                      ? designer.image.crop
+                                      ? designer.image.cropDesktop || designer.image.crop
                                       : undefined
                                   }
                                   hotspot={
                                     typeof designer.image === 'object'
-                                      ? designer.image.hotspot
+                                      ? designer.image.hotspotDesktop || designer.image.hotspot
                                       : undefined
                                   }
                                   origWidth={
                                     typeof designer.image === 'object'
-                                      ? designer.image.origWidth
+                                      ? designer.image.origWidthDesktop || designer.image.origWidth
                                       : undefined
                                   }
                                   origHeight={
                                     typeof designer.image === 'object'
-                                      ? designer.image.origHeight
-                                      : undefined
-                                  }
-                                  cropMobile={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.cropMobile
-                                      : undefined
-                                  }
-                                  hotspotMobile={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.hotspotMobile
-                                      : undefined
-                                  }
-                                  origWidthMobile={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.origWidthMobile
-                                      : undefined
-                                  }
-                                  origHeightMobile={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.origHeightMobile
-                                      : undefined
-                                  }
-                                  cropDesktop={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.cropDesktop
-                                      : undefined
-                                  }
-                                  hotspotDesktop={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.hotspotDesktop
-                                      : undefined
-                                  }
-                                  origWidthDesktop={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.origWidthDesktop
-                                      : undefined
-                                  }
-                                  origHeightDesktop={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.origHeightDesktop
+                                      ? designer.image.origHeightDesktop ||
+                                        designer.image.origHeight
                                       : undefined
                                   }
                                 />
@@ -1118,7 +1070,7 @@ export function AboutPageNew() {
                                 <path
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
-                                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                                  d="M3 12h18L13.5 4.5"
                                 />
                               </svg>
                             </Link>
@@ -1381,7 +1333,7 @@ export function AboutPageNew() {
                                       <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
-                                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                                        d="M3 12h18L13.5 4.5"
                                       />
                                     </svg>
                                   </Link>

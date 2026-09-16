@@ -404,11 +404,11 @@ export function DesignersPageV2() {
               </div>
 
               {/* Bottom Architectural Presentation & Transparent Info Panel */}
-              <div className="relative z-10 w-full max-w-[96%] sm:max-w-[92%] lg:max-w-[88vw] mx-auto pb-12 sm:pb-20 pt-4 pointer-events-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end">
+              <div className="relative z-10 w-full max-w-[96%] sm:max-w-[92%] lg:max-w-[88vw] mx-auto pb-24 sm:pb-20 pt-4 pointer-events-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-12 items-end">
                   {/* Left Column: Big Typographic Title & Tagline */}
                   <div className="lg:col-span-7 xl:col-span-8 flex flex-col">
-                    <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-white uppercase tracking-tight leading-[0.95] mb-3 drop-shadow-md">
+                    <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-white uppercase tracking-tight leading-[0.95] mb-2 sm:mb-3 drop-shadow-md">
                       {t(designer.name)}
                     </h2>
 
@@ -420,7 +420,7 @@ export function DesignersPageV2() {
                   </div>
 
                   {/* Right Column: Only Explore Designer CTA */}
-                  <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-end lg:items-end bg-transparent p-0">
+                  <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-end lg:items-end bg-transparent p-0 pt-1 sm:pt-0">
                     <div className="inline-flex items-center gap-2.5 text-xs sm:text-sm uppercase tracking-[0.25em] font-medium text-white/90 hover:text-white w-fit group-hover:text-white transition-colors">
                       <span>{t('explore_designer') || 'Tasarımcıyı Keşfet'}</span>
                       <ArrowRight className="w-4 h-4 text-white/80 transition-transform duration-300 group-hover:translate-x-1" />
@@ -557,7 +557,7 @@ export function DesignersPageV2() {
               scrollToSectionRef.current(activeIndex + 1)
             }
           }}
-          className={`fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center text-white/80 hover:text-white transition-all duration-500 cursor-pointer focus:outline-none group p-2 ${
+          className={`fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center text-white/80 hover:text-white transition-all duration-500 cursor-pointer focus:outline-none group p-1.5 sm:p-2 ${
             activeIndex === designers.length - 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
           aria-label={t('scroll_down') || 'Aşağı Kaydır'}
@@ -565,7 +565,7 @@ export function DesignersPageV2() {
           <motion.div
             animate={{y: [0, 5, 0]}}
             transition={{duration: 1.5, repeat: Infinity, ease: 'easeInOut'}}
-            className="p-2 sm:p-2.5 rounded-full bg-black/35 border border-white/20 backdrop-blur-md group-hover:border-white/50 group-hover:bg-black/55 transition-all shadow-[0_4px_16px_rgba(0,0,0,0.35)]"
+            className="p-2 sm:p-2.5 rounded-full bg-black/40 border border-white/20 backdrop-blur-md group-hover:border-white/50 group-hover:bg-black/55 transition-all shadow-[0_4px_16px_rgba(0,0,0,0.35)]"
           >
             <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={1.75} />
           </motion.div>
