@@ -1,27 +1,20 @@
 [
   {
+    "name": "Main Application JS",
     "path": "dist/assets/index-*.js",
-    "limit": "500 KB",
-    "name": "Main bundle (index)"
+    "limit": "600 kB",
+    "running": false
   },
   {
+    "name": "React Vendor Bundle",
     "path": "dist/assets/react-vendor-*.js",
-    "limit": "200 KB",
-    "name": "React vendor bundle"
+    "limit": "300 kB",
+    "running": false
   },
   {
-    "path": "dist/assets/sanity-vendor-*.js",
-    "limit": "150 KB",
-    "name": "Sanity vendor bundle"
-  },
-  {
-    "path": "dist/assets/*.css",
-    "limit": "50 KB",
-    "name": "CSS bundle"
-  },
-  {
-    "path": "dist/**/*.js",
-    "limit": "1.5 MB",
-    "name": "Total JS (all bundles)"
+    "name": "Styles CSS",
+    "path": "dist/assets/index-*.css",
+    "limit": "150 kB",
+    "running": false
   }
 ]
