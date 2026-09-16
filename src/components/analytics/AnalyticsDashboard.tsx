@@ -150,7 +150,7 @@ function CustomTooltip({active, payload, label}: CustomTooltipProps) {
   )
 }
 
-export type DateRangeKey =
+type DateRangeKey =
   | '7daysAgo'
   | '30daysAgo'
   | '90daysAgo'
@@ -158,7 +158,7 @@ export type DateRangeKey =
   | '365daysAgo'
   | '2020-01-01'
 
-export const DATE_RANGES: {key: DateRangeKey; label: string}[] = [
+const DATE_RANGES: {key: DateRangeKey; label: string}[] = [
   {key: '7daysAgo', label: 'Son 7 Gün'},
   {key: '30daysAgo', label: 'Son 30 Gün'},
   {key: '90daysAgo', label: 'Son 3 Ay'},

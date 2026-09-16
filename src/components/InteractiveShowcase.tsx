@@ -274,13 +274,16 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
         (typeof mainObj['image'] === 'string' && mainObj['image'])
       if (u) return rewriteR2Url(u.trim())
     }
-    if (Array.isArray(prod.media) && prod.media.length > 0) {
-      const cover = prod.media.find(m => m?.isCover) || prod.media[0]
+    const prodObj = prod as Record<string, unknown>
+    if (Array.isArray(prodObj['media']) && prodObj['media'].length > 0) {
+      const mediaList = prodObj['media'] as Record<string, unknown>[]
+      const cover = mediaList.find(m => m?.['isCover']) || mediaList[0]
       const u =
-        cover?.url ||
-        (cover?.imageR2 as {url?: string})?.url ||
-        (typeof cover?.image === 'string' ? cover.image : undefined)
-      if (typeof u === 'string' && u.trim()) return rewriteR2Url(u.trim())
+        (typeof cover?.['url'] === 'string' && cover['url']) ||
+        (typeof (cover?.['imageR2'] as Record<string, unknown> | undefined)?.['url'] === 'string' &&
+          ((cover?.['imageR2'] as Record<string, unknown>)['url'] as string)) ||
+        (typeof cover?.['image'] === 'string' && cover['image'])
+      if (u) return rewriteR2Url(u.trim())
     }
     return ''
   }

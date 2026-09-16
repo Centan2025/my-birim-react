@@ -302,14 +302,18 @@ export const Footer = () => {
                           alt={partnerName}
                           style={{
                             height: `${heightRem}rem`,
-                            transform: partnerOffsetY ? `translateY(${partnerOffsetY}px)` : undefined,
+                            transform: partnerOffsetY
+                              ? `translateY(${partnerOffsetY}px)`
+                              : undefined,
                           }}
                           className="w-auto max-w-[90px] object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
                         />
                       ) : (
                         <span
                           style={{
-                            transform: partnerOffsetY ? `translateY(${partnerOffsetY}px)` : undefined,
+                            transform: partnerOffsetY
+                              ? `translateY(${partnerOffsetY}px)`
+                              : undefined,
                           }}
                           className="text-xs font-medium text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200"
                         >
