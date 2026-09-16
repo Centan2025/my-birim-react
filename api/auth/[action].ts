@@ -2,7 +2,7 @@ import {randomUUID, createHash, timingSafeEqual} from 'crypto'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 
-function _safeCompareHash(aHex: string, bHex: string): boolean {
+function safeCompareHash(aHex: string, bHex: string): boolean {
   try {
     const bufA = Buffer.from(aHex, 'hex')
     const bufB = Buffer.from(bHex, 'hex')
@@ -32,7 +32,8 @@ async function sendServerVerificationEmail(
   name?: string,
   lang: 'tr' | 'en' = 'tr'
 ): Promise<boolean> {
-  return sendServiceVerificationEmail({to: email, verificationUrl, name, lang})
+  const result = await sendServiceVerificationEmail({to: email, verificationUrl, name, lang})
+  return result.success
 }
 
 async function sendServerPasswordResetEmail(
@@ -41,7 +42,8 @@ async function sendServerPasswordResetEmail(
   name?: string,
   lang: 'tr' | 'en' = 'tr'
 ): Promise<boolean> {
-  return sendServicePasswordResetEmail({to: email, resetUrl, name, lang})
+  const result = await sendServicePasswordResetEmail({to: email, resetUrl, name, lang})
+  return result.success
 }
 
 function detectUserLanguage(
@@ -99,7 +101,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const rawAction = req.query['action']
   const action = Array.isArray(rawAction)
     ? rawAction[0]
-    : rawAction || req.url?.split('?')[0].split('/').pop()
+    : rawAction || (req.url?.split('?')[0] ?? '').split('/').pop()
 
   switch (action) {
     case 'login':

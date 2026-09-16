@@ -73,6 +73,7 @@ export interface GetPaymentStatusResult {
 }
 
 export interface VerifyPaymentCallbackInput {
+  provider?: string
   payload: Record<string, unknown>
   headers: Record<string, string | string[] | undefined>
   rawBody?: string

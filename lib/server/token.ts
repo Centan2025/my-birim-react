@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import type {VercelRequest} from '@vercel/node'
+import type {VercelRequest, VercelResponse} from '@vercel/node'
 
 function getJwtSecret(): string {
   const secret = process.env['JWT_SECRET']

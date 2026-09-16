@@ -341,8 +341,11 @@ export async function getPaymentStatus(
       throw new PaymentError(404, 'PAYMENT_TRANSACTION_NOT_FOUND', 'Ödeme işlemi bulunamadı.')
     }
 
-    txData = data
-    orderData = data.orders as Record<string, unknown>
+    txData = data as unknown as Record<string, unknown>
+    orderData = (Array.isArray(data.orders) ? data.orders[0] : data.orders) as unknown as Record<
+      string,
+      unknown
+    > | null
   } else {
     // In-memory fallback
     txData = {

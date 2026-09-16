@@ -187,7 +187,7 @@ export async function createCommerceOrder(
   const itemsData = validationResult.items.map(item => ({
     product_id: item.productId,
     variant_id: item.variantId || null,
-    product_name_snapshot: item.name,
+    product_name_snapshot: item.productName,
     sku_snapshot: item.sku,
     selected_options_snapshot: item.selectedOptions || {},
     quantity: item.quantity,

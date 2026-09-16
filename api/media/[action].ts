@@ -59,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const rawAction = req.query['action']
   const action = Array.isArray(rawAction)
     ? rawAction[0]
-    : rawAction || req.url?.split('?')[0].split('/').pop()
+    : rawAction || (req.url?.split('?')[0] ?? '').split('/').pop()
 
   switch (action) {
     case 'presigned-url':
