@@ -100,6 +100,15 @@ export default defineType({
         'Aktif edildiğinde ziyaretçiler sadece "Yakında" sayfasını görür. Development modunda otomatik olarak devre dışıdır.',
     }),
     defineField({
+      name: 'commerce_enabled',
+      title: 'E-Ticaret & Online Satışı Etkinleştir (Global Commerce Switch)',
+      type: 'boolean',
+      fieldset: 'features',
+      initialValue: false,
+      description:
+        'Global e-ticaret etkinleştirme anahtarı. Kapalı olduğunda (false), online ticaret ve doğrudan satın alma işlevleri tamamen pasiftir ve site teklif/katalog modunda çalışır.',
+    }),
+    defineField({
       name: 'imageBorderStyle',
       title: 'Görsel ve Video Kenar Stili',
       type: 'string',

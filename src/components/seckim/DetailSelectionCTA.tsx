@@ -34,7 +34,7 @@ export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product})
             onClick={handleToggle}
             className={`group relative inline-flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-none border transition-all duration-300 cursor-pointer shrink-0 shadow-none ${
               selected
-                ? 'bg-[#3c424d] text-white border-[#3c424d] hover:bg-[#4a515c] hover:border-[#4a515c]'
+                ? 'bg-[#525252] text-white border-[#525252] hover:bg-[#636363] hover:border-[#636363]'
                 : 'bg-transparent text-[var(--text-primary)] hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 border-neutral-400 dark:border-neutral-500 hover:border-black dark:hover:border-white'
             }`}
             aria-label={
@@ -46,11 +46,11 @@ export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product})
               viewBox="0 0 24 24"
               fill={selected ? 'currentColor' : 'none'}
               stroke="currentColor"
-              strokeWidth={selected ? '1.4' : '1.3'}
+              strokeWidth={selected ? '1.5' : '1.3'}
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M19 21l-7-4-7 4V3h14v18z" />
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
             </svg>
           </button>
         </AnimatedTooltip>

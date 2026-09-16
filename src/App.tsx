@@ -4,6 +4,7 @@ import {QueryClientProvider} from '@tanstack/react-query'
 
 import {I18nProvider} from './i18n'
 import {CartProvider} from './context/CartContext'
+import {CommerceCartProvider} from './context/CommerceCartContext'
 import {HeaderThemeProvider, useHeaderTheme} from './context/HeaderThemeContext'
 import {AuthProvider} from './context/AuthContext'
 import {CardTransitionProvider} from './context/CardTransitionContext'
@@ -363,19 +364,21 @@ export default function App() {
         <AuthProvider>
           <I18nProvider>
             <CartProvider>
-              <SEOProvider>
-                <DarkModeProvider>
-                  <HeaderThemeProvider>
-                    <SiteSettingsProvider>
-                      <SelectionProvider>
-                        <CardTransitionProvider>
-                          <AppContent />
-                        </CardTransitionProvider>
-                      </SelectionProvider>
-                    </SiteSettingsProvider>
-                  </HeaderThemeProvider>
-                </DarkModeProvider>
-              </SEOProvider>
+              <CommerceCartProvider>
+                <SEOProvider>
+                  <DarkModeProvider>
+                    <HeaderThemeProvider>
+                      <SiteSettingsProvider>
+                        <SelectionProvider>
+                          <CardTransitionProvider>
+                            <AppContent />
+                          </CardTransitionProvider>
+                        </SelectionProvider>
+                      </SiteSettingsProvider>
+                    </HeaderThemeProvider>
+                  </DarkModeProvider>
+                </SEOProvider>
+              </CommerceCartProvider>
             </CartProvider>
           </I18nProvider>
         </AuthProvider>

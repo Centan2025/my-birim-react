@@ -7,6 +7,7 @@ import {useSiteSettings} from '../context/SiteSettingsContext'
 import {analytics} from '../lib/analytics'
 import {useDesigners} from '../hooks/useDesigners'
 import {SelectionButton} from './seckim/SelectionButton'
+import {ShoppingBag} from 'lucide-react'
 
 export const ProductCard: React.FC<{
   product: Product
@@ -114,7 +115,18 @@ export const ProductCard: React.FC<{
             isMirroredDesktop={mainImageIsMirroredDesktop}
             fitAuto={true}
           />
-          <div className="absolute top-2.5 left-2.5 right-2.5 z-20 flex justify-end pointer-events-none">
+          <div className="absolute top-2.5 left-2.5 right-2.5 z-20 flex items-center justify-between pointer-events-none">
+            {product.buyable ? (
+              <div
+                className="pointer-events-auto flex items-center justify-center p-1.5 rounded-full bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs text-neutral-700 dark:text-neutral-200 border border-neutral-200/50 dark:border-neutral-700/50 shadow-xs transition-transform duration-300 group-hover:scale-105"
+                title={t('buyable') || 'Satın Alınabilir'}
+                aria-label={t('buyable') || 'Satın Alınabilir'}
+              >
+                <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.6} />
+              </div>
+            ) : (
+              <div />
+            )}
             <div className="pointer-events-auto">
               <SelectionButton product={product} />
             </div>

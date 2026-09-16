@@ -80,6 +80,8 @@ export interface SiteSettings {
   enableAiRoomPlanner?: boolean
   /** Whether the Selection / Projects (Seçtiklerim / Projelerim) feature is enabled. */
   enableSelections?: boolean
+  /** Whether online commerce functionality is enabled globally. */
+  commerce_enabled?: boolean
 }
 
 // --- Core Data Models ---
@@ -298,6 +300,23 @@ export interface ProductMaterialsGroup {
   materials: ProductMaterial[] // All materials in the group (for backward compatibility)
 }
 
+export type SalesMode = 'NONE' | 'DIRECT' | 'CONFIGURABLE' | 'QUOTE'
+
+export interface ProductVariantOption {
+  name: string
+  value: string
+}
+
+export interface ProductVariant {
+  id: string
+  title?: LocalizedString
+  sku?: string
+  price?: number
+  currency?: string
+  options: ProductVariantOption[]
+  enabled: boolean
+}
+
 /**
  * Represents a single product.
  */
@@ -399,6 +418,12 @@ export interface Product {
   }[]
   /** Indicates if the product can be purchased directly. */
   buyable: boolean
+  /** Whether the product is enabled for e-commerce online sale. */
+  sale_enabled?: boolean
+  /** The sales mode for the product (NONE, DIRECT, CONFIGURABLE, QUOTE). */
+  sales_mode?: SalesMode
+  /** Available variants for the product. */
+  variants?: ProductVariant[]
   /** Price of the product. */
   price: number
   /** Currency code (e.g., 'TRY', 'USD'). */
@@ -1081,6 +1106,18 @@ export interface KvkkPolicy {
   updatedAt?: string
 }
 
+export interface DistanceSalesAgreement {
+  title: LocalizedString
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
+  updatedAt?: string
+}
+
+export interface PreliminaryInfoForm {
+  title: LocalizedString
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
+  updatedAt?: string
+}
+
 // --- Application-Specific Models ---
 
 /**
@@ -1135,4 +1172,103 @@ export interface Project {
   publishAt?: string
   /** Optional manual sort order; smaller numbers appear first. */
   sortOrder?: number
+}
+
+// --- Commerce Domain Types (Phase 1 Foundation) ---
+
+export type OrderStatus =
+  | 'PENDING_PAYMENT'
+  | 'PAID'
+  | 'PAYMENT_FAILED'
+  | 'CANCELLED'
+  | 'REFUNDED'
+  | 'PARTIALLY_REFUNDED'
+
+export type PaymentStatus =
+  | 'PENDING'
+  | 'AUTHORIZED'
+  | 'PAID'
+  | 'FAILED'
+  | 'REFUNDED'
+  | 'PARTIALLY_REFUNDED'
+
+export type PaymentTransactionStatus =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'SUCCESS'
+  | 'FAILED'
+  | 'CANCELLED'
+  | 'REFUNDED'
+  | 'PARTIALLY_REFUNDED'
+
+export type PaymentProvider = 'iyzico' | 'paytr' | 'test'
+
+export interface OrderAddressSnapshot {
+  title?: string
+  firstName?: string
+  lastName?: string
+  name?: string
+  phone?: string
+  email?: string
+  addressLine1?: string
+  addressLine2?: string
+  city?: string
+  state?: string
+  postalCode?: string
+  country?: string
+  taxNumber?: string
+  taxOffice?: string
+  companyName?: string
+  isCorporate?: boolean
+}
+
+export interface OrderItem {
+  id: string
+  order_id: string
+  product_id: string
+  variant_id?: string | null
+  product_name_snapshot: string
+  sku_snapshot?: string | null
+  selected_options_snapshot?: Record<string, string> | ProductVariantOption[] | null
+  quantity: number
+  unit_price: number
+  total_price: number
+  created_at: string
+}
+
+export interface Order {
+  id: string
+  order_number: string
+  user_id?: string | null
+  status: OrderStatus
+  payment_status: PaymentStatus
+  currency: 'TRY' | 'USD' | 'EUR' | string
+  subtotal: number
+  discount_total: number
+  shipping_total: number
+  tax_total: number
+  grand_total: number
+  billing_address_snapshot: OrderAddressSnapshot
+  shipping_address_snapshot: OrderAddressSnapshot
+  items?: OrderItem[]
+  created_at: string
+  updated_at: string
+}
+
+export interface PaymentTransaction {
+  id: string
+  order_id: string
+  provider: PaymentProvider
+  provider_payment_id?: string | null
+  provider_transaction_id?: string | null
+  conversation_id?: string | null
+  amount: number
+  currency: string
+  status: PaymentTransactionStatus
+  installment?: number
+  error_code?: string | null
+  error_message?: string | null
+  metadata?: Record<string, unknown>
+  created_at: string
+  updated_at: string
 }

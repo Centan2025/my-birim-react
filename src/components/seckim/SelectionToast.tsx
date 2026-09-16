@@ -25,7 +25,7 @@ export const SelectionToast: React.FC = () => {
           role="status"
           aria-live="polite"
         >
-          <div className="bg-[#3c424d] text-white px-5 py-3.5 shadow-2xl border border-[#4a515c] flex items-center justify-between gap-4">
+          <div className="bg-[#2c2c2c] text-white px-5 py-3.5 shadow-2xl border border-[#3f3f3f] flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-white flex-shrink-0" />
               <p className="text-xs tracking-wider uppercase font-light text-neutral-100">

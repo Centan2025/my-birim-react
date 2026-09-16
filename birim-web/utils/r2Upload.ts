@@ -1,24 +1,7 @@
-import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
-
-const R2_ACCOUNT_ID = (process.env.SANITY_STUDIO_R2_ACCOUNT_ID || '').trim()
-const R2_ACCESS_KEY_ID = (process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || '').trim()
-const R2_SECRET_ACCESS_KEY = (process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || '').trim()
-const R2_BUCKET_NAME = (process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-assets').trim()
 const R2_DOMAIN = (
-  process.env.SANITY_STUDIO_R2_DOMAIN || 'https://birim-assets.web-birim.workers.dev'
+  (typeof process !== 'undefined' && process.env?.['SANITY_STUDIO_R2_DOMAIN']) ||
+  'https://assets.birim.com'
 ).trim()
-
-let r2Client: S3Client | null = null
-if (R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY) {
-  r2Client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-      accessKeyId: R2_ACCESS_KEY_ID,
-      secretAccessKey: R2_SECRET_ACCESS_KEY,
-    },
-  })
-}
 
 export async function uploadToR2(
   blob: Blob | File,
@@ -28,26 +11,7 @@ export async function uploadToR2(
   const domainToUse = R2_DOMAIN.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
   const finalFileUrl = `${domainToUse}/${key}`
 
-  // 1. Direct R2 upload via S3Client if valid credentials present in runtime
-  if (r2Client) {
-    try {
-      const buffer = await blob.arrayBuffer()
-      const uint8 = new Uint8Array(buffer)
-      await r2Client.send(
-        new PutObjectCommand({
-          Bucket: R2_BUCKET_NAME,
-          Key: key,
-          Body: uint8,
-          ContentType: contentType,
-        }),
-      )
-      return finalFileUrl
-    } catch {
-      // Fallback silently to presigned URL
-    }
-  }
-
-  // 2. Presigned URL fallback
+  // Presigned URL flow (Zero master credentials on client)
   const lastSlash = key.lastIndexOf('/')
   const folder = key.substring(0, lastSlash)
   const filename = key.substring(lastSlash + 1)

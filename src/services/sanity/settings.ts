@@ -5,8 +5,15 @@ import type {
   PrivacyPolicy,
   TermsOfService,
   KvkkPolicy,
+  DistanceSalesAgreement,
+  PreliminaryInfoForm,
   FooterContent,
 } from '../../types'
+import {
+  FALLBACK_DISTANCE_SALES_AGREEMENT,
+  FALLBACK_PRELIMINARY_INFO,
+  FALLBACK_KVKK_COMMERCE,
+} from '../../data/legalFallbacks'
 import {sanity, useSanity, mapImage, SanityImageLike} from './client'
 
 const SIMULATED_DELAY = 200
@@ -138,6 +145,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         ),
         enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
         enableSelections: s?.enableSelections !== false,
+        commerce_enabled: Boolean(s?.commerce_enabled ?? false),
       }
     } catch {
       // Ignore
@@ -169,6 +177,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     ),
     enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
     enableSelections: s?.enableSelections !== false,
+    commerce_enabled: Boolean(s?.commerce_enabled ?? false),
   }
 }
 
@@ -233,11 +242,31 @@ export const getTermsOfService = async (): Promise<TermsOfService | null> => {
 }
 
 export const getKvkkPolicy = async (): Promise<KvkkPolicy | null> => {
-  if (useSanity && sanity)
-    return (
-      (await sanity.fetch(groq`*[_type == "kvkkPolicy"][0]{ title, content, updatedAt }`)) || null
+  if (useSanity && sanity) {
+    const data = await sanity.fetch(groq`*[_type == "kvkkPolicy"][0]{ title, content, updatedAt }`)
+    if (data?.content) return data
+  }
+  return FALLBACK_KVKK_COMMERCE
+}
+
+export const getDistanceSalesAgreement = async (): Promise<DistanceSalesAgreement | null> => {
+  if (useSanity && sanity) {
+    const data = await sanity.fetch(
+      groq`*[_type == "distanceSalesAgreement"][0]{ title, content, updatedAt }`
     )
-  return null
+    if (data?.content) return data
+  }
+  return FALLBACK_DISTANCE_SALES_AGREEMENT
+}
+
+export const getPreliminaryInfoForm = async (): Promise<PreliminaryInfoForm | null> => {
+  if (useSanity && sanity) {
+    const data = await sanity.fetch(
+      groq`*[_type == "preliminaryInfoForm"][0]{ title, content, updatedAt }`
+    )
+    if (data?.content) return data
+  }
+  return FALLBACK_PRELIMINARY_INFO
 }
 
 export const getFooterContent = async (): Promise<FooterContent> => {

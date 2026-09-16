@@ -12,6 +12,7 @@ import {
 } from './client'
 
 import {getItem} from './settings'
+import {normalizeCurrency} from '../../utils/currency'
 
 const SIMULATED_DELAY = 200
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
@@ -511,8 +512,11 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
     showHeroNavigation: Boolean(r?.['showHeroNavigation']),
     dimensionImages: mapDimensionImages(r?.['dimensionImages'] as unknown[]),
     buyable: Boolean(r['buyable']),
+    sale_enabled: r['sale_enabled'] !== undefined ? Boolean(r['sale_enabled']) : false,
+    sales_mode: (r['sales_mode'] as Product['sales_mode']) || 'NONE',
+    variants: Array.isArray(r['variants']) ? (r['variants'] as Product['variants']) : [],
     price: r['price'] as number,
-    currency: r['currency'] as string,
+    currency: normalizeCurrency(r['currency'] as string),
     sku: r['sku'] as string,
     stockStatus: r['stockStatus'] as string,
     showMaterials: r['showMaterials'] !== false,
@@ -556,7 +560,11 @@ const productQueryString = `
     type, url, image, imageMobile, imageR2, imageMobileR2, imageDesktopR2, cropMobile, hotspotMobile, title, description, link, linkText, 
     videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover, isMirrored 
   },
-  mediaSectionTitle, mediaSectionText, showMediaPanels, showHeroNavigation, buyable, price, currency, sku, stockStatus, showMaterials,
+  mediaSectionTitle, mediaSectionText, showMediaPanels, showHeroNavigation, buyable, 
+  "sale_enabled": coalesce(sale_enabled, false),
+  "sales_mode": coalesce(sales_mode, "NONE"),
+  variants[]{ id, title, sku, price, currency, options[]{ name, value }, enabled },
+  price, currency, sku, stockStatus, showMaterials,
   materialSelections[]{ "group": group->{title,books[]{title,items[]{name,imageR2,image}}}, materials[]{name,imageR2,image} },
   dimensionImages[]{ imageR2, imageMobileR2, imageDesktopR2, title },
   exclusiveContent, designer->{ "designerId": id.current }, designers[]->{ "designerId": id.current }, category->{ "categoryId": id.current }

@@ -165,6 +165,32 @@ export default defineType({
       fieldset: 'commerce',
     }),
     defineField({
+      name: 'sale_enabled',
+      title: 'E-Ticaret Satışına Açık (Sale Enabled)',
+      type: 'boolean',
+      fieldset: 'commerce',
+      initialValue: false,
+      description:
+        'Commerce üzerinden doğrudan online satışa açık olup olmadığını belirler. Kapalıysa (false) ürün online satın alınamaz.',
+    }),
+    defineField({
+      name: 'sales_mode',
+      title: 'Satış Modu',
+      type: 'string',
+      fieldset: 'commerce',
+      initialValue: 'NONE',
+      options: {
+        list: [
+          {title: 'Satışa Kapalı (NONE)', value: 'NONE'},
+          {title: 'Doğrudan Satış (DIRECT)', value: 'DIRECT'},
+          {title: 'Varyant / Konfigüre Edilebilir (CONFIGURABLE)', value: 'CONFIGURABLE'},
+          {title: 'Sadece Teklif Talebi (QUOTE)', value: 'QUOTE'},
+        ],
+      },
+      description:
+        'Ürünün satış davranışı: NONE (Satışa kapalı), DIRECT (Tekil doğrudan satış), CONFIGURABLE (Varyantlı), QUOTE (Teklif talebi).',
+    }),
+    defineField({
       name: 'price',
       title: 'Fiyat',
       type: 'number',
@@ -194,6 +220,15 @@ export default defineType({
           {title: 'Preorder', value: 'preorder'},
         ],
       },
+    }),
+    defineField({
+      name: 'variants',
+      title: 'Ürün Varyantları',
+      type: 'array',
+      fieldset: 'commerce',
+      of: [{type: 'productVariant'}],
+      description:
+        'Ürünün farklı ölçü, renk veya malzeme kombinasyonlarına özel varyant seçenekleri.',
     }),
     defineField({
       name: 'dimensionImages',

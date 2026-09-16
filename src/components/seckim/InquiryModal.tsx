@@ -176,7 +176,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
             <div className="p-6">
               {isSuccess ? (
                 <div className="py-12 text-center space-y-4">
-                  <div className="w-12 h-12 mx-auto rounded-full bg-[#3c424d] text-white flex items-center justify-center">
+                  <div className="w-12 h-12 mx-auto rounded-full bg-[#2c2c2c] text-white flex items-center justify-center">
                     <svg
                       className="w-6 h-6"
                       viewBox="0 0 24 24"
@@ -197,7 +197,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="mt-6 px-8 py-3 bg-[#3c424d] text-white border border-[#3c424d] text-xs uppercase tracking-widest font-semibold hover:bg-[#4a515c] hover:border-[#4a515c] transition-all"
+                    className="mt-6 px-8 py-3 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all"
                   >
                     TAMAM
                   </button>
@@ -324,7 +324,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-7 py-3 bg-[#3c424d] text-white border border-[#3c424d] text-xs uppercase tracking-widest font-semibold hover:bg-[#4a515c] hover:border-[#4a515c] disabled:opacity-50 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+                      className="px-7 py-3 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] disabled:opacity-50 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
                     >
                       {loading ? (
                         <>

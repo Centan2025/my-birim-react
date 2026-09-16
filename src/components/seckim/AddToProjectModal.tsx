@@ -157,7 +157,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2.5 bg-[#3c424d] text-white border border-[#3c424d] text-xs uppercase tracking-widest font-semibold hover:bg-[#4a515c] hover:border-[#4a515c] transition-all cursor-pointer shadow-sm"
+                  className="px-5 py-2.5 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all cursor-pointer shadow-sm"
                 >
                   TAMAM
                 </button>

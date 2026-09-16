@@ -34,6 +34,12 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /login
 Disallow: /profile
+Disallow: /account/
+Disallow: /checkout
+Disallow: /order/
+Disallow: /site-analitigi
+Disallow: /analytics
+Disallow: /seckim/paylas/
 Disallow: /verify-email
 Disallow: /reset-password
 Disallow: /*?*bypass=*

@@ -3,6 +3,7 @@ import type {Category, Designer, Product, ProductMaterialsGroup} from '../types'
 import {getProductImageProps} from '../types/seckim'
 import {rewriteR2Url} from '../services/sanity/client'
 import {toPlainText} from './portableText'
+import {formatCurrency} from './currency'
 
 interface GeneratePdfOptions {
   projectName?: string
@@ -852,10 +853,7 @@ export async function generateProductPDF({
 
   // Price (if buyable)
   if (product.buyable && product.price && product.price > 0) {
-    const formattedPrice = new Intl.NumberFormat(isEn ? 'en-US' : 'tr-TR', {
-      style: 'currency',
-      currency: product.currency || 'TRY',
-    }).format(product.price)
+    const formattedPrice = formatCurrency(product.price, product.currency, isEn ? 'en-US' : 'tr-TR')
     doc.setFont(bodyFont, 'bold')
     doc.setFontSize(9)
     doc.setTextColor(30, 30, 30)

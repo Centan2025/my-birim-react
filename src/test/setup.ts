@@ -5,6 +5,12 @@ import {afterEach} from 'vitest'
 // Cleanup after each test
 afterEach(() => {
   cleanup()
+  try {
+    localStorage.clear()
+    sessionStorage.clear()
+  } catch {
+    // Ignore in non-storage environments
+  }
 })
 
 // Mock window.matchMedia

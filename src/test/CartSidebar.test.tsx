@@ -82,11 +82,11 @@ describe('CartSidebar', () => {
     expect(screen.getByText('cart_empty')).toBeInTheDocument()
   })
 
-  it('ürün eklendiğinde ürün adı ve teklif butonu görüntülenmeli', () => {
+  it('ürün eklendiğinde ürün adı ve satın alma butonu görüntülenmeli', () => {
     renderWithProviders(true, true)
 
     expect(screen.getByText('Modern Sandalye')).toBeInTheDocument()
-    expect(screen.getByText('request_quote')).toBeInTheDocument()
+    expect(screen.getByText('Satın Al / Ödemeye Geç')).toBeInTheDocument()
   })
 
   it('Escape tuşuna basıldığında sepet kapanmalı', () => {

@@ -42,6 +42,8 @@ export {
   getPrivacyPolicy,
   getTermsOfService,
   getKvkkPolicy,
+  getDistanceSalesAgreement,
+  getPreliminaryInfoForm,
   getFooterContent,
   updateFooterContent,
 } from './sanity/settings'

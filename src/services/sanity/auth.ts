@@ -289,11 +289,10 @@ export const verifyUserByToken = async (token: string, email?: string): Promise<
   }
 
   const users = getItem<User[]>(KEYS.USERS) || []
-  const localUser = users.find(
-    u => u.verificationToken === token || u._id === token || (email && u.email === email)
-  )
+  const localUser = users.find(u => u.verificationToken && u.verificationToken === token)
   if (localUser) {
     localUser.isVerified = true
+    delete localUser.verificationToken
     setItem(KEYS.USERS, users)
     return localUser
   }

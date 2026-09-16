@@ -118,10 +118,17 @@ export default {
   reset_success_message: 'İçerik sıfırlandı. Sayfa yeniden yüklenecek.',
   navigation: 'Navigasyon',
   kvkk_disclosure: 'KVKK Aydınlatma Metni',
+  preliminary_info_form: 'Ön Bilgilendirme Formu',
+  distance_sales_agreement: 'Mesafeli Satış Sözleşmesi',
   privacy_policy: 'Gizlilik Politikası',
   cookie_policy: 'Çerez Politikası',
   terms_of_service: 'Kullanım Koşulları',
   legal_information: 'Yasal Bilgiler',
+  preliminary_info_description:
+    'Birim Mobilya San. ve Tic. A.Ş. mesafeli e-ticaret ön bilgilendirme formu ve satış koşulları.',
+  distance_sales_description:
+    'Birim Mobilya San. ve Tic. A.Ş. mesafeli satış sözleşmesi ve alışveriş şartları.',
+  kvkk_description: 'Kişisel verilerin korunması ve işlenmesine dair KVKK aydınlatma metni.',
   home_meta_title: 'Birim — Furniture Design & Manufacturing',
   home_meta_description:
     'Birim, 1978 yılında kurulmuş, özel üretim mobilya, contract furniture ve mimari projelere yönelik tasarım ve üretim yapan Türkiye merkezli bir mobilya markasıdır.',
@@ -247,4 +254,14 @@ export default {
   show_more: 'Daha Fazla Göster',
   show_less: 'Daha Az Göster',
   seckim: 'Seçtiklerim',
+  subtotal: 'Ara Toplam',
+  shipping_taxes_calculated: 'Kargo ve teslimat detayları teklif sürecinde netleştirilir.',
+  request_quote: 'Teklif Talebi Oluştur',
+  cart_empty: 'Sepetiniz henüz boş.',
+  continue_shopping: 'Ürünleri İncele',
+  remove: 'Kaldır',
+  remove_item: 'Ürünü kaldır',
+  decrease_quantity: 'Miktarı azalt',
+  increase_quantity: 'Miktarı artır',
+  buyable: 'Satın Alınabilir',
 }

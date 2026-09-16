@@ -17,6 +17,7 @@ import {
   ArrowRight,
   LogOut,
   Trash2,
+  Package,
 } from 'lucide-react'
 
 export function ProfilePage() {
@@ -230,6 +231,27 @@ export function ProfilePage() {
                     })}
                   />
                 </div>
+              </section>
+
+              {/* Siparişlerim (Commerce Orders) Section */}
+              <section className="bg-gray-50/50 p-8 border border-black/5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-[11px] font-bold text-gray-900 uppercase tracking-[0.3em] flex items-center gap-2">
+                    <Package className="w-4 h-4 text-gray-700" />
+                    Siparişlerim
+                  </h2>
+                </div>
+                <p className="text-xs md:text-sm text-gray-500 font-inter mb-8 tracking-wide leading-relaxed max-w-xl">
+                  Geçmiş ve devam eden siparişlerinizin durumunu inceleyebilir, ödeme ve teslimat
+                  detaylarına ulaşabilirsiniz.
+                </p>
+                <Link
+                  to="/account/orders"
+                  className="inline-flex items-center justify-between min-w-[240px] bg-black text-white font-bold py-4 px-8 uppercase tracking-[0.2em] text-[11px] hover:bg-neutral-800 transition-all duration-500 font-inter group"
+                >
+                  <span>Siparişlerimi Görüntüle</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </section>
 
               {/* Mimar Programı / Exclusive Assets Access */}

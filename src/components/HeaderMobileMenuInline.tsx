@@ -110,36 +110,20 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                     setIsMobileMenuOpen(false)
                     openDrawer()
                   }}
-                  className="group relative flex items-center gap-1.5 p-1 text-gray-300 hover:text-white transition-all duration-300 cursor-pointer"
+                  className="group relative flex items-center p-1 text-gray-300 hover:text-white transition-all duration-300 cursor-pointer"
                   aria-label={`${t('seckim') || 'Seçtiklerim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
-                  title={t('seckim') || 'Seçtiklerim'}
                 >
                   <svg
                     className="w-5 h-5 transition-transform duration-300 group-hover:scale-105"
                     viewBox="0 0 24 24"
-                    fill="none"
+                    fill={selectionCount > 0 ? 'currentColor' : 'none'}
                     stroke="currentColor"
                     strokeWidth="1.3"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="M19 21l-7-4-7 4V3h14v18z" />
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                   </svg>
-                  {selectionCount > 0 && (
-                    <span
-                      className="inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[9.5px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs leading-none"
-                      style={{
-                        backgroundColor: '#3c424d',
-                        color: '#ffffff',
-                        fontVariantNumeric: 'tabular-nums',
-                        letterSpacing: 0,
-                      }}
-                    >
-                      <span className="flex items-center justify-center leading-none">
-                        {selectionCount}
-                      </span>
-                    </span>
-                  )}
                 </button>
               )}
 

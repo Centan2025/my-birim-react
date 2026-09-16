@@ -341,7 +341,7 @@ export const CountrySelect: FC<CountrySelectProps> = ({
                     </div>
 
                     {isSelected && (
-                      <Check className="w-4 h-4 flex-shrink-0 text-[#3c424d] dark:text-white ml-2" />
+                      <Check className="w-4 h-4 flex-shrink-0 text-[#2c2c2c] dark:text-white ml-2" />
                     )}
                   </li>
                 )

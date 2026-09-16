@@ -151,10 +151,18 @@ export default {
   reset_success_message: 'Content has been reset. The page will now reload.',
   navigation: 'Navigation',
   kvkk_disclosure: 'KVKK Disclosure',
+  preliminary_info_form: 'Preliminary Information Form',
+  distance_sales_agreement: 'Distance Sales Agreement',
   privacy_policy: 'Privacy Policy',
   cookie_policy: 'Cookie Policy',
   terms_of_service: 'Terms of Service',
   legal_information: 'Legal Information',
+  preliminary_info_description:
+    'Birim Mobilya San. ve Tic. A.Ş. distance preliminary information form and terms of sale.',
+  distance_sales_description:
+    'Birim Mobilya San. ve Tic. A.Ş. distance sales agreement and purchase terms.',
+  kvkk_description:
+    'Clarification text on the processing and protection of personal data under KVKK.',
   home_meta_title: 'Birim — Furniture Design & Manufacturing',
   home_meta_description:
     'Birim is a Turkish furniture design and manufacturing company founded in 1978, specializing in custom furniture, contract furniture and architectural projects.',
@@ -283,4 +291,15 @@ export default {
   show_more: 'Show More',
   show_less: 'Show Less',
   seckim: 'Selections',
+  subtotal: 'Subtotal',
+  shipping_taxes_calculated:
+    'Shipping and delivery details will be finalized during the quote process.',
+  request_quote: 'Request a Quote',
+  cart_empty: 'Your cart is currently empty.',
+  continue_shopping: 'Explore Products',
+  remove: 'Remove',
+  remove_item: 'Remove item',
+  decrease_quantity: 'Decrease quantity',
+  increase_quantity: 'Increase quantity',
+  buyable: 'Available for Purchase',
 }

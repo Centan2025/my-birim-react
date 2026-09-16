@@ -37,7 +37,11 @@ CREATE POLICY "Users can update own profile"
 -- Ayrıcalıklı kolonların (role, architect_verification_status, is_verified)
 -- normal kullanıcılar tarafından değiştirilmesini engelleyen koruma tetikleyicisi (Defense-in-Depth)
 CREATE OR REPLACE FUNCTION public.protect_privileged_profile_fields()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
   IF (COALESCE(current_setting('request.jwt.claim.role', true), '') <> 'service_role' 
       AND current_user <> 'service_role') THEN
@@ -47,7 +51,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_protect_privileged_profile_fields ON public.profiles;
 CREATE TRIGGER on_protect_privileged_profile_fields
@@ -61,7 +65,11 @@ CREATE POLICY "Public can view approved architects"
 
 -- 3. YENİ KULLANICI KAYDOLDUĞUNDA OTOMATİK PROFİL OLUŞTURMA TETİKLEYİCİSİ (TRIGGER)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
   INSERT INTO public.profiles (id, email, name, first_name, last_name, role)
   VALUES (
@@ -74,7 +82,7 @@ BEGIN
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created

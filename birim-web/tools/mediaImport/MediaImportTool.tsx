@@ -5,13 +5,9 @@ import {useClient} from 'sanity'
 import imageCompression from 'browser-image-compression'
 import {uploadToR2 as directUploadToR2} from '../../utils/r2Upload'
 
-const R2_ACCOUNT_ID = process.env.SANITY_STUDIO_R2_ACCOUNT_ID || process.env.R2_ACCOUNT_ID || ''
-const R2_ACCESS_KEY_ID =
-  process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID || ''
-const R2_SECRET_ACCESS_KEY =
-  process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || process.env.R2_SECRET_ACCESS_KEY || ''
-const R2_BUCKET_NAME = process.env.SANITY_STUDIO_R2_BUCKET_NAME || process.env.R2_BUCKET_NAME || ''
-const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN || process.env.R2_DOMAIN || ''
+// Presigned URL mode: Zero master credentials required on client
+const R2_DOMAIN =
+  process.env.SANITY_STUDIO_R2_DOMAIN || process.env.R2_DOMAIN || 'https://assets.birim.com'
 
 // Duplicate Key Prevention Helper
 const uniqueKeyCache = new Set<string>()
@@ -414,20 +410,10 @@ export function MediaImportTool() {
     images: 0,
   })
 
-  // Pre-flight check
+  // Pre-flight check (Presigned URL mode: domain check)
   const preflight = {
-    accountId: !!R2_ACCOUNT_ID,
-    accessKey: !!R2_ACCESS_KEY_ID,
-    secretKey: !!R2_SECRET_ACCESS_KEY,
-    bucket: !!R2_BUCKET_NAME,
     domain: !!R2_DOMAIN,
-    isAllOk: !!(
-      R2_ACCOUNT_ID &&
-      R2_ACCESS_KEY_ID &&
-      R2_SECRET_ACCESS_KEY &&
-      R2_BUCKET_NAME &&
-      R2_DOMAIN
-    ),
+    isAllOk: !!R2_DOMAIN,
   }
 
   // Klasör yapısını parse et
@@ -2208,32 +2194,12 @@ export function MediaImportTool() {
                       ❌ Eksik Yapılandırma
                     </Text>
                     <Text size={1}>
-                      R2 bağlantısı için .env dosyasındaki şu alanları kontrol edin:
+                      R2 bağlantısı için .env dosyasındaki şu alanı kontrol edin:
                     </Text>
                     <Stack space={2}>
-                      {!preflight.accountId && (
-                        <Text size={1} style={{color: 'red'}}>
-                          • R2_ACCOUNT_ID
-                        </Text>
-                      )}
-                      {!preflight.accessKey && (
-                        <Text size={1} style={{color: 'red'}}>
-                          • R2_ACCESS_KEY_ID
-                        </Text>
-                      )}
-                      {!preflight.secretKey && (
-                        <Text size={1} style={{color: 'red'}}>
-                          • R2_SECRET_ACCESS_KEY
-                        </Text>
-                      )}
-                      {!preflight.bucket && (
-                        <Text size={1} style={{color: 'red'}}>
-                          • R2_BUCKET_NAME
-                        </Text>
-                      )}
                       {!preflight.domain && (
                         <Text size={1} style={{color: 'red'}}>
-                          • R2_DOMAIN
+                          • SANITY_STUDIO_R2_DOMAIN
                         </Text>
                       )}
                     </Stack>

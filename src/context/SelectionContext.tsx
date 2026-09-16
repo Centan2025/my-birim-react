@@ -228,7 +228,7 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
         return updated
       })
 
-      triggerToast('Ürün seçtiklerinize eklendi.')
+      triggerToast('Seçtiklerinize eklendi.')
 
       if (isLoggedIn && user?._id) {
         saveUserSelection(user._id, productId).catch(() => {})

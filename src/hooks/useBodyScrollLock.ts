@@ -35,15 +35,13 @@ export function useBodyScrollLock(isLocked: boolean) {
     }
 
     return () => {
-      if (!isLocked) {
-        const body = document.body
-        body.style.position = ''
-        body.style.top = ''
-        body.style.left = ''
-        body.style.right = ''
-        body.style.width = ''
-        body.style.overflow = ''
-      }
+      const body = document.body
+      body.style.position = ''
+      body.style.top = ''
+      body.style.left = ''
+      body.style.right = ''
+      body.style.width = ''
+      body.style.overflow = ''
     }
   }, [isLocked])
 }

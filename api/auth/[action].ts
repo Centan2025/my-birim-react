@@ -1,6 +1,17 @@
-import {randomUUID} from 'crypto'
+import {randomUUID, createHash, timingSafeEqual} from 'crypto'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
+
+function _safeCompareHash(aHex: string, bHex: string): boolean {
+  try {
+    const bufA = Buffer.from(aHex, 'hex')
+    const bufB = Buffer.from(bHex, 'hex')
+    if (bufA.length !== bufB.length) return false
+    return timingSafeEqual(bufA, bufB)
+  } catch {
+    return false
+  }
+}
 import {
   createToken,
   setAuthCookie,
@@ -273,6 +284,10 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
 
     if (existingProfile) {
       if (existingProfile.profession === 'Bülten Abonesi') {
+        const verificationToken = randomUUID()
+        const verificationTokenHash = createHash('sha256').update(verificationToken).digest('hex')
+        const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
         // Upgrade newsletter subscriber to full member
         let hasAuth = false
         try {
@@ -296,6 +311,8 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
                 country: country || 'Türkiye',
                 profession: userProfession,
                 phone,
+                verification_token_hash: verificationTokenHash,
+                verification_token_expires: verificationTokenExpires,
               },
             }
           )
@@ -317,6 +334,8 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
                 country: country || 'Türkiye',
                 profession: userProfession,
                 phone,
+                verification_token_hash: verificationTokenHash,
+                verification_token_expires: verificationTokenExpires,
               },
             }
           )
@@ -344,7 +363,6 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
           updated_at: new Date().toISOString(),
         })
 
-        const verificationToken = randomUUID()
         const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
         const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(normEmail)}`
         const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
@@ -375,6 +393,10 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({error: 'Bu e-posta adresi zaten kayıtlıdır.'})
     }
 
+    const verificationToken = randomUUID()
+    const verificationTokenHash = createHash('sha256').update(verificationToken).digest('hex')
+    const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
     const {data: sbAuth, error: authError} = await supabaseAdmin.auth.admin.createUser({
       email: normEmail,
       password,
@@ -388,6 +410,8 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
         country: country || 'Türkiye',
         profession: userProfession,
         phone,
+        verification_token_hash: verificationTokenHash,
+        verification_token_expires: verificationTokenExpires,
       },
     })
 
@@ -413,7 +437,6 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
       {onConflict: 'id'}
     )
 
-    const verificationToken = randomUUID()
     const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
     const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(normEmail)}`
     const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
@@ -522,8 +545,8 @@ async function handleVerify(req: VercelRequest, res: VercelResponse) {
   }
 
   const {token, email} = req.body || {}
-  if (!token && !email) {
-    return res.status(400).json({error: "Doğrulama token'ı veya e-posta gereklidir."})
+  if (!token || typeof token !== 'string' || token.trim().length === 0) {
+    return res.status(400).json({error: "Geçerli bir doğrulama token'ı gereklidir."})
   }
 
   const supabaseAdmin = getSafeSupabaseAdmin()
@@ -531,67 +554,67 @@ async function handleVerify(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
   }
 
+  const trimmedToken = token.trim()
+  const incomingHash = createHash('sha256').update(trimmedToken).digest('hex')
   const targetEmail = email ? (email as string).trim().toLowerCase() : null
 
   try {
-    let profile = null
+    const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
+    const now = new Date()
 
-    if (targetEmail) {
-      await supabaseAdmin
-        .from('profiles')
-        .update({is_verified: true, updated_at: new Date().toISOString()})
-        .eq('email', targetEmail)
-
-      const {data} = await supabaseAdmin
-        .from('profiles')
-        .select('*')
-        .eq('email', targetEmail)
-        .maybeSingle()
-
-      profile = data
-
-      if (profile?.id) {
-        await supabaseAdmin.auth.admin
-          .updateUserById(profile.id, {
-            email_confirm: true,
-            user_metadata: {email_verified: true},
-          })
-          .catch(() => {})
+    const matchedUser = usersList?.users?.find(u => {
+      if (targetEmail && u.email?.toLowerCase() !== targetEmail) {
+        return false
       }
+      const storedHash = u.user_metadata?.['verification_token_hash']
+      const expires = u.user_metadata?.['verification_token_expires']
+      if (!storedHash || !expires) return false
+      if (new Date(expires) <= now) return false
+      return safeCompareHash(incomingHash, storedHash)
+    })
 
-      const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
-      const authUser = usersList?.users?.find(u => u.email?.toLowerCase() === targetEmail)
-      if (authUser && authUser.id !== profile?.id) {
-        await supabaseAdmin.auth.admin
-          .updateUserById(authUser.id, {
-            email_confirm: true,
-            user_metadata: {...authUser.user_metadata, email_verified: true},
-          })
-          .catch(() => {})
-      }
+    if (!matchedUser) {
+      return res.status(400).json({error: 'Geçersiz veya süresi dolmuş doğrulama tokenı.'})
     }
 
-    if (profile) {
-      return res.status(200).json({
-        success: true,
-        message: 'E-posta adresiniz başarıyla doğrulandı.',
-        user: {
-          _id: profile.id,
-          id: profile.id,
-          email: profile.email,
-          name: profile.name,
-          role: profile.role,
-          company: profile.company,
-          profession: profile.profession,
-          architectVerificationStatus: profile.architect_verification_status,
-          isVerified: true,
-        },
-      })
-    }
+    // Single-use token invalidation and verification confirmation
+    await supabaseAdmin.auth.admin.updateUserById(matchedUser.id, {
+      email_confirm: true,
+      user_metadata: {
+        ...matchedUser.user_metadata,
+        verification_token_hash: null,
+        verification_token_expires: null,
+        email_verified: true,
+      },
+    })
+
+    await supabaseAdmin
+      .from('profiles')
+      .update({is_verified: true, updated_at: new Date().toISOString()})
+      .eq('id', matchedUser.id)
+
+    const {data: profile} = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', matchedUser.id)
+      .maybeSingle()
 
     return res.status(200).json({
       success: true,
       message: 'E-posta adresiniz başarıyla doğrulandı.',
+      user: profile
+        ? {
+            _id: profile.id,
+            id: profile.id,
+            email: profile.email,
+            name: profile.name,
+            role: profile.role,
+            company: profile.company,
+            profession: profile.profession,
+            architectVerificationStatus: profile.architect_verification_status,
+            isVerified: true,
+          }
+        : undefined,
     })
   } catch (sbErr) {
     console.error('[Supabase Verify Error]:', sbErr)
@@ -781,6 +804,10 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
           !existing.is_verified
 
         if (canUpdate) {
+          const verificationToken = randomUUID()
+          const verificationTokenHash = createHash('sha256').update(verificationToken).digest('hex')
+          const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
           let hasAuthAccount = false
           try {
             const {data: usr} = await supabaseAdmin.auth.admin.getUserById(existing.id)
@@ -803,6 +830,8 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
                   profession: profession || existing.profession || 'Mimar / İç Mimar',
                   phone: phone || existing.phone || '',
                   email_verified: false,
+                  verification_token_hash: verificationTokenHash,
+                  verification_token_expires: verificationTokenExpires,
                 },
               })
               .catch(() => {})
@@ -818,6 +847,8 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
                 country: country || 'Türkiye',
                 profession: profession || existing.profession || 'Mimar / İç Mimar',
                 phone: phone || '',
+                verification_token_hash: verificationTokenHash,
+                verification_token_expires: verificationTokenExpires,
               },
             })
             if (newAuth?.user?.id) {
@@ -839,7 +870,6 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
             updated_at: new Date().toISOString(),
           })
 
-          const verificationToken = randomUUID()
           const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
           const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(normEmail)}`
           const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
@@ -860,6 +890,10 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({error: 'Bu e-posta adresi zaten onaylı bir hesaba aittir.'})
       }
 
+      const verificationToken = randomUUID()
+      const verificationTokenHash = createHash('sha256').update(verificationToken).digest('hex')
+      const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
       const {data: sbAuthUser, error: sbAuthErr} = await supabaseAdmin.auth.admin.createUser({
         email: normEmail,
         password: password || undefined,
@@ -871,6 +905,8 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
           country: country || 'Türkiye',
           profession: profession || 'Mimar / İç Mimar',
           phone: phone || '',
+          verification_token_hash: verificationTokenHash,
+          verification_token_expires: verificationTokenExpires,
         },
       })
 
@@ -896,7 +932,6 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
         )
       }
 
-      const verificationToken = randomUUID()
       const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
       const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(normEmail)}`
       const emailLang = detectUserLanguage(req, country, req.body?.['lang'])

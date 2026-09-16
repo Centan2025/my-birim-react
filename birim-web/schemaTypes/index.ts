@@ -15,6 +15,8 @@ import cookiesPolicy from './documents/cookiesPolicy'
 import privacyPolicy from './documents/privacyPolicy'
 import termsOfService from './documents/termsOfService'
 import kvkkPolicy from './documents/kvkkPolicy'
+import distanceSalesAgreement from './documents/distanceSalesAgreement'
+import preliminaryInfoForm from './documents/preliminaryInfoForm'
 import translations from './documents/translations'
 
 import {localizedString} from './objects/localizedString'
@@ -24,6 +26,7 @@ import r2Asset from './objects/r2Asset'
 import seoFields from './objects/seoFields'
 import productHotspot from './objects/productHotspot'
 import interactiveShowcaseItem from './objects/interactiveShowcaseItem'
+import productVariant from './objects/productVariant'
 import {
   productDimensionDetail,
   productDimensionSet,
@@ -65,6 +68,8 @@ export const schemaTypes = [
   privacyPolicy,
   termsOfService,
   kvkkPolicy,
+  distanceSalesAgreement,
+  preliminaryInfoForm,
   translations,
   // objects
   localizedString,
@@ -74,6 +79,7 @@ export const schemaTypes = [
   seoFields,
   productHotspot,
   interactiveShowcaseItem,
+  productVariant,
   productDimensionDetail,
   productDimensionSet,
   productDimensionImage,

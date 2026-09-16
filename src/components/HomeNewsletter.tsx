@@ -353,7 +353,7 @@ export const HomeNewsletter: FC = () => {
                         <button
                           type="submit"
                           disabled={status === 'loading'}
-                          className="bg-[#3c424d] text-white border border-[#3c424d] px-10 py-5 hover:bg-[#4a515c] transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
+                          className="bg-[#2c2c2c] text-white border border-[#2c2c2c] px-10 py-5 hover:bg-[#404040] hover:border-[#404040] transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter cursor-pointer"
                         >
                           <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium">
                             {status === 'loading' ? t('waiting') : t('subscribe')}
@@ -488,7 +488,7 @@ export const HomeNewsletter: FC = () => {
                           <button
                             type="submit"
                             disabled={status === 'loading'}
-                            className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-[#3c424d] text-white border border-[#3c424d] px-10 py-5 hover:bg-[#4a515c] transition-all duration-500 disabled:opacity-50 font-inter"
+                            className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-[#2c2c2c] text-white border border-[#2c2c2c] px-10 py-5 hover:bg-[#404040] hover:border-[#404040] transition-all duration-500 disabled:opacity-50 font-inter cursor-pointer"
                           >
                             <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium">
                               {status === 'loading' ? t('waiting') : t('complete_application')}

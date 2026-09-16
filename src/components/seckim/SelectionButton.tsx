@@ -1,5 +1,4 @@
-import React, {useState} from 'react'
-import {motion, AnimatePresence} from 'framer-motion'
+import React from 'react'
 import {useSelection} from '../../context/SelectionContext'
 import type {Product} from '../../types'
 import {getLocalizedText} from '../../types/seckim'
@@ -16,7 +15,6 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
   showLabel = false,
 }) => {
   const {isInSelection, toggleSelection, isSelectionEnabled} = useSelection()
-  const [showTooltip, setShowTooltip] = useState(false)
 
   if (!isSelectionEnabled) return null
 
@@ -34,28 +32,23 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
       <button
         type="button"
         onClick={handleClick}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        onFocus={() => setShowTooltip(true)}
-        onBlur={() => setShowTooltip(false)}
-        className={`group/btn relative w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-none transition-all duration-300 ease-out backdrop-blur-md cursor-pointer z-10 ${
+        className={`group/btn relative flex items-center justify-center p-1 bg-transparent border-0 shadow-none outline-none transition-all duration-300 ease-out cursor-pointer z-10 ${
           selected
-            ? 'bg-[#3c424d] text-white border border-[#3c424d] shadow-[0_2px_10px_rgba(60,66,77,0.35)] hover:bg-[#4a515c] hover:border-[#4a515c] hover:scale-105 active:scale-95'
-            : 'bg-white/90 dark:bg-neutral-900/80 text-neutral-700 dark:text-neutral-200 hover:text-neutral-950 dark:hover:text-white hover:bg-white dark:hover:bg-neutral-900 border border-black/[0.07] dark:border-white/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:scale-105 active:scale-95'
+            ? 'text-[#525252] dark:text-neutral-300 hover:text-[#333333] dark:hover:text-white hover:scale-110 active:scale-90'
+            : 'text-neutral-400 hover:text-neutral-800 dark:text-neutral-500 dark:hover:text-white hover:scale-110 active:scale-90'
         }`}
         aria-label={selected ? `${rawName} seçtiklerimden çıkar` : `${rawName} seçtiklerime ekle`}
-        title={selected ? 'Seçtiklerimden çıkar' : 'Seçtiklerime ekle'}
       >
         <svg
-          className="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-300 ease-out group-hover/btn:scale-105 group-active/btn:scale-90"
+          className="w-4 h-4 sm:w-[18px] sm:h-[18px] transition-transform duration-300 ease-out group-hover/btn:scale-105 group-active/btn:scale-90"
           viewBox="0 0 24 24"
           fill={selected ? 'currentColor' : 'none'}
           stroke="currentColor"
-          strokeWidth={selected ? '1.4' : '1.3'}
+          strokeWidth={selected ? '1.5' : '1.3'}
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M19 21l-7-4-7 4V3h14v18z" />
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
         </svg>
 
         {showLabel && (
@@ -64,38 +57,6 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
           </span>
         )}
       </button>
-
-      {/* Tooltip on hover with smooth horizontal line animation */}
-      <AnimatePresence>
-        {showTooltip && !showLabel && (
-          <motion.div
-            role="tooltip"
-            initial={{opacity: 0, y: 4}}
-            animate={{opacity: 1, y: 0}}
-            exit={{opacity: 0, y: 3}}
-            transition={{duration: 0.22, ease: [0.16, 1, 0.3, 1]}}
-            className="hidden sm:flex flex-col items-end absolute right-0 bottom-full mb-2 pointer-events-none z-30"
-          >
-            <span className="text-[8.5px] tracking-[0.16em] uppercase font-medium text-neutral-900 dark:text-white bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md px-2 py-0.5 shadow-xs border border-black/[0.06] dark:border-white/[0.1] whitespace-nowrap">
-              {selected ? 'Seçtiklerimden Çıkar' : 'Seçtiklerime Ekle'}
-            </span>
-            {/* Kartın sol kenarına kadar tam boy uzanan animasyonlu çizgi */}
-            <div className="relative w-[600px] max-w-[calc(100vw-2rem)] overflow-visible flex justify-end">
-              <motion.div
-                className={`h-[1px] ${selected ? 'bg-[#3c424d]' : 'bg-neutral-900 dark:bg-white'} origin-right mt-1 w-full shadow-xs`}
-                initial={{scaleX: 0}}
-                animate={{scaleX: 1}}
-                exit={{scaleX: 0}}
-                transition={{
-                  duration: 0.85,
-                  ease: [0.16, 1, 0.3, 1],
-                  delay: 0.04,
-                }}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

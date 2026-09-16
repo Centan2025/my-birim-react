@@ -25,7 +25,7 @@ export const MainLayout: React.FC = () => {
       {!isAnalytics && <FloatingAuthPanel />}
       {!isAnalytics && <SelectionToast />}
       <main id="main-content" className="flex flex-col flex-grow relative overflow-x-clip">
-        <AnimatePresence mode="sync" initial={true}>
+        <AnimatePresence mode="wait" initial={false}>
           <PageTransitionWrapper key={location.pathname} location={location} />
         </AnimatePresence>
       </main>

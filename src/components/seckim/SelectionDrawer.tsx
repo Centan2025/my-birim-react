@@ -222,7 +222,7 @@ export const SelectionDrawer: React.FC = () => {
                             stroke="currentColor"
                             strokeWidth="1.5"
                           >
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                           </svg>
                         </div>
                         <h3 className="text-base font-light uppercase tracking-wider text-[var(--text-primary)]">
@@ -235,7 +235,7 @@ export const SelectionDrawer: React.FC = () => {
                         <button
                           type="button"
                           onClick={handleExplore}
-                          className="mt-8 px-6 py-3 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-widest hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all cursor-pointer font-semibold"
+                          className="mt-8 px-6 py-3 border border-[var(--border-primary)] hover:border-[#2c2c2c] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-widest hover:bg-[#2c2c2c] hover:text-white transition-all cursor-pointer font-semibold"
                         >
                           ÜRÜNLERİ KEŞFET
                         </button>
@@ -266,7 +266,7 @@ export const SelectionDrawer: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleNavigateToSeckim}
-                        className="w-full py-3.5 px-3 border border-[var(--border-primary)] hover:border-[#3c424d] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs tracking-widest uppercase font-semibold hover:bg-[#3c424d] hover:text-white transition-all duration-200 text-center cursor-pointer"
+                        className="w-full py-3.5 px-3 border border-[var(--border-primary)] hover:border-[#2c2c2c] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs tracking-widest uppercase font-semibold hover:bg-[#2c2c2c] hover:text-white transition-all duration-200 text-center cursor-pointer"
                       >
                         SEÇTİKLERİM
                       </button>
@@ -274,7 +274,7 @@ export const SelectionDrawer: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setIsInquiryOpen(true)}
-                        className="w-full py-3.5 px-3 bg-[#3c424d] text-white border border-[#3c424d] text-xs tracking-widest uppercase font-semibold hover:bg-[#4a515c] hover:border-[#4a515c] transition-all text-center cursor-pointer shadow-sm"
+                        className="w-full py-3.5 px-3 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs tracking-widest uppercase font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all text-center cursor-pointer shadow-sm"
                       >
                         BİLGİ / TEKLİF AL
                       </button>

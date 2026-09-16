@@ -63,6 +63,12 @@ const TermsPage = lazyWithRetry(() =>
   import('../pages/TermsPage').then(m => ({default: m.default}))
 )
 const KvkkPage = lazyWithRetry(() => import('../pages/KvkkPage').then(m => ({default: m.default})))
+const PreliminaryInfoPage = lazyWithRetry(() =>
+  import('../pages/PreliminaryInfoPage').then(m => ({default: m.default}))
+)
+const DistanceSalesPage = lazyWithRetry(() =>
+  import('../pages/DistanceSalesPage').then(m => ({default: m.default}))
+)
 const AiRoomPlannerPage = lazyWithRetry(() =>
   import('../pages/AiRoomPlannerPage').then(m => ({default: m.AiRoomPlannerPage}))
 )
@@ -70,6 +76,26 @@ const AnalyticsPage = lazyWithRetry(() => import('../pages/AnalyticsPage'))
 const SeckimPage = lazyWithRetry(() => import('../pages/SeckimPage'))
 const SeckimProjectDetailPage = lazyWithRetry(() => import('../pages/SeckimProjectDetailPage'))
 const SharedProjectPage = lazyWithRetry(() => import('../pages/SharedProjectPage'))
+const CommerceCheckoutPage = lazyWithRetry(() =>
+  import('../pages/CommerceCheckoutPage').then(m => ({default: m.CommerceCheckoutPage}))
+)
+const CommerceOrderResultPage = lazyWithRetry(() =>
+  import('../pages/CommerceOrderResultPage').then(m => ({default: m.CommerceOrderResultPage}))
+)
+const CommerceOrdersPage = lazyWithRetry(() =>
+  import('../pages/CommerceOrdersPage').then(m => ({default: m.CommerceOrdersPage}))
+)
+const CommerceOrderDetailPage = lazyWithRetry(() =>
+  import('../pages/CommerceOrderDetailPage').then(m => ({default: m.CommerceOrderDetailPage}))
+)
+const CommerceOrdersAdminPage = lazyWithRetry(() =>
+  import('../pages/admin/CommerceOrdersAdminPage').then(m => ({default: m.CommerceOrdersAdminPage}))
+)
+const CommerceOrderDetailAdminPage = lazyWithRetry(() =>
+  import('../pages/admin/CommerceOrderDetailAdminPage').then(m => ({
+    default: m.CommerceOrderDetailAdminPage,
+  }))
+)
 
 interface PageBoundaryProps {
   children: React.ReactNode
@@ -309,6 +335,30 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           }
         />
         <Route
+          path="/on-bilgilendirme-formu"
+          element={
+            <PageBoundary>
+              <PreliminaryInfoPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/preliminary-information-form"
+          element={<Navigate to="/on-bilgilendirme-formu" replace />}
+        />
+        <Route
+          path="/mesafeli-satis-sozlesmesi"
+          element={
+            <PageBoundary>
+              <DistanceSalesPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/distance-sales-agreement"
+          element={<Navigate to="/mesafeli-satis-sozlesmesi" replace />}
+        />
+        <Route
           path="/site-analitigi"
           element={
             <PageBoundary pageName="Site Analitiği" hideFooter>
@@ -347,6 +397,54 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           element={
             <PageBoundary pageName="Paylaşılan Proje">
               <SharedProjectPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <PageBoundary pageName="Sipariş Tamamlama">
+              <CommerceCheckoutPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/order/:orderId"
+          element={
+            <PageBoundary pageName="Sipariş Detayı">
+              <CommerceOrderResultPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/account/orders"
+          element={
+            <PageBoundary pageName="Siparişlerim">
+              <CommerceOrdersPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/account/orders/:orderId"
+          element={
+            <PageBoundary pageName="Sipariş Detayı">
+              <CommerceOrderDetailPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <PageBoundary pageName="Admin - Sipariş Yönetimi" hideFooter>
+              <CommerceOrdersAdminPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/admin/orders/:orderId"
+          element={
+            <PageBoundary pageName="Admin - Sipariş Detayı" hideFooter>
+              <CommerceOrderDetailAdminPage />
             </PageBoundary>
           }
         />

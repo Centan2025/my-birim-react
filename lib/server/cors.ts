@@ -21,13 +21,6 @@ export function isOriginAllowed(origin: string | undefined | null): boolean {
   }
 
   if (
-    trimmed.endsWith('.sanity.studio') &&
-    /^https:\/\/([a-z0-9-]+\.)*sanity\.studio$/.test(trimmed)
-  ) {
-    return true
-  }
-
-  if (
     trimmed === 'https://birim-web-antigravity.vercel.app' ||
     BIRIM_VERCEL_PREVIEW_REGEX.test(trimmed)
   ) {

@@ -287,6 +287,30 @@ describe('CartContext', () => {
     expect(setItemSpy).toHaveBeenCalledWith('birim_cart', expect.any(String))
     setItemSpy.mockRestore()
   })
+
+  it('persists cart across remount / page refresh', () => {
+    const {unmount} = render(
+      <CartProvider>
+        <TestComponent />
+      </CartProvider>
+    )
+
+    act(() => {
+      screen.getByTestId('add-button').click()
+    })
+
+    expect(screen.getByTestId('cart-count')).toHaveTextContent('1')
+    unmount()
+
+    render(
+      <CartProvider>
+        <TestComponent />
+      </CartProvider>
+    )
+
+    expect(screen.getByTestId('cart-count')).toHaveTextContent('1')
+    expect(screen.getByTestId('cart-total')).toHaveTextContent('100')
+  })
 })
 
 describe('useCart hook', () => {

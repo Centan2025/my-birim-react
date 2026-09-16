@@ -85,7 +85,7 @@ export default function CookieBanner() {
               </div>
               <button
                 onClick={acceptAll}
-                className="flex-initial sm:min-w-[180px] px-6 py-3 bg-[#3c424d] text-white text-[9px] md:text-[10px] uppercase tracking-[0.15em] font-bold hover:bg-[#4a515c] transition-all duration-500 shadow-lg border border-white/5"
+                className="flex-initial sm:min-w-[180px] px-6 py-3 bg-[#2c2c2c] text-white text-[9px] md:text-[10px] uppercase tracking-[0.15em] font-bold hover:bg-[#404040] transition-all duration-500 shadow-lg border border-white/5 cursor-pointer"
               >
                 Tümünü Kabul Et
               </button>

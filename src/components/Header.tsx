@@ -25,7 +25,7 @@ import {useHeaderSearch} from '../hooks/useHeaderSearch'
 import {useHeroBrightness} from '../hooks/useHeroBrightness'
 import {useHeaderBackgroundColor} from '../hooks/useHeaderBackgroundColor'
 import {useBodyScrollLock} from '../hooks/useBodyScrollLock'
-import {MenuIcon, ChevronDownIcon, SearchIcon, CloseIcon, ShoppingBagIcon} from './HeaderIcons'
+import {MenuIcon, ChevronDownIcon, SearchIcon, CloseIcon} from './HeaderIcons'
 import {useDarkMode} from '../context/DarkModeContext'
 import {useSelection} from '../context/SelectionContext'
 
@@ -1059,44 +1059,36 @@ export function Header() {
 
                 <div className="hidden lg:flex items-end space-x-5">
                   {isSelectionEnabled && (
-                    <button
-                      type="button"
-                      onClick={openDrawer}
-                      className="group relative flex items-center gap-1.5 pb-0 pt-2 cursor-pointer transition-opacity duration-300 hover:opacity-75"
-                      style={{
-                        color: headerForegroundColor,
-                        transition: colorTransition,
-                      }}
-                      aria-label={`${t('seckim') || 'Seçtiklerim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
-                      title={t('seckim') || 'Seçtiklerim'}
-                    >
-                      <svg
-                        className="w-[18px] h-[18px] transition-transform duration-300 ease-out group-hover:scale-105"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    <div className="relative group/seckim flex items-end">
+                      <button
+                        type="button"
+                        onClick={openDrawer}
+                        className="group relative flex items-center pb-0 pt-2 cursor-pointer transition-opacity duration-300 hover:opacity-75"
+                        style={{
+                          color: headerForegroundColor,
+                          transition: colorTransition,
+                        }}
+                        aria-label={`${t('seckim') || 'Seçtiklerim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
                       >
-                        <path d="M19 21l-7-4-7 4V3h14v18z" />
-                      </svg>
-                      {selectionCount > 0 && (
-                        <span
-                          className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold select-none pointer-events-none transition-colors duration-300 shadow-xs leading-none"
-                          style={{
-                            backgroundColor: '#3c424d',
-                            color: '#ffffff',
-                            fontVariantNumeric: 'tabular-nums',
-                            letterSpacing: 0,
-                          }}
+                        <svg
+                          className="w-[18px] h-[18px] transition-transform duration-300 ease-out group-hover:scale-105"
+                          viewBox="0 0 24 24"
+                          fill={selectionCount > 0 ? 'currentColor' : 'none'}
+                          stroke="currentColor"
+                          strokeWidth="1.3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                         >
-                          <span className="flex items-center justify-center leading-none">
-                            {selectionCount}
-                          </span>
+                          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                        </svg>
+                      </button>
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover/seckim:flex items-center justify-center pointer-events-none z-50">
+                        <span className="text-[10px] tracking-wide font-medium text-white bg-neutral-900 dark:text-neutral-900 dark:bg-white px-2.5 py-1 rounded-full shadow-md whitespace-nowrap border border-white/10 dark:border-black/10">
+                          {t('seckim') || 'Seçtiklerim'}
+                          {selectionCount > 0 ? ` (${selectionCount})` : ''}
                         </span>
-                      )}
-                    </button>
+                      </div>
+                    </div>
                   )}
 
                   {/* Auth Trigger Text Button (Seçtiklerim'in sağında) */}
@@ -1183,18 +1175,37 @@ export function Header() {
                     })}
                   </div>
 
-                  {settings?.showCartButton === true && (
+                  {(settings?.showCartButton === true || cartCount > 0) && (
                     <button
+                      type="button"
                       onClick={toggleCart}
-                      className={`relative ${iconClasses}`}
-                      style={{...sharedIconStyle, color: headerForegroundColor}}
+                      className="group relative flex items-center pb-0 pt-2 cursor-pointer transition-opacity duration-300 hover:opacity-75"
+                      style={{
+                        color: headerForegroundColor,
+                        transition: colorTransition,
+                      }}
                       aria-label={`${t('cart') || 'Sepet'}${cartCount > 0 ? ` (${cartCount} ${t('items') || 'ürün'})` : ''}`}
                       aria-expanded={false}
                     >
-                      <ShoppingBagIcon />
+                      <svg
+                        className="w-[19px] h-[19px] transition-transform duration-300 ease-out group-hover:scale-105"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                      </svg>
                       {cartCount > 0 && (
                         <span
-                          className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white border-white border transition-transform duration-300 ease-out"
+                          className="absolute -top-0.5 -right-2.5 flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[10px] font-bold text-white bg-red-600 border border-white dark:border-neutral-900 shadow-xs leading-none pointer-events-none select-none"
+                          style={{
+                            fontVariantNumeric: 'tabular-nums',
+                          }}
                           aria-hidden="true"
                         >
                           {cartCount}
@@ -1204,6 +1215,41 @@ export function Header() {
                   )}
                 </div>
                 <div className="lg:hidden flex items-center gap-1">
+                  {(settings?.showCartButton === true || cartCount > 0) && (
+                    <button
+                      type="button"
+                      onClick={toggleCart}
+                      className="group relative p-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer"
+                      style={{color: headerForegroundColor, transition: colorTransition}}
+                      aria-label={`${t('cart') || 'Sepet'}${cartCount > 0 ? ` (${cartCount} ${t('items') || 'ürün'})` : ''}`}
+                      aria-expanded={false}
+                    >
+                      <svg
+                        className="w-5 h-5 transition-transform duration-300 group-hover:scale-105"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                      </svg>
+                      {cartCount > 0 && (
+                        <span
+                          className="absolute top-0.5 right-0.5 flex items-center justify-center min-w-[16px] h-[16px] px-0.5 rounded-full text-[9.5px] font-bold text-white bg-red-600 border border-white dark:border-neutral-900 shadow-xs leading-none pointer-events-none select-none"
+                          style={{
+                            fontVariantNumeric: 'tabular-nums',
+                          }}
+                          aria-hidden="true"
+                        >
+                          {cartCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
                   {isOverlayMobileMenu ? (
                     // Overlay modunda: hamburger → X animasyonu
                     <button

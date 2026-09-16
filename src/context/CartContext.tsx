@@ -35,19 +35,27 @@ export const useCart = () => {
 }
 
 export const CartProvider = ({children}: PropsWithChildren) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [isCartOpen, setIsCartOpen] = useState(false)
-
-  useEffect(() => {
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
-      const storedCart = localStorage.getItem('birim_cart')
-      if (storedCart) {
-        setCartItems(JSON.parse(storedCart))
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const storedCart = localStorage.getItem('birim_cart')
+        if (storedCart) {
+          const parsed = JSON.parse(storedCart)
+          if (Array.isArray(parsed)) {
+            return parsed
+          }
+        }
       }
-    } catch (e) {
-      localStorage.removeItem('birim_cart')
+    } catch {
+      try {
+        localStorage.removeItem('birim_cart')
+      } catch {
+        // Storage erişilemiyorsa sessizce devam et
+      }
     }
-  }, [])
+    return []
+  })
+  const [isCartOpen, setIsCartOpen] = useState(false)
 
   useEffect(() => {
     try {
