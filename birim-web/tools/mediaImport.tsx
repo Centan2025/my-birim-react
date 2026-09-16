@@ -1,6 +1,6 @@
 import {UploadIcon} from '@sanity/icons'
 import {definePlugin} from 'sanity'
-import MediaImportTool from './mediaImport/MediaImportTool'
+import {MediaImportTool} from './mediaImport/MediaImportTool'
 
 export const mediaImportTool = definePlugin({
   name: 'media-import',
@@ -13,3 +13,6 @@ export const mediaImportTool = definePlugin({
     },
   ],
 })
+
+export default mediaImportTool
+

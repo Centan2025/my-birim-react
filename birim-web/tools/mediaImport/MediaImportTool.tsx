@@ -390,7 +390,7 @@ const compressImageChunk = async (file: File, options: any): Promise<File | Blob
   }
 }
 
-export default function MediaImportTool() {
+export function MediaImportTool() {
   const client = useClient({apiVersion: '2025-01-01'})
   const toast = useToast()
 
@@ -3953,3 +3953,6 @@ async function updateAboutPageMedia(client: any, aboutId: string, aboutData: any
     console.log(`   ✅ Hakkımızda sayfası güncellendi`)
   }
 }
+
+export default MediaImportTool
+
