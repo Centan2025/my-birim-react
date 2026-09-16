@@ -46,6 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (
     path === 'members' ||
+    segments[0] === 'members' ||
     (path === '' && (req.url?.includes('members') || req.body?.architect_verification_status))
   ) {
     return handleAdminMembers(req, res)
@@ -54,7 +55,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (
     path === 'commerce/orders' ||
     path === 'commerce/orders/index' ||
+    path.startsWith('commerce/orders') ||
     path === 'orders' ||
+    path.startsWith('orders') ||
+    segments[0] === 'orders' ||
+    (segments.length >= 2 && segments[0] === 'commerce' && segments[1] === 'orders') ||
     path === ''
   ) {
     return handleAdminCommerceOrders(req, res)
@@ -222,8 +227,19 @@ async function handleAdminCommerceOrders(req: VercelRequest, res: VercelResponse
     })
   }
 
+  const rawSlug = req.query?.['slug']
+  const slugSegments = Array.isArray(rawSlug)
+    ? rawSlug
+    : typeof rawSlug === 'string'
+      ? rawSlug.split('/').filter(Boolean)
+      : []
+
+  const isCancelSlug = slugSegments.includes('cancel')
+  const isRefundSlug = slugSegments.includes('refund')
+  const slugAction = isCancelSlug ? 'cancel' : isRefundSlug ? 'refund' : undefined
+
   if (req.method === 'POST') {
-    const action = String(req.query?.['action'] || req.body?.action || '').trim()
+    const action = String(req.query?.['action'] || req.body?.action || slugAction || '').trim()
 
     if (action === 'cancel') {
       try {
@@ -286,7 +302,13 @@ async function handleAdminCommerceOrders(req: VercelRequest, res: VercelResponse
     })
   }
 
-  const orderId = String(req.query?.['orderId'] || req.query?.['id'] || '').trim()
+  const lastSegment = slugSegments[slugSegments.length - 1]
+  const isSlugOrderId =
+    lastSegment &&
+    !['orders', 'commerce', 'index', 'cancel', 'refund', 'members', 'admin'].includes(lastSegment)
+  const slugOrderId = isSlugOrderId ? lastSegment : undefined
+
+  const orderId = String(req.query?.['orderId'] || req.query?.['id'] || slugOrderId || '').trim()
 
   if (orderId) {
     try {

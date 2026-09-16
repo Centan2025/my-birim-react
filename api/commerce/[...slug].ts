@@ -74,6 +74,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const isCart =
     path === 'cart/validate' ||
     path === 'cart' ||
+    segments[0] === 'cart' ||
     Boolean(req.url?.includes('cart')) ||
     (path === '' &&
       req.body &&
@@ -86,6 +87,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const isCheckout =
     path === 'checkout/validate' ||
     path === 'checkout' ||
+    segments[0] === 'checkout' ||
     Boolean(req.url?.includes('checkout')) ||
     (path === '' &&
       req.body &&
@@ -96,14 +98,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const isPayment =
+    segments[0] === 'payments' ||
     path === 'payments' ||
     path === 'payments/index' ||
+    path.startsWith('payments/') ||
     Boolean(req.url?.includes('payments')) ||
     (path === '' &&
       (req.query?.['transactionId'] ||
         (req.body as Record<string, unknown> | undefined)?.['paymentTransactionId'] ||
         (req.body as Record<string, unknown> | undefined)?.['action'] === 'mock_complete' ||
-        (req.body as Record<string, unknown> | undefined)?.['action'] === 'callback'))
+        (req.body as Record<string, unknown> | undefined)?.['action'] === 'callback' ||
+        (req.body as Record<string, unknown> | undefined)?.['action'] === 'webhook'))
   if (isPayment) {
     return handlePayments(req, res)
   }
@@ -122,10 +127,7 @@ export async function handleCartValidate(req: VercelRequest, res: VercelResponse
   }
 
   const ip = getClientIp(req)
-  if (
-    process.env['NODE_ENV'] !== 'test' &&
-    (await isRateLimitedAsync(`cart_validate_${ip}`, {limit: 30, windowMs: 60000}))
-  ) {
+  if (await isRateLimitedAsync(`cart_validate_${ip}`, {limit: 30, windowMs: 60000})) {
     return res.status(429).json({
       valid: false,
       code: 'RATE_LIMITED',
@@ -243,7 +245,16 @@ export async function handleOrders(req: VercelRequest, res: VercelResponse) {
       })
     }
 
-    const orderId = String(req.query?.['orderId'] || req.query?.['id'] || '').trim()
+    const rawSlug = req.query?.['slug']
+    const slugSegments = Array.isArray(rawSlug)
+      ? rawSlug
+      : typeof rawSlug === 'string'
+        ? rawSlug.split('/').filter(Boolean)
+        : []
+    const slugOrderId =
+      slugSegments.length >= 2 && slugSegments[0] === 'orders' ? slugSegments[1] : undefined
+
+    const orderId = String(req.query?.['orderId'] || req.query?.['id'] || slugOrderId || '').trim()
 
     if (orderId) {
       const guestTokenHeader = req.headers['x-guest-token']
@@ -385,16 +396,33 @@ export async function handlePayments(req: VercelRequest, res: VercelResponse) {
         ? req.query['guestToken'].trim()
         : null
 
+  const rawSlug = req.query?.['slug']
+  const slugSegments = Array.isArray(rawSlug)
+    ? rawSlug
+    : typeof rawSlug === 'string'
+      ? rawSlug.split('/').filter(Boolean)
+      : []
+
   if (req.method === 'GET') {
-    if (await isRateLimitedAsync(`payment_get_${ip}`, {limit: 60, windowMs: 60000})) {
+    if (await isRateLimitedAsync(`payment_get_${ip}`, {limit: 30, windowMs: 60000})) {
       return res.status(429).json({
         success: false,
         code: 'RATE_LIMITED',
-        message: 'Çok fazla istek gönderildi. Lütfen biraz bekleyin.',
+        message:
+          'Çok fazla ödeme sorgulama isteği gönderildi. Lütfen bir süre sonra tekrar deneyin.',
       })
     }
 
-    const transactionId = String(req.query?.['transactionId'] || req.query?.['id'] || '').trim()
+    const slugTxId =
+      slugSegments.length >= 2 &&
+      slugSegments[0] === 'payments' &&
+      !['initiate', 'callback', 'webhook', 'mock_complete'].includes(slugSegments[1])
+        ? slugSegments[1]
+        : undefined
+
+    const transactionId = String(
+      req.query?.['transactionId'] || req.query?.['id'] || slugTxId || ''
+    ).trim()
     if (!transactionId) {
       return res.status(400).json({
         success: false,
@@ -424,19 +452,170 @@ export async function handlePayments(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({
         success: false,
         code: 'INTERNAL_ERROR',
-        message: 'Ödeme durumu sorgulanırken bir hata oluştu.',
+        message: 'Ödeme durumu sorgulanırken beklenmeyen bir sunucu hatası oluştu.',
       })
     }
   }
 
-  const action = String(req.query?.['action'] || req.body?.action || '').trim()
+  const slugAction =
+    slugSegments.length >= 2 &&
+    slugSegments[0] === 'payments' &&
+    ['initiate', 'callback', 'webhook', 'mock_complete'].includes(slugSegments[1])
+      ? slugSegments[1]
+      : undefined
 
-  if (action === 'initiate' || !action) {
-    if (await isRateLimitedAsync(`payment_initiate_${ip}`, {limit: 15, windowMs: 60000})) {
+  const action = String(req.query?.['action'] || req.body?.action || slugAction || '').trim()
+
+  // 1. Mock Payment Completion Action
+  if (action === 'mock_complete') {
+    const isProd = process.env['NODE_ENV'] === 'production'
+    const allowMockInProd = process.env['PAYMENT_ALLOW_MOCK'] === 'true'
+    if (isProd && !allowMockInProd) {
+      return res.status(403).json({
+        success: false,
+        code: 'MOCK_PROVIDER_DISABLED',
+        message: 'Mock payment provider is strictly disabled in production.',
+      })
+    }
+
+    if (await isRateLimitedAsync(`mock_payment_complete_${ip}`, {limit: 20, windowMs: 60000})) {
       return res.status(429).json({
         success: false,
         code: 'RATE_LIMITED',
-        message: 'Çok fazla ödeme başlatma isteği gönderildi. Lütfen biraz bekleyin.',
+        message: 'Çok fazla istek gönderildi. Lütfen bir süre sonra tekrar deneyin.',
+      })
+    }
+
+    const rawBody = req.body || {}
+    const paymentTransactionId =
+      typeof rawBody.paymentTransactionId === 'string' ? rawBody.paymentTransactionId.trim() : ''
+    const rawStatus =
+      typeof rawBody.status === 'string' ? rawBody.status.toUpperCase().trim() : 'SUCCESS'
+    const orderId = typeof rawBody.orderId === 'string' ? rawBody.orderId.trim() : undefined
+
+    if (!paymentTransactionId) {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_REQUEST',
+        message: 'Geçersiz ödeme işlem referansı (paymentTransactionId).',
+      })
+    }
+
+    let mappedStatus: 'PAID' | 'FAILED' | 'CANCELLED' | 'PROCESSING' = 'PAID'
+    if (rawStatus === 'SUCCESS' || rawStatus === 'PAID') {
+      mappedStatus = 'PAID'
+    } else if (rawStatus === 'FAIL' || rawStatus === 'FAILED') {
+      mappedStatus = 'FAILED'
+    } else if (rawStatus === 'CANCEL' || rawStatus === 'CANCELLED') {
+      mappedStatus = 'CANCELLED'
+    } else if (rawStatus === 'PROCESSING') {
+      mappedStatus = 'PROCESSING'
+    } else {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_STATUS',
+        message: 'Geçersiz simülasyon durumu.',
+      })
+    }
+
+    try {
+      const callbackResult = await handlePaymentCallback({
+        provider: 'mock',
+        headers: req.headers as Record<string, string | undefined>,
+        payload: {
+          paymentTransactionId,
+          orderId,
+          status: mappedStatus,
+          eventId: `mock_evt_${Date.now()}`,
+        },
+        rawBody: JSON.stringify(req.body),
+      })
+
+      return res.status(200).json({
+        success: true,
+        status: mappedStatus,
+        orderId: callbackResult.orderId || orderId,
+        message: callbackResult.message,
+      })
+    } catch (error: unknown) {
+      if (error instanceof PaymentError) {
+        return res.status(error.statusCode).json({
+          success: false,
+          code: error.code,
+          message: error.message,
+        })
+      }
+
+      const sanitizedErrorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.error('[Commerce Payments API] Mock Complete Error:', sanitizedErrorMessage)
+
+      return res.status(500).json({
+        success: false,
+        code: 'INTERNAL_ERROR',
+        message: 'Ödeme simülasyonu tamamlanırken hata oluştu.',
+      })
+    }
+  }
+
+  // 2. Generic Callback / Webhook Action
+  if (action === 'callback' || action === 'webhook') {
+    if (await isRateLimitedAsync(`payment_callback_${ip}`, {limit: 30, windowMs: 60000})) {
+      return res.status(429).json({
+        success: false,
+        code: 'RATE_LIMITED',
+        message: 'Çok fazla geri bildirim isteği gönderildi. Lütfen bir süre sonra tekrar deneyin.',
+      })
+    }
+
+    const providerId =
+      typeof req.body?.provider === 'string'
+        ? req.body.provider.trim()
+        : typeof req.query?.['provider'] === 'string'
+          ? req.query['provider'].trim()
+          : 'mock'
+
+    try {
+      const callbackResult = await handlePaymentCallback({
+        provider: providerId,
+        headers: req.headers as Record<string, string | undefined>,
+        payload: (req.body as Record<string, unknown>) || {},
+        rawBody: typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {}),
+      })
+
+      return res.status(200).json({
+        success: true,
+        status: callbackResult.status,
+        orderId: callbackResult.orderId,
+        message: callbackResult.message,
+      })
+    } catch (error: unknown) {
+      if (error instanceof PaymentError) {
+        return res.status(error.statusCode).json({
+          success: false,
+          code: error.code,
+          message: error.message,
+        })
+      }
+
+      const sanitizedErrorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.error('[Commerce Payments API] Callback/Webhook Error:', sanitizedErrorMessage)
+
+      return res.status(500).json({
+        success: false,
+        code: 'INTERNAL_ERROR',
+        message: 'Ödeme geri bildirimi işlenirken bir hata oluştu.',
+      })
+    }
+  }
+
+  // 3. Initiate Payment
+  if (action === 'initiate' || !action) {
+    if (await isRateLimitedAsync(`payment_init_${ip}`, {limit: 10, windowMs: 60000})) {
+      return res.status(429).json({
+        success: false,
+        code: 'RATE_LIMITED',
+        message:
+          'Çok fazla ödeme başlatma isteği gönderildi. Lütfen bir süre sonra tekrar deneyin.',
       })
     }
 
@@ -486,66 +665,7 @@ export async function handlePayments(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({
         success: false,
         code: 'INTERNAL_ERROR',
-        message: 'Ödeme başlatılırken bir hata oluştu.',
-      })
-    }
-  }
-
-  if (action === 'callback' || action === 'mock_complete') {
-    const rawStatus = String(req.body?.status || '').toUpperCase()
-    const paymentTransactionId = String(req.body?.paymentTransactionId || '').trim()
-    const orderId = String(req.body?.orderId || '').trim()
-
-    let mappedStatus: 'SUCCESS' | 'FAILED' | 'PROCESSING' = 'SUCCESS'
-    if (rawStatus === 'SUCCESS') {
-      mappedStatus = 'SUCCESS'
-    } else if (rawStatus === 'FAILED') {
-      mappedStatus = 'FAILED'
-    } else if (rawStatus === 'PROCESSING') {
-      mappedStatus = 'PROCESSING'
-    } else {
-      return res.status(400).json({
-        success: false,
-        code: 'INVALID_STATUS',
-        message: 'Geçersiz simülasyon durumu.',
-      })
-    }
-
-    try {
-      const callbackResult = await handlePaymentCallback({
-        provider: 'mock',
-        headers: req.headers as Record<string, string | undefined>,
-        payload: {
-          paymentTransactionId,
-          orderId,
-          status: mappedStatus,
-          eventId: `mock_evt_${Date.now()}`,
-        },
-        rawBody: JSON.stringify(req.body),
-      })
-
-      return res.status(200).json({
-        success: true,
-        status: mappedStatus,
-        orderId: callbackResult.orderId || orderId,
-        message: callbackResult.message,
-      })
-    } catch (error: unknown) {
-      if (error instanceof PaymentError) {
-        return res.status(error.statusCode).json({
-          success: false,
-          code: error.code,
-          message: error.message,
-        })
-      }
-
-      const sanitizedErrorMessage = error instanceof Error ? error.message : 'Unknown error'
-      console.error('[Commerce Payments API] Callback Error:', sanitizedErrorMessage)
-
-      return res.status(500).json({
-        success: false,
-        code: 'INTERNAL_ERROR',
-        message: 'Ödeme geri bildirimi işlenirken bir hata oluştu.',
+        message: 'Ödeme başlatılırken beklenmeyen bir sunucu hatası oluştu.',
       })
     }
   }
