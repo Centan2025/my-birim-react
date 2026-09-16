@@ -541,17 +541,17 @@ export function DesignersPageV2() {
               scrollToSectionRef.current(activeIndex + 1)
             }
           }}
-          className={`fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center text-white/80 hover:text-white transition-all duration-500 cursor-pointer focus:outline-none group p-1.5 ${
+          className={`fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center text-white/80 hover:text-white transition-all duration-500 cursor-pointer focus:outline-none group p-2 ${
             activeIndex === designers.length - 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
           aria-label={t('scroll_down') || 'Aşağı Kaydır'}
         >
           <motion.div
-            animate={{y: [0, 4, 0]}}
+            animate={{y: [0, 5, 0]}}
             transition={{duration: 1.5, repeat: Infinity, ease: 'easeInOut'}}
-            className="p-1 rounded-full bg-black/30 border border-white/15 backdrop-blur-md group-hover:border-white/40 group-hover:bg-black/50 transition-all shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+            className="p-2 sm:p-2.5 rounded-full bg-black/35 border border-white/20 backdrop-blur-md group-hover:border-white/50 group-hover:bg-black/55 transition-all shadow-[0_4px_16px_rgba(0,0,0,0.35)]"
           >
-            <ChevronDown className="w-3.5 h-3.5 text-white" />
+            <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={1.75} />
           </motion.div>
         </button>
       )}
