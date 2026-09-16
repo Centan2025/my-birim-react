@@ -1,5 +1,5 @@
 import {definePlugin} from 'sanity'
-import {ExcelImportTool} from './excelImport/ExcelImportTool'
+import ExcelImportTool from './excelImport/ExcelImportTool'
 
 export const excelImportTool = definePlugin({
   name: 'excel-import',

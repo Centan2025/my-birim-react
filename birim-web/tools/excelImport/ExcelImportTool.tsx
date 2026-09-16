@@ -2062,3 +2062,5 @@ export function ExcelImportTool() {
     </Container>
   )
 }
+
+export default ExcelImportTool
