@@ -1029,6 +1029,8 @@ export interface FooterPartner {
   name: LocalizedString
   logo?: string
   url?: string
+  scale?: number
+  offsetY?: number
 }
 
 /**

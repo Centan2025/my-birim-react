@@ -795,8 +795,49 @@ export const footerPartner = defineType({
       description: 'Logo yoksa gösterilecek metin',
     }),
     defineField({name: 'logoR2', title: 'Logo', type: 'r2Asset'}),
+    defineField({
+      name: 'scale',
+      title: 'Optik Ölçek (%)',
+      type: 'number',
+      initialValue: 100,
+      description:
+        'Logonun görsel büyüklüğünü dengelemek için yüzde değeri. (Örn: 75 = %75, 100 = Standart, 120 = %120)',
+      validation: (Rule) => Rule.min(20).max(250),
+    }),
+    defineField({
+      name: 'offsetY',
+      title: 'Dikey Kaydırma / İnce Ayar (px)',
+      type: 'number',
+      initialValue: 0,
+      description:
+        'Logoyu aşağı (+) veya yukarı (-) kaydırmak için piksel değeri (Örn: 2 = 2px aşağı kaydırır, -2 = 2px yukarı kaydırır)',
+      validation: (Rule) => Rule.min(-50).max(50),
+    }),
     defineField({name: 'url', title: 'Link URL', type: 'url'}),
   ],
+  preview: {
+    select: {
+      title: 'name.tr',
+      scale: 'scale',
+      offsetY: 'offsetY',
+      imageUrl: 'logoR2.url',
+    },
+    prepare(selection: Record<string, unknown>) {
+      const {title, scale, offsetY, imageUrl} = selection as {
+        title?: string
+        scale?: number
+        offsetY?: number
+        imageUrl?: string
+      }
+      const scaleText = `Ölçek: %${scale ?? 100}`
+      const offsetText = offsetY ? ` | Dikey: ${offsetY > 0 ? '+' : ''}${offsetY}px` : ''
+      return {
+        title: title || 'İsimsiz Partner',
+        subtitle: `${scaleText}${offsetText}`,
+        media: renderPreviewMedia(getPreviewUrl(imageUrl), 'image', false),
+      }
+    },
+  },
 })
 
 export const footerLink = defineType({

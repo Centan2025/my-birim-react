@@ -4,6 +4,7 @@ import {motion, AnimatePresence} from 'framer-motion'
 import {InteractiveShowcaseItem, ProductHotspot, LocalizedString} from '../types'
 import {useTranslation} from '../i18n'
 import {OptimizedImage} from './OptimizedImage'
+import {rewriteR2Url} from '../services/sanity/client'
 
 interface InteractiveShowcaseProps {
   items?: InteractiveShowcaseItem[]
@@ -253,6 +254,33 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
       const obj = val as Record<string, unknown>
       const current = obj[locale] || obj['tr'] || obj['en'] || ''
       return typeof current === 'string' ? current.trim() : ''
+    }
+    return ''
+  }
+
+  const getProductImageSrc = (
+    prod?: NonNullable<InteractiveShowcaseItem['hotspots']>[number]['product']
+  ): string => {
+    if (!prod) return ''
+    if (typeof prod.mainImage === 'string' && prod.mainImage.trim()) {
+      return rewriteR2Url(prod.mainImage.trim())
+    }
+    if (prod.mainImage && typeof prod.mainImage === 'object') {
+      const mainObj = prod.mainImage as Record<string, unknown>
+      const u =
+        (typeof mainObj['url'] === 'string' && mainObj['url']) ||
+        (typeof mainObj['urlDesktop'] === 'string' && mainObj['urlDesktop']) ||
+        (typeof mainObj['urlMobile'] === 'string' && mainObj['urlMobile']) ||
+        (typeof mainObj['image'] === 'string' && mainObj['image'])
+      if (u) return rewriteR2Url(u.trim())
+    }
+    if (Array.isArray(prod.media) && prod.media.length > 0) {
+      const cover = prod.media.find(m => m?.isCover) || prod.media[0]
+      const u =
+        cover?.url ||
+        (cover?.imageR2 as {url?: string})?.url ||
+        (typeof cover?.image === 'string' ? cover.image : undefined)
+      if (typeof u === 'string' && u.trim()) return rewriteR2Url(u.trim())
     }
     return ''
   }
@@ -550,10 +578,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                                 >
                                   {/* Large Prominent Product Image Banner */}
                                   {(() => {
-                                    const imgSrc =
-                                      typeof prod.mainImage === 'string'
-                                        ? prod.mainImage
-                                        : (prod.mainImage as {url?: string} | undefined)?.url
+                                    const imgSrc = getProductImageSrc(prod)
 
                                     return (
                                       <div className="w-full h-48 bg-neutral-100 border-b border-neutral-200 overflow-hidden relative">
@@ -562,6 +587,10 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                                             src={imgSrc}
                                             alt={prodName}
                                             className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-700"
+                                            onError={e => {
+                                              const target = e.currentTarget
+                                              target.style.display = 'none'
+                                            }}
                                           />
                                         ) : (
                                           <div className="w-full h-full flex items-center justify-center text-neutral-400">
@@ -744,10 +773,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
               const prodName =
                 getLocVal(activeHotspot.hotspot.label) || getLocVal(prod.name) || 'Ürün'
 
-              const imgSrc =
-                typeof prod.mainImage === 'string'
-                  ? prod.mainImage
-                  : (prod.mainImage as {url?: string} | undefined)?.url
+              const imgSrc = getProductImageSrc(prod)
 
               return (
                 <Link
@@ -757,7 +783,15 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                 >
                   {imgSrc ? (
                     <div className="w-24 h-24 flex-shrink-0 bg-neutral-100 border border-neutral-200 rounded-none overflow-hidden relative">
-                      <img src={imgSrc} alt={prodName} className="w-full h-full object-cover" />
+                      <img
+                        src={imgSrc}
+                        alt={prodName}
+                        className="w-full h-full object-cover"
+                        onError={e => {
+                          const target = e.currentTarget
+                          target.style.display = 'none'
+                        }}
+                      />
                     </div>
                   ) : null}
 

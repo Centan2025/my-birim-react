@@ -144,8 +144,7 @@ export function DesignersPageV2() {
         )
       }
 
-      const targetSection = container.querySelector<HTMLElement>(`[data-designer-index="${index}"]`)
-      const targetY = targetSection ? targetSection.offsetTop : index * container.clientHeight
+      const targetY = index * container.clientHeight
       smoothScrollTo(targetY, 850)
     }
 
@@ -216,7 +215,7 @@ export function DesignersPageV2() {
       const now = performance.now()
       if (isAnimating || isScrollingRef.current || now - lastScrollTime < COOLDOWN_MS) return
 
-      const TOUCH_THRESHOLD = 45
+      const TOUCH_THRESHOLD = 35
       if (touchAccumulator >= TOUCH_THRESHOLD) {
         if (currentIndexRef.current < designers.length - 1) {
           scrollToSection(currentIndexRef.current + 1)
@@ -232,14 +231,7 @@ export function DesignersPageV2() {
     const handleResize = () => {
       const currentContainer = containerRef.current
       if (!currentContainer) return
-      const targetSection = currentContainer.querySelector<HTMLElement>(
-        `[data-designer-index="${currentIndexRef.current}"]`
-      )
-      if (targetSection) {
-        currentContainer.scrollTop = targetSection.offsetTop
-      } else {
-        currentContainer.scrollTop = currentIndexRef.current * currentContainer.clientHeight
-      }
+      currentContainer.scrollTop = currentIndexRef.current * currentContainer.clientHeight
     }
 
     window.addEventListener('wheel', handleWheel, {passive: false})
@@ -248,6 +240,7 @@ export function DesignersPageV2() {
     window.addEventListener('touchmove', handleTouchMove, {passive: true})
     window.addEventListener('touchend', handleTouchEnd, {passive: true})
     window.addEventListener('resize', handleResize)
+    window.visualViewport?.addEventListener('resize', handleResize)
 
     return () => {
       if (scrollAnimRef.current !== null) {
@@ -260,6 +253,7 @@ export function DesignersPageV2() {
       window.removeEventListener('touchmove', handleTouchMove)
       window.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('resize', handleResize)
+      window.visualViewport?.removeEventListener('resize', handleResize)
     }
   }, [designers.length])
 
@@ -279,7 +273,7 @@ export function DesignersPageV2() {
     <div
       ref={containerRef}
       data-lenis-prevent
-      className="h-screen h-[100dvh] w-full bg-black text-white selection:bg-white selection:text-black overflow-hidden select-none touch-none"
+      className="relative h-screen h-[100dvh] min-h-[100dvh] max-h-[100dvh] w-full bg-black text-white selection:bg-white selection:text-black overflow-hidden select-none touch-none overscroll-none"
       style={{
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
@@ -307,13 +301,13 @@ export function DesignersPageV2() {
               {/* Full-Screen Luminous Black & White Visual Background */}
               <div className="absolute inset-0 w-full h-full overflow-hidden bg-neutral-900 pointer-events-none">
                 {isBirimStudio ? (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-8 sm:p-16 relative bg-neutral-900">
-                    <div className="relative z-10 w-full max-w-lg sm:max-w-2xl flex flex-col items-center justify-center text-center">
+                  <div className="w-full h-full flex flex-col items-center justify-center p-6 sm:p-16 pb-28 sm:pb-36 relative bg-neutral-900">
+                    <div className="relative z-10 w-full max-w-[240px] sm:max-w-2xl flex flex-col items-center justify-center text-center">
                       <SiteLogo
                         logoUrl={settings?.logoUrl}
-                        className="w-full max-w-[300px] sm:max-w-[420px] h-auto object-contain brightness-110 grayscale mb-6"
+                        className="w-full max-w-[200px] sm:max-w-[420px] h-auto object-contain brightness-110 grayscale mb-4 sm:mb-6"
                       />
-                      <p className="text-xs sm:text-sm font-light tracking-[0.4em] text-white/70 uppercase">
+                      <p className="text-[10px] sm:text-sm font-light tracking-[0.35em] sm:tracking-[0.4em] text-white/70 uppercase">
                         {t('design_studio') || 'Tasarım Stüdyosu'}
                       </p>
                     </div>
@@ -393,7 +387,7 @@ export function DesignersPageV2() {
               </div>
 
               {/* Bottom Architectural Presentation & Transparent Info Panel */}
-              <div className="relative z-10 w-full max-w-[96%] sm:max-w-[92%] lg:max-w-[88vw] mx-auto pb-14 sm:pb-20 pt-8 pointer-events-auto">
+              <div className="relative z-10 w-full max-w-[96%] sm:max-w-[92%] lg:max-w-[88vw] mx-auto pb-12 sm:pb-20 pt-4 pointer-events-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end">
                   {/* Left Column: Big Typographic Title & Tagline */}
                   <div className="lg:col-span-7 xl:col-span-8 flex flex-col">

@@ -249,6 +249,8 @@ export const getFooterContent = async (): Promise<FooterContent> => {
       data['partners'] = (data['partners'] as Record<string, unknown>[]).map(
         (p: Record<string, unknown>) => ({
           ...p,
+          scale: typeof p['scale'] === 'number' ? p['scale'] : 100,
+          offsetY: typeof p['offsetY'] === 'number' ? p['offsetY'] : 0,
           logo: mapImage({
             asset: p['logoR2'],
             crop: (p['logoR2'] as Record<string, unknown>)?.['crop'] as

@@ -1,5 +1,5 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest'
-import {render, screen, fireEvent} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 import {MemoryRouter} from 'react-router-dom'
 import {HelmetProvider} from 'react-helmet-async'
 import {DesignersPage} from '../pages/DesignersPage'
@@ -78,7 +78,7 @@ const renderComponent = (initialEntries = ['/designers']) => {
   )
 }
 
-describe('DesignersPage & Version Switching', () => {
+describe('DesignersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
@@ -98,42 +98,12 @@ describe('DesignersPage & Version Switching', () => {
     } as unknown as ReturnType<typeof siteDataHooks.useSiteSettings>)
   })
 
-  it('renders V1 Grid by default', () => {
+  it('renders DesignersPage correctly', () => {
     renderComponent(['/designers'])
 
-    // Switcher presence
-    expect(screen.getByText('V1')).toBeDefined()
-    expect(screen.getByText('V2')).toBeDefined()
-
-    // Title and content in V1
-    expect(screen.getByRole('heading', {level: 1})).toBeDefined()
-    expect(screen.getByText('Ahmet Yılmaz')).toBeDefined()
-    expect(screen.getByText('Birim Design Studio')).toBeDefined()
-  })
-
-  it('renders V2 Fullscreen when query parameter v=2 is present', () => {
-    renderComponent(['/designers?v=2'])
-
-    // V2 specific elements
+    // Designers content
     expect(screen.getAllByText('Ahmet Yılmaz').length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByText('Birim Design Studio').length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByText(/Profili & Tasarımları İncele/i).length).toBeGreaterThanOrEqual(1)
-  })
-
-  it('switches between V1 and V2 when switcher buttons are clicked', () => {
-    renderComponent(['/designers'])
-
-    // Click V2 button
-    const v2Button = screen.getByTitle('V2 (Tam Ekran)')
-    fireEvent.click(v2Button)
-
-    // Should now be on V2
-    expect(screen.getAllByText(/Profili & Tasarımları İncele/i).length).toBeGreaterThanOrEqual(1)
-    expect(localStorage.getItem('birim_designers_view_version')).toBe('v2')
-
-    // Click V1 button
-    const v1Button = screen.getByTitle('V1 (Izgara)')
-    fireEvent.click(v1Button)
-    expect(localStorage.getItem('birim_designers_view_version')).toBe('v1')
   })
 })

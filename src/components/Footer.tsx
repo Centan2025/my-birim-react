@@ -10,6 +10,40 @@ import {resolveLegalLinkText} from '../lib/legalLinks'
 import {SocialIcon} from './SocialIcon'
 import {HomeNewsletter} from './HomeNewsletter'
 
+const getPartnerScale = (partner: unknown): number => {
+  if (typeof partner === 'object' && partner !== null) {
+    const p = partner as {scale?: number; name?: unknown}
+    if (typeof p.scale === 'number' && p.scale > 0 && p.scale !== 100) {
+      return p.scale
+    }
+    const nameStr = (
+      typeof p.name === 'string'
+        ? p.name
+        : typeof p.name === 'object' && p.name !== null
+          ? (p.name as {tr?: string; en?: string}).tr ||
+            (p.name as {tr?: string; en?: string}).en ||
+            ''
+          : ''
+    ).toLowerCase()
+
+    if (nameStr.includes('foscarini')) return 70
+    if (nameStr.includes('gaggenau')) return 80
+    if (nameStr.includes('arper')) return 82
+    if (typeof p.scale === 'number' && p.scale > 0) return p.scale
+  }
+  return 100
+}
+
+const getPartnerOffsetY = (partner: unknown): number => {
+  if (typeof partner === 'object' && partner !== null) {
+    const p = partner as {offsetY?: number}
+    if (typeof p.offsetY === 'number') {
+      return p.offsetY
+    }
+  }
+  return 0
+}
+
 export const Footer = () => {
   const {settings, isLoading: isSettingsLoading} = useSiteSettings()
   const {t, setLocale, locale, supportedLocales} = useTranslation()
@@ -124,15 +158,27 @@ export const Footer = () => {
                     const partnerName = typeof partner === 'string' ? partner : t(partner.name)
                     const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
                     const partnerUrl = typeof partner === 'object' ? partner.url : undefined
+                    const partnerScale = getPartnerScale(partner)
+                    const partnerOffsetY = getPartnerOffsetY(partner)
+                    const heightRem = (1.25 * partnerScale) / 100
 
                     const partnerContent = partnerLogo ? (
                       <img
                         src={partnerLogo}
                         alt={partnerName}
-                        className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
+                        style={{
+                          height: `${heightRem}rem`,
+                          transform: partnerOffsetY ? `translateY(${partnerOffsetY}px)` : undefined,
+                        }}
+                        className="w-auto max-w-[100px] object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
                       />
                     ) : (
-                      <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                      <span
+                        style={{
+                          transform: partnerOffsetY ? `translateY(${partnerOffsetY}px)` : undefined,
+                        }}
+                        className="text-xs md:text-sm font-medium text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200"
+                      >
                         {partnerName}
                       </span>
                     )
@@ -143,12 +189,14 @@ export const Footer = () => {
                         href={partnerUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group"
+                        className="group flex items-center h-7"
                       >
                         {partnerContent}
                       </a>
                     ) : (
-                      <span key={`partner-${index}`}>{partnerContent}</span>
+                      <span key={`partner-${index}`} className="flex items-center h-7">
+                        {partnerContent}
+                      </span>
                     )
                   })}
                 </div>
@@ -194,7 +242,7 @@ export const Footer = () => {
           <div className="mt-8 lg:mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-between gap-6 lg:gap-0">
             {/* Sosyal medya linkleri */}
             <ScrollReveal delay={120} threshold={0.1} width="w-auto" className="h-auto">
-              <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-1">
+              <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-1 lg:-ml-2">
                 {(content.socialLinks || [])
                   .filter(link => link.isEnabled)
                   .map((link, index) => (
@@ -244,15 +292,27 @@ export const Footer = () => {
                       const partnerName = typeof partner === 'string' ? partner : t(partner.name)
                       const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
                       const partnerUrl = typeof partner === 'object' ? partner.url : undefined
+                      const partnerScale = getPartnerScale(partner)
+                      const partnerOffsetY = getPartnerOffsetY(partner)
+                      const heightRem = (1.25 * partnerScale) / 100
 
                       const partnerContent = partnerLogo ? (
                         <img
                           src={partnerLogo}
                           alt={partnerName}
-                          className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
+                          style={{
+                            height: `${heightRem}rem`,
+                            transform: partnerOffsetY ? `translateY(${partnerOffsetY}px)` : undefined,
+                          }}
+                          className="w-auto max-w-[90px] object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
                         />
                       ) : (
-                        <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                        <span
+                          style={{
+                            transform: partnerOffsetY ? `translateY(${partnerOffsetY}px)` : undefined,
+                          }}
+                          className="text-xs font-medium text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200"
+                        >
                           {partnerName}
                         </span>
                       )
@@ -263,18 +323,20 @@ export const Footer = () => {
                           href={partnerUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="group"
+                          className="group flex items-center h-7"
                         >
                           {partnerContent}
                         </a>
                       ) : (
-                        <span key={`partner-mobile-${index}`}>{partnerContent}</span>
+                        <span key={`partner-mobile-${index}`} className="flex items-center h-7">
+                          {partnerContent}
+                        </span>
                       )
                     })}
                   </div>
 
                   {/* Alt çizgi (partnerler altı) */}
-                  <div className="w-full border-t border-gray-500/80" />
+                  <div className="w-full border-t border-white/45" />
                 </div>
               </ScrollReveal>
             </div>
@@ -284,7 +346,7 @@ export const Footer = () => {
               sol: telif, sağ: yasal düğmeler */}
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
             <div
-              className="lg:mt-10 pt-2 lg:pt-8 w-full lg:border-t lg:border-t-2 lg:border-gray-500/80"
+              className="lg:mt-10 pt-2 lg:pt-8 w-full lg:border-t lg:border-white/45"
               style={{overflow: 'visible', width: '100%'}}
             >
               <div className="flex flex-col items-center justify-center gap-4 text-xs w-full lg:flex-row lg:items-start lg:justify-between">

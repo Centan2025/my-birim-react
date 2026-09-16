@@ -290,23 +290,63 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
           const prod = hs['product'] as Record<string, unknown> | undefined
           let mappedProd = undefined
           if (prod) {
-            const prodMedia = Array.isArray(prod['media'])
-              ? (prod['media'] as Record<string, unknown>[])
-              : []
-            const coverItem = prodMedia.find(m => m['isCover']) || prodMedia[0]
+            const prodMedia = (
+              Array.isArray(prod['media']) && prod['media'].length > 0
+                ? prod['media']
+                : Array.isArray(prod['bottomMedia'])
+                  ? prod['bottomMedia']
+                  : []
+            ) as Record<string, unknown>[]
+
+            const coverItem =
+              prodMedia.find(m => m['isCover']) ||
+              prodMedia.find(m => m['imageR2'] || m['image'] || m['url']) ||
+              prodMedia[0]
+
             const imageR2Obj =
               (coverItem?.['imageR2'] as Record<string, unknown> | undefined) ||
               (prod['mainImageR2'] as Record<string, unknown> | undefined)
 
-            const resolvedUrl =
-              (typeof imageR2Obj?.['url'] === 'string'
-                ? mapImage(imageR2Obj as SanityImageLike)
-                : '') ||
-              mapImage(coverItem?.['imageR2'] as SanityImageLike) ||
-              mapImage(prod['mainImageR2'] as SanityImageLike) ||
-              mapImage(prod['mainImage'] as SanityImageLike) ||
-              (typeof coverItem?.['url'] === 'string' ? coverItem['url'] : '') ||
-              (typeof prod['mainImage'] === 'string' ? prod['mainImage'] : '')
+            let resolvedUrl = ''
+            if (imageR2Obj) {
+              resolvedUrl = mapImage(imageR2Obj as SanityImageLike)
+            }
+            if (!resolvedUrl && coverItem?.['image']) {
+              resolvedUrl = mapImage(coverItem['image'] as SanityImageLike)
+            }
+            if (!resolvedUrl && coverItem?.['imageMobileR2']) {
+              resolvedUrl = mapImage(coverItem['imageMobileR2'] as SanityImageLike)
+            }
+            if (!resolvedUrl && coverItem?.['imageDesktopR2']) {
+              resolvedUrl = mapImage(coverItem['imageDesktopR2'] as SanityImageLike)
+            }
+            if (!resolvedUrl && prod['mainImageR2']) {
+              resolvedUrl = mapImage(prod['mainImageR2'] as SanityImageLike)
+            }
+            if (!resolvedUrl && prod['mainImage']) {
+              resolvedUrl = mapImage(prod['mainImage'] as SanityImageLike)
+            }
+            if (!resolvedUrl && typeof coverItem?.['url'] === 'string' && coverItem['url']) {
+              resolvedUrl = rewriteR2Url(coverItem['url'])
+            }
+            if (!resolvedUrl && typeof prod['mainImage'] === 'string' && prod['mainImage']) {
+              resolvedUrl = rewriteR2Url(prod['mainImage'])
+            }
+
+            if (!resolvedUrl) {
+              for (const m of prodMedia) {
+                const u =
+                  mapImage(m?.['imageR2'] as SanityImageLike) ||
+                  mapImage(m?.['image'] as SanityImageLike) ||
+                  mapImage(m?.['imageMobileR2'] as SanityImageLike) ||
+                  mapImage(m?.['imageDesktopR2'] as SanityImageLike) ||
+                  (typeof m?.['url'] === 'string' && m['url'] ? rewriteR2Url(m['url']) : '')
+                if (u) {
+                  resolvedUrl = u
+                  break
+                }
+              }
+            }
 
             mappedProd = {
               id: (prod['id'] as string) || (prod['_id'] as string) || '',
@@ -434,23 +474,48 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       interactiveShowcaseTitle,
       interactiveShowcase[]{
         title,
+        image,
+        imageMobile,
         imageR2,
         imageMobileR2,
+        imageDesktopR2,
+        crop,
+        hotspot,
+        cropMobile,
+        hotspotMobile,
         hotspots[]{
           x,
           y,
           label,
           product->{
             _id,
-            "id": coalesce(slug.current, _id),
+            "id": coalesce(id.current, slug.current, _id),
             name,
             mainImage,
             mainImageR2,
             media[]{
               type,
-              isCover,
+              url,
+              image,
+              imageMobile,
               imageR2,
-              url
+              imageMobileR2,
+              imageDesktopR2,
+              cropMobile,
+              hotspotMobile,
+              isCover
+            },
+            bottomMedia[]{
+              type,
+              url,
+              image,
+              imageMobile,
+              imageR2,
+              imageMobileR2,
+              imageDesktopR2,
+              cropMobile,
+              hotspotMobile,
+              isCover
             },
             price,
             currency,
