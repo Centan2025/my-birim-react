@@ -26,6 +26,14 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       sanity: path.resolve(__dirname, './src/test/mocks/sanity.ts'),
+      '@sanity/orderable-document-list': path.resolve(
+        __dirname,
+        './src/test/mocks/sanityOrderableDocumentList.ts'
+      ),
+      '@sanity/ui': path.resolve(__dirname, './src/test/mocks/sanityUi.ts'),
+      '@sanity/icons': path.resolve(__dirname, './src/test/mocks/sanityIcons.ts'),
+      'styled-components': path.resolve(__dirname, './src/test/mocks/styledComponents.ts'),
+      '@portabletext/editor': path.resolve(__dirname, './src/test/mocks/portableTextEditor.ts'),
     },
   },
 })
