@@ -2,11 +2,13 @@ import {describe, it, expect, vi, beforeEach} from 'vitest'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import type {SupabaseClient} from '@supabase/supabase-js'
 import crypto from 'crypto'
-import cartValidateHandler from '../../api/commerce/cart/validate'
-import checkoutValidateHandler from '../../api/commerce/checkout/validate'
-import ordersHandler from '../../api/commerce/orders/index'
-import paymentsHandler from '../../api/commerce/payments/index'
-import adminOrdersHandler from '../../api/admin/commerce/orders/index'
+import {
+  handleCartValidate as cartValidateHandler,
+  handleCheckoutValidate as checkoutValidateHandler,
+  handleOrders as ordersHandler,
+  handlePayments as paymentsHandler,
+} from '../../api/commerce/[...slug]'
+import adminOrdersHandler from '../../api/admin/[...slug]'
 import {
   isValidOrderStatusTransition,
   canCancelOrderStatus,

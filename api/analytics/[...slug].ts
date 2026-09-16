@@ -2,9 +2,10 @@ import crypto from 'crypto'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {GoogleAuth} from 'google-auth-library'
 import dotenv from 'dotenv'
-import {getAuthTokenFromReq, verifyToken} from '../lib/server/token.js'
-import {handleCors} from '../lib/server/cors.js'
-import {isRateLimitedAsync, getClientIp} from '../lib/server/rateLimiter.js'
+import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
+import {handleCors} from '../../lib/server/cors.js'
+import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
+import {getSafeSupabaseAdmin} from '../../lib/server/supabaseAdmin.js'
 
 dotenv.config({path: '.env.local'})
 dotenv.config()
@@ -14,9 +15,25 @@ interface GAReportRow {
   metricValues?: {value: string}[]
 }
 
-// In-memory cache to prevent 429 and reduce Google Analytics API quota usage
+interface ActivityPayload {
+  user_id: string
+  user_email?: string
+  session_id: string
+  activity_type: 'session_start' | 'page_view' | 'page_dwell' | 'download' | 'session_end'
+  page_url?: string
+  page_title?: string
+  duration_seconds?: number
+  download_file_name?: string
+  download_file_type?: string
+  platform?: string
+  os?: string
+  browser?: string
+  referrer?: string
+  metadata?: Record<string, unknown>
+}
+
 const cache = new Map<string, {data: unknown; expires: number}>()
-const CACHE_TTL_MS = 60 * 1000 // 1 minute
+const CACHE_TTL_MS = 60 * 1000
 
 function getCredentials() {
   let propertyId = process.env['GA_PROPERTY_ID']?.trim() || ''
@@ -118,8 +135,6 @@ export async function getRealtimeData() {
   }
 
   try {
-    // Single consolidated realtime query: unifiedScreenName + country + city
-    // Consumes ONLY 1 quota token instead of 3!
     const realtimeReport = await runRealtimeReport({
       dimensions: [{name: 'unifiedScreenName'}, {name: 'country'}, {name: 'city'}],
       metrics: [{name: 'activeUsers'}],
@@ -174,11 +189,10 @@ export async function getRealtimeData() {
     if (totalActive > 0) {
       lastValidRealtime = result
     }
-    cache.set(cacheKey, {data: result, expires: Date.now() + 60 * 1000}) // 60s cache
+    cache.set(cacheKey, {data: result, expires: Date.now() + 60 * 1000})
     return result
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)
-    // If quota 429, serve last known valid realtime data seamlessly
     return {
       ...lastValidRealtime,
       isQuotaThrottled: true,
@@ -196,8 +210,6 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
     return cached.data
   }
 
-  // Run in 2 concurrent batches to stay well within GA4 concurrency limit (max 10) while minimizing latency
-  // Batch 1: Primary metrics and trends
   const [overviewRes, dailyRes, topPagesRes, sourcesRes] = await Promise.all([
     runReport({
       dateRanges: [{startDate, endDate}],
@@ -243,7 +255,6 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
     }),
   ])
 
-  // Batch 2: Secondary breakdowns and realtime
   const [devicesRes, countryRes, cityRes, browserRes, realtime] = await Promise.all([
     runReport({
       dateRanges: [{startDate, endDate}],
@@ -344,7 +355,6 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
       const users = parseInt(r.metricValues?.[0]?.value || '0', 10) || 0
       const sessions = parseInt(r.metricValues?.[1]?.value || '0', 10) || 0
 
-      // Aggregate region stats
       if (isRegionValid) {
         const rKey = `${country}_${region}`
         const existingR = regionMap.get(rKey)
@@ -394,14 +404,132 @@ export async function getAllAnalyticsData(startDate: string, endDate: string) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (
     handleCors(req, res, {
-      allowMethods: 'GET, OPTIONS',
+      allowMethods: 'GET, POST, OPTIONS',
       allowHeaders: 'Content-Type, Authorization, x-analytics-pin',
     })
   ) {
     return
   }
 
-  // Server-side authentication: valid PIN or valid Admin JWT
+  const rawSlug = req.query?.['slug']
+  const slugArray: string[] = Array.isArray(rawSlug)
+    ? rawSlug
+    : typeof rawSlug === 'string'
+      ? [rawSlug]
+      : (req.url?.split('?')[0] ?? '').split('/').filter(Boolean).slice(1)
+
+  const segments = slugArray.filter(s => s !== 'analytics')
+  const path = segments.join('/')
+
+  if (path === 'activity') {
+    return handleActivity(req, res)
+  }
+
+  return handleAnalyticsReport(req, res)
+}
+
+async function handleActivity(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({error: 'Method Not Allowed'})
+  }
+
+  const ip = getClientIp(req)
+  if (await isRateLimitedAsync(`activity_req_${ip}`, {limit: 60, windowMs: 60000})) {
+    return res.status(429).json({error: 'Çok fazla aktivite isteği. Lütfen bekleyin.'})
+  }
+
+  try {
+    let bodyData: unknown = req.body
+
+    if (typeof bodyData === 'string') {
+      if (bodyData.length > 32768) {
+        return res.status(400).json({error: 'Payload boyutu 32KB sınırını aşıyor'})
+      }
+      try {
+        bodyData = JSON.parse(bodyData)
+      } catch {
+        return res.status(400).json({error: 'Invalid JSON payload'})
+      }
+    }
+
+    if (!bodyData || typeof bodyData !== 'object') {
+      return res.status(400).json({error: 'Missing payload'})
+    }
+
+    const rawPayloadList: ActivityPayload[] = Array.isArray(bodyData)
+      ? (bodyData as ActivityPayload[])
+      : [bodyData as ActivityPayload]
+
+    const payloadList = rawPayloadList.slice(0, 15)
+
+    if (payloadList.length === 0) {
+      return res.status(400).json({error: 'Empty payload list'})
+    }
+
+    const country =
+      (req.headers['x-vercel-ip-country'] as string) ||
+      (req.headers['cf-ipcountry'] as string) ||
+      null
+    const city = (req.headers['x-vercel-ip-city'] as string)
+      ? decodeURIComponent(req.headers['x-vercel-ip-city'] as string)
+      : null
+
+    const supabase = getSafeSupabaseAdmin()
+    if (!supabase) {
+      return res.status(503).json({error: 'Supabase admin client unavailable'})
+    }
+
+    const rowsToInsert = payloadList
+      .filter(item => item && item.user_id && item.session_id && item.activity_type)
+      .map(item => ({
+        user_id: item.user_id,
+        user_email: item.user_email || null,
+        session_id: item.session_id,
+        activity_type: item.activity_type,
+        page_url: item.page_url || null,
+        page_title: item.page_title || null,
+        duration_seconds: Math.max(0, Math.floor(Number(item.duration_seconds) || 0)),
+        download_file_name: item.download_file_name || null,
+        download_file_type: item.download_file_type || null,
+        platform: item.platform || null,
+        os: item.os || null,
+        browser: item.browser || null,
+        referrer: item.referrer || null,
+        ip_address: ip || null,
+        city: city || null,
+        country: country || null,
+        metadata: item.metadata || {},
+        created_at: new Date().toISOString(),
+      }))
+
+    if (rowsToInsert.length === 0) {
+      return res.status(400).json({error: 'No valid activity rows to record'})
+    }
+
+    const {error} = await supabase.from('user_activities').insert(rowsToInsert)
+
+    if (error) {
+      console.error('[Activity API] Error inserting activities:', error.message)
+      return res.status(200).json({
+        success: false,
+        warning: 'Activities received but persistence failed',
+        details: error.message,
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      recorded: rowsToInsert.length,
+    })
+  } catch (err) {
+    console.error('[Activity API] Unexpected error:', err)
+    return res.status(500).json({
+      error: err instanceof Error ? err.message : 'Internal Server Error',
+    })
+  }
+}
+
+async function handleAnalyticsReport(req: VercelRequest, res: VercelResponse) {
   const rawExpectedPin = process.env['ANALYTICS_PIN']?.trim()
   if (!rawExpectedPin) {
     console.error('[Analytics Security] ANALYTICS_PIN environment variable is not configured!')
@@ -414,7 +542,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const clientIp = getClientIp(req)
 
-  // Rate limit incoming requests to prevent brute force
   if (await isRateLimitedAsync(`analytics_req_${clientIp}`, {limit: 30, windowMs: 60000})) {
     return res.status(429).json({
       success: false,
@@ -422,7 +549,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
   }
 
-  // Strictly accept PIN via header only (never accept via URL query params)
   const rawProvidedPin = req.headers['x-analytics-pin']
   const providedPin = typeof rawProvidedPin === 'string' ? rawProvidedPin.trim() : ''
 
@@ -436,7 +562,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const payload = token ? verifyToken(token) : null
   const isUserAdmin = Boolean(payload && payload.role === 'admin')
 
-  // Verification endpoint for client PIN submission (Rate limited)
   if (req.query['action'] === 'verify') {
     if (await isRateLimitedAsync(`analytics_verify_${clientIp}`, {limit: 5, windowMs: 60000})) {
       return res.status(429).json({

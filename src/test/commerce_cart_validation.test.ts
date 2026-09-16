@@ -1,6 +1,6 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
-import validateHandler from '../../api/commerce/cart/validate'
+import validateHandler from '../../api/commerce/[...slug]'
 import {validateCart} from '../../lib/commerce/cart-validator'
 import {CommerceValidationError} from '../../lib/commerce/types'
 import type {AuthoritativeCatalogBatch} from '../../lib/commerce/sanityCommerceClient'

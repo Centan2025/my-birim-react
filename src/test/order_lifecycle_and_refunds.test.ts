@@ -1,6 +1,6 @@
 import {describe, it, expect, beforeEach} from 'vitest'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
-import adminOrdersHandler from '../../api/admin/commerce/orders/index'
+import adminOrdersHandler from '../../api/admin/[...slug]'
 import {
   isValidOrderStatusTransition,
   assertValidOrderStatusTransition,

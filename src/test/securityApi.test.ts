@@ -2,9 +2,9 @@ import {describe, it, expect, vi, beforeEach} from 'vitest'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import sanityQueryHandler from '../../api/sanity/query'
 import authHandler from '../../api/auth/[action]'
-import analyticsHandler from '../../api/analytics'
+import analyticsHandler from '../../api/analytics/[...slug]'
 import mediaActionHandler from '../../api/media/[action]'
-import presignedUrlHandler from '../../api/media/presigned-url'
+const presignedUrlHandler = mediaActionHandler
 
 function createMockReqRes(overrides?: {
   method?: string

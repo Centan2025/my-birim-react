@@ -50,7 +50,7 @@ vi.mock('../../lib/server/supabaseAdmin.js', () => ({
   })),
 }))
 
-import membersHandler from '../../api/admin/members'
+import membersHandler from '../../api/admin/[...slug]'
 
 function createMockReqRes(overrides?: {
   method?: string
