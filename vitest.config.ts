@@ -34,6 +34,13 @@ export default defineConfig({
       '@sanity/icons': path.resolve(__dirname, './src/test/mocks/sanityIcons.ts'),
       'styled-components': path.resolve(__dirname, './src/test/mocks/styledComponents.ts'),
       '@portabletext/editor': path.resolve(__dirname, './src/test/mocks/portableTextEditor.ts'),
+      'browser-image-compression': path.resolve(
+        __dirname,
+        './src/test/mocks/browserImageCompression.ts'
+      ),
+      'react-image-crop': path.resolve(__dirname, './src/test/mocks/reactImageCrop.ts'),
+      xlsx: path.resolve(__dirname, './src/test/mocks/xlsx.ts'),
+      jszip: path.resolve(__dirname, './src/test/mocks/jszip.ts'),
     },
   },
 })
