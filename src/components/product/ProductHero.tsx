@@ -165,13 +165,13 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           to { opacity: 1; transform: scale(1); }
         }
         .product-hero-title {
-          letter-spacing: -0.08em !important;
+          letter-spacing: -0.03em !important;
         }
         @media (orientation: landscape) and (max-height: 600px) {
           .product-hero-title {
             font-size: 1.25rem !important;
             line-height: 1.2 !important;
-            letter-spacing: -0.06em !important;
+            letter-spacing: -0.02em !important;
           }
           .product-hero-details {
             font-size: 0.75rem !important;
@@ -364,7 +364,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     ease: [0.22, 1, 0.36, 1],
                   }}
                 >
-                  <h1 className="product-hero-title text-white text-lg max-md:landscape:text-sm md:text-4xl lg:text-5xl font-extrabold tracking-[-0.08em] drop-shadow-lg font-michroma pointer-events-auto">
+                  <h1 className="product-hero-title text-white text-lg max-md:landscape:text-sm md:text-4xl lg:text-5xl font-extrabold tracking-[-0.03em] drop-shadow-lg font-michroma pointer-events-auto">
                     {t(product.name)}
                   </h1>
                 </motion.div>
