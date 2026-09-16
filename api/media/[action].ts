@@ -11,40 +11,47 @@ import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
 import {handleCors} from '../../lib/server/cors.js'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 
-const R2_ACCOUNT_ID = (
-  process.env['R2_ACCOUNT_ID'] ||
-  process.env['SANITY_STUDIO_R2_ACCOUNT_ID'] ||
-  ''
-).trim()
-const R2_ACCESS_KEY_ID = (
-  process.env['R2_ACCESS_KEY_ID'] ||
-  process.env['SANITY_STUDIO_R2_ACCESS_KEY_ID'] ||
-  ''
-).trim()
-const R2_SECRET_ACCESS_KEY = (
-  process.env['R2_SECRET_ACCESS_KEY'] ||
-  process.env['SANITY_STUDIO_R2_SECRET_ACCESS_KEY'] ||
-  ''
-).trim()
-const R2_BUCKET_NAME = (
-  process.env['R2_BUCKET_NAME'] ||
-  process.env['SANITY_STUDIO_R2_BUCKET_NAME'] ||
-  'birim-web'
-).trim()
-const R2_DOMAIN = (
-  process.env['R2_DOMAIN'] ||
-  process.env['SANITY_STUDIO_R2_DOMAIN'] ||
-  'https://assets.birim.com'
-).trim()
+function getR2Config() {
+  const accountId = (
+    process.env['R2_ACCOUNT_ID'] ||
+    process.env['SANITY_STUDIO_R2_ACCOUNT_ID'] ||
+    ''
+  ).trim()
+  const accessKeyId = (
+    process.env['R2_ACCESS_KEY_ID'] ||
+    process.env['SANITY_STUDIO_R2_ACCESS_KEY_ID'] ||
+    ''
+  ).trim()
+  const secretAccessKey = (
+    process.env['R2_SECRET_ACCESS_KEY'] ||
+    process.env['SANITY_STUDIO_R2_SECRET_ACCESS_KEY'] ||
+    ''
+  ).trim()
+  const bucketName = (
+    process.env['R2_BUCKET_NAME'] ||
+    process.env['SANITY_STUDIO_R2_BUCKET_NAME'] ||
+    'birim-web'
+  ).trim()
+  const domain = (
+    process.env['R2_DOMAIN'] ||
+    process.env['SANITY_STUDIO_R2_DOMAIN'] ||
+    'https://assets.birim.com'
+  ).trim()
 
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: R2_ACCOUNT_ID ? `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : '',
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID || '',
-    secretAccessKey: R2_SECRET_ACCESS_KEY || '',
-  },
-})
+  return {accountId, accessKeyId, secretAccessKey, bucketName, domain}
+}
+
+function getR2Client() {
+  const {accountId, accessKeyId, secretAccessKey} = getR2Config()
+  return new S3Client({
+    region: 'auto',
+    endpoint: accountId ? `https://${accountId}.r2.cloudflarestorage.com` : '',
+    credentials: {
+      accessKeyId: accessKeyId || '',
+      secretAccessKey: secretAccessKey || '',
+    },
+  })
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleCors(req, res)) {
@@ -131,7 +138,9 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({error: 'Geçersiz klasör veya dosya adı.'})
   }
 
-  if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
+  const {accountId, accessKeyId, secretAccessKey, bucketName, domain} = getR2Config()
+
+  if (!accountId || !accessKeyId || !secretAccessKey) {
     return res.status(500).json({
       error:
         'Cloudflare R2 konfigürasyon değişkenleri (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) sunucu ortamında tanımlı değil.',
@@ -149,12 +158,13 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
 
     const isSvg = contentType.toLowerCase() === 'image/svg+xml'
     const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
+      Bucket: bucketName,
       Key: key,
       ContentType: contentType,
       ...(isSvg ? {ContentDisposition: `attachment; filename="${cleanFileName}"`} : {}),
     })
 
+    const r2Client = getR2Client()
     const url = await getSignedUrl(
       r2Client as unknown as Parameters<typeof getSignedUrl>[0],
       command,
@@ -164,7 +174,7 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
     )
 
     const defaultDomain = 'assets.birim.com'
-    const domainToUse = R2_DOMAIN && R2_DOMAIN !== 'undefined' ? R2_DOMAIN : defaultDomain
+    const domainToUse = domain && domain !== 'undefined' ? domain : defaultDomain
     const r2Domain = domainToUse.startsWith('http') ? domainToUse : `https://${domainToUse}`
     const finalFileUrl = `${r2Domain}/${key}`
 
@@ -219,8 +229,10 @@ async function handleDeleteBatch(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const {bucketName} = getR2Config()
+    const r2Client = getR2Client()
     const command = new DeleteObjectsCommand({
-      Bucket: R2_BUCKET_NAME,
+      Bucket: bucketName,
       Delete: {
         Objects: safeKeys.map((key: string) => ({Key: key})),
         Quiet: true,
@@ -267,8 +279,10 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
   const {continuationToken} = req.body || {}
 
   try {
+    const {bucketName} = getR2Config()
+    const r2Client = getR2Client()
     const command = new ListObjectsV2Command({
-      Bucket: R2_BUCKET_NAME,
+      Bucket: bucketName,
       ContinuationToken: continuationToken as string | undefined,
     })
 

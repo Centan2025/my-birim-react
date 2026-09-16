@@ -37,6 +37,46 @@ vi.mock('../../lib/commerce/sanityCommerceClient', () => ({
   })),
 }))
 
+// Mock AWS S3 client and request presigner
+vi.mock('@aws-sdk/client-s3', () => {
+  class MockS3Client {
+    send = vi.fn().mockResolvedValue({
+      Contents: [{Key: 'uploads/sample.jpg'}],
+      NextContinuationToken: undefined,
+    })
+  }
+  class MockPutObjectCommand {
+    constructor(public input: Record<string, unknown>) {}
+  }
+  class MockDeleteObjectsCommand {
+    constructor(public input: Record<string, unknown>) {}
+  }
+  class MockListObjectsV2Command {
+    constructor(public input: Record<string, unknown>) {}
+  }
+
+  return {
+    S3Client: MockS3Client,
+    PutObjectCommand: MockPutObjectCommand,
+    DeleteObjectsCommand: MockDeleteObjectsCommand,
+    ListObjectsV2Command: MockListObjectsV2Command,
+  }
+})
+
+vi.mock('@aws-sdk/s3-request-presigner', () => ({
+  getSignedUrl: vi.fn(async () => 'https://assets.birim.com/signed-upload-url-mock'),
+}))
+
+interface RpcArgs {
+  p_event?: {
+    transaction_id?: string
+    status?: string
+  }
+  p_transaction?: {
+    order_id?: string
+  }
+}
+
 // Mock Supabase admin
 vi.mock('../../lib/server/supabaseAdmin.js', () => ({
   getSafeSupabaseAdmin: vi.fn(() => ({
@@ -63,7 +103,7 @@ vi.mock('../../lib/server/supabaseAdmin.js', () => ({
       }),
       insert: vi.fn().mockResolvedValue({data: [], error: null}),
     })),
-    rpc: vi.fn((proc: string, args: any) => {
+    rpc: vi.fn((proc: string, args: RpcArgs) => {
       if (proc === 'resolve_payment_event_atomic') {
         return Promise.resolve({
           data: {
@@ -108,6 +148,16 @@ import {
   canRefundOrderStatus,
 } from '../../lib/commerce/order-lifecycle'
 
+interface TestResponseBody {
+  success?: boolean
+  valid?: boolean
+  code?: string
+  message?: string
+  error?: string
+  uploadUrl?: string
+  fileUrl?: string
+}
+
 // Helper to create mock VercelRequest and VercelResponse
 function createMockReqRes(overrides?: {
   method?: string
@@ -131,7 +181,7 @@ function createMockReqRes(overrides?: {
   const res = {
     statusCode: 200,
     headers: {} as Record<string, string>,
-    body: null as unknown,
+    body: null as TestResponseBody | null,
     setHeader(key: string, value: string) {
       this.headers[key.toLowerCase()] = value
       return this
@@ -140,7 +190,7 @@ function createMockReqRes(overrides?: {
       this.statusCode = code
       return this
     },
-    json(data: unknown) {
+    json(data: TestResponseBody) {
       this.body = data
       return this
     },
@@ -185,7 +235,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(405)
-      expect((res.body as any).code).toBe('INVALID_REQUEST')
+      expect(res.body?.code).toBe('INVALID_REQUEST')
     })
 
     it('1.2 cart/validate rejects client price/currency manipulation attempt via strict Zod schema', async () => {
@@ -205,8 +255,8 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).valid).toBe(false)
-      expect((res.body as any).message).toContain('yetkisiz')
+      expect(res.body?.valid).toBe(false)
+      expect(res.body?.message).toContain('yetkisiz')
     })
 
     it('1.3 cart/validate rejects zero or negative quantity', async () => {
@@ -219,7 +269,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).valid).toBe(false)
+      expect(res.body?.valid).toBe(false)
     })
 
     it('1.4 cart/validate rejects empty items array', async () => {
@@ -230,7 +280,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).valid).toBe(false)
+      expect(res.body?.valid).toBe(false)
     })
 
     it('1.5 checkout/validate rejects non-POST requests with 405 Method Not Allowed', async () => {
@@ -250,7 +300,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).valid).toBe(false)
+      expect(res.body?.valid).toBe(false)
     })
 
     it('1.7 orders GET rejects non-authenticated requests without guest token or orderId', async () => {
@@ -260,7 +310,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(401)
-      expect((res.body as any).code).toBe('UNAUTHORIZED')
+      expect(res.body?.code).toBe('UNAUTHORIZED')
     })
 
     it('1.8 orders rejects unsupported methods like PUT and DELETE with 405', async () => {
@@ -270,7 +320,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(405)
-      expect((res.body as any).code).toBe('METHOD_NOT_ALLOWED')
+      expect(res.body?.code).toBe('METHOD_NOT_ALLOWED')
     })
 
     it('1.9 orders creates guest order with strict validation rejection on invalid payload', async () => {
@@ -281,7 +331,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).code).toBe('INVALID_REQUEST')
+      expect(res.body?.code).toBe('INVALID_REQUEST')
     })
 
     it('1.10 orders parses subpath orderId from slug path seamlessly', async () => {
@@ -305,7 +355,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(405)
-      expect((res.body as any).code).toBe('METHOD_NOT_ALLOWED')
+      expect(res.body?.code).toBe('METHOD_NOT_ALLOWED')
     })
 
     it('2.2 payment status GET requires transactionId query or slug parameter', async () => {
@@ -315,7 +365,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).code).toBe('INVALID_REQUEST')
+      expect(res.body?.code).toBe('INVALID_REQUEST')
     })
 
     it('2.3 payment initiation rejects request with missing orderId', async () => {
@@ -326,7 +376,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).code).toBe('INVALID_REQUEST')
+      expect(res.body?.code).toBe('INVALID_REQUEST')
     })
 
     it('2.4 mock_complete is strictly blocked in production unless PAYMENT_ALLOW_MOCK is true', async () => {
@@ -344,7 +394,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(403)
-      expect((res.body as any).code).toBe('MOCK_PROVIDER_DISABLED')
+      expect(res.body?.code).toBe('MOCK_PROVIDER_DISABLED')
     })
 
     it('2.5 mock_complete rejects missing paymentTransactionId', async () => {
@@ -359,7 +409,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).code).toBe('INVALID_REQUEST')
+      expect(res.body?.code).toBe('INVALID_REQUEST')
     })
 
     it('2.6 mock_complete rejects invalid simulation status values', async () => {
@@ -375,7 +425,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).code).toBe('INVALID_STATUS')
+      expect(res.body?.code).toBe('INVALID_STATUS')
     })
 
     it('2.7 webhook callback rejects forged invalid signature', async () => {
@@ -391,7 +441,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).code).toBe('PAYMENT_CALLBACK_INVALID')
+      expect(res.body?.code).toBe('PAYMENT_CALLBACK_INVALID')
     })
 
     it('2.8 webhook callback processes verified payload with valid status mapping', async () => {
@@ -407,7 +457,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(200)
-      expect((res.body as any).success).toBe(true)
+      expect(res.body?.success).toBe(true)
     })
 
     it('2.9 payment state machine prevents invalid transition from PAID to PENDING', () => {
@@ -483,7 +533,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await adminHandler(req, res)
       expect(res.statusCode).toBe(401)
-      expect((res.body as any).code).toBe('UNAUTHORIZED')
+      expect(res.body?.code).toBe('UNAUTHORIZED')
     })
 
     it('3.6 admin/commerce/orders routes refund subpath with break-glass authorization', async () => {
@@ -504,7 +554,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await adminHandler(req, res)
       expect(res.statusCode).toBe(404)
-      expect((res.body as any).code).toBe('NOT_FOUND')
+      expect(res.body?.code).toBe('NOT_FOUND')
     })
   })
 
@@ -520,7 +570,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await analyticsHandler(req, res)
       expect(res.statusCode).toBe(401)
-      expect((res.body as any).success).toBe(false)
+      expect(res.body?.success).toBe(false)
     })
 
     it('4.2 analytics verify action succeeds with valid PIN', async () => {
@@ -531,7 +581,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await analyticsHandler(req, res)
       expect(res.statusCode).toBe(200)
-      expect((res.body as any).success).toBe(true)
+      expect(res.body?.success).toBe(true)
     })
 
     it('4.3 analytics activity endpoint rejects non-POST methods with 405', async () => {
@@ -552,7 +602,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await analyticsHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).error).toContain('32KB')
+      expect(res.body?.error).toContain('32KB')
     })
   })
 
@@ -579,9 +629,9 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await mediaHandler(req, res)
       expect(res.statusCode).toBe(200)
-      expect((res.body as any).success).toBe(true)
-      expect((res.body as any).uploadUrl).toBeDefined()
-      expect((res.body as any).fileUrl).toBeDefined()
+      expect(res.body?.success).toBe(true)
+      expect(res.body?.uploadUrl).toBeDefined()
+      expect(res.body?.fileUrl).toBeDefined()
     })
 
     it('5.3 presigned-url rejects non-whitelisted MIME types (e.g. executable/php)', async () => {
@@ -593,7 +643,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await mediaHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).error).toContain('Desteklenmeyen')
+      expect(res.body?.error).toContain('Desteklenmeyen')
     })
 
     it('5.4 presigned-url rejects path traversal attempts in filename or folder', async () => {
@@ -605,7 +655,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await mediaHandler(req, res)
       expect(res.statusCode).toBe(400)
-      expect((res.body as any).error).toContain('Geçersiz')
+      expect(res.body?.error).toContain('Geçersiz')
     })
 
     it('5.5 presigned-url rejects missing filename or contentType', async () => {
@@ -696,7 +746,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(200)
-      expect((res.body as any).success).toBe(true)
+      expect(res.body?.success).toBe(true)
     })
 
     it('7.2 order cancellation lifecycle validates allowable states', () => {
@@ -734,7 +784,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await adminHandler(req, res)
       expect(res.statusCode).toBe(401)
-      expect((res.body as any).code).toBe('UNAUTHORIZED')
+      expect(res.body?.code).toBe('UNAUTHORIZED')
     })
   })
 
@@ -757,7 +807,7 @@ describe('API Route Consolidation Regression & Security Suite', () => {
       })
       await commerceHandler(req, res)
       expect(res.statusCode).toBe(200)
-      expect((res.body as any).valid).toBe(true)
+      expect(res.body?.valid).toBe(true)
     })
   })
 })
