@@ -130,6 +130,7 @@ export function DesignersPageV2() {
 
     const scrollToSection = (index: number) => {
       if (index < 0 || index >= designers.length) return
+      const isScrollingDown = index > currentIndexRef.current
       isAnimating = true
       isScrollingRef.current = true
       lastScrollTime = performance.now()
@@ -139,7 +140,7 @@ export function DesignersPageV2() {
       if (typeof window !== 'undefined') {
         window.dispatchEvent(
           new CustomEvent('setHeaderVisibility', {
-            detail: true,
+            detail: !isScrollingDown || index === 0,
           })
         )
       }
