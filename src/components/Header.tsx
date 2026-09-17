@@ -1175,7 +1175,7 @@ export function Header() {
                     })}
                   </div>
 
-                  {(settings?.showCartButton === true || cartCount > 0) && (
+                  {settings?.showCartButton === true && settings?.commerce_enabled === true && (
                     <button
                       type="button"
                       onClick={toggleCart}
@@ -1215,7 +1215,7 @@ export function Header() {
                   )}
                 </div>
                 <div className="lg:hidden flex items-center gap-1">
-                  {(settings?.showCartButton === true || cartCount > 0) && (
+                  {settings?.showCartButton === true && settings?.commerce_enabled === true && (
                     <button
                       type="button"
                       onClick={toggleCart}
