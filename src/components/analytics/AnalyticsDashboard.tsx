@@ -32,10 +32,11 @@ import {
 } from 'lucide-react'
 
 import {getCountryFlag, COUNTRY_META} from '../../lib/geo-coords'
+import {lazyWithRetry} from '../../utils/lazyWithRetry'
 
-const TurkeyMapChart = React.lazy(() => import('./TurkeyMapChart'))
-const USMapChart = React.lazy(() => import('./USMapChart'))
-const WorldMapChart = React.lazy(() => import('./WorldMapChart'))
+const TurkeyMapChart = lazyWithRetry(() => import('./TurkeyMapChart'))
+const USMapChart = lazyWithRetry(() => import('./USMapChart'))
+const WorldMapChart = lazyWithRetry(() => import('./WorldMapChart'))
 
 export interface AnalyticsData {
   overview: {

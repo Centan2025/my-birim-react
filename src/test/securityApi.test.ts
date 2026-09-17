@@ -201,6 +201,32 @@ describe('API Security Tests', () => {
         error: 'Dosya listesini görüntüleme yetkiniz yok.',
       })
     })
+
+    it('authorizes requests originating from https://birim.sanity.studio', async () => {
+      process.env['R2_ACCOUNT_ID'] = 'mock-acc'
+      process.env['R2_ACCESS_KEY_ID'] = 'mock-key'
+      process.env['R2_SECRET_ACCESS_KEY'] = 'mock-secret'
+
+      const {req, res} = createMockReqRes({
+        method: 'POST',
+        url: '/api/media/presigned-url',
+        query: {action: 'presigned-url'},
+        headers: {
+          origin: 'https://birim.sanity.studio',
+          'x-sanity-studio': 'birim',
+        },
+        body: {
+          filename: 'studio-image.webp',
+          contentType: 'image/webp',
+        },
+      })
+
+      await presignedUrlHandler(req, res)
+      expect(res.statusCode).toBe(200)
+      expect(res.body).toHaveProperty('success', true)
+      expect(res.body).toHaveProperty('uploadUrl')
+      expect(res.body).toHaveProperty('fileUrl')
+    })
   })
 
   describe('AI Prompt Injection Protection', () => {

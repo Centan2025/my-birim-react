@@ -40,6 +40,7 @@ export async function uploadToR2(
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    'x-sanity-studio': 'birim',
   }
   if (studioToken) {
     headers['Authorization'] = `Bearer ${studioToken}`

@@ -8,7 +8,7 @@ import {
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
-import {handleCors, isOriginAllowed} from '../../lib/server/cors.js'
+import {handleCors} from '../../lib/server/cors.js'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 
 function getR2Config() {
@@ -80,29 +80,65 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({error: 'Method Not Allowed'})
-  }
-
-  // Auth check: require valid admin JWT session or valid admin secret token
+function isMediaAuthorized(req: VercelRequest): boolean {
+  // 1. JWT Admin token from cookie/headers
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
+  if (payload && payload.role === 'admin') {
+    return true
+  }
+
+  // 2. Secret token match
   const adminSecret =
     process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET'] || process.env['ADMIN_SECRET']
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
 
-  const isAdminSecretMatch = Boolean(
+  if (
     adminSecret &&
-      headerToken &&
-      headerToken.length === adminSecret.length &&
-      crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(adminSecret))
-  )
-  const isUserAdmin = Boolean(payload && payload.role === 'admin')
+    headerToken &&
+    headerToken.length === adminSecret.length &&
+    crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(adminSecret))
+  ) {
+    return true
+  }
 
-  if (!isUserAdmin && !isAdminSecretMatch) {
+  // 3. Studio Origin / Referer check
+  const rawOrigin = req.headers?.origin || req.headers?.referer
+  let origin = typeof rawOrigin === 'string' ? rawOrigin.trim() : ''
+  try {
+    if (origin.startsWith('http://') || origin.startsWith('https://')) {
+      origin = new URL(origin).origin
+    }
+  } catch (_err) {
+    // Ignore invalid URL format in origin/referer headers
+  }
+
+  if (origin === 'https://birim.sanity.studio' || origin.endsWith('.sanity.studio')) {
+    return true
+  }
+
+  // Development environment & local studio access
+  if (process.env['NODE_ENV'] === 'development') {
+    if (
+      origin === 'http://localhost:3333' ||
+      origin === 'http://localhost:3002' ||
+      origin === 'http://localhost:3001'
+    ) {
+      return true
+    }
+  }
+
+  return false
+}
+
+async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({error: 'Method Not Allowed'})
+  }
+
+  if (!isMediaAuthorized(req)) {
     return res
       .status(401)
       .json({error: 'Dosya yükleme bileti almak için yönetici yetkisi gereklidir.'})
@@ -197,23 +233,7 @@ async function handleDeleteBatch(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  const expectedToken =
-    process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET'] || process.env['ADMIN_SECRET']
-
-  const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
-  const tokenStr =
-    typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-  const isTokenMatch = Boolean(
-    expectedToken &&
-      tokenStr &&
-      tokenStr.length === expectedToken.length &&
-      crypto.timingSafeEqual(Buffer.from(tokenStr), Buffer.from(expectedToken))
-  )
-  const token = getAuthTokenFromReq(req)
-  const payload = token ? verifyToken(token) : null
-  const isUserAdmin = Boolean(payload && payload.role === 'admin')
-
-  if (!isTokenMatch && !isUserAdmin) {
+  if (!isMediaAuthorized(req)) {
     return res.status(401).json({error: 'Yetkisiz erişim.'})
   }
 
@@ -259,24 +279,7 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  // Auth check: require valid admin JWT session or valid admin secret token
-  const token = getAuthTokenFromReq(req)
-  const payload = token ? verifyToken(token) : null
-  const adminSecret =
-    process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET'] || process.env['ADMIN_SECRET']
-  const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
-  const headerToken =
-    typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-
-  const isAdminSecretMatch = Boolean(
-    adminSecret &&
-      headerToken &&
-      headerToken.length === adminSecret.length &&
-      crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(adminSecret))
-  )
-  const isUserAdmin = Boolean(payload && payload.role === 'admin')
-
-  if (!isAdminSecretMatch && !isUserAdmin) {
+  if (!isMediaAuthorized(req)) {
     return res.status(401).json({error: 'Dosya listesini görüntüleme yetkiniz yok.'})
   }
 
