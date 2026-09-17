@@ -1418,7 +1418,12 @@ export function Header() {
                           <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                         </svg>
                       </button>
-                      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 hidden group-hover/seckim:flex items-center justify-center pointer-events-none z-50">
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 flex items-center justify-center pointer-events-none z-50 opacity-0 -translate-y-1.5 scale-95 group-hover/seckim:opacity-100 group-hover/seckim:translate-y-0 group-hover/seckim:scale-100 transition-all duration-300"
+                        style={{
+                          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                        }}
+                      >
                         <span className="text-[10px] tracking-wide font-medium text-white bg-neutral-900/95 dark:text-neutral-900 dark:bg-white/95 px-2.5 py-1 rounded-full shadow-lg whitespace-nowrap border border-white/10 dark:border-black/10 backdrop-blur-sm">
                           {t('seckim') || 'Seçtiklerim'}
                           {selectionCount > 0 ? ` (${selectionCount})` : ''}
