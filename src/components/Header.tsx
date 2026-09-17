@@ -36,6 +36,7 @@ export function Header() {
   const location = useLocation()
   const {data: categories = []} = useCategories()
   const [isProductsOpen, setIsProductsOpen] = useState(false)
+  const [isProductsClosing, setIsProductsClosing] = useState(false)
   const [isMobileProductsMenuOpen, setIsMobileProductsMenuOpen] = useState(false)
   const [isLangOpen, setIsLangOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -50,6 +51,7 @@ export function Header() {
   const [categoryProducts, setCategoryProducts] = useState<Map<string, Product[]>>(new Map())
   const productsTimeoutRef = useRef<number | null>(null)
   const productsCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const productsClosingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchPanelRef = useRef<HTMLDivElement>(null)
   const searchButtonRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -82,7 +84,7 @@ export function Header() {
   )
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const isDarkHero = isDarkHeroPage(location.pathname, location.search)
-  const isProductsActive = isProductsOpen && !isSearchOpen && !isMobile
+  const isProductsActive = (isProductsOpen || isProductsClosing) && !isSearchOpen && !isMobile
 
   // Track whether scroll has passed the hero bottom boundary
   const [isPastHero, setIsPastHero] = useState(false)
@@ -198,6 +200,12 @@ export function Header() {
     return () => {
       if (mobileMenuCloseTimeoutRef.current) {
         clearTimeout(mobileMenuCloseTimeoutRef.current)
+      }
+      if (productsCloseTimeoutRef.current) {
+        clearTimeout(productsCloseTimeoutRef.current)
+      }
+      if (productsClosingTimeoutRef.current) {
+        clearTimeout(productsClosingTimeoutRef.current)
       }
     }
   }, [])
@@ -615,6 +623,11 @@ export function Header() {
       clearTimeout(productsCloseTimeoutRef.current)
       productsCloseTimeoutRef.current = null
     }
+    if (productsClosingTimeoutRef.current) {
+      clearTimeout(productsClosingTimeoutRef.current)
+      productsClosingTimeoutRef.current = null
+    }
+    setIsProductsClosing(false)
     setIsProductsOpen(true)
   }
 
@@ -624,7 +637,16 @@ export function Header() {
     }
     productsTimeoutRef.current = window.setTimeout(() => {
       setIsProductsOpen(false)
+      setIsProductsClosing(true)
       productsTimeoutRef.current = null
+
+      if (productsClosingTimeoutRef.current) {
+        clearTimeout(productsClosingTimeoutRef.current)
+      }
+      productsClosingTimeoutRef.current = setTimeout(() => {
+        setIsProductsClosing(false)
+        productsClosingTimeoutRef.current = null
+      }, 420)
 
       if (productsCloseTimeoutRef.current) {
         clearTimeout(productsCloseTimeoutRef.current)
@@ -632,7 +654,7 @@ export function Header() {
       productsCloseTimeoutRef.current = setTimeout(() => {
         setHoveredCategoryId(null) // Only clear after panel collapse completes to prevent flicker
         productsCloseTimeoutRef.current = null
-      }, 350)
+      }, 420)
     }, 120)
   }
 
@@ -642,13 +664,23 @@ export function Header() {
       productsTimeoutRef.current = null
     }
     setIsProductsOpen(false)
+    setIsProductsClosing(true)
+
+    if (productsClosingTimeoutRef.current) {
+      clearTimeout(productsClosingTimeoutRef.current)
+    }
+    productsClosingTimeoutRef.current = setTimeout(() => {
+      setIsProductsClosing(false)
+      productsClosingTimeoutRef.current = null
+    }, 420)
+
     if (productsCloseTimeoutRef.current) {
       clearTimeout(productsCloseTimeoutRef.current)
     }
     productsCloseTimeoutRef.current = setTimeout(() => {
       setHoveredCategoryId(null)
       productsCloseTimeoutRef.current = null
-    }, 350)
+    }, 420)
   }
 
   const navLinkClasses =
@@ -883,16 +915,8 @@ export function Header() {
           style={{
             minHeight: isMobile ? '3.5rem' : '5rem',
             maxHeight:
-              isMobileMenuOpen && !isOverlayMobileMenu
-                ? '40rem'
-                : isProductsActive
-                  ? '50rem'
-                  : isMobile
-                    ? '3.5rem'
-                    : '5rem',
+              isMobileMenuOpen && !isOverlayMobileMenu ? '40rem' : isMobile ? '3.5rem' : undefined,
             overflow: !isMobile ? 'hidden' : undefined,
-            transition:
-              'max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
           ref={headerContainerRef}
         >
