@@ -11,8 +11,8 @@ export function HeaderStyles() {
 
         .header-scroll-transition {
           transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
-                      opacity 0.4s ease-out !important;
-          will-change: auto !important;
+                      opacity 0.4s ease-out;
+          will-change: auto;
         }
 
         .header-layout-transition {
@@ -69,7 +69,7 @@ export function HeaderStyles() {
         header nav .header-nav-text {
           line-height: 1.25rem !important;
           display: inline-block !important;
-          transition: color 0.35s cubic-bezier(0.25, 1, 0.5, 1), font-weight 0.3s ease, text-shadow 0.3s ease !important;
+          transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1), font-weight 0.3s ease, text-shadow 0.3s ease !important;
         }
 
         /* React Router active state override */
@@ -164,8 +164,8 @@ export function HeaderStyles() {
 
         /* Frosted Glass (Buz Efekti) - Minimal & Subtle */
         .header-frosted-glass {
-          backdrop-filter: blur(4px) !important;
-          -webkit-backdrop-filter: blur(4px) !important;
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
         }
 
         /* Neutral gray focus outlines for mobile menu */

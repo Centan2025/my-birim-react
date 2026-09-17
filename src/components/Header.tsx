@@ -38,7 +38,6 @@ export function Header() {
   const [isProductsOpen, setIsProductsOpen] = useState(false)
   const isProductsOpenRef = useRef(isProductsOpen)
   isProductsOpenRef.current = isProductsOpen
-  const [isProductsClosing, setIsProductsClosing] = useState(false)
   const [isMobileProductsMenuOpen, setIsMobileProductsMenuOpen] = useState(false)
   const [isLangOpen, setIsLangOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -53,7 +52,6 @@ export function Header() {
   const [categoryProducts, setCategoryProducts] = useState<Map<string, Product[]>>(new Map())
   const productsTimeoutRef = useRef<number | null>(null)
   const productsCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const productsClosingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchPanelRef = useRef<HTMLDivElement>(null)
   const searchButtonRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -86,7 +84,7 @@ export function Header() {
   )
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const isDarkHero = isDarkHeroPage(location.pathname, location.search)
-  const isProductsActive = (isProductsOpen || isProductsClosing) && !isSearchOpen && !isMobile
+  const isProductsActive = isProductsOpen && !isSearchOpen && !isMobile
 
   // Track whether scroll has passed the hero bottom boundary
   const [isPastHero, setIsPastHero] = useState(false)
@@ -147,7 +145,7 @@ export function Header() {
   const iconBrightness = isLightMode ? 'brightness(0)' : 'none'
   // Smooth transitions for colors, backgrounds, and icon/logo filters
   const colorTransition =
-    'color 0.45s cubic-bezier(0.25, 1, 0.5, 1), filter 0.45s cubic-bezier(0.25, 1, 0.5, 1), fill 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1)'
+    'color 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s cubic-bezier(0.16, 1, 0.3, 1), fill 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
 
   const lastScrollYRef = useRef(0)
   const headerVisibilityLastChanged = useRef(0)
@@ -205,9 +203,6 @@ export function Header() {
       }
       if (productsCloseTimeoutRef.current) {
         clearTimeout(productsCloseTimeoutRef.current)
-      }
-      if (productsClosingTimeoutRef.current) {
-        clearTimeout(productsClosingTimeoutRef.current)
       }
     }
   }, [])
@@ -625,11 +620,6 @@ export function Header() {
       clearTimeout(productsCloseTimeoutRef.current)
       productsCloseTimeoutRef.current = null
     }
-    if (productsClosingTimeoutRef.current) {
-      clearTimeout(productsClosingTimeoutRef.current)
-      productsClosingTimeoutRef.current = null
-    }
-    setIsProductsClosing(false)
     setIsProductsOpen(true)
   }
 
@@ -643,16 +633,7 @@ export function Header() {
         return
       }
       setIsProductsOpen(false)
-      setIsProductsClosing(true)
       productsTimeoutRef.current = null
-
-      if (productsClosingTimeoutRef.current) {
-        clearTimeout(productsClosingTimeoutRef.current)
-      }
-      productsClosingTimeoutRef.current = setTimeout(() => {
-        setIsProductsClosing(false)
-        productsClosingTimeoutRef.current = null
-      }, 420)
 
       if (productsCloseTimeoutRef.current) {
         clearTimeout(productsCloseTimeoutRef.current)
@@ -660,8 +641,8 @@ export function Header() {
       productsCloseTimeoutRef.current = setTimeout(() => {
         setHoveredCategoryId(null) // Only clear after panel collapse completes to prevent flicker
         productsCloseTimeoutRef.current = null
-      }, 420)
-    }, 120)
+      }, 400)
+    }, 100)
   }
 
   const handleCloseProducts = () => {
@@ -673,15 +654,6 @@ export function Header() {
       return
     }
     setIsProductsOpen(false)
-    setIsProductsClosing(true)
-
-    if (productsClosingTimeoutRef.current) {
-      clearTimeout(productsClosingTimeoutRef.current)
-    }
-    productsClosingTimeoutRef.current = setTimeout(() => {
-      setIsProductsClosing(false)
-      productsClosingTimeoutRef.current = null
-    }, 420)
 
     if (productsCloseTimeoutRef.current) {
       clearTimeout(productsCloseTimeoutRef.current)
@@ -689,7 +661,7 @@ export function Header() {
     productsCloseTimeoutRef.current = setTimeout(() => {
       setHoveredCategoryId(null)
       productsCloseTimeoutRef.current = null
-    }, 420)
+    }, 400)
   }
 
   const navLinkClasses =
@@ -902,8 +874,8 @@ export function Header() {
         style={{
           transform: isHeaderVisible ? 'none' : 'translateY(-100%)',
           transition: isMobile
-            ? 'transform 0.2s ease-out, background-color 0.45s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.45s cubic-bezier(0.25, 1, 0.5, 1), backdrop-filter 0.45s cubic-bezier(0.25, 1, 0.5, 1), -webkit-backdrop-filter 0.45s cubic-bezier(0.25, 1, 0.5, 1)'
-            : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            ? 'transform 0.2s ease-out, background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), backdrop-filter 0.4s cubic-bezier(0.16, 1, 0.3, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+            : 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), backdrop-filter 0.4s cubic-bezier(0.16, 1, 0.3, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
           backgroundColor: headerBgColor,
           backdropFilter:
             headerBgColor === 'transparent' && !isProductsActive
