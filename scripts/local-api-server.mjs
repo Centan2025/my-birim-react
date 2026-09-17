@@ -1378,80 +1378,7 @@ app.post('/api/send-password-reset', async (req, res) => {
   }
 })
 
-// ─── /api/media/presigned-url ──────────────────────────────────────────────
-app.post('/api/media/presigned-url', async (req, res) => {
-  const {filename, contentType, folder} = req.body || {}
-  if (!filename || !contentType) {
-    return res.status(400).json({error: 'filename ve contentType parametreleri gereklidir.'})
-  }
 
-  try {
-    const {S3Client, PutObjectCommand} = await import('@aws-sdk/client-s3')
-    const {getSignedUrl} = await import('@aws-sdk/s3-request-presigner')
-
-    const originDomain = process.env.VITE_R2_ORIGIN_DOMAIN || ''
-    const hashMatch = originDomain.match(/pub-([a-f0-9]+)\.r2\.dev/)
-    const defaultAccountId = hashMatch ? hashMatch[1] : '114e37dc2d51e58147e027097a68470b'
-
-    const R2_ACCOUNT_ID =
-      process.env.R2_ACCOUNT_ID ||
-      process.env.SANITY_STUDIO_R2_ACCOUNT_ID ||
-      process.env.VITE_R2_ACCOUNT_ID ||
-      defaultAccountId
-    const R2_ACCESS_KEY_ID =
-      process.env.R2_ACCESS_KEY_ID ||
-      process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID ||
-      process.env.VITE_R2_ACCESS_KEY_ID
-    const R2_SECRET_ACCESS_KEY =
-      process.env.R2_SECRET_ACCESS_KEY ||
-      process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY ||
-      process.env.VITE_R2_SECRET_ACCESS_KEY
-    const R2_BUCKET_NAME =
-      process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
-    const R2_DOMAIN =
-      process.env.R2_DOMAIN ||
-      process.env.SANITY_STUDIO_R2_DOMAIN ||
-      process.env.VITE_R2_DOMAIN ||
-      'https://assets.birim.com'
-
-    if (!R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
-      return res.status(500).json({
-        error:
-          'Cloudflare R2 erişim anahtarları (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) .env.local dosyasında tanımlı değil.',
-      })
-    }
-
-    const r2Client = new S3Client({
-      region: 'auto',
-      endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: R2_ACCESS_KEY_ID,
-        secretAccessKey: R2_SECRET_ACCESS_KEY,
-      },
-    })
-
-    const key = folder ? `${folder}/${filename}` : `uploads/${filename}`
-    const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: key,
-      ContentType: contentType,
-    })
-
-    const url = await getSignedUrl(r2Client, command, {expiresIn: 900})
-    const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
-    const finalFileUrl = `${r2Domain}/${key}`
-
-    return res.status(200).json({
-      success: true,
-      uploadUrl: url,
-      fileUrl: finalFileUrl,
-      key: key,
-    })
-  } catch (error) {
-    console.error('Presigned URL error:', error)
-    return res.status(500).json({error: `Presigned URL oluşturulamadı: ${error.message}`})
-  }
-})
 
 // In-Memory Rate Limiting for local API server (3 requests per 1 minute window)
 const rateLimitStore = new Map()
@@ -2290,9 +2217,11 @@ app.post(['/api/media/presigned-url', '/api/media'], async (req, res) => {
 
     const safeFolder = typeof folder === 'string' && folder.trim() ? folder.trim() : 'uploads'
     const cleanFileName = filename.trim().replace(/[^a-zA-Z0-9_.-]/g, '_')
+    const hasTimestamp = /^\d{10,14}[-_]/.test(cleanFileName)
+    const finalFileName = hasTimestamp ? cleanFileName : `${Date.now()}-${cleanFileName}`
     const key = safeFolder.endsWith('/')
-      ? `${safeFolder}${cleanFileName}`
-      : `${safeFolder}/${cleanFileName}`
+      ? `${safeFolder}${finalFileName}`
+      : `${safeFolder}/${finalFileName}`
 
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET_NAME,

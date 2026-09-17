@@ -187,8 +187,8 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
   try {
     const safeFolder = typeof folder === 'string' && folder.trim() ? folder.trim() : 'uploads'
     const cleanFileName = filename.trim().replace(/[^a-zA-Z0-9_.-]/g, '_')
-    const uniquePrefix = `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`
-    const finalFileName = `${uniquePrefix}_${cleanFileName}`
+    const hasTimestamp = /^\d{10,14}[-_]/.test(cleanFileName)
+    const finalFileName = hasTimestamp ? cleanFileName : `${Date.now()}-${cleanFileName}`
     const key = safeFolder.endsWith('/')
       ? `${safeFolder}${finalFileName}`
       : `${safeFolder}/${finalFileName}`
