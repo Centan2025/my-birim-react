@@ -22,12 +22,21 @@ export interface RawProductCandidate {
   currency?: string | null
   sku?: string | null
   stockStatus?: 'in_stock' | 'out_of_stock' | 'preorder' | string | null
+  dimensionImages?: Array<{_key?: string; title?: unknown; imageR2?: unknown}> | null
+  materialSelections?: Array<{
+    group?: unknown
+    materials?: Array<{_key?: string; name?: unknown}>
+  }> | null
+  selectedDimensions?: Array<{dimensionKey?: string; title?: unknown; enabled?: boolean}> | null
+  selectedMaterials?: Array<{materialKey?: string; name?: unknown; enabled?: boolean}> | null
   variants?: Array<{
     enabled?: boolean
     sku?: string | null
     price?: number | null
     compareAtPrice?: number | null
-    options?: Array<{type?: string; value?: string; valueEn?: string}>
+    dimensionKey?: string | null
+    materialKey?: string | null
+    options?: Array<{name?: string; value?: string; type?: string; valueEn?: string}>
   }> | null
   media?: Array<{
     isCover?: boolean
@@ -164,15 +173,123 @@ export function getProductReadiness(product?: RawProductCandidate | null): Produ
         'Varyantlı Satış (CONFIGURABLE) için en az bir aktif (enabled) varyant gereklidir.'
       )
     } else {
+      // Build catalog key indexes
+      const catalogDimensionKeys = new Set<string>()
+      if (Array.isArray(product.dimensionImages)) {
+        for (const d of product.dimensionImages) {
+          if (d?._key) catalogDimensionKeys.add(String(d._key))
+        }
+      }
+
+      const catalogMaterialKeys = new Set<string>()
+      if (Array.isArray(product.materialSelections)) {
+        for (const ms of product.materialSelections) {
+          if (Array.isArray(ms?.materials)) {
+            for (const m of ms.materials) {
+              if (m?._key) catalogMaterialKeys.add(String(m._key))
+            }
+          }
+          const group = ms?.group as {books?: Array<{items?: Array<{_key?: string}>}>} | undefined
+          if (Array.isArray(group?.books)) {
+            for (const b of group.books) {
+              if (Array.isArray(b?.items)) {
+                for (const item of b.items) {
+                  if (item?._key) catalogMaterialKeys.add(String(item._key))
+                }
+              }
+            }
+          }
+        }
+      }
+
+      const hasSelectedDimensions = Array.isArray(product.selectedDimensions)
+      const hasSelectedMaterials = Array.isArray(product.selectedMaterials)
+
+      const enabledShopDimensionKeys = new Set<string>()
+      if (hasSelectedDimensions) {
+        for (const sd of product.selectedDimensions!) {
+          if (sd?.enabled !== false && sd?.dimensionKey) {
+            enabledShopDimensionKeys.add(String(sd.dimensionKey))
+          }
+        }
+      }
+
+      const enabledShopMaterialKeys = new Set<string>()
+      if (hasSelectedMaterials) {
+        for (const sm of product.selectedMaterials!) {
+          if (sm?.enabled !== false && sm?.materialKey) {
+            enabledShopMaterialKeys.add(String(sm.materialKey))
+          }
+        }
+      }
+
+      const isStructuredModel =
+        hasSelectedDimensions ||
+        hasSelectedMaterials ||
+        variants.some(v => Boolean(v?.dimensionKey || v?.materialKey))
+
       let missingVariantPriceCount = 0
       let missingVariantSkuCount = 0
+      let validSellableVariantCount = 0
 
       for (const v of enabledVariants) {
+        let isVariantValid = true
+
         if (v.price === undefined || v.price === null || v.price <= 0) {
           missingVariantPriceCount++
+          isVariantValid = false
         }
         if (!v.sku || !v.sku.trim()) {
           missingVariantSkuCount++
+          isVariantValid = false
+        }
+
+        if (isStructuredModel) {
+          // Dimension key linkage validation
+          if (v.dimensionKey) {
+            const dimKey = String(v.dimensionKey)
+            if (catalogDimensionKeys.size > 0 && !catalogDimensionKeys.has(dimKey)) {
+              blockers.push(
+                `Varyant (${v.sku || 'SKU yok'}) için bağlı katalog ölçüsü bulunamadı (${dimKey}): Catalog option reference unavailable.`
+              )
+              isVariantValid = false
+            } else if (hasSelectedDimensions && !enabledShopDimensionKeys.has(dimKey)) {
+              blockers.push(
+                `Varyant (${v.sku || 'SKU yok'}) için seçilen ölçü (${dimKey}) Shop satış listesinde (selectedDimensions) aktif değil.`
+              )
+              isVariantValid = false
+            }
+          } else if (hasSelectedDimensions && product.selectedDimensions!.length > 0) {
+            blockers.push(
+              `Varyant (${v.sku || 'SKU yok'}) için ölçü seçimi (dimensionKey) atanmamış.`
+            )
+            isVariantValid = false
+          }
+
+          // Material key linkage validation
+          if (v.materialKey) {
+            const matKey = String(v.materialKey)
+            if (catalogMaterialKeys.size > 0 && !catalogMaterialKeys.has(matKey)) {
+              blockers.push(
+                `Varyant (${v.sku || 'SKU yok'}) için bağlı katalog malzemesi bulunamadı (${matKey}): Catalog option reference unavailable.`
+              )
+              isVariantValid = false
+            } else if (hasSelectedMaterials && !enabledShopMaterialKeys.has(matKey)) {
+              blockers.push(
+                `Varyant (${v.sku || 'SKU yok'}) için seçilen malzeme (${matKey}) Shop satış listesinde (selectedMaterials) aktif değil.`
+              )
+              isVariantValid = false
+            }
+          } else if (hasSelectedMaterials && product.selectedMaterials!.length > 0) {
+            blockers.push(
+              `Varyant (${v.sku || 'SKU yok'}) için malzeme seçimi (materialKey) atanmamış.`
+            )
+            isVariantValid = false
+          }
+        }
+
+        if (isVariantValid) {
+          validSellableVariantCount++
         }
       }
 
@@ -181,6 +298,10 @@ export function getProductReadiness(product?: RawProductCandidate | null): Produ
       }
       if (missingVariantSkuCount > 0) {
         blockers.push(`${missingVariantSkuCount} aktif varyantın SKU kodu eksik.`)
+      }
+
+      if (validSellableVariantCount === 0) {
+        blockers.push('Satışa hazır en az bir geçerli aktif varyant bulunmalıdır.')
       }
     }
   }

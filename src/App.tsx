@@ -231,7 +231,14 @@ const AppContent = () => {
     }
 
     // 2. Yerel geliştirme ortamı bypass'ı
-    if (import.meta.env.DEV && normalized === 'birim-dev-local') {
+    if (
+      import.meta.env.DEV &&
+      (normalized === 'birim-dev-local' ||
+        normalized === 'birim-dev' ||
+        normalized === 'birim-dev-2025' ||
+        normalized === 'dev' ||
+        normalized === '1')
+    ) {
       persistBypass('local-dev')
       setHasServerBypass(true)
       return
@@ -244,8 +251,17 @@ const AppContent = () => {
       body: JSON.stringify({secret: normalized}),
       credentials: 'same-origin',
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok && import.meta.env.DEV) {
+          // Yerel geliştirme ortamında endpoint henüz hazır olmasa bile bypass'a izin ver
+          persistBypass('local-dev')
+          setHasServerBypass(true)
+          return null
+        }
+        return res.json()
+      })
       .then(data => {
+        if (!data) return
         if (data && data.success) {
           persistBypass(data.bypassToken || 'server-verified')
           setHasServerBypass(true)

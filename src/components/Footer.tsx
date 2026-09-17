@@ -130,7 +130,7 @@ export const Footer = () => {
                           : 'text-gray-400 hover:text-white font-thin'
                       }`}
                     >
-                      {langCode.toLowerCase()}
+                      {langCode.toUpperCase()}
                     </button>
                   )
                 })}

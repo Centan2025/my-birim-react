@@ -43,8 +43,8 @@ export default defineType({
     },
     {
       name: 'commerce',
-      title: '🏷️ Fiyat & Stok Ayarları',
-      options: {collapsible: true, collapsed: true},
+      title: '🛒 SHOP SATIŞ KONFİGÜRASYONU',
+      options: {collapsible: true, collapsed: false},
     },
     {
       name: 'seoGroup',
@@ -160,18 +160,20 @@ export default defineType({
     }),
     defineField({
       name: 'buyable',
-      title: 'Satın Alınabilir',
+      title: 'E-Ticarette Satılabilir',
       type: 'boolean',
       fieldset: 'commerce',
+      description:
+        'Bu ürünün yapısal olarak BİRİM SHOP üzerinden doğrudan satışa uygun olup olmadığını belirler.',
     }),
     defineField({
       name: 'sale_enabled',
-      title: 'E-Ticaret Satışına Açık (Sale Enabled)',
+      title: 'Satış Aktif',
       type: 'boolean',
       fieldset: 'commerce',
       initialValue: false,
       description:
-        'Commerce üzerinden doğrudan online satışa açık olup olmadığını belirler. Kapalıysa (false) ürün online satın alınamaz.',
+        'Bu ürünün şu anda BİRİM SHOP üzerinde aktif olarak satışa sunulup sunulmadığını belirler.',
     }),
     defineField({
       name: 'sales_mode',
@@ -275,6 +277,31 @@ export default defineType({
           }
           return true
         }),
+    }),
+    defineField({
+      name: 'leadTimeWeeks',
+      title: 'Genel Termin / Üretim Süresi (Hafta)',
+      type: 'number',
+      fieldset: 'commerce',
+      description: 'Sipariş sonrası üretim ve teslimat süresi (hafta cinsinden, örn: 4).',
+    }),
+    defineField({
+      name: 'selectedDimensions',
+      title: "Shop'ta Satılacak Ölçüler",
+      type: 'array',
+      fieldset: 'commerce',
+      of: [{type: 'productSellableDimension'}],
+      description:
+        'Katalogda tanımlı ölçü çizelgelerinden veya ölçü görsellerinden hangilerinin online satışta seçilebileceğini belirler.',
+    }),
+    defineField({
+      name: 'selectedMaterials',
+      title: "Shop'ta Satılacak Malzemeler / Renkler",
+      type: 'array',
+      fieldset: 'commerce',
+      of: [{type: 'productSellableMaterial'}],
+      description:
+        'Katalogda tanımlı malzeme seçimlerinden (kartela ve renkler) hangilerinin online satışta sunulacağını belirler.',
     }),
     defineField({
       name: 'variants',

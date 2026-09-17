@@ -54,7 +54,7 @@ export function useHeaderBackgroundColor({
     }
 
     if (isProductsOpen && !isMobile) {
-      return 'rgba(0, 0, 0, 0.85)'
+      return 'rgba(0, 0, 0, 0.78)'
     }
 
     if (isFullscreen) {

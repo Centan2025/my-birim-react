@@ -41,6 +41,28 @@ if (typeof window === 'undefined') {
   }
 }
 
+if (
+  typeof window !== 'undefined' &&
+  window.WebSocket &&
+  !(window.WebSocket as any).__patchedClose
+) {
+  const originalClose = window.WebSocket.prototype.close
+  ;(window.WebSocket as any).__patchedClose = true
+  window.WebSocket.prototype.close = function (this: WebSocket, code?: number, reason?: string) {
+    if (this.readyState === 0 /* WebSocket.CONNECTING */) {
+      const onOpen = () => {
+        try {
+          originalClose.call(this, code, reason)
+        } catch {}
+      }
+      this.addEventListener('open', onOpen, {once: true})
+      this.addEventListener('error', () => {}, {once: true})
+      return
+    }
+    return originalClose.call(this, code, reason)
+  }
+}
+
 import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
@@ -61,8 +83,9 @@ export default defineConfig({
   name: 'default',
   title: 'Birim Web',
 
-  projectId: 'wn3a082f',
-  dataset: 'production',
+  projectId:
+    process.env.SANITY_STUDIO_PROJECT_ID || process.env.VITE_SANITY_PROJECT_ID || 'wn3a082f',
+  dataset: process.env.SANITY_STUDIO_DATASET || process.env.VITE_SANITY_DATASET || 'production',
 
   studio: {
     components: {
@@ -89,6 +112,7 @@ export default defineConfig({
           'aboutPageV2',
           'factoryPage',
           'contactPage',
+          'shopHomePage',
         ]
         if (previewTypes.includes(schemaType)) {
           if (schemaType === 'category') {
@@ -126,6 +150,51 @@ export default defineConfig({
     supabaseUsersTool(),
     colorInput(),
   ],
+
+  document: {
+    newDocumentOptions: (prev, {creationContext}) => {
+      const singletonTypes = new Set([
+        'homePage',
+        'aboutPage',
+        'aboutPageV2',
+        'factoryPage',
+        'contactPage',
+        'footer',
+        'siteSettings',
+        'shopHomePage',
+        'shopSettings',
+        'cookiesPolicy',
+        'privacyPolicy',
+        'termsOfService',
+        'kvkkPolicy',
+      ])
+      if (creationContext.type === 'global') {
+        return prev.filter((templateItem) => !singletonTypes.has(templateItem.templateId))
+      }
+      return prev
+    },
+    actions: (prev, {schemaType}) => {
+      const singletonTypes = new Set([
+        'homePage',
+        'aboutPage',
+        'aboutPageV2',
+        'factoryPage',
+        'contactPage',
+        'footer',
+        'siteSettings',
+        'shopHomePage',
+        'shopSettings',
+        'cookiesPolicy',
+        'privacyPolicy',
+        'termsOfService',
+        'kvkkPolicy',
+      ])
+      if (singletonTypes.has(schemaType)) {
+        return prev.filter(({action}) => action !== 'unpublish' && action !== 'duplicate')
+      }
+      return prev
+    },
+  },
 
   schema: {
     types: schemaTypes,

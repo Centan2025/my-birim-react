@@ -1699,3 +1699,89 @@ export const contentBlock = defineType({
     },
   },
 })
+
+export const productSellableDimension = defineType({
+  name: 'productSellableDimension',
+  title: 'Shop Satış Ölçüsü',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'dimensionKey',
+      title: 'Ölçü Anahtarı (_key / ID)',
+      type: 'string',
+      validation: (Rule) => Rule.required(),
+      description:
+        'Katalog ölçü görselinin (dimensionImages) benzersiz anahtarı (_key). Başlık ve görsel katalogdan runtime olarak çözümlenir.',
+    }),
+    defineField({
+      name: 'enabled',
+      title: 'Satışta Aktif',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Bu ölçünün Shop online satışında seçilebilir olup olmadığını belirler.',
+    }),
+    defineField({
+      name: 'sortOrder',
+      title: 'Sıra (Opsiyonel)',
+      type: 'number',
+      description: 'Shop ölçü seçim listesindeki görüntüleme sırası.',
+    }),
+  ],
+  preview: {
+    select: {
+      key: 'dimensionKey',
+      enabled: 'enabled',
+      sortOrder: 'sortOrder',
+    },
+    prepare({key, enabled, sortOrder}) {
+      const order = sortOrder !== undefined ? ` [Sıra: ${sortOrder}]` : ''
+      return {
+        title: `Ölçü: ${key || 'Tanımsız'}${order}${enabled === false ? ' (Pasif)' : ' (Aktif)'}`,
+        subtitle: key ? `Key: ${key}` : undefined,
+      }
+    },
+  },
+})
+
+export const productSellableMaterial = defineType({
+  name: 'productSellableMaterial',
+  title: 'Shop Satış Malzemesi / Rengi',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'materialKey',
+      title: 'Renk / Swatch Anahtarı (_key)',
+      type: 'string',
+      validation: (Rule) => Rule.required(),
+      description:
+        'Katalog kartelasındaki swatch öğesinin benzersiz anahtarı (_key). Malzeme adı, kartela ve görsel katalogdan runtime olarak çözümlenir.',
+    }),
+    defineField({
+      name: 'enabled',
+      title: 'Satışta Aktif',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Bu malzeme/rengin Shop online satışında seçilebilir olup olmadığını belirler.',
+    }),
+    defineField({
+      name: 'sortOrder',
+      title: 'Sıra (Opsiyonel)',
+      type: 'number',
+      description: 'Shop malzeme seçim listesindeki görüntüleme sırası.',
+    }),
+  ],
+  preview: {
+    select: {
+      key: 'materialKey',
+      enabled: 'enabled',
+      sortOrder: 'sortOrder',
+    },
+    prepare({key, enabled, sortOrder}) {
+      const order = sortOrder !== undefined ? ` [Sıra: ${sortOrder}]` : ''
+      return {
+        title: `Malzeme: ${key || 'Tanımsız'}${order}${enabled === false ? ' (Pasif)' : ' (Aktif)'}`,
+        subtitle: key ? `Key: ${key}` : undefined,
+      }
+    },
+  },
+})

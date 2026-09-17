@@ -75,3 +75,41 @@ export interface ProductHealthCounts {
   totalCount: number
   needsAttentionItems: NeedsAttentionItem[]
 }
+
+export interface ProductPerformanceItem {
+  productId: string
+  productName: string
+  slug: string
+  categorySlug?: string
+  currency: string
+  views: number
+  clicks: number
+  variantInteractions: number
+  addToBagCount: number
+  paidOrders: number
+  unitsSold: number
+  grossRevenue: number
+  viewToBagRate: number
+  bagToPurchaseRate: number
+}
+
+export interface FunnelSummary {
+  views: number
+  addToBags: number
+  checkoutStarts: number
+  paidOrders: number
+  overallConversionRate: number
+}
+
+export interface ProductPerformanceResponse {
+  success: boolean
+  range: string
+  from: string
+  to: string
+  currency: string
+  products: ProductPerformanceItem[]
+  funnel: FunnelSummary
+  refundAllocationNote?: string
+  code?: string
+  message?: string
+}

@@ -135,14 +135,13 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
   }, [products, searchQuery])
 
   const handleProductClick = (productId: string) => {
-    const cleanCatId = categoryId.replace('drafts.', '')
     const cleanProdId = productId.replace('drafts.', '')
-    router.navigateUrl({path: `/structure/orderable-category;${cleanCatId};${cleanProdId}`})
+    router.navigateIntent('edit', {id: cleanProdId, type: 'product'})
   }
 
   const handleEditCategoryClick = () => {
     const cleanId = categoryId.replace('drafts.', '')
-    router.navigateUrl({path: `/structure/orderable-category;${cleanId},view=editor`})
+    router.navigateIntent('edit', {id: cleanId, type: 'category'})
   }
 
   const handleCreateModel = useCallback(async () => {
@@ -176,7 +175,7 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
         description: 'Yeni model düzenleme sayfasına yönlendiriliyorsunuz...',
       })
 
-      router.navigateUrl({path: `/structure/orderable-category;${cleanCatId};${newId}`})
+      router.navigateIntent('edit', {id: newId, type: 'product'})
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Bir hata oluştu.'
       console.error('Error creating product in category:', err)

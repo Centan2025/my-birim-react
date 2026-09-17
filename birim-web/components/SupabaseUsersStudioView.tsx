@@ -59,6 +59,74 @@ export interface AuthUserDetails {
   app_metadata?: Record<string, unknown>
 }
 
+function getAdminApiUrl(path: string): string {
+  if (typeof window === 'undefined') return path
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return `http://localhost:3002${path}`
+  }
+  return path
+}
+
+async function safeFetchAdmin(path: string, options: RequestInit = {}): Promise<Response> {
+  const primaryUrl = getAdminApiUrl(path)
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  }
+
+  try {
+    const res = await fetch(primaryUrl, {
+      ...options,
+      headers,
+      credentials: 'include',
+    })
+    const contentType = res.headers.get('content-type') || ''
+    if (
+      contentType.includes('application/json') ||
+      res.status === 401 ||
+      res.status === 403 ||
+      res.status === 503
+    ) {
+      return res
+    }
+    if (primaryUrl !== path) {
+      const fallbackRes = await fetch(path, {...options, headers, credentials: 'include'})
+      return fallbackRes
+    }
+    return res
+  } catch (err) {
+    if (primaryUrl !== path) {
+      try {
+        const fallbackRes = await fetch(path, {...options, headers, credentials: 'include'})
+        return fallbackRes
+      } catch {}
+      try {
+        const port3001Res = await fetch(`http://localhost:3001${path}`, {
+          ...options,
+          headers,
+          credentials: 'include',
+        })
+        return port3001Res
+      } catch {}
+    }
+    throw err
+  }
+}
+
+async function parseJsonResponse(res: Response) {
+  const text = await res.text()
+  if (!text || text.trim().startsWith('<')) {
+    throw new Error(
+      `API sunucusundan geçersiz yanıt alındı (${res.status}). Yerel API sunucusunun (port 3002) "npm run dev:full" ile çalıştığından emin olun.`,
+    )
+  }
+  try {
+    return JSON.parse(text)
+  } catch {
+    throw new Error(`API yanıtı çözümlenemedi (${res.status}).`)
+  }
+}
+
 export const SupabaseUsersStudioView: React.FC = () => {
   const [members, setMembers] = useState<MemberProfile[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -120,7 +188,7 @@ export const SupabaseUsersStudioView: React.FC = () => {
     if (!selectedMember) return
     setActionLoading(selectedMember.id)
     try {
-      const res = await fetch('/api/admin/members', {
+      const res = await safeFetchAdmin('/api/admin/members', {
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',
@@ -137,11 +205,11 @@ export const SupabaseUsersStudioView: React.FC = () => {
       })
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
+        const errData = await parseJsonResponse(res).catch(() => ({}))
         throw new Error(errData.error || errData.message || `Güncelleme başarısız (${res.status})`)
       }
 
-      const json = await res.json()
+      const json = await parseJsonResponse(res)
       const updatedProfile: MemberProfile = json.member || {
         ...selectedMember,
         name: editFormData.name.trim() || null,
@@ -190,7 +258,7 @@ export const SupabaseUsersStudioView: React.FC = () => {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/admin/members', {
+      const res = await safeFetchAdmin('/api/admin/members', {
         method: 'GET',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',
@@ -203,13 +271,13 @@ export const SupabaseUsersStudioView: React.FC = () => {
       }
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
+        const errData = await parseJsonResponse(res).catch(() => ({}))
         throw new Error(
           errData.error || errData.message || `Üye listesi yüklenemedi (${res.status})`,
         )
       }
 
-      const json = await res.json()
+      const json = await parseJsonResponse(res)
       const profilesList = (json.members as MemberProfile[]) || []
       setMembers(profilesList)
     } catch (err: unknown) {
@@ -228,7 +296,7 @@ export const SupabaseUsersStudioView: React.FC = () => {
     setActionLoading(id)
     setSuccessMessage(null)
     try {
-      const res = await fetch('/api/admin/members', {
+      const res = await safeFetchAdmin('/api/admin/members', {
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',
@@ -240,7 +308,7 @@ export const SupabaseUsersStudioView: React.FC = () => {
       })
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
+        const errData = await parseJsonResponse(res).catch(() => ({}))
         throw new Error(errData.error || errData.message || `İşlem başarısız (${res.status})`)
       }
 
@@ -274,7 +342,7 @@ export const SupabaseUsersStudioView: React.FC = () => {
     }
     setActionLoading(id)
     try {
-      const res = await fetch('/api/admin/members', {
+      const res = await safeFetchAdmin('/api/admin/members', {
         method: 'DELETE',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',
@@ -282,7 +350,7 @@ export const SupabaseUsersStudioView: React.FC = () => {
       })
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
+        const errData = await parseJsonResponse(res).catch(() => ({}))
         throw new Error(
           errData.error || errData.message || `Silme işlemi başarısız (${res.status})`,
         )
@@ -306,7 +374,7 @@ export const SupabaseUsersStudioView: React.FC = () => {
     const newStatus = !currentStatus
     setActionLoading(id)
     try {
-      const res = await fetch('/api/admin/members', {
+      const res = await safeFetchAdmin('/api/admin/members', {
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',
@@ -317,7 +385,7 @@ export const SupabaseUsersStudioView: React.FC = () => {
       })
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
+        const errData = await parseJsonResponse(res).catch(() => ({}))
         throw new Error(errData.error || errData.message || `İşlem başarısız (${res.status})`)
       }
 

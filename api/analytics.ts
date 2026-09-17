@@ -425,6 +425,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return handleActivity(req, res)
   }
 
+  if (
+    path === 'shop/events' ||
+    path === 'shop/event' ||
+    path === 'events' ||
+    (segments.length >= 2 && segments[0] === 'shop' && segments[1] === 'events')
+  ) {
+    return handleShopEvents(req, res)
+  }
+
   return handleAnalyticsReport(req, res)
 }
 
@@ -614,5 +623,285 @@ async function handleAnalyticsReport(req: VercelRequest, res: VercelResponse) {
     console.error('[Analytics API Handler Error]:', err)
     const message = err instanceof Error ? err.message : 'Failed to fetch analytics'
     return res.status(500).json({success: false, error: message})
+  }
+}
+
+// ----------------------------------------------------------------------
+// Shop Zero-PII Engagement Analytics Ingestion
+// ----------------------------------------------------------------------
+
+const FORBIDDEN_PURCHASE_EVENTS = new Set([
+  'order_created',
+  'payment_success',
+  'purchase',
+  'refund',
+  'revenue',
+  'paid_order',
+])
+
+const ALLOWED_ENGAGEMENT_EVENTS = new Set([
+  'product_view',
+  'product_list_view',
+  'product_click',
+  'category_view',
+  'variant_select',
+  'add_to_bag',
+  'bag_view',
+  'checkout_start',
+])
+
+const FORBIDDEN_PII_KEYS = new Set([
+  'firstname',
+  'lastname',
+  'name',
+  'email',
+  'phone',
+  'phonenumber',
+  'address',
+  'postalcode',
+  'zipcode',
+  'deliveryinstructions',
+  'guesttoken',
+  'authtoken',
+  'paymentreference',
+  'card',
+  'cardnumber',
+  'cvv',
+  'pan',
+  'password',
+])
+
+const ALLOWED_METADATA_KEYS = new Set([
+  'source',
+  'listName',
+  'position',
+  'layout',
+  'categoryName',
+  'designerName',
+  'itemCount',
+  'selectedOptionCount',
+  'timestamp',
+])
+
+function normalizeKey(key: string): string {
+  return key.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+function findForbiddenPiiKey(val: unknown, depth = 0): string | null {
+  if (!val || typeof val !== 'object' || depth > 5) return null
+  if (Array.isArray(val)) {
+    for (const item of val) {
+      const forbidden = findForbiddenPiiKey(item, depth + 1)
+      if (forbidden) return forbidden
+    }
+    return null
+  }
+
+  for (const [k, v] of Object.entries(val as Record<string, unknown>)) {
+    const normalized = normalizeKey(k)
+    if (FORBIDDEN_PII_KEYS.has(normalized)) {
+      return k
+    }
+    const nested = findForbiddenPiiKey(v, depth + 1)
+    if (nested) return nested
+  }
+  return null
+}
+
+function validateMetadataObject(meta: unknown): {valid: boolean; invalidKey?: string} {
+  if (!meta || typeof meta !== 'object' || Array.isArray(meta)) return {valid: true}
+  for (const k of Object.keys(meta as Record<string, unknown>)) {
+    if (!ALLOWED_METADATA_KEYS.has(k)) {
+      return {valid: false, invalidKey: k}
+    }
+  }
+  return {valid: true}
+}
+
+interface RawShopEventPayload {
+  eventName?: string
+  event_name?: string
+  productId?: string
+  product_id?: string
+  slug?: string
+  categorySlug?: string
+  category_slug?: string
+  variantId?: string
+  variant_id?: string
+  currency?: string
+  price?: number
+  quantity?: number
+  source?: string
+  sessionId?: string
+  session_id?: string
+  metadata?: Record<string, unknown>
+}
+
+async function handleShopEvents(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST, OPTIONS')
+    return res.status(405).json({
+      success: false,
+      code: 'METHOD_NOT_ALLOWED',
+      error: 'Method Not Allowed. Yalnızca POST istekleri desteklenir.',
+    })
+  }
+
+  const ip = getClientIp(req)
+  if (await isRateLimitedAsync(`shop_events_${ip}`, {limit: 120, windowMs: 60000})) {
+    return res.status(429).json({
+      success: false,
+      code: 'RATE_LIMITED',
+      error: 'Çok fazla analitik isteği gönderildi. Lütfen bekleyin.',
+    })
+  }
+
+  try {
+    let bodyData: unknown = req.body
+    if (typeof bodyData === 'string') {
+      if (bodyData.length > 65536) {
+        return res.status(400).json({
+          success: false,
+          code: 'PAYLOAD_TOO_LARGE',
+          error: 'Payload boyutu 64KB sınırını aşıyor',
+        })
+      }
+      try {
+        bodyData = JSON.parse(bodyData)
+      } catch {
+        return res.status(400).json({
+          success: false,
+          code: 'INVALID_JSON',
+          error: 'Invalid JSON payload',
+        })
+      }
+    }
+
+    if (!bodyData || typeof bodyData !== 'object') {
+      return res.status(400).json({
+        success: false,
+        code: 'MISSING_PAYLOAD',
+        error: 'Payload body is required',
+      })
+    }
+
+    // 1. Strict PII Check across the entire payload
+    const piiField = findForbiddenPiiKey(bodyData)
+    if (piiField) {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_EVENT_PAYLOAD',
+        error: `PII fields are strictly prohibited in analytics events. Detected forbidden key: ${piiField}`,
+      })
+    }
+
+    const rawList: RawShopEventPayload[] = Array.isArray(bodyData)
+      ? (bodyData as RawShopEventPayload[])
+      : [bodyData as RawShopEventPayload]
+
+    const eventList = rawList.slice(0, 20)
+    if (eventList.length === 0) {
+      return res.status(400).json({
+        success: false,
+        code: 'EMPTY_PAYLOAD',
+        error: 'No events provided in payload',
+      })
+    }
+
+    const rowsToInsert = []
+
+    for (const raw of eventList) {
+      const eventName = String(raw.eventName || raw.event_name || '')
+        .trim()
+        .toLowerCase()
+
+      // 2. Reject client-side purchase/revenue events
+      if (FORBIDDEN_PURCHASE_EVENTS.has(eventName)) {
+        return res.status(400).json({
+          success: false,
+          code: 'INVALID_EVENT_NAME',
+          error: `Purchase and financial events (${eventName}) are strictly forbidden in client analytics. Revenue is computed from authoritative commerce orders.`,
+        })
+      }
+
+      // 3. Verify event is in allowed engagement set
+      if (!ALLOWED_ENGAGEMENT_EVENTS.has(eventName)) {
+        return res.status(400).json({
+          success: false,
+          code: 'INVALID_EVENT_NAME',
+          error: `Unsupported analytics event name: "${eventName}". Allowed: ${Array.from(ALLOWED_ENGAGEMENT_EVENTS).join(', ')}`,
+        })
+      }
+
+      // 4. Validate metadata against strict whitelist
+      if (raw.metadata) {
+        const metaCheck = validateMetadataObject(raw.metadata)
+        if (!metaCheck.valid) {
+          return res.status(400).json({
+            success: false,
+            code: 'INVALID_EVENT_PAYLOAD',
+            error: `Disallowed metadata property: "${metaCheck.invalidKey}". Allowed metadata keys: ${Array.from(ALLOWED_METADATA_KEYS).join(', ')}`,
+          })
+        }
+      }
+
+      const productId = raw.productId || raw.product_id
+      const categorySlug = raw.categorySlug || raw.category_slug
+      const variantId = raw.variantId || raw.variant_id
+      const sessionId = raw.sessionId || raw.session_id
+
+      rowsToInsert.push({
+        event_name: eventName,
+        product_id: productId ? String(productId).slice(0, 100) : null,
+        slug: raw.slug ? String(raw.slug).slice(0, 150) : null,
+        category_slug: categorySlug ? String(categorySlug).slice(0, 100) : null,
+        variant_id: variantId ? String(variantId).slice(0, 100) : null,
+        currency: raw.currency ? String(raw.currency).slice(0, 10).toUpperCase() : null,
+        price: typeof raw.price === 'number' && !isNaN(raw.price) ? raw.price : null, // informational only
+        quantity:
+          typeof raw.quantity === 'number' && !isNaN(raw.quantity)
+            ? Math.max(1, Math.floor(raw.quantity))
+            : 1,
+        source: raw.source ? String(raw.source).slice(0, 50) : null,
+        session_id: sessionId ? String(sessionId).slice(0, 100) : null,
+        metadata:
+          raw.metadata && typeof raw.metadata === 'object' && !Array.isArray(raw.metadata)
+            ? raw.metadata
+            : {},
+        created_at: new Date().toISOString(),
+      })
+    }
+
+    const supabase = getSafeSupabaseAdmin()
+    if (!supabase) {
+      return res.status(200).json({
+        success: true,
+        warning: 'Supabase admin client unavailable, event acknowledged',
+        recorded: 0,
+      })
+    }
+
+    const {error} = await supabase.from('shop_analytics_events').insert(rowsToInsert)
+
+    if (error) {
+      console.warn('[Shop Analytics API] Ingestion warning:', error.message)
+      return res.status(200).json({
+        success: true,
+        warning: 'Events received but database persistence failed or table pending migration',
+        details: error.message,
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      recorded: rowsToInsert.length,
+    })
+  } catch (err) {
+    console.error('[Shop Analytics API] Unexpected error:', err)
+    return res.status(500).json({
+      success: false,
+      code: 'INTERNAL_ERROR',
+      error: err instanceof Error ? err.message : 'Internal Server Error',
+    })
   }
 }

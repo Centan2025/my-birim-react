@@ -3,6 +3,7 @@ import type {VercelRequest, VercelResponse} from '@vercel/node'
 const EXACT_ALLOWED_ORIGINS = new Set([
   'https://www.birim.com',
   'https://birim.com',
+  'https://shop.birim.com',
   'https://birim.sanity.studio',
 ])
 

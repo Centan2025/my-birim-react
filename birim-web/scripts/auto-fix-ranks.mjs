@@ -1,12 +1,20 @@
+import dotenv from 'dotenv'
+import {resolve, dirname} from 'path'
+import {fileURLToPath} from 'url'
 import {createClient} from '@sanity/client'
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
+dotenv.config({path: resolve(__dirname, '../../.env.local')})
+dotenv.config({path: resolve(__dirname, '../../.env')})
+
 async function run() {
+  const token = process.env.SANITY_TOKEN || process.env.VITE_SANITY_TOKEN
   const client = createClient({
     projectId: 'wn3a082f',
     dataset: 'production',
     useCdn: false,
     apiVersion: '2024-04-15',
-    token: process.env.SANITY_TOKEN || undefined,
+    token: token || undefined,
   })
 
   // Types that use orderRankField

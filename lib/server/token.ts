@@ -139,6 +139,9 @@ export function setAuthCookie(res: VercelResponse, token: string) {
  * Clears Auth Cookie on VercelResponse
  */
 export function clearAuthCookie(res: VercelResponse) {
-  const cookieStr = `birim_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`
+  const isProd = process.env['NODE_ENV'] === 'production'
+  const cookieStr = `birim_token=; Path=/; Max-Age=0; HttpOnly; ${
+    isProd ? 'Secure; ' : ''
+  }SameSite=Lax`
   res.setHeader('Set-Cookie', cookieStr)
 }

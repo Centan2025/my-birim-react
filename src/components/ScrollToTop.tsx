@@ -79,8 +79,8 @@ export const ScrollToTop = () => {
       suffix = t('contact') || 'İletişim'
     } else if (pathname === '/login') {
       suffix = t('login') || 'Giriş'
-    } else if (pathname === '/profile') {
-      suffix = t('profile') || 'Profil'
+    } else if (pathname === '/hesabim' || pathname === '/profile') {
+      suffix = t('profile') || 'Hesabım'
     } else if (pathname === '/verify-email') {
       suffix = 'E-posta Doğrulama'
     } else if (pathname === '/cookies') {

@@ -15,11 +15,13 @@ import type {ControlCenterTimeRange} from './types'
 import {useCommerceMetrics} from './hooks/useCommerceMetrics'
 import {useRecentOrders} from './hooks/useRecentOrders'
 import {useProductHealth} from './hooks/useProductHealth'
+import {useProductPerformance} from './hooks/useProductPerformance'
 import {DashboardHeader} from './components/DashboardHeader'
 import {MetricCard, formatCurrencyAmount} from './components/MetricCard'
 import {SalesTrend} from './components/SalesTrend'
 import {RecentOrders} from './components/RecentOrders'
 import {ProductHealthCard} from './components/ProductHealthCard'
+import {ProductPerformance} from './components/ProductPerformance'
 import {AuthBanner} from './components/AuthBanner'
 
 const Container = styled.div`
@@ -101,6 +103,13 @@ export const ControlCenterTool: React.FC = () => {
     refetch: refetchHealth,
   } = useProductHealth()
 
+  const {
+    data: perfData,
+    loading: perfLoading,
+    error: perfError,
+    refetch: refetchPerf,
+  } = useProductPerformance(range, currency)
+
   const availableCurrencies = useMemo(() => {
     if (!metricsData?.metrics) return ['TRY', 'EUR', 'USD']
     const keys = Object.keys(metricsData.metrics)
@@ -117,10 +126,11 @@ export const ControlCenterTool: React.FC = () => {
     refetchMetrics()
     refetchOrders()
     refetchHealth()
+    refetchPerf()
     setLastUpdated(new Date())
   }
 
-  const isLoading = metricsLoading || ordersLoading || healthLoading
+  const isLoading = metricsLoading || ordersLoading || healthLoading || perfLoading
 
   // Formatted Metric Values
   const netSalesFormatted = formatCurrencyAmount(activeCurrencyMetrics?.netSales || 0, currency)
@@ -208,6 +218,17 @@ export const ControlCenterTool: React.FC = () => {
             onRefresh={refetchHealth}
           />
         </MainGrid>
+
+        {/* Product Performance & Funnel Analysis */}
+        <ProductPerformance
+          products={perfData?.products || []}
+          funnel={perfData?.funnel}
+          currency={currency}
+          range={range}
+          loading={perfLoading}
+          error={perfError}
+          onRefresh={refetchPerf}
+        />
 
         {/* Bottom Grid: Recent Orders */}
         <BottomGrid>

@@ -34,6 +34,46 @@ export const productVariant = defineType({
       title: 'Para Birimi',
       type: 'string',
       initialValue: 'TRY',
+      options: {
+        list: [
+          {title: 'TRY (₺)', value: 'TRY'},
+          {title: 'EUR (€)', value: 'EUR'},
+          {title: 'USD ($)', value: 'USD'},
+        ],
+      },
+    }),
+    defineField({
+      name: 'stockStatus',
+      title: 'Varyant Stok Durumu',
+      type: 'string',
+      initialValue: 'in_stock',
+      options: {
+        list: [
+          {title: 'Stokta (in_stock)', value: 'in_stock'},
+          {title: 'Stok Dışı (out_of_stock)', value: 'out_of_stock'},
+          {title: 'Ön Sipariş (preorder)', value: 'preorder'},
+        ],
+      },
+      description: 'Varyanta özel stok durumu (boş bırakılırsa ana ürün stok durumu geçerlidir).',
+    }),
+    defineField({
+      name: 'leadTimeWeeks',
+      title: 'Termin Süresi (Hafta)',
+      type: 'number',
+      description: 'Üretim / teslimat süresi (örn. 4-6 hafta için 4).',
+    }),
+    defineField({
+      name: 'dimensionKey',
+      title: 'Bağlı Ölçü Seçeneği (_key / ID)',
+      type: 'string',
+      description:
+        'Katalog ölçü çizelgesinden veya ölçü görsellerinden seçilen ölçünün tanımlayıcısı.',
+    }),
+    defineField({
+      name: 'materialKey',
+      title: 'Bağlı Malzeme / Renk Seçeneği (_key / ID)',
+      type: 'string',
+      description: 'Katalog malzeme seçimlerinden (kartela / swatch) seçilen rengin tanımlayıcısı.',
     }),
     defineField({
       name: 'options',
@@ -90,14 +130,16 @@ export const productVariant = defineType({
       price: 'price',
       currency: 'currency',
       enabled: 'enabled',
+      stockStatus: 'stockStatus',
     },
     prepare(selection) {
-      const {titleTr, titleEn, sku, price, currency, enabled} = selection
+      const {titleTr, titleEn, sku, price, currency, enabled, stockStatus} = selection
       const title = titleTr || titleEn || sku || 'İsimsiz Varyant'
       const priceStr = price !== undefined ? ` - ${price} ${currency || 'TRY'}` : ''
       const status = enabled === false ? ' (Pasif)' : ''
+      const stock = stockStatus && stockStatus !== 'in_stock' ? ` [${stockStatus}]` : ''
       return {
-        title: `${title}${priceStr}${status}`,
+        title: `${title}${priceStr}${stock}${status}`,
         subtitle: sku ? `SKU: ${sku}` : undefined,
       }
     },

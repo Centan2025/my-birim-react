@@ -202,5 +202,27 @@ describe('BİRİM Control Center Phase 3 & 3.1 Tests', () => {
       expect(toolContent).toContain('isUnauthorized')
       expect(toolContent).toContain('<AuthBanner onRetry={handleRefreshAll} />')
     })
+
+    it('ensures useProductPerformance does not send x-admin-secret or read from storage', () => {
+      const perfHookPath = path.resolve(
+        __dirname,
+        '../../birim-web/tools/controlCenter/hooks/useProductPerformance.ts'
+      )
+      const content = fs.readFileSync(perfHookPath, 'utf8')
+
+      expect(content).not.toContain('x-admin-secret')
+      expect(content).not.toContain('localStorage')
+      expect(content).not.toContain('sessionStorage')
+      expect(content).toContain("credentials: 'include'")
+    })
+
+    it('ensures ControlCenterTool integrates ProductPerformance component', () => {
+      const toolContent = fs.readFileSync(
+        path.resolve(__dirname, '../../birim-web/tools/controlCenter/ControlCenterTool.tsx'),
+        'utf8'
+      )
+      expect(toolContent).toContain('<ProductPerformance')
+      expect(toolContent).toContain('useProductPerformance')
+    })
   })
 })

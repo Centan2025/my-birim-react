@@ -40,8 +40,8 @@ const ContactPage = lazyWithRetry(() =>
 const LoginPage = lazyWithRetry(() =>
   import('../pages/LoginPage').then(m => ({default: m.LoginPage}))
 )
-const ProfilePage = lazyWithRetry(() =>
-  import('../pages/ProfilePage').then(m => ({default: m.ProfilePage}))
+const AccountPage = lazyWithRetry(() =>
+  import('../pages/AccountPage').then(m => ({default: m.AccountPage}))
 )
 const VerifyEmailPage = lazyWithRetry(() =>
   import('../pages/VerifyEmailPage').then(m => ({default: m.VerifyEmailPage}))
@@ -262,13 +262,14 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           }
         />
         <Route
-          path="/profile"
+          path="/hesabim"
           element={
-            <PageBoundary pageName="Profil">
-              <ProfilePage />
+            <PageBoundary pageName="Hesabım">
+              <AccountPage />
             </PageBoundary>
           }
         />
+        <Route path="/profile" element={<Navigate to="/hesabim" replace />} />
         <Route
           path="/verify-email"
           element={

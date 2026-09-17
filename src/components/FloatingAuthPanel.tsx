@@ -158,11 +158,11 @@ export const FloatingAuthPanel: React.FC = () => {
 
                     <div className="space-y-4 pt-10 border-t border-[var(--border-primary)]/10">
                       <Link
-                        to="/profile"
+                        to="/hesabim"
                         onClick={() => setIsOpen(false)}
                         className="flex items-center justify-between w-full p-5 bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-primary)] hover:bg-[var(--bg-primary)] transition-all duration-500 uppercase tracking-[0.25em] text-[11px] font-bold font-inter group"
                       >
-                        <span>{t('go_to_profile')}</span>
+                        <span>{t('go_to_profile') || 'Hesabıma Git'}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </Link>
 

@@ -21,7 +21,7 @@ interface HeaderMobileMenuOverlayProps {
   isLoggedIn: boolean
   categories: Category[]
   headerHeight: number
-  mobileMenuLinks: {to: string; label: string}[]
+  mobileMenuLinks: {to: string; label: string; isExternal?: boolean}[]
   mobileMenuCloseDelay: number
   subscribeEmail: string
   isMobileLocaleTransition: boolean
@@ -159,7 +159,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                     style={{fontFamily: "'Inter', sans-serif", fontWeight: 300}}
                   >
                     <span className="relative inline-block transition-opacity transition-transform duration-200 ease-out">
-                      {langCode.toLowerCase()}
+                      {langCode.toUpperCase()}
                     </span>
                   </button>
                 )
@@ -316,40 +316,68 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
           </div>
         </div>
         {/* Diğer menü linkleri */}
-        {mobileMenuLinks.map((item, index) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            style={{
-              transitionDelay: `${
-                isMobileMenuOpen ? (index + 1) * 100 : (mobileMenuLinks.length - 1 - index) * 100
-              }ms`,
-              fontWeight: 300,
-              letterSpacing: '0.05em',
-              fontFamily: "'Inter', sans-serif",
-            }}
-            className={`group flex items-center justify-between text-3xl md:text-4xl leading-tight text-white transition-all duration-400 ${
-              isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-            }`}
-            onClick={() => {
-              // Ana menüde başka bir linke gidildiğinde hem ana menüyü hem ürünler alt menüsünü kapat
-              onCloseAll()
-              setIsMobileProductsMenuOpen(false)
-            }}
-          >
-            <span className="inline-flex items-baseline gap-2">
-              <CrossFadeText text={item.label} triggerKey={locale} />
-              {item.to === '/seckim' && (selectionCount ?? 0) > 0 && (
-                <span className="text-xs md:text-sm font-light text-neutral-400 font-sans tracking-widest tabular-nums select-none opacity-80">
-                  /{selectionCount < 10 ? `0${selectionCount}` : selectionCount}
-                </span>
-              )}
-            </span>
-            <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-              <ChevronRightIcon />
-            </span>
-          </NavLink>
-        ))}
+        {mobileMenuLinks.map((item, index) => {
+          const isExt = item.isExternal || item.to.startsWith('http')
+          const linkStyle = {
+            transitionDelay: `${
+              isMobileMenuOpen ? (index + 1) * 100 : (mobileMenuLinks.length - 1 - index) * 100
+            }ms`,
+            fontWeight: 300,
+            letterSpacing: '0.05em',
+            fontFamily: "'Inter', sans-serif",
+          }
+          const linkClasses = `group flex items-center justify-between text-3xl md:text-4xl leading-tight text-white transition-all duration-400 ${
+            isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+          }`
+
+          const content = (
+            <>
+              <span className="inline-flex items-baseline gap-2">
+                <CrossFadeText text={item.label} triggerKey={locale} />
+                {item.to === '/seckim' && (selectionCount ?? 0) > 0 && (
+                  <span className="text-xs md:text-sm font-light text-neutral-400 font-sans tracking-widest tabular-nums select-none opacity-80">
+                    /{selectionCount < 10 ? `0${selectionCount}` : selectionCount}
+                  </span>
+                )}
+              </span>
+              <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                <ChevronRightIcon />
+              </span>
+            </>
+          )
+
+          if (isExt) {
+            return (
+              <a
+                key={item.to}
+                href={item.to}
+                style={linkStyle}
+                className={linkClasses}
+                onClick={() => {
+                  onCloseAll()
+                  setIsMobileProductsMenuOpen(false)
+                }}
+              >
+                {content}
+              </a>
+            )
+          }
+
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              style={linkStyle}
+              className={linkClasses}
+              onClick={() => {
+                onCloseAll()
+                setIsMobileProductsMenuOpen(false)
+              }}
+            >
+              {content}
+            </NavLink>
+          )
+        })}
       </nav>
 
       {/* Alt kısım - Subscribe ve Sosyal Medya */}

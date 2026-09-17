@@ -242,7 +242,7 @@ export const ProductHealthCard: React.FC<ProductHealthCardProps> = ({
                   ? item.name?.tr || item.name?.en || 'İsimsiz'
                   : item.name || 'İsimsiz'
 
-              const docUrl = `/structure/products;${item._id}`
+              const docUrl = `/intent/edit/id=${item._id};type=product`
 
               return (
                 <AttentionItem

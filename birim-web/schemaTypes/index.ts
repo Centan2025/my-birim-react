@@ -18,6 +18,8 @@ import kvkkPolicy from './documents/kvkkPolicy'
 import distanceSalesAgreement from './documents/distanceSalesAgreement'
 import preliminaryInfoForm from './documents/preliminaryInfoForm'
 import translations from './documents/translations'
+import shopHomePage from './documents/shopHomePage'
+import shopSettings from './documents/shopSettings'
 
 import {localizedString} from './objects/localizedString'
 import {localizedText} from './objects/localizedText'
@@ -47,6 +49,8 @@ import {
   contactLocation,
   contactLocationMedia,
   materialSwatchBook,
+  productSellableDimension,
+  productSellableMaterial,
 } from './objects/shared'
 
 export const schemaTypes = [
@@ -71,6 +75,8 @@ export const schemaTypes = [
   distanceSalesAgreement,
   preliminaryInfoForm,
   translations,
+  shopHomePage,
+  shopSettings,
   // objects
   localizedString,
   localizedText,
@@ -88,6 +94,8 @@ export const schemaTypes = [
   productMaterial,
   materialSwatchBook,
   productMaterialSelection,
+  productSellableDimension,
+  productSellableMaterial,
   downloadableItem,
   exclusiveContent,
   heroMediaItem,

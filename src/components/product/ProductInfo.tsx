@@ -8,6 +8,7 @@ import type {Category, Designer, LocalizedString, Product, ProductMaterialsGroup
 import {ProductPdfButton} from './ProductPdfButton'
 import {DetailSelectionCTA} from '../seckim/DetailSelectionCTA'
 import {formatCurrency} from '../../utils/currency'
+import {isProductShopEligible, getShopProductUrl, getShopCtaLabel} from '../../utils/shopBridge'
 
 const ArrowLeft = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -226,6 +227,24 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
               delay={160}
               stagger={65}
             />
+          )
+        })()}
+
+        {(() => {
+          const isEligible = isProductShopEligible(product)
+          const shopUrl = isEligible ? getShopProductUrl(product) : null
+          if (!shopUrl) return null
+
+          return (
+            <div className="mt-8 pt-2">
+              <a
+                href={shopUrl}
+                className="inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-black hover:bg-neutral-800 text-white dark:bg-white dark:text-black dark:hover:bg-neutral-200 text-xs uppercase tracking-widest font-medium transition-all duration-300 shadow-xs"
+              >
+                <span>{getShopCtaLabel(product, locale, 'pdp')}</span>
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
           )
         })()}
       </div>

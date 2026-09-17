@@ -61,8 +61,8 @@ export function HeaderStyles() {
         header nav a.header-nav-item.active,
         header nav .header-nav-text {
           font-size: clamp(12px, 0.35rem + 0.5vw, 13.5px) !important;
-          font-weight: 500 !important;
-          letter-spacing: 0.05em !important;
+          font-weight: 600 !important;
+          letter-spacing: 0.025em !important;
           font-family: 'Inter', sans-serif !important;
         }
 
@@ -77,8 +77,8 @@ export function HeaderStyles() {
         header nav a.active .header-nav-text,
         header nav a[aria-current="page"] .header-nav-text {
           font-size: clamp(12px, 0.35rem + 0.5vw, 13.5px) !important;
-          font-weight: 500 !important;
-          letter-spacing: 0.05em !important;
+          font-weight: 600 !important;
+          letter-spacing: 0.025em !important;
           line-height: 1.25rem !important;
           font-family: 'Inter', sans-serif !important;
         }
@@ -89,8 +89,8 @@ export function HeaderStyles() {
         header nav .group:hover .header-nav-text,
         header nav a:hover .header-nav-text,
         .group:hover > .header-nav-text {
-          font-weight: 600 !important;
-          text-shadow: 0.25px 0 0.1px currentColor !important;
+          font-weight: 700 !important;
+          text-shadow: 0.3px 0 0.1px currentColor !important;
         }
 
         /* Underline animation - smooth expansion from center to left & right with delicate hairline thickness */

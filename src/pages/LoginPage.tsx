@@ -55,10 +55,10 @@ export function LoginPage() {
     locale: 'tr_TR',
   })
 
-  // Eğer kullanıcı zaten giriş yaptıysa, /login'e geldiğinde direkt profiline yönlendir
+  // Eğer kullanıcı zaten giriş yaptıysa, /login'e geldiğinde direkt hesabına yönlendir
   useEffect(() => {
     if (auth.isLoggedIn) {
-      navigate('/profile', {replace: true})
+      navigate('/hesabim', {replace: true})
     }
   }, [auth.isLoggedIn, navigate])
 
@@ -73,10 +73,10 @@ export function LoginPage() {
             {auth.user.name || auth.user.email}
           </p>
           <Link
-            to="/profile"
+            to="/hesabim"
             className="inline-block w-full bg-[#111827] dark:bg-white text-white dark:text-black py-3 text-xs font-semibold uppercase tracking-widest hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
           >
-            {t('profile') || 'Profil Sayfama Git'}
+            {t('profile') || 'Hesabıma Git'}
           </Link>
         </div>
       </div>
@@ -112,7 +112,7 @@ export function LoginPage() {
       if (user) {
         loginRateLimiter.reset(rateLimitKey)
         auth.login(user)
-        navigate('/profile')
+        navigate('/hesabim')
       } else {
         setError(t('invalid_credentials') || 'Geçersiz e-posta veya şifre')
         const remaining = rateLimitResult.remaining
@@ -164,7 +164,7 @@ export function LoginPage() {
         auth.login(user)
         setSuccess('Kayıt başarılı! Hesabınız oluşturuldu.')
         setTimeout(() => {
-          navigate('/profile')
+          navigate('/hesabim')
         }, 1000)
       } else {
         setSuccess('Kayıt başarılı! Lütfen e-posta kutunuzu kontrol edin ve üyeliğinizi onaylayın.')

@@ -434,7 +434,7 @@ const mapDimensionImages = (dimImgs: unknown[] | undefined): unknown[] => {
     .filter((di: Record<string, unknown>) => !!di['image'])
 }
 
-const mapProductRow = (r: Record<string, unknown>): Product => {
+export const mapProductRow = (r: Record<string, unknown>): Product => {
   const mediaArr = Array.isArray(r['media']) ? (r['media'] as Record<string, unknown>[]) : []
   const coverItem = mediaArr.find((m: Record<string, unknown>) => m['isCover']) || mediaArr[0]
 
@@ -486,8 +486,14 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
     if (urlDesktop) mainImage['urlDesktop'] = urlDesktop
   }
 
+  const rawId = r['id']
+  const parsedId =
+    typeof rawId === 'object' && rawId !== null
+      ? (rawId as {current?: string})?.current || ''
+      : (rawId as string) || ''
+
   return {
-    id: r['id'] as string,
+    id: parsedId,
     name: r['name'] as LocalizedString,
     designerId:
       ((r['designers'] as Record<string, unknown>[])?.[0]?.['designerId'] as string) ||
@@ -520,6 +526,14 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
     sku: r['sku'] as string,
     stockStatus: r['stockStatus'] as string,
     showMaterials: r['showMaterials'] !== false,
+    leadTimeWeeks:
+      typeof r['leadTimeWeeks'] === 'number' ? (r['leadTimeWeeks'] as number) : undefined,
+    selectedDimensions: Array.isArray(r['selectedDimensions'])
+      ? (r['selectedDimensions'] as Product['selectedDimensions'])
+      : undefined,
+    selectedMaterials: Array.isArray(r['selectedMaterials'])
+      ? (r['selectedMaterials'] as Product['selectedMaterials'])
+      : undefined,
     materials: mapMaterialsFromSelections(r['materialSelections'] as SanityMaterialSelection[]),
     groupedMaterials: mapGroupedMaterials(r['materialSelections'] as SanityMaterialSelection[]),
     mediaSectionTitle: r?.['mediaSectionTitle'] as LocalizedString,
@@ -563,10 +577,12 @@ const productQueryString = `
   mediaSectionTitle, mediaSectionText, showMediaPanels, showHeroNavigation, buyable, 
   "sale_enabled": coalesce(sale_enabled, false),
   "sales_mode": coalesce(sales_mode, "NONE"),
-  variants[]{ id, title, sku, price, currency, options[]{ name, value }, enabled },
-  price, currency, sku, stockStatus, showMaterials,
-  materialSelections[]{ "group": group->{title,books[]{title,items[]{name,imageR2,image}}}, materials[]{name,imageR2,image} },
-  dimensionImages[]{ imageR2, imageMobileR2, imageDesktopR2, title },
+  variants[]{ id, title, sku, price, currency, options[]{ name, value }, enabled, stockStatus, leadTimeWeeks, dimensionKey, materialKey },
+  price, currency, sku, stockStatus, showMaterials, leadTimeWeeks,
+  selectedDimensions[]{ dimensionKey, enabled, sortOrder },
+  selectedMaterials[]{ materialKey, enabled, sortOrder },
+  materialSelections[]{ _key, "group": group->{_key, title,books[]{_key, title,items[]{_key, name,imageR2,image}}}, materials[]{_key, name,imageR2,image} },
+  dimensionImages[]{ _key, imageR2, imageMobileR2, imageDesktopR2, title },
   exclusiveContent, designer->{ "designerId": id.current }, designers[]->{ "designerId": id.current }, category->{ "categoryId": id.current }
 `
 

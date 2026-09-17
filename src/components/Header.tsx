@@ -1,5 +1,6 @@
 import {useState, useEffect, useRef, FC, Fragment, useCallback, ReactNode} from 'react'
 import {Link, NavLink, useLocation} from 'react-router-dom'
+import {motion} from 'framer-motion'
 import {isDarkHeroPage as isDarkHeroPageUtil, isFullscreenDarkPage} from '../utils/headerUtils'
 import type {SiteSettings, Product, FooterContent} from '../types'
 import {
@@ -28,6 +29,7 @@ import {useBodyScrollLock} from '../hooks/useBodyScrollLock'
 import {MenuIcon, ChevronDownIcon, SearchIcon, CloseIcon} from './HeaderIcons'
 import {useDarkMode} from '../context/DarkModeContext'
 import {useSelection} from '../context/SelectionContext'
+import {getShopBaseUrl, isShopNavVisible} from '../utils/shopBridge'
 
 export function Header() {
   const {t, setLocale, locale, supportedLocales} = useTranslation()
@@ -80,7 +82,7 @@ export function Header() {
   )
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const isDarkHero = isDarkHeroPage(location.pathname, location.search)
-  const isProductsHovered = isProductsOpen && !isSearchOpen && !isMobile
+  const isProductsActive = isProductsOpen && !isSearchOpen && !isMobile
 
   // Track whether scroll has passed the hero bottom boundary
   const [isPastHero, setIsPastHero] = useState(false)
@@ -132,7 +134,7 @@ export function Header() {
   // Search open: always dark text (white panel bg).
   // Mobile overlay menu: always dark text.
   const isLightMode =
-    !isProductsHovered &&
+    !isProductsActive &&
     !(isMobile && (isMobileMenuOpen || isMobileMenuClosing)) &&
     (isSearchOpen || (isFullscreen ? false : isPastHero || !isDarkHero))
 
@@ -202,7 +204,8 @@ export function Header() {
 
   const upperLoc = locale === 'tr' ? 'tr-TR' : 'en-US'
   const isProjectsVisible = settings?.isProjectsVisible !== false
-  const mobileMenuLinks: {to: string; label: string}[] = [
+  const isShopVisible = isShopNavVisible(settings || undefined)
+  const mobileMenuLinks: {to: string; label: string; isExternal?: boolean}[] = [
     {to: '/designers', label: (t('designers') || '').toLocaleUpperCase(upperLoc)},
     ...(isProjectsVisible
       ? [{to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase(upperLoc)}]
@@ -213,6 +216,7 @@ export function Header() {
       ? [{to: '/uretim', label: (t('factory') || 'Üretim').toLocaleUpperCase(upperLoc)}]
       : []),
     {to: '/contact', label: (t('contact') || '').toLocaleUpperCase(upperLoc)},
+    ...(isShopVisible ? [{to: getShopBaseUrl(), label: 'SHOP', isExternal: true}] : []),
     ...(isSelectionEnabled
       ? [
           {
@@ -576,12 +580,10 @@ export function Header() {
 
       // Search panel için - sadece mouse event'lerde çalış (touch'da sorun yaratıyor)
       if (event.type === 'mousedown' && isSearchOpen) {
-        if (
-          searchPanelRef.current &&
-          !searchPanelRef.current.contains(target) &&
-          searchButtonRef.current &&
-          !searchButtonRef.current.contains(target)
-        ) {
+        const isInPanel = searchPanelRef.current && searchPanelRef.current.contains(target)
+        const isInButton = searchButtonRef.current && searchButtonRef.current.contains(target)
+        const isInInput = searchInputRef.current && searchInputRef.current.contains(target)
+        if (!isInPanel && !isInButton && !isInInput) {
           closeSearch()
         }
       }
@@ -631,7 +633,7 @@ export function Header() {
         setHoveredCategoryId(null) // Only clear after panel collapse completes to prevent flicker
         productsCloseTimeoutRef.current = null
       }, 350)
-    }, 200)
+    }, 120)
   }
 
   const handleCloseProducts = () => {
@@ -650,7 +652,7 @@ export function Header() {
   }
 
   const navLinkClasses =
-    'tracking-wider uppercase text-gray-300 hover:text-white transition-colors duration-300 header-nav-item'
+    'tracking-wide uppercase text-gray-300 hover:text-white transition-colors duration-300 header-nav-item'
   const activeLinkClasses = {
     color: 'white',
     textShadow: '0 0 5px rgba(255,255,255,0.5)',
@@ -669,22 +671,119 @@ export function Header() {
     filter: iconBrightness,
     transition: `opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), ${colorTransition}`,
   }
+  const searchIconBaseSize = 'clamp(18px, 0.88rem + 0.35vw, 22px)'
+  const searchIconStyle = {
+    ...sharedIconStyle,
+    width: searchIconBaseSize,
+    height: searchIconBaseSize,
+  }
+
+  const MaskedNavText: FC<{
+    text: string
+    isVisible: boolean
+    delay?: number
+    className?: string
+    style?: React.CSSProperties
+  }> = ({text, isVisible, delay = 0, className = '', style}) => {
+    return (
+      <span
+        className={`relative inline-block overflow-hidden [clip-path:inset(0)] ${className}`}
+        style={{
+          ...style,
+          verticalAlign: 'bottom',
+          lineHeight: '1.25rem',
+        }}
+      >
+        <motion.span
+          initial={false}
+          animate={{
+            y: isVisible ? '0%' : '-115%',
+            opacity: isVisible ? 1 : 0,
+          }}
+          transition={{
+            y: {
+              duration: isVisible ? 0.38 : 0.24,
+              delay: isVisible ? delay : delay * 0.5,
+              ease: isVisible ? [0.16, 1, 0.3, 1] : [0.4, 0, 0.2, 1],
+            },
+            opacity: {
+              duration: isVisible ? 0.3 : 0.18,
+              delay: isVisible ? delay : delay * 0.5,
+              ease: 'linear',
+            },
+          }}
+          className="block whitespace-nowrap"
+          style={{
+            willChange: 'transform, opacity',
+          }}
+        >
+          {text}
+        </motion.span>
+      </span>
+    )
+  }
 
   const NavItem: FC<{
     to: string
     children: ReactNode
     onMouseEnter?: () => void
     onClick?: () => void
-  }> = ({to, children, onMouseEnter, onClick}) => {
+    isExternal?: boolean
+    isVisible?: boolean
+    delay?: number
+  }> = ({to, children, onMouseEnter, onClick, isExternal, isVisible = true, delay = 0}) => {
     const baseStyle = {
       fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
-      fontWeight: 500,
-      letterSpacing: '0.05em',
+      fontWeight: 600,
+      letterSpacing: '0.025em',
       fontFamily: "'Inter', sans-serif",
       lineHeight: '1.25rem',
       color: headerForegroundColor,
       transition: colorTransition,
     }
+
+    const renderedChildren =
+      typeof children === 'string' ? (
+        <MaskedNavText text={children} isVisible={isVisible} delay={delay} />
+      ) : (
+        children
+      )
+
+    if (isExternal || to.startsWith('http')) {
+      return (
+        <a
+          href={to}
+          onMouseEnter={onMouseEnter}
+          onClick={onClick}
+          className={`relative group flex items-end pb-0 pt-2 ${navLinkClasses}`}
+          style={{
+            ...baseStyle,
+            display: 'flex',
+            alignItems: 'flex-end',
+          }}
+        >
+          <span
+            className="relative flex items-end uppercase header-nav-text"
+            style={{
+              ...baseStyle,
+              display: 'flex',
+              alignItems: 'flex-end',
+            }}
+          >
+            {renderedChildren}
+            <span
+              className="header-nav-underline"
+              style={{
+                backgroundColor: headerForegroundColor,
+                opacity: isVisible ? undefined : 0,
+                transition: 'opacity 0.2s ease',
+              }}
+            />
+          </span>
+        </a>
+      )
+    }
+
     return (
       <NavLink
         to={to}
@@ -706,13 +805,15 @@ export function Header() {
             alignItems: 'flex-end',
           }}
         >
-          {children}
+          {renderedChildren}
           <span
             className="header-nav-underline"
             style={{
               backgroundColor: headerForegroundColor,
+              opacity: isVisible ? undefined : 0,
+              transition: 'opacity 0.2s ease',
             }}
-          ></span>
+          />
         </span>
       </NavLink>
     )
@@ -738,7 +839,7 @@ export function Header() {
   // Background color calculation (extracted from inline IIFE)
   const headerBgColor = useHeaderBackgroundColor({
     isMobile,
-    isProductsOpen,
+    isProductsOpen: isProductsActive,
     headerOpacity,
     isMobileMenuOpen,
     isMobileMenuClosing,
@@ -756,40 +857,47 @@ export function Header() {
           isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
             ? 'overlay-menu-open'
             : ''
-        } ${
-          headerBgColor === 'transparent' && !isProductsOpen
-            ? ''
-            : 'header-frosted-glass backdrop-blur-[4px]'
-        }`}
+        } ${headerBgColor === 'transparent' && !isProductsActive ? '' : 'header-frosted-glass'}`}
         style={{
           transform: isHeaderVisible ? 'none' : 'translateY(-100%)',
           transition: isMobile
             ? 'transform 0.2s ease-out, background-color 0.45s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.45s cubic-bezier(0.25, 1, 0.5, 1), backdrop-filter 0.45s cubic-bezier(0.25, 1, 0.5, 1), -webkit-backdrop-filter 0.45s cubic-bezier(0.25, 1, 0.5, 1)'
             : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           backgroundColor: headerBgColor,
-          backdropFilter: headerBgColor === 'transparent' && !isProductsOpen ? 'none' : 'blur(4px)',
+          backdropFilter:
+            headerBgColor === 'transparent' && !isProductsActive
+              ? 'none'
+              : isProductsActive
+                ? 'blur(24px) saturate(180%)'
+                : 'blur(4px)',
           WebkitBackdropFilter:
-            headerBgColor === 'transparent' && !isProductsOpen ? 'none' : 'blur(4px)',
+            headerBgColor === 'transparent' && !isProductsActive
+              ? 'none'
+              : isProductsActive
+                ? 'blur(24px) saturate(180%)'
+                : 'blur(4px)',
         }}
       >
         <div
-          className={`${isOverlayMobileMenu ? '' : 'overflow-hidden'} ${
-            // Header yüksekliği: mobil ve desktop için sabit yükseklik - her zaman
-            isMobile
-              ? 'h-[3.5rem] min-h-[3.5rem] max-h-[3.5rem]'
-              : 'h-[5rem] min-h-[5rem] max-h-[5rem]'
-          } transition-all duration-500 ease-in-out`}
+          className={`${isOverlayMobileMenu ? '' : 'overflow-hidden'}`}
           style={{
             minHeight: isMobile ? '3.5rem' : '5rem',
             maxHeight:
-              isMobileMenuOpen && !isOverlayMobileMenu ? '40rem' : isMobile ? '3.5rem' : '5rem',
-            // Products dropdown için overflow visible
-            overflow: !isMobile ? 'visible' : undefined,
+              isMobileMenuOpen && !isOverlayMobileMenu
+                ? '40rem'
+                : isProductsActive
+                  ? '50rem'
+                  : isMobile
+                    ? '3.5rem'
+                    : '5rem',
+            overflow: !isMobile ? 'hidden' : undefined,
+            transition:
+              'max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
           ref={headerContainerRef}
         >
           <nav
-            className="mx-auto h-full flex items-center w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] px-4 md:px-8 lg:px-0 header-scroll-transition header-layout-transition"
+            className="mx-auto h-[3.5rem] lg:h-[5rem] shrink-0 flex items-center w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] px-4 md:px-8 lg:px-0 header-scroll-transition header-layout-transition"
             ref={navRef}
             style={{
               transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-20px)',
@@ -802,9 +910,17 @@ export function Header() {
             }}
           >
             {/* Üst satır: grid stretch (tam yükseklik), içindeki hücreler alttan hizalı */}
-            <div className="grid grid-cols-[1fr_auto_1fr] w-full h-full items-center header-layout-transition">
+            <div
+              className={`w-full h-full items-center header-layout-transition ${
+                isMobile && isSearchOpen ? 'flex justify-between' : 'grid grid-cols-[1fr_auto_1fr]'
+              } lg:grid lg:grid-cols-[1fr_auto_1fr]`}
+            >
               {/* Sol taraf - Arama + sol menü (desktop) ve arama (mobil) */}
-              <div className="flex h-full items-center lg:items-end justify-start lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition">
+              <div
+                className={`flex h-full items-center lg:items-end justify-start lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition relative ${
+                  isMobile && isSearchOpen ? 'flex-1 min-w-0 mr-3' : 'min-w-0'
+                }`}
+              >
                 {/* Mobil Arama - Solda */}
                 {isMobile && (
                   <button
@@ -822,7 +938,7 @@ export function Header() {
                         setIsSearchOpen(true)
                       }
                     }}
-                    className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
+                    className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center shrink-0"
                     style={{color: headerForegroundColor, transition: colorTransition}}
                     aria-label={
                       isSearchOpen
@@ -833,7 +949,7 @@ export function Header() {
                     aria-controls="search-panel"
                   >
                     {/* Search → X arasında yumuşak geçiş animasyonu */}
-                    <span className="relative flex items-center justify-center w-6 h-6">
+                    <span className="relative flex items-center justify-center w-[22px] h-[22px] sm:w-6 sm:h-6">
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
                           isSearchOpen
@@ -855,6 +971,64 @@ export function Header() {
                     </span>
                   </button>
                 )}
+
+                {/* Mobil Inline Arama Girişi */}
+                {isMobile && (
+                  <div
+                    className={`flex items-center flex-1 min-w-0 transition-all duration-300 ease-out ${
+                      isSearchOpen
+                        ? 'opacity-100 translate-x-0 pointer-events-auto ml-1 mr-1'
+                        : 'opacity-0 -translate-x-2 pointer-events-none w-0 max-w-0 overflow-hidden ml-0 mr-0'
+                    }`}
+                  >
+                    <div className="relative w-full flex items-center">
+                      <input
+                        ref={isMobile ? searchInputRef : undefined}
+                        type="search"
+                        placeholder={t('search_placeholder') || 'Ara...'}
+                        id="global-search-input-mobile"
+                        name="global-search"
+                        className={`w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 text-[15px] sm:text-sm pb-1 border-b transition-colors pr-7 ${
+                          isLightMode
+                            ? 'text-neutral-900 placeholder-neutral-400 border-neutral-300 focus:border-neutral-900'
+                            : 'text-white placeholder-neutral-500 border-neutral-600 focus:border-white'
+                        }`}
+                        style={{
+                          color: headerForegroundColor,
+                          outline: 'none',
+                          boxShadow: 'none',
+                          fontFamily: "'Inter', sans-serif",
+                        }}
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        autoComplete="off"
+                        spellCheck={false}
+                      />
+                      {searchQuery.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery('')
+                            searchInputRef.current?.focus()
+                          }}
+                          aria-label={t('clear_search') || 'Aramayı temizle'}
+                          className="absolute right-0 inset-y-0 flex items-center justify-center p-1.5 cursor-pointer"
+                        >
+                          <span className="relative w-3.5 h-3.5 flex items-center justify-center">
+                            <span
+                              className={`absolute inset-0 before:absolute before:left-1/2 before:top-[2px] before:bottom-[2px] before:w-[1.5px] before:-translate-x-1/2 before:rotate-45 after:absolute after:left-1/2 after:top-[2px] after:bottom-[2px] after:w-[1.5px] after:-translate-x-1/2 after:-rotate-45 transition-colors ${
+                                isLightMode
+                                  ? 'before:bg-neutral-800 after:bg-neutral-800'
+                                  : 'before:bg-neutral-200 after:bg-neutral-200'
+                              }`}
+                            />
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Desktop Arama (masaüstü) - Sol tarafta */}
                 {!isMobile && (
                   <button
@@ -877,8 +1051,8 @@ export function Header() {
                         setIsSearchOpen(true)
                       }
                     }}
-                    className={`${iconClasses} hidden lg:inline-flex`}
-                    style={{...sharedIconStyle, color: headerForegroundColor}}
+                    className={`${iconClasses} hidden lg:inline-flex shrink-0`}
+                    style={{...searchIconStyle, color: headerForegroundColor}}
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'
@@ -888,7 +1062,7 @@ export function Header() {
                     aria-controls="search-panel"
                   >
                     {/* Search → X arasında yumuşak geçiş animasyonu */}
-                    <span className="relative flex items-center justify-center w-6 h-6">
+                    <span className="relative flex items-center justify-center w-full h-full">
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
                           isSearchOpen
@@ -911,93 +1085,211 @@ export function Header() {
                   </button>
                 )}
 
-                {/* Desktop Menü - Logo'nun solundaki linkler (eşit aralıklarla dağıtılmış) */}
-                <div
-                  ref={productsButtonRef}
-                  className="relative hidden lg:block"
-                  onMouseEnter={handleProductsEnter}
-                  onMouseLeave={handleProductsLeave}
-                >
-                  <Link
-                    to="/categories"
-                    className={`group flex items-end space-x-1 pb-0 pt-2 ${navLinkClasses}`}
-                    onClick={() => setIsProductsOpen(false)}
-                    style={{
-                      fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
-                      fontWeight: 500, // Re-applying the 500 from previous request
-                      letterSpacing: '0.05em',
-                      fontFamily: "'Inter', sans-serif",
-                      lineHeight: '1.25rem',
-                      color: headerForegroundColor,
-                      transition: colorTransition,
-                    }}
-                  >
-                    <span
-                      className="relative inline-block uppercase header-nav-text"
-                      style={{
-                        fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
-                        fontWeight: 500, // Re-applying the 500 from previous request
-                        letterSpacing: '0.05em',
-                        fontFamily: "'Inter', sans-serif",
-                        lineHeight: '1.25rem',
-                        color: headerForegroundColor,
-                      }}
-                    >
-                      {t('products')}
-                      <span
-                        className={`header-nav-underline ${
-                          isProductsOpen ? 'opacity-0 scale-x-0' : ''
-                        }`}
-                        style={{
-                          backgroundColor: headerForegroundColor,
-                        }}
-                      ></span>
-                    </span>
-                    <div
-                      className={`transform ${isProductsOpen ? 'rotate-180' : ''}`}
-                      style={{
-                        filter: iconBrightness,
-                        transition: `transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s cubic-bezier(0.25, 1, 0.5, 1)`,
-                      }}
-                    >
-                      <ChevronDownIcon />
-                    </div>
-                  </Link>
-                </div>
-                <div className="hidden lg:flex items-end">
-                  <NavItem
-                    to="/designers"
-                    onMouseEnter={handleCloseProducts}
-                    onClick={handleCloseProducts}
-                  >
-                    {t('designers')}
-                  </NavItem>
-                </div>
-                {isProjectsVisible ? (
-                  <div className="hidden lg:flex items-end">
-                    <NavItem
-                      to="/projects"
-                      onMouseEnter={handleCloseProducts}
-                      onClick={handleCloseProducts}
-                    >
-                      {t('projects') || 'Projeler'}
-                    </NavItem>
-                  </div>
-                ) : (
-                  <div className="hidden lg:flex items-end">
-                    <NavItem
-                      to="/news"
-                      onMouseEnter={handleCloseProducts}
-                      onClick={handleCloseProducts}
-                    >
-                      {t('news')}
-                    </NavItem>
-                  </div>
-                )}
+                {/* Desktop Sol Bölüm: Arama Çubuğu ve Menü Butonları Alanı */}
+                {!isMobile &&
+                  (() => {
+                    const productsLabel = t('products') || 'ÜRÜNLER'
+                    const designersLabel = t('designers') || 'TASARIMCILAR'
+                    const thirdNavLabel = isProjectsVisible
+                      ? t('projects') || 'Projeler'
+                      : t('news') || 'Haberler'
+
+                    return (
+                      <div className="hidden lg:flex items-end relative flex-1 min-w-0">
+                        {/* 1. Desktop Menü Butonları (Maskeli zarif yukarı/aşağı geçiş alanı) */}
+                        <div
+                          className={`flex items-end lg:gap-6 xl:gap-8 ${
+                            isSearchOpen ? 'pointer-events-none' : 'pointer-events-auto'
+                          }`}
+                        >
+                          <div
+                            ref={productsButtonRef}
+                            className="relative"
+                            onMouseEnter={handleProductsEnter}
+                            onMouseLeave={handleProductsLeave}
+                          >
+                            <Link
+                              to="/categories"
+                              className={`group flex items-end space-x-1 pb-0 pt-2 ${navLinkClasses}`}
+                              onClick={() => setIsProductsOpen(false)}
+                              style={{
+                                fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
+                                fontWeight: 600,
+                                letterSpacing: '0.025em',
+                                fontFamily: "'Inter', sans-serif",
+                                lineHeight: '1.25rem',
+                                color: headerForegroundColor,
+                                transition: colorTransition,
+                              }}
+                            >
+                              <span
+                                className="relative inline-block uppercase header-nav-text"
+                                style={{
+                                  fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
+                                  fontWeight: 600,
+                                  letterSpacing: '0.025em',
+                                  fontFamily: "'Inter', sans-serif",
+                                  lineHeight: '1.25rem',
+                                  color: headerForegroundColor,
+                                }}
+                              >
+                                <MaskedNavText
+                                  text={productsLabel}
+                                  isVisible={!isSearchOpen}
+                                  delay={0}
+                                />
+                                <span
+                                  className={`header-nav-underline ${
+                                    isProductsOpen || isSearchOpen ? 'opacity-0 scale-x-0' : ''
+                                  }`}
+                                  style={{
+                                    backgroundColor: headerForegroundColor,
+                                    opacity: isSearchOpen ? 0 : undefined,
+                                    transition: 'opacity 0.2s ease',
+                                  }}
+                                />
+                              </span>
+                              <span className="relative inline-block overflow-hidden [clip-path:inset(0)]">
+                                <motion.div
+                                  initial={false}
+                                  animate={{
+                                    y: !isSearchOpen ? '0%' : '-115%',
+                                    opacity: !isSearchOpen ? 1 : 0,
+                                  }}
+                                  transition={{
+                                    y: {
+                                      duration: !isSearchOpen ? 0.38 : 0.24,
+                                      delay: !isSearchOpen ? 0.02 : 0,
+                                      ease: !isSearchOpen ? [0.16, 1, 0.3, 1] : [0.4, 0, 0.2, 1],
+                                    },
+                                    opacity: {
+                                      duration: !isSearchOpen ? 0.3 : 0.18,
+                                      delay: !isSearchOpen ? 0.02 : 0,
+                                    },
+                                  }}
+                                  className={`transform ${isProductsOpen ? 'rotate-180' : ''}`}
+                                  style={{
+                                    filter: iconBrightness,
+                                    transition: `transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s cubic-bezier(0.25, 1, 0.5, 1)`,
+                                  }}
+                                >
+                                  <ChevronDownIcon />
+                                </motion.div>
+                              </span>
+                            </Link>
+                          </div>
+
+                          <div className="flex items-end">
+                            <NavItem
+                              to="/designers"
+                              onMouseEnter={handleCloseProducts}
+                              onClick={handleCloseProducts}
+                              isVisible={!isSearchOpen}
+                              delay={0.05}
+                            >
+                              {designersLabel}
+                            </NavItem>
+                          </div>
+
+                          {isProjectsVisible ? (
+                            <div className="flex items-end">
+                              <NavItem
+                                to="/projects"
+                                onMouseEnter={handleCloseProducts}
+                                onClick={handleCloseProducts}
+                                isVisible={!isSearchOpen}
+                                delay={0.1}
+                              >
+                                {thirdNavLabel}
+                              </NavItem>
+                            </div>
+                          ) : (
+                            <div className="flex items-end">
+                              <NavItem
+                                to="/news"
+                                onMouseEnter={handleCloseProducts}
+                                onClick={handleCloseProducts}
+                                isVisible={!isSearchOpen}
+                                delay={0.1}
+                              >
+                                {thirdNavLabel}
+                              </NavItem>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 2. Desktop Inline Arama Çubuğu (Menü butonlarının üzerine doğru genişleyen alan) */}
+                        <motion.div
+                          initial={false}
+                          animate={{
+                            width: isSearchOpen ? '100%' : '0%',
+                            opacity: isSearchOpen ? 1 : 0,
+                          }}
+                          transition={{
+                            duration: isSearchOpen ? 0.38 : 0.28,
+                            ease: isSearchOpen ? [0.16, 1, 0.3, 1] : [0.4, 0, 0.2, 1],
+                          }}
+                          className={`absolute inset-y-0 left-0 flex items-center overflow-hidden max-w-sm xl:max-w-md ${
+                            isSearchOpen ? 'pointer-events-auto z-10' : 'pointer-events-none z-0'
+                          }`}
+                        >
+                          <div className="relative w-full flex items-center pr-4">
+                            <input
+                              ref={!isMobile ? searchInputRef : undefined}
+                              type="search"
+                              placeholder={t('search_placeholder') || 'Ara...'}
+                              id="global-search-input"
+                              name="global-search"
+                              className={`w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 text-sm pb-1 border-b transition-colors ${
+                                isLightMode
+                                  ? 'text-neutral-900 placeholder-neutral-400 border-neutral-300 focus:border-neutral-900'
+                                  : 'text-white placeholder-neutral-500 border-neutral-600 focus:border-white'
+                              }`}
+                              style={{
+                                color: headerForegroundColor,
+                                outline: 'none',
+                                boxShadow: 'none',
+                                fontFamily: "'Inter', sans-serif",
+                              }}
+                              value={searchQuery}
+                              onChange={e => setSearchQuery(e.target.value)}
+                              autoComplete="off"
+                              spellCheck={false}
+                            />
+                            {searchQuery.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSearchQuery('')
+                                  searchInputRef.current?.focus()
+                                }}
+                                aria-label={t('clear_search') || 'Aramayı temizle'}
+                                className="absolute right-4 inset-y-0 flex items-center justify-center px-1 group"
+                              >
+                                <span className="relative w-3.5 h-3.5 flex items-center justify-center">
+                                  <span
+                                    className={`absolute inset-0 before:absolute before:left-1/2 before:top-[2px] before:bottom-[2px] before:w-[1px] before:-translate-x-1/2 before:rotate-45 after:absolute after:left-1/2 after:top-[2px] after:bottom-[2px] after:w-[1px] after:-translate-x-1/2 after:-rotate-45 transition-colors ${
+                                      isLightMode
+                                        ? 'before:bg-neutral-800 after:bg-neutral-800 group-hover:before:bg-black group-hover:after:bg-black'
+                                        : 'before:bg-neutral-200 after:bg-neutral-200 group-hover:before:bg-white group-hover:after:bg-white'
+                                    }`}
+                                  />
+                                </span>
+                              </button>
+                            )}
+                          </div>
+                        </motion.div>
+                      </div>
+                    )
+                  })()}
               </div>
 
               {/* Orta - Logo (Tüm Ekranlar için Grid Sütun 2) */}
-              <div className="flex h-full items-center lg:items-end justify-center lg:pb-6 px-2 header-layout-transition-delayed pointer-events-auto">
+              <div
+                className={`h-full items-center lg:items-end justify-center lg:pb-6 px-2 header-layout-transition-delayed pointer-events-auto transition-opacity duration-300 ${
+                  isMobile && isSearchOpen ? 'hidden' : 'flex'
+                }`}
+              >
                 <Link
                   to="/"
                   className="flex items-center lg:items-end gap-3 transition-opacity duration-300 hover:opacity-80"
@@ -1014,7 +1306,7 @@ export function Header() {
               </div>
 
               {/* Sağ taraf - Logo'nun sağındaki linkler + ikonlar */}
-              <div className="flex h-full items-center lg:items-end justify-end gap-3 lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition">
+              <div className="flex h-full items-center lg:items-end justify-end gap-3 lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition shrink-0">
                 {/* Desktop Menü - Logo'nun sağındaki linkler (eşit aralıklarla dağıtılmış) */}
                 {isProjectsVisible && (
                   <div className="hidden lg:flex items-end">
@@ -1056,6 +1348,18 @@ export function Header() {
                     {t('contact')}
                   </NavItem>
                 </div>
+                {isShopVisible && (
+                  <div className="hidden lg:flex items-end">
+                    <NavItem
+                      to={getShopBaseUrl()}
+                      isExternal
+                      onMouseEnter={handleCloseProducts}
+                      onClick={handleCloseProducts}
+                    >
+                      SHOP
+                    </NavItem>
+                  </div>
+                )}
 
                 <div className="hidden lg:flex items-end space-x-5">
                   {isSelectionEnabled && (
@@ -1111,8 +1415,8 @@ export function Header() {
                       className="relative inline-block uppercase header-nav-text"
                       style={{
                         fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
-                        fontWeight: 500,
-                        letterSpacing: '0.05em',
+                        fontWeight: 600,
+                        letterSpacing: '0.025em',
                         fontFamily: "'Inter', sans-serif",
                         lineHeight: '1.25rem',
                         color: headerForegroundColor,
@@ -1130,8 +1434,11 @@ export function Header() {
                   </button>
 
                   <div
-                    className="flex items-center"
-                    style={{fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)'}}
+                    className="flex items-end pb-0 pt-2"
+                    style={{
+                      fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
+                      lineHeight: '1.25rem',
+                    }}
                   >
                     {supportedLocales.map((langCode, index) => {
                       const isLast = index === supportedLocales.length - 1
@@ -1144,12 +1451,13 @@ export function Header() {
                               langCode === 'tr' ? 'Türkçe diline geç' : 'Switch to English'
                             }
                             aria-current={isActive ? 'true' : undefined}
-                            className={`relative lowercase transition-opacity duration-300 hover:opacity-100`}
+                            className="relative uppercase transition-opacity duration-300 hover:opacity-100 flex items-end"
                             style={{
-                              fontWeight: 500,
+                              fontWeight: 600,
                               fontFamily: "'Inter', sans-serif",
-                              letterSpacing: '0.05em',
+                              letterSpacing: '0.025em',
                               fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
+                              lineHeight: '1.25rem',
                               color: isActive
                                 ? headerForegroundColor
                                 : `${headerForegroundColor}80`, // 50% opacity for inactive
@@ -1157,13 +1465,15 @@ export function Header() {
                               transition: colorTransition,
                             }}
                           >
-                            {langCode.toLowerCase()}
+                            {langCode.toUpperCase()}
                           </button>
                           {!isLast && (
                             <span
-                              className="mx-1"
+                              className="mx-1 flex items-end"
                               style={{
                                 color: `${headerForegroundColor}40`,
+                                fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
+                                lineHeight: '1.25rem',
                                 transition: colorTransition,
                               }}
                             >
@@ -1311,6 +1621,27 @@ export function Header() {
               </div>
             </div>
           </nav>
+          {/* Header altı silik ayırıcı çizgi - Açılırken yavaşça belirip yerine oturur, kapanırken silinir */}
+          <div
+            className="w-full pointer-events-none hidden lg:block overflow-hidden"
+            style={{
+              height: '1px',
+            }}
+          >
+            <div
+              className="w-full h-full"
+              style={{
+                backgroundColor: isLightMode ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.14)',
+                opacity: isProductsOpen ? 1 : 0,
+                transform: isProductsOpen
+                  ? 'scaleX(1) translateY(0)'
+                  : 'scaleX(0.85) translateY(-2px)',
+                transformOrigin: 'center center',
+                transition:
+                  'opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease',
+              }}
+            />
+          </div>
           {/* Desktop ürün paneli */}
           <HeaderProductsPanel
             isOpen={isProductsOpen}
@@ -1399,6 +1730,7 @@ export function Header() {
         closeSearch={closeSearch}
         searchPanelRef={searchPanelRef}
         searchInputRef={searchInputRef}
+        searchButtonRef={searchButtonRef}
         isLightMode={isLightMode}
       />
     </>

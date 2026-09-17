@@ -123,7 +123,13 @@ export function EmailExportTool() {
         throw new Error(`Üyeler yüklenemedi (${res.status})`)
       }
 
-      const json = await res.json()
+      const text = await res.text()
+      let json: any = {}
+      try {
+        json = JSON.parse(text)
+      } catch {
+        throw new Error('API yanıtı çözümlenemedi (JSON yerine geçersiz yanıt döndü).')
+      }
       const data = json.members || []
 
       if (data && data.length > 0) {

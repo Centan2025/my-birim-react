@@ -11,6 +11,7 @@ import {
 import {cancelCommerceOrder} from '../../lib/commerce/order-lifecycle.js'
 import {createCommerceRefund} from '../../lib/commerce/refund-service.js'
 import {getAdminCommerceMetrics} from '../../lib/commerce/admin-metrics-service.js'
+import {getAdminProductPerformance} from '../../lib/commerce/admin-product-performance-service.js'
 import {CommerceValidationError} from '../../lib/commerce/types.js'
 
 function isBreakGlassAuthorized(adminSecretHeader?: string | string[]): boolean {
@@ -59,6 +60,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     (segments.length >= 2 && segments[0] === 'commerce' && segments[1] === 'metrics')
   ) {
     return handleAdminCommerceMetrics(req, res)
+  }
+
+  if (
+    path === 'analytics/products' ||
+    path === 'commerce/products/performance' ||
+    (segments.length >= 2 && segments[0] === 'analytics' && segments[1] === 'products') ||
+    (segments.length >= 3 &&
+      segments[0] === 'commerce' &&
+      segments[1] === 'products' &&
+      segments[2] === 'performance')
+  ) {
+    return handleAdminProductPerformance(req, res)
   }
 
   if (
@@ -317,6 +330,90 @@ async function handleAdminCommerceMetrics(req: VercelRequest, res: VercelRespons
       success: false,
       code: 'INTERNAL_ERROR',
       message: 'Ticari metrikler hesaplanırken bir hata oluştu.',
+    })
+  }
+}
+
+// -------------------------------------------------------------
+// 2.1 Admin Product Performance Handler
+// -------------------------------------------------------------
+async function handleAdminProductPerformance(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET, OPTIONS')
+    return res.status(405).json({
+      success: false,
+      code: 'METHOD_NOT_ALLOWED',
+      message: 'Method Not Allowed. Yalnızca GET istekleri desteklenir.',
+    })
+  }
+
+  const ip = getClientIp(req)
+  if (await isRateLimitedAsync(`admin_product_perf_${ip}`, {limit: 60, windowMs: 60000})) {
+    return res.status(429).json({
+      success: false,
+      code: 'RATE_LIMITED',
+      message: 'Çok fazla istek gönderildi. Lütfen biraz bekleyin.',
+    })
+  }
+
+  let isAuthorized = false
+
+  const token = getAuthTokenFromReq(req)
+  if (token) {
+    const payload = verifyToken(token)
+    if (payload && payload.role === 'admin') {
+      isAuthorized = true
+    }
+  }
+
+  if (!isAuthorized) {
+    const adminSecretHeader = req.headers['x-admin-secret']
+    if (isBreakGlassAuthorized(adminSecretHeader)) {
+      isAuthorized = true
+    }
+  }
+
+  if (!isAuthorized) {
+    return res.status(401).json({
+      success: false,
+      code: 'UNAUTHORIZED',
+      message: 'Yetkisiz erişim. Admin yetkisi gereklidir.',
+    })
+  }
+
+  try {
+    const range = typeof req.query?.['range'] === 'string' ? req.query['range'] : undefined
+    const from = typeof req.query?.['from'] === 'string' ? req.query['from'] : undefined
+    const to = typeof req.query?.['to'] === 'string' ? req.query['to'] : undefined
+    const currency = typeof req.query?.['currency'] === 'string' ? req.query['currency'] : undefined
+
+    const result = await getAdminProductPerformance({
+      range,
+      from,
+      to,
+      currency,
+    })
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+    })
+  } catch (error: unknown) {
+    if (error instanceof CommerceValidationError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        code: error.code,
+        message: error.message,
+      })
+    }
+
+    const sanitizedErrorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error('[Admin Product Performance API] Error:', sanitizedErrorMessage)
+
+    return res.status(500).json({
+      success: false,
+      code: 'INTERNAL_ERROR',
+      message: 'Ürün performans metrikleri hesaplanırken bir hata oluştu.',
     })
   }
 }

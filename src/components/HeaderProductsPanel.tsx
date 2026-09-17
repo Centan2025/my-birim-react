@@ -31,40 +31,37 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
   isLightMode,
 }) => {
   return (
-    // Ürün kategorileri paneli - header içinde genişleyip daralır
+    // Ürün kategorileri paneli - header ile birlikte tek parça uzayıp toplanır
     <div
-      className={`hidden lg:block overflow-hidden ${
+      className={`hidden lg:block overflow-hidden bg-transparent ${
         isOpen
-          ? 'opacity-100 translate-y-0 max-h-[800px]'
+          ? 'opacity-100 translate-y-0 max-h-[800px] pointer-events-auto'
           : 'opacity-0 -translate-y-2 max-h-0 pointer-events-none'
       }`}
       style={{
-        backgroundColor: isLightMode ? 'rgba(238, 239, 242, 0.98)' : 'rgba(0, 0, 0, 0.85)',
-        backdropFilter: 'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
         transition:
-          'max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          'max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease-out, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
-      {/* Ayırıcı çizgi */}
       <div
-        className={`w-full border-t ${isLightMode ? 'border-black/10' : 'border-white/50'}`}
-        style={{transition: 'border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'}}
-      ></div>
-
-      <div
-        className="pt-4 pb-3 grid grid-cols-[auto_1fr] gap-16 lg:gap-24 items-stretch"
+        className="pt-2 pb-5 grid grid-cols-[auto_1fr] gap-16 lg:gap-24 items-stretch"
         style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}
       >
         {/* Sol taraf - Kategoriler */}
         <div
           className="overflow-y-auto hide-scrollbar pr-6"
           onMouseLeave={() => onHoveredCategoryChange(null)}
+          style={{
+            transform: isOpen ? 'translateY(0) scaleY(1)' : 'translateY(-14px) scaleY(0.88)',
+            transformOrigin: 'top left',
+            opacity: isOpen ? 1 : 0,
+            transition: 'transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease-out',
+          }}
         >
           <div className="flex flex-col gap-3">
-            {categories.map(category => (
+            {categories.map((category, index) => (
               <NavLink
                 key={category.id}
                 to={`/products/${category.id}`}
@@ -75,7 +72,11 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
                   fontSize: 'clamp(12px, 0.3rem + 0.5vw, 13.5px)',
                   letterSpacing: '0.02em',
                   fontFamily: "'Inter', sans-serif",
-                  transition: 'color 0.35s cubic-bezier(0.25, 1, 0.5, 1)',
+                  transform: isOpen
+                    ? 'translateY(0)'
+                    : `translateY(-${Math.min(index * 2 + 4, 18)}px)`,
+                  opacity: isOpen ? 1 : 0,
+                  transition: `transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.015}s, opacity 0.35s ease-out, color 0.35s cubic-bezier(0.25, 1, 0.5, 1)`,
                 }}
                 onClick={onClose}
                 onMouseEnter={() => onHoveredCategoryChange(category.id)}
@@ -101,6 +102,11 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
         <div
           className="relative w-[500px] lg:w-[600px] h-full self-stretch flex items-center justify-center"
           onMouseEnter={() => onHoveredCategoryChange(null)}
+          style={{
+            transform: isOpen ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.97)',
+            opacity: isOpen ? 1 : 0,
+            transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease-out',
+          }}
         >
           {(() => {
             const hoveredCategory = categories.find(c => c.id === hoveredCategoryId)
@@ -195,11 +201,17 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
       </div>
 
       <div
-        className={`w-full border-t mt-3 ${isLightMode ? 'border-black/10' : 'border-white/50'}`}
+        className={`w-full border-t mt-3 ${isLightMode ? 'border-black/10' : 'border-white/15'}`}
       ></div>
       <div
         className="pt-3 pb-3"
-        style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}
+        style={{
+          paddingLeft: submenuOffset,
+          paddingRight: '5rem',
+          transform: isOpen ? 'translateY(0)' : 'translateY(-10px)',
+          opacity: isOpen ? 1 : 0,
+          transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s, opacity 0.3s ease-out',
+        }}
         onMouseEnter={() => onHoveredCategoryChange(null)}
       >
         <NavLink

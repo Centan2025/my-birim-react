@@ -2,6 +2,7 @@ import {FC, MutableRefObject, useEffect} from 'react'
 import {NavLink} from 'react-router-dom'
 import type {Category, SiteSettings} from '../types'
 import {CrossFadeText, HeaderTranslateFn, UserIcon, UserLoggedInIcon} from './HeaderShared'
+import {getShopBaseUrl, isShopNavVisible} from '../utils/shopBridge'
 
 interface HeaderMobileMenuInlineProps {
   isOpen: boolean
@@ -96,7 +97,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                       letterSpacing: '0.08em',
                     }}
                   >
-                    <span className="relative inline-block">{langCode.toLowerCase()}</span>
+                    <span className="relative inline-block">{langCode.toUpperCase()}</span>
                   </button>
                 )
               })}
@@ -267,11 +268,20 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
           )}
           <NavLink
             to="/contact"
-            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
+            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
             onClick={onCloseAll}
           >
             <CrossFadeText text={t('contact')} triggerKey={locale} />
           </NavLink>
+          {isShopNavVisible(settings || undefined) && (
+            <a
+              href={getShopBaseUrl()}
+              className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
+              onClick={onCloseAll}
+            >
+              <CrossFadeText text="SHOP" triggerKey={locale} />
+            </a>
+          )}
         </div>
       </nav>
     </div>

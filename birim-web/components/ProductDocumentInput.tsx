@@ -2,7 +2,7 @@ import React, {useEffect, useState, useMemo} from 'react'
 import {InputProps, useClient} from 'sanity'
 import {Card, Flex, Text, Box, Badge, Button, Stack} from '@sanity/ui'
 import StudioLanguageBar from './StudioLanguageBar'
-import {getProductReadiness} from '../utils/productReadiness'
+import {getProductReadiness, getCommerceStateDescription} from '../utils/productReadiness'
 
 export default function ProductDocumentInput(props: InputProps) {
   const {renderDefault, value} = props
@@ -17,6 +17,7 @@ export default function ProductDocumentInput(props: InputProps) {
 
   // Real-time readiness calculation (zero database writes)
   const readiness = useMemo(() => getProductReadiness(productVal), [productVal])
+  const stateDescription = useMemo(() => getCommerceStateDescription(productVal), [productVal])
 
   useEffect(() => {
     if (categoryRef) {
@@ -42,6 +43,10 @@ export default function ProductDocumentInput(props: InputProps) {
       : readiness.status === 'NEEDS_ATTENTION'
         ? 'caution'
         : 'default'
+
+  const isBuyable = productVal?.buyable === true
+  const isSaleEnabled = productVal?.sale_enabled === true
+  const salesMode = productVal?.sales_mode || 'NONE'
 
   return (
     <Card style={{position: 'relative'}}>
@@ -120,31 +125,58 @@ export default function ProductDocumentInput(props: InputProps) {
                 : 'rgba(110, 118, 129, 0.06)',
         }}
       >
-        <Flex align="center" justify="space-between" gap={3} style={{flexWrap: 'wrap'}}>
-          <Flex align="center" gap={3}>
-            <Badge
-              tone={statusTone}
-              mode="outline"
-              fontSize={1}
-              style={{letterSpacing: '0.04em', textTransform: 'uppercase'}}
-            >
-              {readiness.status === 'READY'
-                ? '● Commerce Ready'
-                : readiness.status === 'NEEDS_ATTENTION'
-                  ? '▲ Needs Attention'
-                  : readiness.status === 'NOT_FOR_SALE'
-                    ? '○ Katalog (Satışa Kapalı)'
-                    : '○ Eksik Veri'}
-            </Badge>
+        <Stack space={3}>
+          <Flex align="center" justify="space-between" gap={3} style={{flexWrap: 'wrap'}}>
+            <Flex align="center" gap={2} style={{flexWrap: 'wrap'}}>
+              <Badge
+                tone={statusTone}
+                mode="outline"
+                fontSize={1}
+                style={{letterSpacing: '0.04em', textTransform: 'uppercase'}}
+              >
+                {readiness.status === 'READY'
+                  ? '● DOĞRUDAN SATIŞA HAZIR'
+                  : readiness.status === 'NEEDS_ATTENTION'
+                    ? '▲ Satış Engelleri Var'
+                    : readiness.status === 'NOT_FOR_SALE'
+                      ? '○ Katalog (Satışa Kapalı)'
+                      : '○ Eksik Veri'}
+              </Badge>
 
-            <Text size={1} style={{color: '#8b949e'}}>
-              {readiness.summary}
-              {productVal?.sales_mode ? ` · Mod: ${productVal.sales_mode}` : ''}
-              {productVal?.sku ? ` · SKU: ${productVal.sku}` : ''}
-            </Text>
-          </Flex>
+              {/* Status breakdown pills */}
+              <Badge tone={isBuyable ? 'positive' : 'default'} mode="outline" fontSize={0}>
+                E-Ticarette Satılabilir: {isBuyable ? '✓' : '✕'}
+              </Badge>
+              <Badge tone={isSaleEnabled ? 'positive' : 'default'} mode="outline" fontSize={0}>
+                Satış Aktif: {isSaleEnabled ? '✓' : '✕'}
+              </Badge>
+              <Badge tone="primary" mode="outline" fontSize={0}>
+                Mod: {salesMode}
+              </Badge>
 
-          {(readiness.blockers.length > 0 || readiness.warnings.length > 0) && (
+              {readiness.catalogDimensionsCount !== undefined &&
+                readiness.catalogDimensionsCount > 0 && (
+                  <Badge tone="default" mode="outline" fontSize={0}>
+                    📐 Ölçüler: {readiness.catalogDimensionsCount}
+                    {readiness.shopDimensionsCount
+                      ? ` (Shop: ${readiness.shopDimensionsCount})`
+                      : ''}
+                  </Badge>
+                )}
+              {readiness.catalogMaterialsCount !== undefined &&
+                readiness.catalogMaterialsCount > 0 && (
+                  <Badge tone="default" mode="outline" fontSize={0}>
+                    🎨 Renkler: {readiness.catalogMaterialsCount}
+                    {readiness.shopMaterialsCount ? ` (Shop: ${readiness.shopMaterialsCount})` : ''}
+                  </Badge>
+                )}
+              {readiness.totalVariantsCount !== undefined && readiness.totalVariantsCount > 0 && (
+                <Badge tone="default" mode="outline" fontSize={0}>
+                  🏷️ Varyant: {readiness.activeVariantsCount} / {readiness.totalVariantsCount}
+                </Badge>
+              )}
+            </Flex>
+
             <Button
               mode="bleed"
               tone={statusTone}
@@ -153,36 +185,40 @@ export default function ProductDocumentInput(props: InputProps) {
               text={showReadinessDetails ? 'Detayları Gizle ▲' : 'Detayları İncele ▼'}
               onClick={() => setShowReadinessDetails((prev) => !prev)}
             />
+          </Flex>
+
+          <Text size={1} style={{color: '#8b949e', fontStyle: 'italic'}}>
+            {stateDescription}
+          </Text>
+
+          {showReadinessDetails && (
+            <Box paddingTop={2}>
+              <Stack space={2}>
+                {readiness.blockers.map((b, idx) => (
+                  <Flex key={`blocker-${idx}`} align="center" gap={2}>
+                    <Text size={1} style={{color: '#f85149', fontWeight: 600}}>
+                      ✕
+                    </Text>
+                    <Text size={1} style={{color: '#f85149'}}>
+                      {b}
+                    </Text>
+                  </Flex>
+                ))}
+
+                {readiness.warnings.map((w, idx) => (
+                  <Flex key={`warning-${idx}`} align="center" gap={2}>
+                    <Text size={1} style={{color: '#d29922', fontWeight: 600}}>
+                      !
+                    </Text>
+                    <Text size={1} style={{color: '#8b949e'}}>
+                      {w}
+                    </Text>
+                  </Flex>
+                ))}
+              </Stack>
+            </Box>
           )}
-        </Flex>
-
-        {showReadinessDetails && (
-          <Box paddingTop={3}>
-            <Stack space={2}>
-              {readiness.blockers.map((b, idx) => (
-                <Flex key={`blocker-${idx}`} align="center" gap={2}>
-                  <Text size={1} style={{color: '#f85149', fontWeight: 600}}>
-                    ✕
-                  </Text>
-                  <Text size={1} style={{color: '#f85149'}}>
-                    {b}
-                  </Text>
-                </Flex>
-              ))}
-
-              {readiness.warnings.map((w, idx) => (
-                <Flex key={`warning-${idx}`} align="center" gap={2}>
-                  <Text size={1} style={{color: '#d29922', fontWeight: 600}}>
-                    !
-                  </Text>
-                  <Text size={1} style={{color: '#8b949e'}}>
-                    {w}
-                  </Text>
-                </Flex>
-              ))}
-            </Stack>
-          </Box>
-        )}
+        </Stack>
       </Card>
 
       {/* Default Form Rendering */}

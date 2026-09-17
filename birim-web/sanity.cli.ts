@@ -48,8 +48,9 @@ import path from 'path'
 
 export default defineCliConfig({
   api: {
-    projectId: 'wn3a082f',
-    dataset: 'production',
+    projectId:
+      process.env.SANITY_STUDIO_PROJECT_ID || process.env.VITE_SANITY_PROJECT_ID || 'wn3a082f',
+    dataset: process.env.SANITY_STUDIO_DATASET || process.env.VITE_SANITY_DATASET || 'production',
   },
   studioHost: 'birim',
   deployment: {
@@ -60,6 +61,26 @@ export default defineCliConfig({
       ...config,
       server: {
         ...config.server,
+        proxy: {
+          '/api': {
+            target: 'http://127.0.0.1:3002',
+            changeOrigin: true,
+            secure: false,
+            configure: (proxy: any) => {
+              proxy.on('error', (_err: any, _req: any, res: any) => {
+                if (res && 'writeHead' in res && !res.headersSent) {
+                  res.writeHead(503, {'Content-Type': 'application/json'})
+                  res.end(
+                    JSON.stringify({
+                      error:
+                        'Yerel API Sunucusu (Port 3002) çalışmıyor. Lütfen projenizi "npm run dev:full" komutu ile başlatın.',
+                    }),
+                  )
+                }
+              })
+            },
+          },
+        },
         hmr: {
           overlay: false,
         },
@@ -92,6 +113,24 @@ export default defineCliConfig({
     return BLOCK.some(function(d){return s.indexOf(d)!==-1}); 
   }
   
+  // 0. WebSocket Close Shield (Blink native error suppressor)
+  if (window.WebSocket && window.WebSocket.prototype && !window.WebSocket.prototype.__patchedClose) {
+    var _wsClose = window.WebSocket.prototype.close;
+    window.WebSocket.prototype.__patchedClose = true;
+    window.WebSocket.prototype.close = function(code, reason) {
+      var self = this;
+      if (self.readyState === 0 /* CONNECTING */) {
+        var onOpen = function() {
+          try { _wsClose.call(self, code, reason); } catch(e) {}
+        };
+        self.addEventListener('open', onOpen, {once: true});
+        self.addEventListener('error', function() {}, {once: true});
+        return;
+      }
+      return _wsClose.call(self, code, reason);
+    };
+  }
+
   // 1. Fetch
   var _fetch = window.fetch;
   window.fetch = function(input, init) {

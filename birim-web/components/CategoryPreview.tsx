@@ -17,7 +17,7 @@ export function CategoryPreview(props: PreviewProps) {
     e.stopPropagation()
     if (docId) {
       const cleanId = String(docId).replace('drafts.', '')
-      router.navigateUrl({path: `/structure/orderable-category;${cleanId},view=editor`})
+      router.navigateIntent('edit', {id: cleanId, type: 'category'})
     }
   }
 

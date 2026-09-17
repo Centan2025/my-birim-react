@@ -109,6 +109,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     case 'register':
       return handleRegister(req, res)
     case 'me':
+    case 'session':
       return handleMe(req, res)
     case 'logout':
       return handleLogout(req, res)
@@ -512,8 +513,10 @@ async function handleMe(req: VercelRequest, res: VercelResponse) {
       authenticated: true,
       user: {
         _id: profile.id,
+        id: profile.id,
         email: profile.email,
         name: displayName,
+        fullName: displayName,
         firstName: profile.first_name || '',
         lastName: profile.last_name || '',
         role: profile.role || 'consumer',

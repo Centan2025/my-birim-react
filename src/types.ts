@@ -80,6 +80,8 @@ export interface SiteSettings {
   enableAiRoomPlanner?: boolean
   /** Whether the Selection / Projects (Seçtiklerim / Projelerim) feature is enabled. */
   enableSelections?: boolean
+  /** Whether the "Shop" menu and links are visible. */
+  isShopVisible?: boolean
   /** Whether online commerce functionality is enabled globally. */
   commerce_enabled?: boolean
 }
@@ -313,6 +315,10 @@ export interface ProductVariant {
   sku?: string
   price?: number
   currency?: string
+  stockStatus?: 'in_stock' | 'out_of_stock' | 'preorder'
+  leadTimeWeeks?: number
+  dimensionKey?: string
+  materialKey?: string
   options: ProductVariantOption[]
   enabled: boolean
 }
@@ -438,6 +444,14 @@ export interface Product {
   groupedMaterials?: ProductMaterialsGroup[]
   /** Toggles material section visibility. */
   showMaterials?: boolean
+  /** Optional production lead time in weeks. */
+  leadTimeWeeks?: number
+  /** Selected sellable dimensions for shop (key-based references). */
+  selectedDimensions?: Array<{dimensionKey: string; enabled?: boolean; sortOrder?: number}>
+  /** Selected sellable materials/colors for shop (key-based references). */
+  selectedMaterials?: Array<{materialKey: string; enabled?: boolean; sortOrder?: number}>
+  /** Optional slug or slug object from Sanity. */
+  slug?: string | {current?: string}
   /** Content accessible only to logged-in users. */
   exclusiveContent: ExclusiveContent
   /** Sanity update timestamp. */

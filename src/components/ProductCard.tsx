@@ -8,12 +8,13 @@ import {analytics} from '../lib/analytics'
 import {useDesigners} from '../hooks/useDesigners'
 import {SelectionButton} from './seckim/SelectionButton'
 import {ShoppingBag} from 'lucide-react'
+import {isProductShopEligible, getShopProductUrl, getShopCtaLabel} from '../utils/shopBridge'
 
 export const ProductCard: React.FC<{
   product: Product
   priority?: boolean
 }> = ({product, priority = false}) => {
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
   const {settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
@@ -116,17 +117,26 @@ export const ProductCard: React.FC<{
             fitAuto={true}
           />
           <div className="absolute top-2.5 left-2.5 right-2.5 z-20 flex items-center justify-between pointer-events-none">
-            {product.buyable ? (
-              <div
-                className="pointer-events-auto flex items-center justify-center p-1.5 rounded-full bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs text-neutral-700 dark:text-neutral-200 border border-neutral-200/50 dark:border-neutral-700/50 shadow-xs transition-transform duration-300 group-hover:scale-105"
-                title={t('buyable') || 'Satın Alınabilir'}
-                aria-label={t('buyable') || 'Satın Alınabilir'}
-              >
-                <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.6} />
-              </div>
-            ) : (
-              <div />
-            )}
+            {(() => {
+              const isEligible = isProductShopEligible(product)
+              const shopUrl = isEligible ? getShopProductUrl(product) : null
+              if (!shopUrl) return <div />
+
+              return (
+                <a
+                  href={shopUrl}
+                  onClick={e => e.stopPropagation()}
+                  className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xs text-neutral-900 dark:text-neutral-100 border border-neutral-200/60 dark:border-neutral-700/60 shadow-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300"
+                  title={getShopCtaLabel(product, locale, 'card')}
+                  aria-label={getShopCtaLabel(product, locale, 'card')}
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" strokeWidth={1.6} />
+                  <span className="text-[10px] font-medium uppercase tracking-wider hidden sm:inline-block">
+                    {getShopCtaLabel(product, locale, 'card')}
+                  </span>
+                </a>
+              )
+            })()}
             <div className="pointer-events-auto">
               <SelectionButton product={product} />
             </div>
