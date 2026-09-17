@@ -1,5 +1,4 @@
 import React, {useState, useEffect, useMemo} from 'react'
-import {createClient} from '@supabase/supabase-js'
 
 export interface MemberProfile {
   id: string
@@ -59,15 +58,6 @@ export interface AuthUserDetails {
   user_metadata?: Record<string, unknown>
   app_metadata?: Record<string, unknown>
 }
-
-const SUPABASE_URL = 'https://rkmpfxervwqleibhbiqv.supabase.co'
-// Sanity Studio yöneticileri için doğrudan yetkili istemci
-const SUPABASE_ADMIN_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrbXBmeGVydndxbGVpYmhiaXF2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODc5MzU4NCwiZXhwIjoyMTA0MzY5NTg0fQ.4Bglk8zupMO9ooUDL0u4-9TpRZg7kMDM0MxwqALlVa8'
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ADMIN_KEY, {
-  auth: {persistSession: false},
-})
 
 export const SupabaseUsersStudioView: React.FC = () => {
   const [members, setMembers] = useState<MemberProfile[]>([])
@@ -130,47 +120,29 @@ export const SupabaseUsersStudioView: React.FC = () => {
     if (!selectedMember) return
     setActionLoading(selectedMember.id)
     try {
-      const profileUpdates: Record<string, unknown> = {
-        name: editFormData.name.trim() || null,
-        company: editFormData.company.trim() || null,
-        profession: editFormData.profession.trim() || null,
-        phone: editFormData.phone.trim() || null,
-        tax_id: editFormData.tax_id.trim() || null,
-        role: editFormData.role,
-        updated_at: new Date().toISOString(),
-      }
-
-      // Try updating profiles table with country
-      const {error: sbErr} = await supabase
-        .from('profiles')
-        .update({
-          ...profileUpdates,
+      const res = await fetch('/api/admin/members', {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({
+          id: selectedMember.id,
+          name: editFormData.name.trim() || null,
+          company: editFormData.company.trim() || null,
           country: editFormData.country.trim() || null,
-        })
-        .eq('id', selectedMember.id)
+          profession: editFormData.profession.trim() || null,
+          phone: editFormData.phone.trim() || null,
+          tax_id: editFormData.tax_id.trim() || null,
+          role: editFormData.role,
+        }),
+      })
 
-      if (sbErr && sbErr.message.includes('country')) {
-        await supabase.from('profiles').update(profileUpdates).eq('id', selectedMember.id)
-      } else if (sbErr) {
-        throw new Error(sbErr.message)
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || errData.message || `Güncelleme başarısız (${res.status})`)
       }
 
-      // Also persist country and other fields in Supabase Auth user_metadata
-      await supabase.auth.admin
-        .updateUserById(selectedMember.id, {
-          user_metadata: {
-            ...detailAuthUser?.user_metadata,
-            name: editFormData.name.trim(),
-            company: editFormData.company.trim(),
-            country: editFormData.country.trim(),
-            profession: editFormData.profession.trim(),
-            phone: editFormData.phone.trim(),
-            role: editFormData.role,
-          },
-        })
-        .catch(() => {})
-
-      const updatedProfile: MemberProfile = {
+      const json = await res.json()
+      const updatedProfile: MemberProfile = json.member || {
         ...selectedMember,
         name: editFormData.name.trim() || null,
         company: editFormData.company.trim() || null,
@@ -211,96 +183,34 @@ export const SupabaseUsersStudioView: React.FC = () => {
       return
     }
 
-    let isMounted = true
-    setDetailLoading(true)
-
-    const fetchAuthUser = async (): Promise<AuthUserDetails | null> => {
-      try {
-        const {data, error: authErr} = await supabase.auth.admin.getUserById(selectedMember.id)
-        if (authErr) return null
-        return (data?.user as unknown as AuthUserDetails) || null
-      } catch {
-        return null
-      }
-    }
-
-    const fetchFavorites = async (): Promise<UserFavorite[]> => {
-      try {
-        const {data, error: favErr} = await supabase
-          .from('favorites')
-          .select('*')
-          .eq('user_id', selectedMember.id)
-        if (favErr) return []
-        return (data as UserFavorite[]) || []
-      } catch {
-        return []
-      }
-    }
-
-    const fetchActivities = async (): Promise<UserActivityRecord[]> => {
-      try {
-        const {data, error: actErr} = await supabase
-          .from('user_activities')
-          .select('*')
-          .eq('user_id', selectedMember.id)
-          .order('created_at', {ascending: false})
-          .limit(200)
-        if (actErr) return []
-        return (data as UserActivityRecord[]) || []
-      } catch {
-        return []
-      }
-    }
-
-    Promise.all([fetchAuthUser(), fetchFavorites(), fetchActivities()]).then(
-      ([authUser, favs, acts]) => {
-        if (isMounted) {
-          setDetailAuthUser(authUser)
-          setDetailFavorites(favs)
-          setDetailActivities(acts)
-          setDetailLoading(false)
-        }
-      },
-    )
-
-    return () => {
-      isMounted = false
-    }
+    setDetailLoading(false)
   }, [selectedMember])
 
   const fetchMembers = async () => {
     setLoading(true)
     setError(null)
     try {
-      const {data, error: sbError} = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', {ascending: false})
+      const res = await fetch('/api/admin/members', {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+      })
 
-      if (sbError) {
-        throw new Error(sbError.message)
+      if (res.status === 401 || res.status === 403) {
+        throw new Error(
+          'Admin yetkisi gereklidir. Lütfen BİRİM Admin girişi yapın veya oturumunuzu yenileyin.',
+        )
       }
 
-      let profilesList = (data as MemberProfile[]) || []
-
-      // Auth user_metadata'sından ülke ve ek bilgileri takviye et
-      try {
-        const {data: authData} = await supabase.auth.admin.listUsers()
-        if (authData?.users) {
-          const authMap = new Map(authData.users.map((u) => [u.id, u]))
-          profilesList = profilesList.map((m) => {
-            const authUser = authMap.get(m.id)
-            const metaCountry = (authUser?.user_metadata?.country as string) || null
-            return {
-              ...m,
-              country: m.country || metaCountry || null,
-            }
-          })
-        }
-      } catch {
-        // Hata durumunda profiles listesi olduğu gibi kullanılır
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(
+          errData.error || errData.message || `Üye listesi yüklenemedi (${res.status})`,
+        )
       }
 
+      const json = await res.json()
+      const profilesList = (json.members as MemberProfile[]) || []
       setMembers(profilesList)
     } catch (err: unknown) {
       console.error('Fetch members error:', err)
@@ -318,17 +228,20 @@ export const SupabaseUsersStudioView: React.FC = () => {
     setActionLoading(id)
     setSuccessMessage(null)
     try {
-      const {error: sbError} = await supabase
-        .from('profiles')
-        .update({
+      const res = await fetch('/api/admin/members', {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({
+          id,
           architect_verification_status: newStatus,
           role: 'architect',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id)
+        }),
+      })
 
-      if (sbError) {
-        throw new Error(sbError.message)
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || errData.message || `İşlem başarısız (${res.status})`)
       }
 
       setMembers((prev) =>
@@ -361,8 +274,19 @@ export const SupabaseUsersStudioView: React.FC = () => {
     }
     setActionLoading(id)
     try {
-      await supabase.from('profiles').delete().eq('id', id)
-      await supabase.auth.admin.deleteUser(id).catch(() => {})
+      const res = await fetch('/api/admin/members', {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({id}),
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(
+          errData.error || errData.message || `Silme işlemi başarısız (${res.status})`,
+        )
+      }
 
       setMembers((prev) => prev.filter((m) => m.id !== id))
       setSuccessMessage(`"${email}" kullanıcısı başarıyla silindi.`)
@@ -382,19 +306,20 @@ export const SupabaseUsersStudioView: React.FC = () => {
     const newStatus = !currentStatus
     setActionLoading(id)
     try {
-      const {error: sbError} = await supabase
-        .from('profiles')
-        .update({is_verified: newStatus, updated_at: new Date().toISOString()})
-        .eq('id', id)
+      const res = await fetch('/api/admin/members', {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({
+          id,
+          is_verified: newStatus,
+        }),
+      })
 
-      if (sbError) throw new Error(sbError.message)
-
-      await supabase.auth.admin
-        .updateUserById(id, {
-          email_confirm: newStatus,
-          user_metadata: {email_verified: newStatus},
-        })
-        .catch(() => {})
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || errData.message || `İşlem başarısız (${res.status})`)
+      }
 
       setMembers((prev) => prev.map((m) => (m.id === id ? {...m, is_verified: newStatus} : m)))
       if (selectedMember?.id === id) {

@@ -113,24 +113,27 @@ export function EmailExportTool() {
 
   const fetchAllUsers = async (): Promise<User[]> => {
     try {
-      const {createClient: createSupabaseClient} = await import('@supabase/supabase-js')
-      const sbUrl = 'https://rkmpfxervwqleibhbiqv.supabase.co'
-      const sbKey =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrbXBmeGVydndxbGVpYmhiaXF2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODc5MzU4NCwiZXhwIjoyMTA0MzY5NTg0fQ.4Bglk8zupMO9ooUDL0u4-9TpRZg7kMDM0MxwqALlVa8'
-      const sb = createSupabaseClient(sbUrl, sbKey, {auth: {persistSession: false}})
-      const {data, error} = await sb
-        .from('profiles')
-        .select('*')
-        .order('created_at', {ascending: false})
+      const res = await fetch('/api/admin/members', {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+      })
 
-      if (!error && data && data.length > 0) {
-        return data.map((p) => ({
+      if (!res.ok) {
+        throw new Error(`Üyeler yüklenemedi (${res.status})`)
+      }
+
+      const json = await res.json()
+      const data = json.members || []
+
+      if (data && data.length > 0) {
+        return data.map((p: any) => ({
           _id: p.id,
           email: p.email,
           name: p.name || [p.first_name, p.last_name].filter(Boolean).join(' ') || '',
           company: p.company || '',
           profession: p.profession || '',
-          country: '',
+          country: p.country || '',
           userType:
             p.role === 'architect'
               ? 'professional_subscriber'
@@ -143,7 +146,7 @@ export function EmailExportTool() {
         }))
       }
     } catch (err) {
-      console.error('Supabase fetch error:', err)
+      console.error('Members fetch error:', err)
       return []
     }
 

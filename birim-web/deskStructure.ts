@@ -7,54 +7,114 @@ import {SupabaseUsersStudioView} from './components/SupabaseUsersStudioView'
 
 export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
   return S.list()
-    .title('İçerik')
+    .title('BİRİM Yönetim')
     .items([
+      // 1. Ürün Yönetimi & Commerce Hub
       S.listItem()
-        .title('Site Analitiği')
-        .icon(() => '📊')
-        .child(S.component(AnalyticsStudioView).title('Google Analytics Raporu')),
-      S.listItem()
-        .title('Üyeler & Mimarlar (Supabase)')
-        .icon(() => '👥')
-        .child(S.component(SupabaseUsersStudioView).title('Üye & Mimar Yönetimi')),
-      S.divider(),
-      S.listItem()
-        .title('Site Ayarları')
+        .title('Ürünler & Modeller')
+        .icon(() => '🪑')
         .child(
-          S.document()
-            .schemaType('siteSettings')
-            .documentId('siteSettings')
-            .views([
-              S.view.form().title('Düzenle'),
-              S.view
-                .component(PreviewView)
-                .title('Önizleme')
-                .icon(() => '👁️'),
+          S.list()
+            .title('Ürün Yönetimi')
+            .items([
+              S.listItem()
+                .title('Tüm Ürünler')
+                .icon(() => '📦')
+                .child(S.documentTypeList('product').title('Tüm Ürünler')),
+              S.listItem()
+                .title('Satışa Hazır (Commerce Ready)')
+                .icon(() => '✅')
+                .child(
+                  S.documentTypeList('product')
+                    .title('Satışa Hazır Ürünler')
+                    .filter(
+                      `_type == "product" &&
+                       isPublished == true &&
+                       sale_enabled == true &&
+                       buyable == true &&
+                       defined(category) &&
+                       (
+                         (sales_mode == "DIRECT" && defined(price) && price > 0 && defined(currency) && defined(sku) && defined(stockStatus)) ||
+                         (sales_mode == "CONFIGURABLE" && count(variants[enabled == true && defined(price) && price > 0 && defined(sku)]) > 0)
+                       )`,
+                    ),
+                ),
+              S.listItem()
+                .title('İnceleme Gerektirenler (Needs Attention)')
+                .icon(() => '⚠️')
+                .child(
+                  S.documentTypeList('product')
+                    .title('İnceleme Gerektiren Satış Ürünleri')
+                    .filter(
+                      `_type == "product" &&
+                       sale_enabled == true &&
+                       (
+                         !defined(category) ||
+                         buyable != true ||
+                         !defined(sales_mode) ||
+                         sales_mode in ["NONE", "QUOTE"] ||
+                         !defined(stockStatus) ||
+                         (sales_mode == "DIRECT" && (!defined(price) || price <= 0 || !defined(currency) || !defined(sku))) ||
+                         (sales_mode == "CONFIGURABLE" && (count(variants[enabled == true]) == 0 || count(variants[enabled == true && (!defined(price) || price <= 0 || !defined(sku))]) > 0)) ||
+                         count(media) == 0
+                       )`,
+                    ),
+                ),
+              S.divider(),
+              S.listItem()
+                .title('Stok Durumları (Inventory Health)')
+                .icon(() => '🏷️')
+                .child(
+                  S.list()
+                    .title('Stok Durumları')
+                    .items([
+                      S.listItem()
+                        .title('Stokta Olanlar (In Stock)')
+                        .icon(() => '🟢')
+                        .child(
+                          S.documentTypeList('product')
+                            .title('Stokta Olan Ürünler')
+                            .filter('_type == "product" && stockStatus == "in_stock"'),
+                        ),
+                      S.listItem()
+                        .title('Ön Sipariş (Preorder)')
+                        .icon(() => '🟡')
+                        .child(
+                          S.documentTypeList('product')
+                            .title('Ön Siparişteki Ürünler')
+                            .filter('_type == "product" && stockStatus == "preorder"'),
+                        ),
+                      S.listItem()
+                        .title('Stok Dışı (Out of Stock)')
+                        .icon(() => '🔴')
+                        .child(
+                          S.documentTypeList('product')
+                            .title('Stok Dışı Ürünler')
+                            .filter('_type == "product" && stockStatus == "out_of_stock"'),
+                        ),
+                    ]),
+                ),
+              S.listItem()
+                .title('Taslak & Yayında Olmayanlar')
+                .icon(() => '📝')
+                .child(
+                  S.documentTypeList('product')
+                    .title('Taslak & Yayında Olmayan Ürünler')
+                    .filter(
+                      '_type == "product" && (_id in path("drafts.**") || isPublished == false)',
+                    ),
+                ),
             ]),
         ),
-      S.listItem().title('UI Çevirileri').child(S.document().schemaType('uiTranslations')),
-      S.listItem()
-        .title('Ana Sayfa')
-        .child(
-          S.document()
-            .schemaType('homePage')
-            .documentId('homePage')
-            .views([
-              S.view.form().title('Düzenle'),
-              S.view
-                .component(PreviewView)
-                .title('Önizleme')
-                .icon(() => '👁️'),
-            ]),
-        ),
+
+      // 2. Katalog & Mimari Yapı
       orderableDocumentListDeskItem({
         type: 'category',
-        title: 'Kategoriler & Modeller',
+        title: 'Kategoriler & Sıralama',
         S,
         context,
-        icon: () => '🪑',
+        icon: () => '📁',
       }),
-      S.documentTypeListItem('product').title('Tüm Modeller'),
       orderableDocumentListDeskItem({
         type: 'designer',
         title: 'Tasarımcılar',
@@ -69,57 +129,125 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
         context,
         icon: () => '🏗️',
       }),
-      S.documentTypeListItem('newsItem').title('Haberler'),
+      S.documentTypeListItem('materialGroup')
+        .title('Malzeme Grupları')
+        .icon(() => '🧱'),
+      S.documentTypeListItem('newsItem')
+        .title('Haberler & Basın')
+        .icon(() => '📰'),
+
+      S.divider(),
+
+      // 3. Editoryal Sayfalar (Content)
       S.listItem()
-        .title('Hakkımızda')
-        .child(
-          S.document()
-            .schemaType('aboutPageV2')
-            .documentId('aboutPageV2')
-            .views([
-              S.view.form().title('Düzenle'),
-              S.view
-                .component(PreviewView)
-                .title('Önizleme')
-                .icon(() => '👁️'),
-            ]),
-        ),
-      S.listItem()
-        .title('Üretim')
-        .child(
-          S.document()
-            .schemaType('factoryPage')
-            .documentId('factoryPage')
-            .views([
-              S.view.form().title('Düzenle'),
-              S.view
-                .component(PreviewView)
-                .title('Önizleme')
-                .icon(() => '👁️'),
-            ]),
-        ),
-      S.listItem()
-        .title('İletişim')
-        .child(
-          S.document()
-            .schemaType('contactPage')
-            .documentId('contact-page')
-            .views([
-              S.view.form().title('Düzenle'),
-              S.view
-                .component(PreviewView)
-                .title('Önizleme')
-                .icon(() => '👁️'),
-            ]),
-        ),
-      S.listItem()
-        .title('Altbilgi')
+        .title('Sayfa İçerikleri')
+        .icon(() => '📄')
         .child(
           S.list()
-            .title('Altbilgi')
+            .title('Sayfa İçerikleri')
             .items([
               S.listItem()
-                .title('Genel Ayarlar')
+                .title('Ana Sayfa')
+                .icon(() => '🏠')
+                .child(
+                  S.document()
+                    .schemaType('homePage')
+                    .documentId('homePage')
+                    .views([
+                      S.view.form().title('Düzenle'),
+                      S.view
+                        .component(PreviewView)
+                        .title('Önizleme')
+                        .icon(() => '👁️'),
+                    ]),
+                ),
+              S.listItem()
+                .title('Hakkımızda')
+                .icon(() => '🏢')
+                .child(
+                  S.document()
+                    .schemaType('aboutPageV2')
+                    .documentId('aboutPageV2')
+                    .views([
+                      S.view.form().title('Düzenle'),
+                      S.view
+                        .component(PreviewView)
+                        .title('Önizleme')
+                        .icon(() => '👁️'),
+                    ]),
+                ),
+              S.listItem()
+                .title('Üretim / Fabrika')
+                .icon(() => '🏭')
+                .child(
+                  S.document()
+                    .schemaType('factoryPage')
+                    .documentId('factoryPage')
+                    .views([
+                      S.view.form().title('Düzenle'),
+                      S.view
+                        .component(PreviewView)
+                        .title('Önizleme')
+                        .icon(() => '👁️'),
+                    ]),
+                ),
+              S.listItem()
+                .title('İletişim')
+                .icon(() => '✉️')
+                .child(
+                  S.document()
+                    .schemaType('contactPage')
+                    .documentId('contact-page')
+                    .views([
+                      S.view.form().title('Düzenle'),
+                      S.view
+                        .component(PreviewView)
+                        .title('Önizleme')
+                        .icon(() => '👁️'),
+                    ]),
+                ),
+            ]),
+        ),
+
+      // 4. Kullanıcılar & Raporlar
+      S.listItem()
+        .title('Site Analitiği')
+        .icon(() => '📊')
+        .child(S.component(AnalyticsStudioView).title('Google Analytics Raporu')),
+      S.listItem()
+        .title('Üyeler & Mimarlar')
+        .icon(() => '👥')
+        .child(S.component(SupabaseUsersStudioView).title('Üye & Mimar Yönetimi')),
+
+      S.divider(),
+
+      // 5. Site Ayarları & Yasal
+      S.listItem()
+        .title('Site Ayarları & Yasal')
+        .icon(() => '⚙️')
+        .child(
+          S.list()
+            .title('Site Ayarları & Yasal')
+            .items([
+              S.listItem()
+                .title('Genel Site Ayarları')
+                .child(
+                  S.document()
+                    .schemaType('siteSettings')
+                    .documentId('siteSettings')
+                    .views([
+                      S.view.form().title('Düzenle'),
+                      S.view
+                        .component(PreviewView)
+                        .title('Önizleme')
+                        .icon(() => '👁️'),
+                    ]),
+                ),
+              S.listItem()
+                .title('UI Çevirileri (Sözlük)')
+                .child(S.document().schemaType('translations')),
+              S.listItem()
+                .title('Altbilgi (Footer)')
                 .child(
                   S.document()
                     .schemaType('footer')
@@ -132,6 +260,7 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
                         .icon(() => '👁️'),
                     ]),
                 ),
+              S.divider(),
               S.listItem()
                 .title('Çerez Politikası')
                 .child(
@@ -148,8 +277,15 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
               S.listItem()
                 .title('KVKK Aydınlatma Metni')
                 .child(S.document().schemaType('kvkkPolicy').documentId('kvkkAydinlatmaMetni')),
+              S.listItem()
+                .title('Mesafeli Satış Sözleşmesi')
+                .child(
+                  S.documentTypeList('distanceSalesAgreement').title('Mesafeli Satış Sözleşmesi'),
+                ),
+              S.listItem()
+                .title('Ön Bilgilendirme Formu')
+                .child(S.documentTypeList('preliminaryInfoForm').title('Ön Bilgilendirme Formu')),
             ]),
         ),
-      S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),
     ])
 }

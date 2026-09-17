@@ -43,6 +43,12 @@ vi.mock('../../lib/server/supabaseAdmin.js', () => ({
               }),
             }),
           }),
+          delete: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({
+              data: null,
+              error: null,
+            }),
+          }),
         }
       }
       return {}
@@ -50,6 +56,8 @@ vi.mock('../../lib/server/supabaseAdmin.js', () => ({
   })),
 }))
 
+import fs from 'fs'
+import path from 'path'
 import membersHandler from '../../api/admin/[...slug]'
 
 function createMockReqRes(overrides?: {
@@ -201,5 +209,61 @@ describe('api/admin/members', () => {
     expect(res.statusCode).toBe(400)
     const body = res.body as AdminMembersResponse
     expect(body.error).toContain("ID'si gereklidir")
+  })
+
+  it('DELETE /api/admin/members geçerli ID ile üye silmeli (200)', async () => {
+    const {req, res} = createMockReqRes({
+      method: 'DELETE',
+      headers: {
+        'x-admin-secret': TEST_ADMIN_SECRET,
+      },
+      body: {
+        id: 'prof-1',
+      },
+    })
+
+    await membersHandler(req, res)
+
+    expect(res.statusCode).toBe(200)
+    const body = res.body as Record<string, unknown>
+    expect(body['success']).toBe(true)
+    expect(body['message']).toContain('silindi')
+  })
+
+  it('DELETE /api/admin/members ID verilmediğinde 400 dönmeli', async () => {
+    const {req, res} = createMockReqRes({
+      method: 'DELETE',
+      headers: {
+        'x-admin-secret': TEST_ADMIN_SECRET,
+      },
+      body: {},
+    })
+
+    await membersHandler(req, res)
+
+    expect(res.statusCode).toBe(400)
+    const body = res.body as Record<string, unknown>
+    expect(body['error']).toContain("ID'si gereklidir")
+  })
+
+  it('Sanity Studio client bileşenlerinde hardcoded service role anahtarı bulunmamalı', () => {
+    const viewPath = path.resolve(
+      __dirname,
+      '../../birim-web/components/SupabaseUsersStudioView.tsx'
+    )
+    const exportPath = path.resolve(
+      __dirname,
+      '../../birim-web/tools/emailExport/EmailExportTool.tsx'
+    )
+
+    const viewContent = fs.readFileSync(viewPath, 'utf8')
+    const exportContent = fs.readFileSync(exportPath, 'utf8')
+
+    expect(viewContent).not.toContain('SUPABASE_ADMIN_KEY')
+    expect(viewContent).not.toContain('4Bglk8zupMO9ooUDL0u4-9TpRZg7kMDM0MxwqALlVa8')
+    expect(viewContent).not.toContain('createClient(')
+
+    expect(exportContent).not.toContain('4Bglk8zupMO9ooUDL0u4-9TpRZg7kMDM0MxwqALlVa8')
+    expect(exportContent).not.toContain('createClient(')
   })
 })

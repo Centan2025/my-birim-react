@@ -10,6 +10,7 @@ import {
 } from '../../lib/commerce/admin-order-service.js'
 import {cancelCommerceOrder} from '../../lib/commerce/order-lifecycle.js'
 import {createCommerceRefund} from '../../lib/commerce/refund-service.js'
+import {getAdminCommerceMetrics} from '../../lib/commerce/admin-metrics-service.js'
 import {CommerceValidationError} from '../../lib/commerce/types.js'
 
 function isBreakGlassAuthorized(adminSecretHeader?: string | string[]): boolean {
@@ -26,7 +27,7 @@ function isBreakGlassAuthorized(adminSecretHeader?: string | string[]): boolean 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (
     handleCors(req, res, {
-      allowMethods: 'GET, POST, PATCH, OPTIONS',
+      allowMethods: 'GET, POST, PATCH, DELETE, OPTIONS',
       allowHeaders: 'Content-Type, Authorization, x-admin-secret',
       allowCredentials: true,
     })
@@ -50,6 +51,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     (path === '' && (req.url?.includes('members') || req.body?.architect_verification_status))
   ) {
     return handleAdminMembers(req, res)
+  }
+
+  if (
+    path === 'commerce/metrics' ||
+    path === 'metrics' ||
+    (segments.length >= 2 && segments[0] === 'commerce' && segments[1] === 'metrics')
+  ) {
+    return handleAdminCommerceMetrics(req, res)
   }
 
   if (
@@ -131,7 +140,18 @@ async function handleAdminMembers(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'POST' || req.method === 'PATCH') {
     try {
-      const {id, architect_verification_status, role, is_verified} = req.body || {}
+      const {
+        id,
+        architect_verification_status,
+        role,
+        is_verified,
+        name,
+        company,
+        country,
+        profession,
+        phone,
+        tax_id,
+      } = req.body || {}
 
       if (!id || typeof id !== 'string') {
         return res.status(400).json({error: "Kullanıcı ID'si gereklidir."})
@@ -141,14 +161,32 @@ async function handleAdminMembers(req: VercelRequest, res: VercelResponse) {
         updated_at: new Date().toISOString(),
       }
 
-      if (architect_verification_status) {
+      if (architect_verification_status !== undefined) {
         updates['architect_verification_status'] = architect_verification_status
       }
-      if (role) {
+      if (role !== undefined) {
         updates['role'] = role
       }
       if (typeof is_verified === 'boolean') {
         updates['is_verified'] = is_verified
+      }
+      if (name !== undefined) {
+        updates['name'] = name ? String(name).trim() : null
+      }
+      if (company !== undefined) {
+        updates['company'] = company ? String(company).trim() : null
+      }
+      if (country !== undefined) {
+        updates['country'] = country ? String(country).trim() : null
+      }
+      if (profession !== undefined) {
+        updates['profession'] = profession ? String(profession).trim() : null
+      }
+      if (phone !== undefined) {
+        updates['phone'] = phone ? String(phone).trim() : null
+      }
+      if (tax_id !== undefined) {
+        updates['tax_id'] = tax_id ? String(tax_id).trim() : null
       }
 
       const {data: updated, error} = await supabaseAdmin
@@ -174,11 +212,117 @@ async function handleAdminMembers(req: VercelRequest, res: VercelResponse) {
     }
   }
 
+  if (req.method === 'DELETE') {
+    try {
+      const id = String(req.query?.['id'] || req.body?.id || '').trim()
+      if (!id) {
+        return res.status(400).json({error: "Kullanıcı ID'si gereklidir."})
+      }
+
+      const {error} = await supabaseAdmin.from('profiles').delete().eq('id', id)
+
+      if (error) {
+        console.error('[Admin Members] Delete error:', error)
+        return res.status(500).json({error: error.message})
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Üye kaydı başarıyla silindi.',
+      })
+    } catch (err: unknown) {
+      console.error('[Admin Members] Delete Error:', err)
+      return res.status(500).json({error: 'Üye silinirken bir hata oluştu.'})
+    }
+  }
+
   return res.status(405).json({error: 'Method Not Allowed'})
 }
 
 // -------------------------------------------------------------
-// 2. Admin Commerce Orders Handler
+// 2. Admin Commerce Metrics Handler
+// -------------------------------------------------------------
+async function handleAdminCommerceMetrics(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET, OPTIONS')
+    return res.status(405).json({
+      success: false,
+      code: 'METHOD_NOT_ALLOWED',
+      message: 'Method Not Allowed. Yalnızca GET istekleri desteklenir.',
+    })
+  }
+
+  const ip = getClientIp(req)
+  if (await isRateLimitedAsync(`admin_commerce_metrics_${ip}`, {limit: 60, windowMs: 60000})) {
+    return res.status(429).json({
+      success: false,
+      code: 'RATE_LIMITED',
+      message: 'Çok fazla istek gönderildi. Lütfen biraz bekleyin.',
+    })
+  }
+
+  let isAuthorized = false
+
+  const token = getAuthTokenFromReq(req)
+  if (token) {
+    const payload = verifyToken(token)
+    if (payload && payload.role === 'admin') {
+      isAuthorized = true
+    }
+  }
+
+  if (!isAuthorized) {
+    const adminSecretHeader = req.headers['x-admin-secret']
+    if (isBreakGlassAuthorized(adminSecretHeader)) {
+      isAuthorized = true
+    }
+  }
+
+  if (!isAuthorized) {
+    return res.status(401).json({
+      success: false,
+      code: 'UNAUTHORIZED',
+      message: 'Yetkisiz erişim. Admin yetkisi gereklidir.',
+    })
+  }
+
+  try {
+    const range = typeof req.query?.['range'] === 'string' ? req.query['range'] : undefined
+    const from = typeof req.query?.['from'] === 'string' ? req.query['from'] : undefined
+    const to = typeof req.query?.['to'] === 'string' ? req.query['to'] : undefined
+
+    const result = await getAdminCommerceMetrics({
+      range,
+      from,
+      to,
+    })
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+    })
+  } catch (error: unknown) {
+    if (error instanceof CommerceValidationError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        code: error.code,
+        message: error.message,
+      })
+    }
+
+    const sanitizedErrorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error('[Admin Commerce Metrics API] Error:', sanitizedErrorMessage)
+
+    return res.status(500).json({
+      success: false,
+      code: 'INTERNAL_ERROR',
+      message: 'Ticari metrikler hesaplanırken bir hata oluştu.',
+    })
+  }
+}
+
+// -------------------------------------------------------------
+// 3. Admin Commerce Orders Handler
 // -------------------------------------------------------------
 async function handleAdminCommerceOrders(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET' && req.method !== 'POST') {

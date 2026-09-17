@@ -189,37 +189,92 @@ export default defineType({
       },
       description:
         'Ürünün satış davranışı: NONE (Satışa kapalı), DIRECT (Tekil doğrudan satış), CONFIGURABLE (Varyantlı), QUOTE (Teklif talebi).',
+      validation: (Rule) =>
+        Rule.custom((salesMode, context) => {
+          const doc = context.document as Record<string, any> | undefined
+          if (doc?.sale_enabled && (!salesMode || salesMode === 'NONE')) {
+            return 'Satışa açık (sale_enabled=true) ürünlerde Satış Modu NONE olamaz.'
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'price',
       title: 'Fiyat',
       type: 'number',
       fieldset: 'commerce',
+      validation: (Rule) =>
+        Rule.custom((price, context) => {
+          const doc = context.document as Record<string, any> | undefined
+          if (doc?.sale_enabled && doc?.sales_mode === 'DIRECT') {
+            if (price === undefined || price === null || price <= 0) {
+              return 'Doğrudan satış (DIRECT) modu için geçerli bir ürün fiyatı gereklidir.'
+            }
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'currency',
       title: 'Para Birimi',
       type: 'string',
       fieldset: 'commerce',
+      initialValue: 'TRY',
+      options: {
+        list: [
+          {title: 'TRY (₺)', value: 'TRY'},
+          {title: 'EUR (€)', value: 'EUR'},
+          {title: 'USD ($)', value: 'USD'},
+        ],
+      },
+      validation: (Rule) =>
+        Rule.custom((currency, context) => {
+          const doc = context.document as Record<string, any> | undefined
+          if (doc?.sale_enabled && doc?.sales_mode === 'DIRECT') {
+            if (!currency) {
+              return 'Doğrudan satış (DIRECT) modu için para birimi seçilmelidir.'
+            }
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'sku',
       title: 'Stok Kodu (SKU)',
       type: 'string',
       fieldset: 'commerce',
+      validation: (Rule) =>
+        Rule.custom((sku, context) => {
+          const doc = context.document as Record<string, any> | undefined
+          if (doc?.sale_enabled && doc?.sales_mode === 'DIRECT') {
+            if (!sku || !String(sku).trim()) {
+              return 'Doğrudan satış (DIRECT) modu için Stok Kodu (SKU) zorunludur.'
+            }
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'stockStatus',
       title: 'Stok Durumu',
       type: 'string',
       fieldset: 'commerce',
+      initialValue: 'in_stock',
       options: {
         list: [
-          {title: 'Stokta', value: 'in_stock'},
-          {title: 'Stok Dışı', value: 'out_of_stock'},
-          {title: 'Preorder', value: 'preorder'},
+          {title: 'Stokta (in_stock)', value: 'in_stock'},
+          {title: 'Stok Dışı (out_of_stock)', value: 'out_of_stock'},
+          {title: 'Ön Sipariş (preorder)', value: 'preorder'},
         ],
       },
+      validation: (Rule) =>
+        Rule.custom((stockStatus, context) => {
+          const doc = context.document as Record<string, any> | undefined
+          if (doc?.sale_enabled && !stockStatus) {
+            return 'Satışa açık ürünler için stok durumu seçilmelidir.'
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'variants',
@@ -229,6 +284,20 @@ export default defineType({
       of: [{type: 'productVariant'}],
       description:
         'Ürünün farklı ölçü, renk veya malzeme kombinasyonlarına özel varyant seçenekleri.',
+      validation: (Rule) =>
+        Rule.custom((variants: any, context) => {
+          const doc = context.document as Record<string, any> | undefined
+          if (doc?.sale_enabled && doc?.sales_mode === 'CONFIGURABLE') {
+            if (!Array.isArray(variants) || variants.length === 0) {
+              return 'CONFIGURABLE satış modu için en az 1 varyant eklenmelidir.'
+            }
+            const hasEnabled = variants.some((v) => v?.enabled === true)
+            if (!hasEnabled) {
+              return 'CONFIGURABLE satış modu için en az 1 aktif (enabled) varyant bulunmalıdır.'
+            }
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'dimensionImages',
@@ -315,9 +384,28 @@ export default defineType({
     select: {
       name: 'name',
       media: 'media',
+      categoryName: 'category.name.tr',
+      sales_mode: 'sales_mode',
+      price: 'price',
+      currency: 'currency',
+      sku: 'sku',
+      stockStatus: 'stockStatus',
+      variants: 'variants',
+      sale_enabled: 'sale_enabled',
     },
     prepare(selection: Record<string, unknown> = {}) {
-      const {name, media} = selection as {
+      const {
+        name,
+        media,
+        categoryName,
+        sales_mode,
+        price,
+        currency,
+        sku,
+        stockStatus,
+        variants,
+        sale_enabled,
+      } = selection as {
         name?: {tr?: string; en?: string}
         media?: Array<{
           type?: string
@@ -332,6 +420,14 @@ export default defineType({
           thumbnailR2?: {url?: string; isMirrored?: boolean}
           url?: string
         }>
+        categoryName?: string
+        sales_mode?: string
+        price?: number
+        currency?: string
+        sku?: string
+        stockStatus?: string
+        variants?: Array<{enabled?: boolean}>
+        sale_enabled?: boolean
       }
       const coverItem = media?.find((m) => m.isCover) || media?.[0]
       const r2Url =
@@ -351,8 +447,53 @@ export default defineType({
         !!coverItem?.thumbnailR2?.isMirrored ||
         !!coverItem?.isMirrored
 
+      const parts: string[] = []
+      if (categoryName) parts.push(categoryName)
+
+      if (sales_mode === 'DIRECT') {
+        parts.push('DIRECT')
+        if (typeof price === 'number' && price > 0) {
+          const curSym =
+            currency === 'TRY'
+              ? '₺'
+              : currency === 'EUR'
+                ? '€'
+                : currency === 'USD'
+                  ? '$'
+                  : currency || ''
+          parts.push(`${curSym}${price.toLocaleString('tr-TR')}`)
+        }
+      } else if (sales_mode === 'CONFIGURABLE') {
+        const variantCount = Array.isArray(variants) ? variants.length : 0
+        const activeCount = Array.isArray(variants) ? variants.filter((v) => v?.enabled).length : 0
+        parts.push(
+          activeCount > 0
+            ? `CONFIGURABLE (${activeCount} Aktif / ${variantCount} Varyant)`
+            : `CONFIGURABLE (${variantCount} Varyant)`,
+        )
+      } else if (sales_mode === 'QUOTE') {
+        parts.push('QUOTE (Teklif)')
+      }
+
+      if (sku) {
+        parts.push(`SKU: ${sku}`)
+      }
+
+      if (stockStatus) {
+        const stockLabel =
+          stockStatus === 'in_stock'
+            ? 'Stokta'
+            : stockStatus === 'out_of_stock'
+              ? 'Stok Dışı'
+              : stockStatus === 'preorder'
+                ? 'Ön Sipariş'
+                : stockStatus
+        parts.push(stockLabel)
+      }
+
       return {
         title: name?.tr || name?.en || 'İsimsiz Ürün',
+        subtitle: parts.length > 0 ? parts.join(' · ') : undefined,
         media: renderPreviewMedia(finalUrl, coverItem?.type, isMirrored),
       }
     },

@@ -51,6 +51,7 @@ import {mediaImportTool} from './tools/mediaImport'
 import {mediaExportTool} from './tools/mediaExport'
 import {emailExportTool} from './tools/emailExport'
 import {supabaseUsersTool} from './tools/supabaseUsers'
+import {controlCenterTool} from './tools/controlCenter'
 import {colorInput} from '@sanity/color-input'
 import {CategoryProductsView} from './components/CategoryProductsView'
 import {PreviewView} from './components/PreviewView'
@@ -116,6 +117,7 @@ export default defineConfig({
         return S.document().views([S.view.form()])
       },
     }),
+    controlCenterTool(),
     visionTool(),
     excelImportTool(),
     mediaImportTool(),
