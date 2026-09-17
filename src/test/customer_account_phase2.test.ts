@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {describe, it, expect, vi, beforeEach} from 'vitest'
 import {
   getProfileForUser,
@@ -6,19 +7,14 @@ import {
   createAddressForUser,
   updateAddressForUser,
   deleteAddressForUser,
-  setDefaultAddressForUser,
-  listBillingProfilesForUser,
   createBillingProfileForUser,
   updateBillingProfileForUser,
-  deleteBillingProfileForUser,
-  setDefaultBillingProfileForUser,
   listOrdersForUser,
   getOrderForUser,
   AccountError,
 } from '../../lib/account/account-service'
 import accountHandler from '../../api/account/[...slug]'
 import {createToken} from '../../lib/server/token'
-import type {SupabaseClient} from '@supabase/supabase-js'
 
 // Mock Supabase Store
 function createMockSupabaseClient(initialState: {
@@ -72,21 +68,21 @@ function createMockSupabaseClient(initialState: {
 
       let filterUserId: string | null = null
       let filterId: string | null = null
-      let filterDefaultShipping: boolean | null = null
-      let filterDefaultBilling: boolean | null = null
-      let notFilterId: string | null = null
+      let _filterDefaultShipping: boolean | null = null
+      let _filterDefaultBilling: boolean | null = null
+      let _notFilterId: string | null = null
 
       const builder: any = {
         select: vi.fn(() => builder),
         eq: vi.fn((field: string, val: any) => {
           if (field === 'id') filterId = val
           if (field === 'user_id') filterUserId = val
-          if (field === 'is_default_shipping') filterDefaultShipping = val
-          if (field === 'is_default') filterDefaultBilling = val
+          if (field === 'is_default_shipping') _filterDefaultShipping = val
+          if (field === 'is_default') _filterDefaultBilling = val
           return builder
         }),
         neq: vi.fn((field: string, val: any) => {
-          if (field === 'id') notFilterId = val
+          if (field === 'id') _notFilterId = val
           return builder
         }),
         order: vi.fn(() => builder),

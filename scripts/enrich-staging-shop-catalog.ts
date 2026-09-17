@@ -232,11 +232,11 @@ export async function enrichStagingCatalog(config: EnrichmentConfig = DEFAULT_EN
     )
   }
 
-  const rawDocs: Array<Record<string, any>> = JSON.parse(fs.readFileSync(catalogPath, 'utf-8'))
+  const rawDocs: Array<Record<string, unknown>> = JSON.parse(fs.readFileSync(catalogPath, 'utf-8'))
   console.log(`Loaded ${rawDocs.length} documents from ${catalogPath}`)
 
   const categories = rawDocs.filter(d => d._type === 'category')
-  const designers = rawDocs.filter(d => d._type === 'designer')
+  const _designers = rawDocs.filter(d => d._type === 'designer')
   const materialGroups = rawDocs.filter(d => d._type === 'materialGroup')
   const products = rawDocs.filter(d => d._type === 'product')
 
@@ -245,14 +245,14 @@ export async function enrichStagingCatalog(config: EnrichmentConfig = DEFAULT_EN
   const fabricGroup =
     materialGroups.find(g => (g.title?.tr || g.title || '').toLowerCase().includes('kumaş')) ||
     materialGroups[0]
-  const leatherGroup =
+  const _leatherGroup =
     materialGroups.find(g => (g.title?.tr || g.title || '').toLowerCase().includes('deri')) ||
     materialGroups[1]
   const woodGroup =
     materialGroups.find(g => (g.title?.tr || g.title || '').toLowerCase().includes('ahşap')) ||
     materialGroups[2]
 
-  const enrichedProducts: Array<Record<string, any>> = []
+  const enrichedProducts: Array<Record<string, unknown>> = []
   const categoryStats: Array<{
     category: string
     slug: string
@@ -300,7 +300,13 @@ export async function enrichStagingCatalog(config: EnrichmentConfig = DEFAULT_EN
       configurableCount: 0,
       quoteCount: 0,
       noneCount: 0,
-      products: [] as any[],
+      products: [] as Array<{
+        name: string
+        slug: string
+        mode: string
+        variantsCount: number
+        priceRange: string
+      }>,
     }
 
     selected.forEach((p, idx) => {
@@ -442,7 +448,7 @@ export async function enrichStagingCatalog(config: EnrichmentConfig = DEFAULT_EN
         }
 
         // 5. Generate Combinatorial Variant Matrix
-        const variants: Array<Record<string, any>> = []
+        const variants: Array<Record<string, unknown>> = []
         let vIdx = 1
         for (const d of dimDefs) {
           for (const m of matDefs) {

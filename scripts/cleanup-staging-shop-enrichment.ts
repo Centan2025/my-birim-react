@@ -25,7 +25,7 @@ export async function cleanupStagingEnrichment(targetDataset: string = 'staging'
     throw new Error(`Real catalog staging file not found at ${catalogPath}`)
   }
 
-  const rawDocs: Array<Record<string, any>> = JSON.parse(fs.readFileSync(catalogPath, 'utf-8'))
+  const rawDocs: Array<Record<string, unknown>> = JSON.parse(fs.readFileSync(catalogPath, 'utf-8'))
   console.log(`Restoring ${rawDocs.length} pristine documents to staging mirror.`)
 
   const outDir = path.resolve(process.cwd(), 'dist/staging-fixtures')

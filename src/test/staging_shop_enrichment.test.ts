@@ -9,13 +9,23 @@ import {createClient} from '@sanity/client'
 describe('BİRİM Shop Staging — Category-Wide Enrichment Safety & Data Integrity', () => {
   describe('1. Safety Guards & Dataset Validation', () => {
     it('rejects "production" across case variations', () => {
-      ;['production', 'Production', 'PRODUCTION', ' production '].forEach(target => {
+      const targets = ['production', 'Production', 'PRODUCTION', ' production ']
+      targets.forEach(target => {
         expect(() => assertSafeStagingDataset(target)).toThrowError(/CRITICAL SAFETY VIOLATION/)
       })
     })
 
     it('rejects empty, undefined, null, or non-staging inputs', () => {
-      ;['', '   ', undefined as any, null as any, 'dev', 'test', 'preview'].forEach(target => {
+      const invalidTargets = [
+        '',
+        '   ',
+        undefined as unknown as string,
+        null as unknown as string,
+        'dev',
+        'test',
+        'preview',
+      ]
+      invalidTargets.forEach(target => {
         expect(() => assertSafeStagingDataset(target)).toThrow()
       })
     })
@@ -79,7 +89,7 @@ describe('BİRİM Shop Staging — Category-Wide Enrichment Safety & Data Integr
         designer
       }`)
 
-      const idSet = new Set(allDocs.map((d: any) => d._id))
+      const idSet = new Set(allDocs.map((d: {_id: string}) => d._id))
       let brokenCategoryRefs = 0
       let brokenDesignerRefs = 0
 

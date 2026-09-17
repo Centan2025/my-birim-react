@@ -14,7 +14,7 @@ import type {CustomerOrderSummary, OrderDetailResult} from '../../lib/commerce/o
 
 vi.mock('../hooks/useSEO', () => ({
   useSEO: vi.fn(),
-  SEOProvider: ({children}: any) => children,
+  SEOProvider: ({children}: {children?: React.ReactNode}) => <>{children}</>,
 }))
 
 const mockProfile: CustomerProfileData = {
@@ -169,7 +169,7 @@ describe('BİRİM Canonical Account Center UI (Phase 2B Tests)', () => {
     ui: React.ReactNode,
     authValue: {
       isLoggedIn: boolean
-      user: any
+      user: Record<string, unknown> | null
       login: () => void
       logout: () => void
     },
@@ -279,7 +279,7 @@ describe('BİRİM Canonical Account Center UI (Phase 2B Tests)', () => {
       })
 
       // Verify forbidden fields were NOT included in the payload
-      const sentPayload = updateSpy.mock.calls[0][0] as any
+      const sentPayload = updateSpy.mock.calls[0][0] as Record<string, unknown>
       expect(sentPayload.user_id).toBeUndefined()
       expect(sentPayload.role).toBeUndefined()
       expect(sentPayload.architect_verification_status).toBeUndefined()
