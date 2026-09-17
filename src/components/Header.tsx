@@ -36,6 +36,8 @@ export function Header() {
   const location = useLocation()
   const {data: categories = []} = useCategories()
   const [isProductsOpen, setIsProductsOpen] = useState(false)
+  const isProductsOpenRef = useRef(isProductsOpen)
+  isProductsOpenRef.current = isProductsOpen
   const [isProductsClosing, setIsProductsClosing] = useState(false)
   const [isMobileProductsMenuOpen, setIsMobileProductsMenuOpen] = useState(false)
   const [isLangOpen, setIsLangOpen] = useState(false)
@@ -636,6 +638,10 @@ export function Header() {
       clearTimeout(productsTimeoutRef.current)
     }
     productsTimeoutRef.current = window.setTimeout(() => {
+      if (!isProductsOpenRef.current) {
+        productsTimeoutRef.current = null
+        return
+      }
       setIsProductsOpen(false)
       setIsProductsClosing(true)
       productsTimeoutRef.current = null
@@ -662,6 +668,9 @@ export function Header() {
     if (productsTimeoutRef.current) {
       clearTimeout(productsTimeoutRef.current)
       productsTimeoutRef.current = null
+    }
+    if (!isProductsOpenRef.current) {
+      return
     }
     setIsProductsOpen(false)
     setIsProductsClosing(true)
