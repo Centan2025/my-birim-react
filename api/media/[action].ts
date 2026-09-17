@@ -8,7 +8,7 @@ import {
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
-import {handleCors} from '../../lib/server/cors.js'
+import {handleCors, isOriginAllowed} from '../../lib/server/cors.js'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 
 function getR2Config() {
@@ -88,7 +88,8 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
   // Auth check: require valid admin JWT session or valid admin secret token
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
-  const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
+  const adminSecret =
+    process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET'] || process.env['ADMIN_SECRET']
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
@@ -196,10 +197,8 @@ async function handleDeleteBatch(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  const expectedToken = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
-  if (!expectedToken) {
-    return res.status(500).json({error: 'Sunucu yetkilendirme anahtarı yapılandırılmamış.'})
-  }
+  const expectedToken =
+    process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET'] || process.env['ADMIN_SECRET']
 
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const tokenStr =
@@ -210,7 +209,11 @@ async function handleDeleteBatch(req: VercelRequest, res: VercelResponse) {
       tokenStr.length === expectedToken.length &&
       crypto.timingSafeEqual(Buffer.from(tokenStr), Buffer.from(expectedToken))
   )
-  if (!isTokenMatch) {
+  const token = getAuthTokenFromReq(req)
+  const payload = token ? verifyToken(token) : null
+  const isUserAdmin = Boolean(payload && payload.role === 'admin')
+
+  if (!isTokenMatch && !isUserAdmin) {
     return res.status(401).json({error: 'Yetkisiz erişim.'})
   }
 
@@ -259,7 +262,8 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
   // Auth check: require valid admin JWT session or valid admin secret token
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
-  const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
+  const adminSecret =
+    process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET'] || process.env['ADMIN_SECRET']
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''

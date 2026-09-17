@@ -134,7 +134,7 @@ vi.mock('../../lib/server/supabaseAdmin.js', () => ({
 
 import commerceHandler from '../../api/commerce/[...slug]'
 import adminHandler from '../../api/admin/[...slug]'
-import analyticsHandler from '../../api/analytics/[...slug]'
+import analyticsHandler from '../../api/analytics'
 import mediaHandler from '../../api/media/[action]'
 import {createToken, verifyToken} from '../../lib/server/token'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter'

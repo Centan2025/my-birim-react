@@ -55,7 +55,7 @@ export async function uploadToR2(
 
   const apiBase = isLocal
     ? `${window.location.protocol || 'http:'}//${window.location.hostname}:3002`
-    : 'https://birim-web-antigravity.vercel.app'
+    : 'https://www.birim.com'
 
   let res: Response
   try {
@@ -65,14 +65,14 @@ export async function uploadToR2(
       body: JSON.stringify({filename, contentType, folder}),
     })
   } catch (fetchErr) {
-    if (isLocal) {
-      // Fallback to production if local API server is not running
+    // Fallback to secondary production url if primary fails or if local API server is not running
+    try {
       res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
         method: 'POST',
         headers,
         body: JSON.stringify({filename, contentType, folder}),
       })
-    } else {
+    } catch {
       throw fetchErr
     }
   }

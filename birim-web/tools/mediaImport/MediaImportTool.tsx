@@ -141,7 +141,7 @@ const getApiUrl = (path: string): string => {
   if (typeof window === 'undefined') return path
   const isLocal =
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  const base = isLocal ? 'http://localhost:3002' : 'https://birim-web-antigravity.vercel.app'
+  const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
   return `${base}${path}`
 }
 
@@ -220,11 +220,15 @@ const fetchApiWithFallback = async (path: string, init?: RequestInit): Promise<R
       res = await fetch(`http://localhost:3002${path}`, mergedInit)
       if (res.ok || res.status !== 404) return res
     } catch {
-      // Local port 3002 is not running, fallback to production Vercel deployment
+      // Local port 3002 is not running, fallback to production deployment
     }
   }
 
-  res = await fetch(`https://birim-web-antigravity.vercel.app${path}`, mergedInit)
+  try {
+    res = await fetch(`https://www.birim.com${path}`, mergedInit)
+  } catch {
+    res = await fetch(`https://birim-web-antigravity.vercel.app${path}`, mergedInit)
+  }
 
   if (res.status === 401 && typeof window !== 'undefined' && typeof window.prompt === 'function') {
     const userToken = window.prompt(
@@ -236,7 +240,7 @@ const fetchApiWithFallback = async (path: string, init?: RequestInit): Promise<R
         ...mergedHeaders,
         Authorization: `Bearer ${userToken.trim()}`,
       }
-      return fetch(`https://birim-web-antigravity.vercel.app${path}`, {
+      return fetch(`https://www.birim.com${path}`, {
         ...mergedInit,
         headers: retryHeaders,
       })

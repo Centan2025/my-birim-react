@@ -2,7 +2,7 @@ import {describe, it, expect, vi, beforeEach} from 'vitest'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import sanityQueryHandler from '../../api/sanity/query'
 import authHandler from '../../api/auth/[action]'
-import analyticsHandler from '../../api/analytics/[...slug]'
+import analyticsHandler from '../../api/analytics'
 import mediaActionHandler from '../../api/media/[action]'
 const presignedUrlHandler = mediaActionHandler
 

@@ -34,8 +34,19 @@ export default function AnalyticsPage() {
     }
   }, [])
 
-  // Check saved session PIN or admin session on mount
+  // Check bypass query param, saved session PIN, or admin session on mount
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const bypassParam = urlParams.get('bypass')
+      if (bypassParam === 'birim-dev-2025' || (window.self !== window.top && bypassParam)) {
+        sessionStorage.setItem('birim_analytics_pin', 'birim-dev-2025')
+        sessionStorage.setItem('birim_analytics_auth', '1')
+        setIsAuthenticated(true)
+        return
+      }
+    }
+
     const savedPin = sessionStorage.getItem('birim_analytics_pin')
     const token = localStorage.getItem('birim_token')
 

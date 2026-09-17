@@ -399,7 +399,7 @@ export function ExcelImportTool() {
     if (typeof window === 'undefined') return path
     const isLocal =
       window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    const base = isLocal ? 'http://localhost:3002' : 'https://birim-web-antigravity.vercel.app'
+    const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
     return `${base}${path}`
   }
 
@@ -434,7 +434,7 @@ export function ExcelImportTool() {
     let res: Response
     try {
       // 1. Try Production API first
-      res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
+      res = await fetch('https://www.birim.com/api/media/presigned-url', {
         method: 'POST',
         headers: reqHeaders,
         credentials: 'include',
