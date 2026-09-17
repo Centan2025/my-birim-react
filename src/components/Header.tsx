@@ -1466,9 +1466,8 @@ export function Header() {
                   </button>
 
                   <div
-                    className="flex items-end pb-0 pt-2"
+                    className="flex items-end pb-0 pt-2 h-[1.25rem] box-content"
                     style={{
-                      fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
                       lineHeight: '1.25rem',
                     }}
                   >
@@ -1483,13 +1482,13 @@ export function Header() {
                               langCode === 'tr' ? 'Türkçe diline geç' : 'Switch to English'
                             }
                             aria-current={isActive ? 'true' : undefined}
-                            className="relative uppercase transition-opacity duration-300 hover:opacity-100 flex items-end"
+                            className="relative uppercase transition-opacity duration-300 hover:opacity-100 flex items-end pb-[1px]"
                             style={{
                               fontWeight: 600,
                               fontFamily: "'Inter', sans-serif",
                               letterSpacing: '0.025em',
-                              fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
-                              lineHeight: '1.25rem',
+                              fontSize: 'clamp(9.5px, 0.22rem + 0.45vw, 11px)',
+                              lineHeight: '1',
                               color: isActive
                                 ? headerForegroundColor
                                 : `${headerForegroundColor}80`, // 50% opacity for inactive
@@ -1501,11 +1500,11 @@ export function Header() {
                           </button>
                           {!isLast && (
                             <span
-                              className="mx-1 flex items-end"
+                              className="mx-1 flex items-end pb-[1px] select-none"
                               style={{
                                 color: `${headerForegroundColor}40`,
-                                fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
-                                lineHeight: '1.25rem',
+                                fontSize: 'clamp(9.5px, 0.22rem + 0.45vw, 11px)',
+                                lineHeight: '1',
                                 transition: colorTransition,
                               }}
                             >
