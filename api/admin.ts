@@ -162,11 +162,13 @@ async function handleAdminMembers(req: VercelRequest, res: VercelResponse) {
       })
     } catch (err: unknown) {
       console.error('[Admin Members] Error:', err)
+      const cause = (err as {cause?: {code?: string; message?: string; hostname?: string}} | undefined)?.cause
+      const detail = cause ? ` (${cause.code || ''} ${cause.hostname || ''} ${cause.message || ''})` : ''
       return res.status(200).json({
         success: true,
         count: 0,
         members: [],
-        warning: err instanceof Error ? err.message : 'Supabase bağlantı hatası',
+        warning: (err instanceof Error ? err.message : 'Supabase bağlantı hatası') + detail,
       })
     }
   }
