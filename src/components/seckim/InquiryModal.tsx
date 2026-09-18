@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {createPortal} from 'react-dom'
 import {motion, AnimatePresence} from 'framer-motion'
 import {useFocusTrap} from '../../hooks/useFocusTrap'
@@ -26,16 +26,36 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
   const {user} = useAuth()
   const {t} = useTranslation()
 
-  const [name, setName] = useState(user?.name || '')
-  const [company, setCompany] = useState(user?.company || '')
-  const [email, setEmail] = useState(user?.email || '')
-  const [phone, setPhone] = useState(user?.phone || '')
+  const [name, setName] = useState('')
+  const [company, setCompany] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [currentProjectName, setCurrentProjectName] = useState(projectName)
   const [message, setMessage] = useState('')
 
   const [loading, setLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  // Auto-fill form fields from logged-in user profile whenever modal opens
+  useEffect(() => {
+    if (isOpen) {
+      if (user) {
+        const computedName =
+          user.name ||
+          (user.firstName && user.lastName
+            ? `${user.firstName} ${user.lastName}`.trim()
+            : user.firstName || '')
+        setName(computedName)
+        setCompany(user.company || '')
+        setEmail(user.email || '')
+        setPhone(user.phone || '')
+      }
+      setCurrentProjectName(projectName || '')
+      setErrorMessage(null)
+      setIsSuccess(false)
+    }
+  }, [isOpen, user, projectName])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
