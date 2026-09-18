@@ -346,11 +346,11 @@ export function SeckimProjectDetailPage() {
                 return (
                   <div
                     key={product.id}
-                    className="group bg-[var(--bg-primary)] border border-[var(--border-primary)] flex flex-col overflow-hidden shadow-2xs hover:shadow-md transition-shadow"
+                    className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex flex-col overflow-hidden shadow-2xs hover:shadow-md transition-shadow"
                   >
                     <Link
                       to={`/product/${product.id}`}
-                      className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-[var(--bg-primary)] p-2 block"
+                      className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white dark:bg-neutral-900 p-3 block"
                     >
                       <OptimizedImage
                         {...imgProps}
@@ -363,7 +363,7 @@ export function SeckimProjectDetailPage() {
                       />
                     </Link>
 
-                    <div className="p-4 flex flex-col flex-1 justify-between gap-4">
+                    <div className="p-4 flex flex-col flex-1 justify-between gap-4 bg-white dark:bg-neutral-900">
                       <div>
                         <div className="flex items-start justify-between gap-2">
                           <Link
