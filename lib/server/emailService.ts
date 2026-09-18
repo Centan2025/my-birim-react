@@ -81,10 +81,10 @@ function generateVerificationHtml(
               </p>
 
               <!-- CTA BUTTON -->
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 32px 0;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 28px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${verificationUrl}" target="_blank" style="display: inline-block; background-color: #0f172a; color: #ffffff; font-size: 14px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; padding: 14px 34px; border-radius: 6px; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);">
+                    <a href="${verificationUrl}" target="_blank" style="display: inline-block; background-color: #18181b; color: #ffffff; font-size: 13px; font-weight: 500; letter-spacing: 0.5px; text-decoration: none; padding: 13px 30px; border-radius: 4px; border: 1px solid #27272a;">
                       ${buttonText}
                     </a>
                   </td>
@@ -184,7 +184,7 @@ function generatePasswordResetHtml(
               <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 28px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${resetUrl}" target="_blank" style="display: inline-block; background-color: #0f172a; color: #ffffff; font-size: 14px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; padding: 14px 34px; border-radius: 6px;">
+                    <a href="${resetUrl}" target="_blank" style="display: inline-block; background-color: #18181b; color: #ffffff; font-size: 13px; font-weight: 500; letter-spacing: 0.5px; text-decoration: none; padding: 13px 30px; border-radius: 4px; border: 1px solid #27272a;">
                       ${buttonText}
                     </a>
                   </td>
