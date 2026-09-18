@@ -255,48 +255,48 @@ export function SeckimPage() {
             <button
               type="button"
               onClick={() => handleTabChange('seckim')}
-              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer inline-flex items-center gap-2 ${
+              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer inline-flex items-center gap-2 group ${
                 activeTab === 'seckim'
                   ? 'text-[var(--text-primary)]'
                   : 'text-neutral-400 hover:text-[var(--text-primary)]'
               }`}
             >
-              <span>{t('all_selections')}</span>
+              <span className="tracking-widest">{t('all_selections')}</span>
               <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded-full transition-all duration-200 ${
+                className={`text-[11px] font-mono tracking-tight transition-colors duration-200 ${
                   activeTab === 'seckim'
-                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold'
-                    : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
+                    ? 'text-[var(--text-primary)] font-semibold'
+                    : 'text-neutral-400 group-hover:text-[var(--text-primary)] font-normal'
                 }`}
               >
-                {selectedProducts.length}
+                {String(selectedProducts.length).padStart(2, '0')}
               </span>
               {activeTab === 'seckim' && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
+                <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--text-primary)]" />
               )}
             </button>
 
             <button
               type="button"
               onClick={() => handleTabChange('projeler')}
-              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer inline-flex items-center gap-2 ${
+              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer inline-flex items-center gap-2 group ${
                 activeTab === 'projeler'
                   ? 'text-[var(--text-primary)]'
                   : 'text-neutral-400 hover:text-[var(--text-primary)]'
               }`}
             >
-              <span>{t('my_projects')}</span>
+              <span className="tracking-widest">{t('my_projects')}</span>
               <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded-full transition-all duration-200 ${
+                className={`text-[11px] font-mono tracking-tight transition-colors duration-200 ${
                   activeTab === 'projeler'
-                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold'
-                    : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
+                    ? 'text-[var(--text-primary)] font-semibold'
+                    : 'text-neutral-400 group-hover:text-[var(--text-primary)] font-normal'
                 }`}
               >
-                {projects.length}
+                {String(projects.length).padStart(2, '0')}
               </span>
               {activeTab === 'projeler' && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
+                <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--text-primary)]" />
               )}
             </button>
           </div>
