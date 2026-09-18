@@ -93,6 +93,16 @@ export async function updateAccountProfile(
   return res.profile
 }
 
+export async function changeAccountPassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<{success: boolean; message: string}> {
+  return request<{success: boolean; message: string}>('/api/account/change-password', {
+    method: 'POST',
+    body: JSON.stringify({currentPassword, newPassword}),
+  })
+}
+
 // ==========================================
 // 2. Addresses API
 // ==========================================

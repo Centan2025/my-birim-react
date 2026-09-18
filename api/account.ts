@@ -1,4 +1,6 @@
-﻿import type {VercelRequest, VercelResponse} from '@vercel/node'
+import type {VercelRequest, VercelResponse} from '@vercel/node'
+import {createClient} from '@supabase/supabase-js'
+import {getSafeSupabaseAdmin} from '../lib/server/supabaseAdmin.js'
 import {handleCors} from '../lib/server/cors.js'
 import {isRateLimitedAsync, getClientIp} from '../lib/server/rateLimiter.js'
 import {getAuthTokenFromReq, verifyToken} from '../lib/server/token.js'
@@ -78,6 +80,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(200).json({success: true, profile})
       }
       return res.status(405).json({error: 'Method Not Allowed'})
+    }
+
+    // --- CHANGE PASSWORD ---
+    if (resource === 'change-password') {
+      if (req.method !== 'POST') {
+        return res.status(405).json({error: 'Method Not Allowed'})
+      }
+      const {currentPassword, newPassword} = req.body || {}
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({error: 'Mevcut şifre ve yeni şifre gereklidir.'})
+      }
+      if (typeof newPassword !== 'string' || newPassword.length < 6) {
+        return res.status(400).json({error: 'Yeni şifre en az 6 karakter olmalıdır.'})
+      }
+
+      const supabaseAdmin = getSafeSupabaseAdmin()
+      if (!supabaseAdmin) {
+        return res.status(500).json({error: 'Veritabanı servisi kullanılamıyor.'})
+      }
+
+      const {data: usrData, error: usrErr} = await supabaseAdmin.auth.admin.getUserById(userId)
+      if (usrErr || !usrData?.user?.email) {
+        return res.status(404).json({error: 'Kullanıcı hesabı bulunamadı.'})
+      }
+
+      const anonKey = process.env['VITE_SUPABASE_ANON_KEY'] || process.env['SUPABASE_ANON_KEY']
+      const sbUrl = process.env['VITE_SUPABASE_URL'] || process.env['SUPABASE_URL']
+      if (anonKey && sbUrl) {
+        const testClient = createClient(sbUrl, anonKey, {auth: {persistSession: false}})
+        const {error: signErr} = await testClient.auth.signInWithPassword({
+          email: usrData.user.email,
+          password: currentPassword,
+        })
+        if (signErr) {
+          return res.status(400).json({error: 'Mevcut şifreniz hatalı.'})
+        }
+      }
+
+      const {error: updateErr} = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password: newPassword,
+      })
+
+      if (updateErr) {
+        return res.status(500).json({error: updateErr.message})
+      }
+
+      return res.status(200).json({success: true, message: 'Şifreniz başarıyla güncellendi.'})
     }
 
     // --- ADDRESSES ---

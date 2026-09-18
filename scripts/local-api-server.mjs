@@ -962,6 +962,50 @@ app.patch('/api/account/profile', requireLocalAuth, async (req, res) => {
   }
 })
 
+// ─── /api/account/change-password ─────────────────────────────────────────
+app.post('/api/account/change-password', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Supabase servisi yok.'})
+  const {currentPassword, newPassword} = req.body || {}
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({error: 'Mevcut şifre ve yeni şifre gereklidir.'})
+  }
+  if (typeof newPassword !== 'string' || newPassword.length < 6) {
+    return res.status(400).json({error: 'Yeni şifre en az 6 karakter olmalıdır.'})
+  }
+
+  try {
+    const {data: usrData, error: usrErr} = await supabaseAdmin.auth.admin.getUserById(req.userId)
+    if (usrErr || !usrData?.user?.email) {
+      return res.status(404).json({error: 'Kullanıcı hesabı bulunamadı.'})
+    }
+
+    if (SUPABASE_ANON_KEY && SUPABASE_URL) {
+      const testClient = createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {persistSession: false},
+      })
+      const {error: signErr} = await testClient.auth.signInWithPassword({
+        email: usrData.user.email,
+        password: currentPassword,
+      })
+      if (signErr) {
+        return res.status(400).json({error: 'Mevcut şifreniz hatalı.'})
+      }
+    }
+
+    const {error: updateErr} = await supabaseAdmin.auth.admin.updateUserById(req.userId, {
+      password: newPassword,
+    })
+
+    if (updateErr) {
+      return res.status(500).json({error: updateErr.message})
+    }
+
+    return res.status(200).json({success: true, message: 'Şifreniz başarıyla güncellendi.'})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
 // ─── /api/account/addresses ───────────────────────────────────────────────
 app.get('/api/account/addresses', requireLocalAuth, async (req, res) => {
   if (!supabaseAdmin) return res.status(200).json({success: true, addresses: []})

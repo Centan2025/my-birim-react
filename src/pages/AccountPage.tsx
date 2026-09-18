@@ -20,6 +20,7 @@ import {
   ChevronRight,
   RefreshCw,
   ExternalLink,
+  Lock,
 } from 'lucide-react'
 import {useAuth} from '../context/AuthContext'
 import {useSEO} from '../hooks/useSEO'
@@ -28,6 +29,7 @@ import {formatCurrency} from '../utils/currency'
 import {
   getAccountProfile,
   updateAccountProfile,
+  changeAccountPassword,
   listAccountAddresses,
   createAccountAddress,
   updateAccountAddress,
@@ -65,6 +67,7 @@ export function AccountPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const {locale} = useTranslation()
+  const isEn = locale === 'en'
 
   const currentTab = (searchParams.get('tab') as AccountTab) || 'overview'
 
@@ -73,8 +76,10 @@ export function AccountPage() {
   }
 
   useSEO({
-    title: 'BİRİM — Hesabım',
-    description: 'BİRİM Müşteri Hesabı, teslimat adresleri, fatura profilleri ve sipariş geçmişi.',
+    title: isEn ? 'BİRİM — My Account' : 'BİRİM — Hesabım',
+    description: isEn
+      ? 'BİRİM Customer Account, shipping addresses, billing profiles, and order history.'
+      : 'BİRİM Müşteri Hesabı, teslimat adresleri, fatura profilleri ve sipariş geçmişi.',
     siteName: 'BİRİM',
     type: 'profile',
     locale: locale === 'tr' ? 'tr_TR' : 'en_US',
@@ -105,6 +110,8 @@ export function AccountPage() {
 
   const [billingModalOpen, setBillingModalOpen] = useState(false)
   const [editingBilling, setEditingBilling] = useState<CustomerBillingProfile | null>(null)
+
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false)
 
   const [deleteConfirm, setDeleteConfirm] = useState<{
     type: 'address' | 'billing'
@@ -222,16 +229,22 @@ export function AccountPage() {
       if (editingAddress) {
         const updated = await updateAccountAddress(editingAddress.id, payload)
         setAddresses(prev => prev.map(a => (a.id === updated.id ? updated : a)))
-        showFeedback('success', 'Teslimat adresi güncellendi.')
+        showFeedback(
+          'success',
+          isEn ? 'Shipping address updated successfully.' : 'Teslimat adresi güncellendi.'
+        )
       } else {
         const created = await createAccountAddress(payload)
         setAddresses(prev => [created, ...prev])
-        showFeedback('success', 'Yeni teslimat adresi eklendi.')
+        showFeedback(
+          'success',
+          isEn ? 'New shipping address added.' : 'Yeni teslimat adresi eklendi.'
+        )
       }
       setAddressModalOpen(false)
       setEditingAddress(null)
     } catch (err: any) {
-      showFeedback('error', err.message || 'Adres kaydedilemedi.')
+      showFeedback('error', err.message || (isEn ? 'Failed to save address.' : 'Adres kaydedilemedi.'))
     }
   }
 
@@ -244,9 +257,15 @@ export function AccountPage() {
           isDefaultShipping: a.id === updated.id,
         }))
       )
-      showFeedback('success', 'Varsayılan teslimat adresi güncellendi.')
+      showFeedback(
+        'success',
+        isEn ? 'Default shipping address updated.' : 'Varsayılan teslimat adresi güncellendi.'
+      )
     } catch (err: any) {
-      showFeedback('error', err.message || 'Varsayılan adres ayarlanamadı.')
+      showFeedback(
+        'error',
+        err.message || (isEn ? 'Failed to set default address.' : 'Varsayılan adres ayarlanamadı.')
+      )
     }
   }
 
@@ -255,10 +274,16 @@ export function AccountPage() {
     try {
       await deleteAccountAddress(id)
       setAddresses(prev => prev.filter(a => a.id !== id))
-      showFeedback('success', 'Adres silindi.')
+      showFeedback(
+        'success',
+        isEn ? 'Address deleted.' : 'Adres silindi.'
+      )
       setDeleteConfirm(null)
     } catch (err: any) {
-      showFeedback('error', err.message || 'Adres silinemedi.')
+      showFeedback(
+        'error',
+        err.message || (isEn ? 'Failed to delete address.' : 'Adres silinemedi.')
+      )
     } finally {
       setIsDeleting(false)
     }
@@ -270,16 +295,25 @@ export function AccountPage() {
       if (editingBilling) {
         const updated = await updateAccountBillingProfile(editingBilling.id, payload)
         setBillingProfiles(prev => prev.map(b => (b.id === updated.id ? updated : b)))
-        showFeedback('success', 'Fatura profili güncellendi.')
+        showFeedback(
+          'success',
+          isEn ? 'Billing profile updated.' : 'Fatura profili güncellendi.'
+        )
       } else {
         const created = await createAccountBillingProfile(payload)
         setBillingProfiles(prev => [created, ...prev])
-        showFeedback('success', 'Yeni fatura profili eklendi.')
+        showFeedback(
+          'success',
+          isEn ? 'New billing profile added.' : 'Yeni fatura profili eklendi.'
+        )
       }
       setBillingModalOpen(false)
       setEditingBilling(null)
     } catch (err: any) {
-      showFeedback('error', err.message || 'Fatura profili kaydedilemedi.')
+      showFeedback(
+        'error',
+        err.message || (isEn ? 'Failed to save billing profile.' : 'Fatura profili kaydedilemedi.')
+      )
     }
   }
 
@@ -292,9 +326,15 @@ export function AccountPage() {
           isDefault: b.id === updated.id,
         }))
       )
-      showFeedback('success', 'Varsayılan fatura profili güncellendi.')
+      showFeedback(
+        'success',
+        isEn ? 'Default billing profile updated.' : 'Varsayılan fatura profili güncellendi.'
+      )
     } catch (err: any) {
-      showFeedback('error', err.message || 'Varsayılan profil ayarlanamadı.')
+      showFeedback(
+        'error',
+        err.message || (isEn ? 'Failed to set default profile.' : 'Varsayılan profil ayarlanamadı.')
+      )
     }
   }
 
@@ -303,10 +343,16 @@ export function AccountPage() {
     try {
       await deleteAccountBillingProfile(id)
       setBillingProfiles(prev => prev.filter(b => b.id !== id))
-      showFeedback('success', 'Fatura profili silindi.')
+      showFeedback(
+        'success',
+        isEn ? 'Billing profile deleted.' : 'Fatura profili silindi.'
+      )
       setDeleteConfirm(null)
     } catch (err: any) {
-      showFeedback('error', err.message || 'Fatura profili silinemedi.')
+      showFeedback(
+        'error',
+        err.message || (isEn ? 'Failed to delete billing profile.' : 'Fatura profili silinemedi.')
+      )
     } finally {
       setIsDeleting(false)
     }
@@ -322,10 +368,16 @@ export function AccountPage() {
     try {
       const updated = await updateAccountProfile(data)
       setProfile(updated)
-      showFeedback('success', 'Profil bilgileriniz güncellendi.')
+      showFeedback(
+        'success',
+        isEn ? 'Your profile details have been updated.' : 'Profil bilgileriniz güncellendi.'
+      )
       return true
     } catch (err: any) {
-      showFeedback('error', err.message || 'Profil güncellenemedi.')
+      showFeedback(
+        'error',
+        err.message || (isEn ? 'Failed to update profile.' : 'Profil güncellenemedi.')
+      )
       return false
     }
   }
@@ -337,10 +389,19 @@ export function AccountPage() {
       setProfile(updated)
       showFeedback(
         'success',
-        subscribed ? 'Bülten aboneliğiniz başlatıldı.' : 'Bülten aboneliğiniz sonlandırıldı.'
+        subscribed
+          ? isEn
+            ? 'Subscribed to newsletter successfully.'
+            : 'Bülten aboneliğiniz başlatıldı.'
+          : isEn
+            ? 'Unsubscribed from newsletter.'
+            : 'Bülten aboneliğiniz sonlandırıldı.'
       )
     } catch (err: any) {
-      showFeedback('error', err.message || 'Bülten tercihi güncellenemedi.')
+      showFeedback(
+        'error',
+        err.message || (isEn ? 'Failed to update newsletter preferences.' : 'Bülten tercihi güncellenemedi.')
+      )
     }
   }
 
@@ -354,18 +415,19 @@ export function AccountPage() {
           </div>
           <div>
             <h1 className="font-heading text-2xl uppercase tracking-wider text-stone-900 dark:text-stone-100">
-              Giriş Yapın
+              {isEn ? 'Sign In' : 'Giriş Yapın'}
             </h1>
             <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-              Hesap detaylarınıza, teslimat adreslerinize ve sipariş geçmişinize erişmek için lütfen
-              giriş yapın.
+              {isEn
+                ? 'Please sign in to access your account details, shipping addresses, and order history.'
+                : 'Hesap detaylarınıza, teslimat adreslerinize ve sipariş geçmişinize erişmek için lütfen giriş yapın.'}
             </p>
           </div>
           <Link
             to="/login?redirect=/hesabim"
             className="inline-block w-full py-3 px-6 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-widest hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors"
           >
-            Giriş Yap / Üye Ol
+            {isEn ? 'Sign In / Register' : 'Giriş Yap / Üye Ol'}
           </Link>
         </div>
       </div>
@@ -377,16 +439,16 @@ export function AccountPage() {
     label: string
     icon: React.ComponentType<{className?: string}>
   }[] = [
-    {id: 'overview', label: 'Genel Bakış', icon: User},
-    {id: 'profile', label: 'Profil Bilgilerim', icon: Edit2},
-    {id: 'addresses', label: 'Teslimat Adreslerim', icon: MapPin},
-    {id: 'billing', label: 'Fatura Bilgilerim', icon: FileText},
-    {id: 'orders', label: 'Siparişlerim', icon: Package},
-    {id: 'professional', label: 'Profesyonel Hesabım', icon: Award},
-    {id: 'newsletter', label: 'Bülten & İletişim', icon: Mail},
+    {id: 'overview', label: isEn ? 'Overview' : 'Genel Bakış', icon: User},
+    {id: 'profile', label: isEn ? 'My Profile' : 'Profil Bilgilerim', icon: Edit2},
+    {id: 'addresses', label: isEn ? 'Shipping Addresses' : 'Teslimat Adreslerim', icon: MapPin},
+    {id: 'billing', label: isEn ? 'Billing Profiles' : 'Fatura Bilgilerim', icon: FileText},
+    {id: 'orders', label: isEn ? 'My Orders' : 'Siparişlerim', icon: Package},
+    {id: 'professional', label: isEn ? 'Professional Account' : 'Profesyonel Hesabım', icon: Award},
+    {id: 'newsletter', label: isEn ? 'Newsletter & Contact' : 'Bülten & İletişim', icon: Mail},
   ]
 
-  const displayName = profile?.name || auth.user?.name || auth.user?.email || 'Müşterimiz'
+  const displayName = profile?.name || auth.user?.name || auth.user?.email || (isEn ? 'Customer' : 'Müşterimiz')
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 pt-28 pb-20 px-4 sm:px-6 lg:px-8">
@@ -418,14 +480,15 @@ export function AccountPage() {
         <div className="mb-8 border-b border-stone-200 dark:border-stone-800 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500 dark:text-stone-400">
-              BİRİM Müşteri Portalı
+              {isEn ? 'BİRİM Customer Portal' : 'BİRİM Müşteri Portalı'}
             </span>
             <h1 className="font-heading text-2xl sm:text-3xl uppercase tracking-wider mt-1">
-              Hoş Geldiniz, {displayName}
+              {isEn ? `Welcome, ${displayName}` : `Hoş Geldiniz, ${displayName}`}
             </h1>
             <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-              Tek BİRİM Hesabı ile tüm siparişlerinizi, teslimat adreslerinizi ve profesyonel
-              profilinizi yönetin.
+              {isEn
+                ? 'Manage all your orders, shipping addresses, and professional profile with a single BİRİM Account.'
+                : 'Tek BİRİM Hesabı ile tüm siparişlerinizi, teslimat adreslerinizi ve profesyonel profilinizi yönetin.'}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -434,7 +497,7 @@ export function AccountPage() {
               className="inline-flex items-center gap-2 px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
-              Çıkış
+              {isEn ? 'Sign Out' : 'Çıkış'}
             </button>
           </div>
         </div>
@@ -476,7 +539,7 @@ export function AccountPage() {
               <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-12 flex flex-col items-center justify-center space-y-3">
                 <RefreshCw className="w-6 h-6 animate-spin text-stone-400" />
                 <span className="text-xs font-mono uppercase tracking-wider text-stone-500">
-                  Hesap verileri yükleniyor...
+                  {isEn ? 'Loading account data...' : 'Hesap verileri yükleniyor...'}
                 </span>
               </div>
             ) : (
@@ -489,6 +552,7 @@ export function AccountPage() {
                     orders={orders}
                     ordersLoading={ordersLoading}
                     ordersError={ordersError}
+                    isEn={isEn}
                     onNavigateTab={setTab}
                     onSelectOrder={setSelectedOrderId}
                   />
@@ -498,7 +562,9 @@ export function AccountPage() {
                   <ProfileSection
                     profile={profile}
                     error={profileError}
+                    isEn={isEn}
                     onSave={handleUpdateProfile}
+                    onOpenPasswordModal={() => setPasswordModalOpen(true)}
                   />
                 )}
 
@@ -507,6 +573,7 @@ export function AccountPage() {
                     addresses={addresses}
                     loading={addressesLoading}
                     error={addressesError}
+                    isEn={isEn}
                     onAdd={() => {
                       setEditingAddress(null)
                       setAddressModalOpen(true)
@@ -531,6 +598,7 @@ export function AccountPage() {
                     billingProfiles={billingProfiles}
                     loading={billingLoading}
                     error={billingError}
+                    isEn={isEn}
                     onAdd={() => {
                       setEditingBilling(null)
                       setBillingModalOpen(true)
@@ -544,7 +612,7 @@ export function AccountPage() {
                       setDeleteConfirm({
                         type: 'billing',
                         id: bp.id,
-                        title: bp.label || bp.companyName || bp.fullName || 'Fatura Profili',
+                        title: bp.label || bp.companyName || bp.fullName || (isEn ? 'Billing Profile' : 'Fatura Profili'),
                       })
                     }}
                   />
@@ -555,14 +623,15 @@ export function AccountPage() {
                     orders={orders}
                     loading={ordersLoading}
                     error={ordersError}
+                    isEn={isEn}
                     onSelectOrder={setSelectedOrderId}
                   />
                 )}
 
-                {currentTab === 'professional' && <ProfessionalSection profile={profile} />}
+                {currentTab === 'professional' && <ProfessionalSection profile={profile} isEn={isEn} />}
 
                 {currentTab === 'newsletter' && (
-                  <NewsletterSection profile={profile} onToggle={handleToggleNewsletter} />
+                  <NewsletterSection profile={profile} isEn={isEn} onToggle={handleToggleNewsletter} />
                 )}
               </>
             )}
@@ -576,6 +645,7 @@ export function AccountPage() {
           address={editingAddress}
           defaultRecipient={profile?.name || auth.user?.name || ''}
           defaultPhone={profile?.phone || ''}
+          isEn={isEn}
           onClose={() => {
             setAddressModalOpen(false)
             setEditingAddress(null)
@@ -589,6 +659,7 @@ export function AccountPage() {
         <BillingModal
           billing={editingBilling}
           defaultRecipient={profile?.name || auth.user?.name || ''}
+          isEn={isEn}
           onClose={() => {
             setBillingModalOpen(false)
             setEditingBilling(null)
@@ -597,12 +668,36 @@ export function AccountPage() {
         />
       )}
 
+      {/* Change Password Modal */}
+      {passwordModalOpen && (
+        <ChangePasswordModal
+          isEn={isEn}
+          onClose={() => setPasswordModalOpen(false)}
+          onSuccess={() => {
+            setPasswordModalOpen(false)
+            showFeedback(
+              'success',
+              isEn ? 'Password changed successfully.' : 'Şifreniz başarıyla değiştirildi.'
+            )
+          }}
+        />
+      )}
+
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
         <DeleteConfirmModal
           title={deleteConfirm.title}
-          type={deleteConfirm.type === 'address' ? 'teslimat adresini' : 'fatura profilini'}
+          type={
+            deleteConfirm.type === 'address'
+              ? isEn
+                ? 'shipping address'
+                : 'teslimat adresini'
+              : isEn
+                ? 'billing profile'
+                : 'fatura profilini'
+          }
           isDeleting={isDeleting}
+          isEn={isEn}
           onClose={() => setDeleteConfirm(null)}
           onConfirm={() => {
             if (deleteConfirm.type === 'address') {
@@ -621,6 +716,7 @@ export function AccountPage() {
           orderDetail={orderDetail}
           loading={orderDetailLoading}
           error={orderDetailError}
+          isEn={isEn}
           onClose={() => setSelectedOrderId(null)}
         />
       )}
@@ -638,6 +734,7 @@ function OverviewSection({
   orders,
   ordersLoading,
   ordersError,
+  isEn,
   onNavigateTab,
   onSelectOrder,
 }: {
@@ -647,6 +744,7 @@ function OverviewSection({
   orders: CustomerOrderSummary[]
   ordersLoading: boolean
   ordersError: string | null
+  isEn: boolean
   onNavigateTab: (tab: AccountTab) => void
   onSelectOrder: (id: string) => void
 }) {
@@ -662,12 +760,12 @@ function OverviewSection({
           <div>
             <div className="flex items-center justify-between text-stone-500 dark:text-stone-400 mb-3">
               <span className="text-[10px] font-mono uppercase tracking-widest">
-                Kişisel Bilgiler
+                {isEn ? 'Personal Information' : 'Kişisel Bilgiler'}
               </span>
               <User className="w-4 h-4" />
             </div>
             <p className="font-heading text-lg font-medium text-stone-900 dark:text-stone-100">
-              {profile?.name || 'İsimsiz Müşteri'}
+              {profile?.name || (isEn ? 'Customer' : 'İsimsiz Müşteri')}
             </p>
             <p className="text-xs text-stone-500 dark:text-stone-400 truncate mt-1">
               {profile?.email || '—'}
@@ -680,7 +778,7 @@ function OverviewSection({
             onClick={() => onNavigateTab('profile')}
             className="mt-4 inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:underline"
           >
-            Profili Düzenle &rarr;
+            {isEn ? 'Edit Profile' : 'Profili Düzenle'} &rarr;
           </button>
         </div>
 
@@ -689,14 +787,14 @@ function OverviewSection({
           <div>
             <div className="flex items-center justify-between text-stone-500 dark:text-stone-400 mb-3">
               <span className="text-[10px] font-mono uppercase tracking-widest">
-                Teslimat Adresleri
+                {isEn ? 'Shipping Addresses' : 'Teslimat Adresleri'}
               </span>
               <MapPin className="w-4 h-4" />
             </div>
             {defaultAddress ? (
               <div>
                 <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
-                  {defaultAddress.label || 'Varsayılan Adres'}
+                  {defaultAddress.label || (isEn ? 'Default Address' : 'Varsayılan Adres')}
                 </p>
                 <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 mt-1">
                   {defaultAddress.addressLine1}
@@ -705,14 +803,18 @@ function OverviewSection({
                 </p>
               </div>
             ) : (
-              <p className="text-xs text-stone-400">Henüz kayıtlı teslimat adresi bulunmuyor.</p>
+              <p className="text-xs text-stone-400">
+                {isEn
+                  ? 'No registered shipping address yet.'
+                  : 'Henüz kayıtlı teslimat adresi bulunmuyor.'}
+              </p>
             )}
           </div>
           <button
             onClick={() => onNavigateTab('addresses')}
             className="mt-4 inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:underline"
           >
-            Adresleri Yönet ({addresses.length}) &rarr;
+            {isEn ? `Manage Addresses (${addresses.length})` : `Adresleri Yönet (${addresses.length})`} &rarr;
           </button>
         </div>
 
@@ -721,7 +823,7 @@ function OverviewSection({
           <div>
             <div className="flex items-center justify-between text-stone-500 dark:text-stone-400 mb-3">
               <span className="text-[10px] font-mono uppercase tracking-widest">
-                Fatura Profili
+                {isEn ? 'Billing Profile' : 'Fatura Profili'}
               </span>
               <FileText className="w-4 h-4" />
             </div>
@@ -732,19 +834,30 @@ function OverviewSection({
                 </p>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
                   {defaultBilling.billingType === 'company'
-                    ? `Kurumsal • VKN: ${maskTaxNumber(defaultBilling.taxNumber)}`
-                    : 'Bireysel Fatura'}
+                    ? isEn
+                      ? `Corporate • Tax No: ${maskTaxNumber(defaultBilling.taxNumber)}`
+                      : `Kurumsal • VKN: ${maskTaxNumber(defaultBilling.taxNumber)}`
+                    : isEn
+                      ? 'Individual'
+                      : 'Bireysel Fatura'}
                 </p>
               </div>
             ) : (
-              <p className="text-xs text-stone-400">Henüz kayıtlı fatura profili bulunmuyor.</p>
+              <p className="text-xs text-stone-400">
+                {isEn
+                  ? 'No registered billing profile yet.'
+                  : 'Henüz kayıtlı fatura profili bulunmuyor.'}
+              </p>
             )}
           </div>
           <button
             onClick={() => onNavigateTab('billing')}
             className="mt-4 inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:underline"
           >
-            Profilleri Yönet ({billingProfiles.length}) &rarr;
+            {isEn
+              ? `Manage Profiles (${billingProfiles.length})`
+              : `Profilleri Yönet (${billingProfiles.length})`}{' '}
+            &rarr;
           </button>
         </div>
       </div>
@@ -753,32 +866,39 @@ function OverviewSection({
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6">
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800 mb-4">
           <div>
-            <h2 className="font-heading text-lg uppercase tracking-wider">Son Siparişler</h2>
-            <p className="text-xs text-stone-500">BİRİM Shop üzerinden verilen siparişleriniz.</p>
+            <h2 className="font-heading text-lg uppercase tracking-wider">
+              {isEn ? 'Recent Orders' : 'Son Siparişler'}
+            </h2>
+            <p className="text-xs text-stone-500">
+              {isEn
+                ? 'Your recent purchases made on BİRİM Shop.'
+                : 'BİRİM Shop üzerinden verilen siparişleriniz.'}
+            </p>
           </div>
           <button
             onClick={() => onNavigateTab('orders')}
             className="text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:underline"
           >
-            Tümünü Gör ({orders.length}) &rarr;
+            {isEn ? `View All (${orders.length})` : `Tümünü Gör (${orders.length})`} &rarr;
           </button>
         </div>
 
         {ordersLoading ? (
           <div className="py-8 flex items-center justify-center text-xs font-mono uppercase tracking-wider text-stone-400">
-            <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Siparişler yükleniyor...
+            <RefreshCw className="w-4 h-4 animate-spin mr-2" />{' '}
+            {isEn ? 'Loading orders...' : 'Siparişler yükleniyor...'}
           </div>
         ) : ordersError ? (
           <div className="py-6 text-xs text-amber-600 dark:text-amber-400">{ordersError}</div>
         ) : orders.length === 0 ? (
           <div className="py-8 text-center text-xs text-stone-400">
-            Henüz bir siparişiniz bulunmuyor.
+            {isEn ? 'You have no orders yet.' : 'Henüz bir siparişiniz bulunmuyor.'}
           </div>
         ) : (
           <div className="space-y-3">
             {orders.slice(0, 3).map(order => {
               const count = (order as any).itemCount ?? order.itemsCount ?? 1
-              const firstItemName = (order as any).firstItemNameSnapshot || 'Ürün'
+              const firstItemName = (order as any).firstItemNameSnapshot || (isEn ? 'Product' : 'Ürün')
               return (
                 <div
                   key={order.id}
@@ -787,14 +907,14 @@ function OverviewSection({
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs font-semibold">{order.orderNumber}</span>
-                      <OrderStatusBadge status={order.status} />
+                      <OrderStatusBadge status={order.status} isEn={isEn} />
                     </div>
                     <p className="text-xs text-stone-600 dark:text-stone-400">
                       {firstItemName}
-                      {count > 1 ? ` ve ${count - 1} diğer ürün` : ''}
+                      {count > 1 ? (isEn ? ` and ${count - 1} more items` : ` ve ${count - 1} diğer ürün`) : ''}
                     </p>
                     <span className="text-[10px] text-stone-400 font-mono">
-                      {new Date(order.createdAt).toLocaleDateString('tr-TR')}
+                      {new Date(order.createdAt).toLocaleDateString(isEn ? 'en-US' : 'tr-TR')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-4">
@@ -805,7 +925,7 @@ function OverviewSection({
                       onClick={() => onSelectOrder(order.id)}
                       className="px-3 py-1.5 border border-stone-300 dark:border-stone-700 text-[11px] font-mono uppercase tracking-wider hover:bg-stone-100 dark:hover:bg-stone-800"
                     >
-                      Detay
+                      {isEn ? 'Detail' : 'Detay'}
                     </button>
                   </div>
                 </div>
@@ -824,16 +944,20 @@ function OverviewSection({
 function ProfileSection({
   profile,
   error,
+  isEn,
   onSave,
+  onOpenPasswordModal,
 }: {
   profile: CustomerProfileData | null
   error: string | null
+  isEn: boolean
   onSave: (data: {
     name?: string
     phone?: string | null
     company?: string | null
     profession?: string | null
   }) => Promise<boolean>
+  onOpenPasswordModal: () => void
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(profile?.name || '')
@@ -867,182 +991,228 @@ function ProfileSection({
   }
 
   return (
-    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
-        <div>
-          <h2 className="font-heading text-xl uppercase tracking-wider">Profil Bilgilerim</h2>
-          <p className="text-xs text-stone-500">Kişisel ve iletişim bilgilerinizi yönetin.</p>
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
+        <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
+          <div>
+            <h2 className="font-heading text-xl uppercase tracking-wider">
+              {isEn ? 'My Profile' : 'Profil Bilgilerim'}
+            </h2>
+            <p className="text-xs text-stone-500">
+              {isEn
+                ? 'Manage your personal and contact details.'
+                : 'Kişisel ve iletişim bilgilerinizi yönetin.'}
+            </p>
+          </div>
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+              {isEn ? 'Edit' : 'Düzenle'}
+            </button>
+          )}
         </div>
-        {!isEditing && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-          >
-            <Edit2 className="w-3.5 h-3.5" />
-            Düzenle
-          </button>
+
+        {error && (
+          <div className="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-300">
+            {error}
+          </div>
+        )}
+
+        {!isEditing ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
+                {isEn ? 'Full Name' : 'Ad Soyad'}
+              </span>
+              <p className="text-sm font-medium">{profile?.name || '—'}</p>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
+                {isEn ? 'Email (Read Only)' : 'E-posta (Salt Okunur)'}
+              </span>
+              <p className="text-sm font-medium font-mono text-stone-600 dark:text-stone-400">
+                {profile?.email || '—'}
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
+                {isEn ? 'Phone' : 'Telefon'}
+              </span>
+              <p className="text-sm font-medium font-mono">{profile?.phone || '—'}</p>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
+                {isEn ? 'Company' : 'Firma'}
+              </span>
+              <p className="text-sm font-medium">{profile?.company || '—'}</p>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
+                {isEn ? 'Profession / Specialty' : 'Meslek / Uzmanlık'}
+              </span>
+              <p className="text-sm font-medium">{profile?.profession || '—'}</p>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
+                {isEn ? 'Account Type' : 'Hesap Tipi'}
+              </span>
+              <p className="text-sm font-medium uppercase font-mono">
+                {profile?.role === 'architect'
+                  ? isEn
+                    ? 'Architect / Professional'
+                    : 'Mimar / Profesyonel'
+                  : isEn
+                    ? 'Standard Customer'
+                    : 'Standart Müşteri'}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="profile-name"
+                  className="block text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1"
+                >
+                  {isEn ? 'Full Name' : 'Ad Soyad'}
+                </label>
+                <input
+                  id="profile-name"
+                  type="text"
+                  required
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="profile-email"
+                  className="block text-[11px] font-mono uppercase tracking-wider text-stone-400 mb-1"
+                >
+                  {isEn ? 'Email (Cannot be changed)' : 'E-posta (Değiştirilemez)'}
+                </label>
+                <input
+                  id="profile-email"
+                  type="email"
+                  disabled
+                  value={profile?.email || ''}
+                  className="w-full px-3 py-2 text-sm border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-800/50 text-stone-500 cursor-not-allowed font-mono"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="profile-phone"
+                  className="block text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1"
+                >
+                  {isEn ? 'Phone' : 'Telefon'}
+                </label>
+                <input
+                  id="profile-phone"
+                  type="tel"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  placeholder="+905xxxxxxxxx"
+                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100 font-mono"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="profile-company"
+                  className="block text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1"
+                >
+                  {isEn ? 'Company' : 'Firma'}
+                </label>
+                <input
+                  id="profile-company"
+                  type="text"
+                  value={company}
+                  onChange={e => setCompany(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="profile-profession"
+                  className="block text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1"
+                >
+                  {isEn ? 'Profession' : 'Meslek'}
+                </label>
+                <input
+                  id="profile-profession"
+                  type="text"
+                  value={profession}
+                  onChange={e => setProfession(e.target.value)}
+                  placeholder={isEn ? 'e.g. Interior Designer, Architect' : 'Örn: İç Mimar, Tasarımcı'}
+                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200 dark:border-stone-800">
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider hover:bg-stone-100 dark:hover:bg-stone-800"
+              >
+                {isEn ? 'Cancel' : 'Vazgeç'}
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors"
+              >
+                {saving
+                  ? isEn
+                    ? 'Saving...'
+                    : 'Kaydediliyor...'
+                  : isEn
+                    ? 'Save Changes'
+                    : 'Değişiklikleri Kaydet'}
+              </button>
+            </div>
+          </form>
         )}
       </div>
 
-      {error && (
-        <div className="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-300">
-          {error}
-        </div>
-      )}
-
-      {!isEditing ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Security & Password Card */}
+      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              Ad Soyad
-            </span>
-            <p className="text-sm font-medium">{profile?.name || '—'}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              E-posta (Salt Okunur)
-            </span>
-            <p className="text-sm font-medium font-mono text-stone-600 dark:text-stone-400">
-              {profile?.email || '—'}
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4 text-stone-700 dark:text-stone-300" />
+              <h3 className="font-heading text-base uppercase tracking-wider font-semibold">
+                {isEn ? 'Security & Password' : 'Güvenlik ve Şifre'}
+              </h3>
+            </div>
+            <p className="text-xs text-stone-600 dark:text-stone-400">
+              {isEn
+                ? 'Change your account password directly without needing an email reset link.'
+                : 'E-posta sıfırlama bağlantısına gerek kalmadan doğrudan hesap şifrenizi güncelleyin.'}
             </p>
           </div>
-
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              Telefon
-            </span>
-            <p className="text-sm font-medium font-mono">{profile?.phone || '—'}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              Firma
-            </span>
-            <p className="text-sm font-medium">{profile?.company || '—'}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              Meslek / Uzmanlık
-            </span>
-            <p className="text-sm font-medium">{profile?.profession || '—'}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              Hesap Tipi
-            </span>
-            <p className="text-sm font-medium uppercase font-mono">
-              {profile?.role === 'architect' ? 'Mimar / Profesyonel' : 'Standart Müşteri'}
-            </p>
-          </div>
+          <button
+            onClick={onOpenPasswordModal}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors shrink-0"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            {isEn ? 'Change Password' : 'Şifre Değiştir'}
+          </button>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="profile-name"
-                className="block text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1"
-              >
-                Ad Soyad
-              </label>
-              <input
-                id="profile-name"
-                type="text"
-                required
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="profile-email"
-                className="block text-[11px] font-mono uppercase tracking-wider text-stone-400 mb-1"
-              >
-                E-posta (Değiştirilemez)
-              </label>
-              <input
-                id="profile-email"
-                type="email"
-                disabled
-                value={profile?.email || ''}
-                className="w-full px-3 py-2 text-sm border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-800/50 text-stone-500 cursor-not-allowed font-mono"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="profile-phone"
-                className="block text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1"
-              >
-                Telefon
-              </label>
-              <input
-                id="profile-phone"
-                type="tel"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                placeholder="+905xxxxxxxxx"
-                className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100 font-mono"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="profile-company"
-                className="block text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1"
-              >
-                Firma
-              </label>
-              <input
-                id="profile-company"
-                type="text"
-                value={company}
-                onChange={e => setCompany(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="profile-profession"
-                className="block text-[11px] font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1"
-              >
-                Meslek
-              </label>
-              <input
-                id="profile-profession"
-                type="text"
-                value={profession}
-                onChange={e => setProfession(e.target.value)}
-                placeholder="Örn: İç Mimar, Tasarımcı"
-                className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200 dark:border-stone-800">
-            <button
-              type="button"
-              onClick={() => setIsEditing(false)}
-              className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider hover:bg-stone-100 dark:hover:bg-stone-800"
-            >
-              Vazgeç
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors"
-            >
-              {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
-            </button>
-          </div>
-        </form>
-      )}
+      </div>
     </div>
   )
 }
@@ -1054,6 +1224,7 @@ function AddressesSection({
   addresses,
   loading,
   error,
+  isEn,
   onAdd,
   onEdit,
   onSetDefault,
@@ -1062,6 +1233,7 @@ function AddressesSection({
   addresses: CustomerAddress[]
   loading: boolean
   error: string | null
+  isEn: boolean
   onAdd: () => void
   onEdit: (address: CustomerAddress) => void
   onSetDefault: (id: string) => void
@@ -1071,9 +1243,13 @@ function AddressesSection({
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800 gap-4">
         <div>
-          <h2 className="font-heading text-xl uppercase tracking-wider">Teslimat Adreslerim</h2>
+          <h2 className="font-heading text-xl uppercase tracking-wider">
+            {isEn ? 'Shipping Addresses' : 'Teslimat Adreslerim'}
+          </h2>
           <p className="text-xs text-stone-500">
-            Siparişlerinizde kullanacağınız kayıtlı adresleriniz.
+            {isEn
+              ? 'Saved addresses to use for your orders.'
+              : 'Siparişlerinizde kullanacağınız kayıtlı adresleriniz.'}
           </p>
         </div>
         <button
@@ -1081,7 +1257,7 @@ function AddressesSection({
           className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200"
         >
           <Plus className="w-3.5 h-3.5" />
-          Yeni Adres Ekle
+          {isEn ? 'Add New Address' : 'Yeni Adres Ekle'}
         </button>
       </div>
 
@@ -1093,17 +1269,20 @@ function AddressesSection({
 
       {loading ? (
         <div className="py-12 flex items-center justify-center text-xs font-mono uppercase tracking-wider text-stone-400">
-          <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Adresler yükleniyor...
+          <RefreshCw className="w-4 h-4 animate-spin mr-2" />{' '}
+          {isEn ? 'Loading addresses...' : 'Adresler yükleniyor...'}
         </div>
       ) : addresses.length === 0 ? (
         <div className="py-12 text-center space-y-3">
           <MapPin className="w-8 h-8 text-stone-300 dark:text-stone-700 mx-auto" />
-          <p className="text-sm text-stone-500">Kayıtlı teslimat adresiniz bulunmuyor.</p>
+          <p className="text-sm text-stone-500">
+            {isEn ? 'You have no saved shipping addresses.' : 'Kayıtlı teslimat adresiniz bulunmuyor.'}
+          </p>
           <button
             onClick={onAdd}
             className="text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 underline"
           >
-            İlk adresinizi ekleyin &rarr;
+            {isEn ? 'Add your first address' : 'İlk adresinizi ekleyin'} &rarr;
           </button>
         </div>
       ) : (
@@ -1120,11 +1299,11 @@ function AddressesSection({
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-heading text-base uppercase font-semibold">
-                    {address.label || 'Teslimat Adresi'}
+                    {address.label || (isEn ? 'Shipping Address' : 'Teslimat Adresi')}
                   </span>
                   {address.isDefaultShipping && (
                     <span className="px-2 py-0.5 bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      Varsayılan
+                      {isEn ? 'Default' : 'Varsayılan'}
                     </span>
                   )}
                 </div>
@@ -1151,7 +1330,7 @@ function AddressesSection({
                       onClick={() => onSetDefault(address.id)}
                       className="text-[11px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 underline"
                     >
-                      Varsayılan Yap
+                      {isEn ? 'Set as Default' : 'Varsayılan Yap'}
                     </button>
                   )}
                 </div>
@@ -1159,14 +1338,14 @@ function AddressesSection({
                   <button
                     onClick={() => onEdit(address)}
                     className="p-1.5 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
-                    title="Düzenle"
+                    title={isEn ? 'Edit' : 'Düzenle'}
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => onDelete(address)}
                     className="p-1.5 text-stone-400 hover:text-rose-600 transition-colors"
-                    title="Sil"
+                    title={isEn ? 'Delete' : 'Sil'}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -1187,6 +1366,7 @@ function BillingSection({
   billingProfiles,
   loading,
   error,
+  isEn,
   onAdd,
   onEdit,
   onSetDefault,
@@ -1195,6 +1375,7 @@ function BillingSection({
   billingProfiles: CustomerBillingProfile[]
   loading: boolean
   error: string | null
+  isEn: boolean
   onAdd: () => void
   onEdit: (bp: CustomerBillingProfile) => void
   onSetDefault: (id: string) => void
@@ -1204,15 +1385,21 @@ function BillingSection({
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800 gap-4">
         <div>
-          <h2 className="font-heading text-xl uppercase tracking-wider">Fatura Bilgilerim</h2>
-          <p className="text-xs text-stone-500">Bireysel ve kurumsal e-fatura profilleriniz.</p>
+          <h2 className="font-heading text-xl uppercase tracking-wider">
+            {isEn ? 'Billing Profiles' : 'Fatura Bilgilerim'}
+          </h2>
+          <p className="text-xs text-stone-500">
+            {isEn
+              ? 'Your individual and corporate e-invoice profiles.'
+              : 'Bireysel ve kurumsal e-fatura profilleriniz.'}
+          </p>
         </div>
         <button
           onClick={onAdd}
           className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200"
         >
           <Plus className="w-3.5 h-3.5" />
-          Yeni Fatura Profili
+          {isEn ? 'Add Billing Profile' : 'Yeni Fatura Profili'}
         </button>
       </div>
 
@@ -1224,17 +1411,20 @@ function BillingSection({
 
       {loading ? (
         <div className="py-12 flex items-center justify-center text-xs font-mono uppercase tracking-wider text-stone-400">
-          <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Fatura profilleri yükleniyor...
+          <RefreshCw className="w-4 h-4 animate-spin mr-2" />{' '}
+          {isEn ? 'Loading billing profiles...' : 'Fatura profilleri yükleniyor...'}
         </div>
       ) : billingProfiles.length === 0 ? (
         <div className="py-12 text-center space-y-3">
           <FileText className="w-8 h-8 text-stone-300 dark:text-stone-700 mx-auto" />
-          <p className="text-sm text-stone-500">Kayıtlı fatura profiliniz bulunmuyor.</p>
+          <p className="text-sm text-stone-500">
+            {isEn ? 'You have no saved billing profiles.' : 'Kayıtlı fatura profiliniz bulunmuyor.'}
+          </p>
           <button
             onClick={onAdd}
             className="text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 underline"
           >
-            İlk fatura profilinizi oluşturun &rarr;
+            {isEn ? 'Create your first billing profile' : 'İlk fatura profilinizi oluşturun'} &rarr;
           </button>
         </div>
       ) : (
@@ -1255,13 +1445,19 @@ function BillingSection({
                   </span>
                   {bp.isDefault && (
                     <span className="px-2 py-0.5 bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      Varsayılan
+                      {isEn ? 'Default' : 'Varsayılan'}
                     </span>
                   )}
                 </div>
 
                 <div className="inline-block px-2 py-0.5 mb-2 text-[10px] font-mono uppercase border border-stone-300 dark:border-stone-700">
-                  {bp.billingType === 'company' ? 'Kurumsal Fatura' : 'Bireysel Fatura'}
+                  {bp.billingType === 'company'
+                    ? isEn
+                      ? 'Corporate Invoice'
+                      : 'Kurumsal Fatura'
+                    : isEn
+                      ? 'Individual Invoice'
+                      : 'Bireysel Fatura'}
                 </div>
 
                 {bp.billingType === 'company' ? (
@@ -1269,14 +1465,22 @@ function BillingSection({
                     <p className="font-medium text-stone-900 dark:text-stone-100">
                       {bp.companyName}
                     </p>
-                    {bp.taxOffice && <p>Vergi Dairesi: {bp.taxOffice}</p>}
-                    <p className="font-mono">VKN: {maskTaxNumber(bp.taxNumber)}</p>
+                    {bp.taxOffice && (
+                      <p>
+                        {isEn ? 'Tax Office' : 'Vergi Dairesi'}: {bp.taxOffice}
+                      </p>
+                    )}
+                    <p className="font-mono">
+                      {isEn ? 'Tax No' : 'VKN'}: {maskTaxNumber(bp.taxNumber)}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-1 text-xs text-stone-600 dark:text-stone-400">
                     <p className="font-medium text-stone-900 dark:text-stone-100">{bp.fullName}</p>
                     {bp.taxNumber && (
-                      <p className="font-mono">TCKN: {maskTaxNumber(bp.taxNumber)}</p>
+                      <p className="font-mono">
+                        {isEn ? 'ID Number' : 'TCKN'}: {maskTaxNumber(bp.taxNumber)}
+                      </p>
                     )}
                   </div>
                 )}
@@ -1295,7 +1499,7 @@ function BillingSection({
                       onClick={() => onSetDefault(bp.id)}
                       className="text-[11px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 underline"
                     >
-                      Varsayılan Yap
+                      {isEn ? 'Set as Default' : 'Varsayılan Yap'}
                     </button>
                   )}
                 </div>
@@ -1303,14 +1507,14 @@ function BillingSection({
                   <button
                     onClick={() => onEdit(bp)}
                     className="p-1.5 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
-                    title="Düzenle"
+                    title={isEn ? 'Edit' : 'Düzenle'}
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => onDelete(bp)}
                     className="p-1.5 text-stone-400 hover:text-rose-600 transition-colors"
-                    title="Sil"
+                    title={isEn ? 'Delete' : 'Sil'}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -1331,19 +1535,25 @@ function OrdersSection({
   orders,
   loading,
   error,
+  isEn,
   onSelectOrder,
 }: {
   orders: CustomerOrderSummary[]
   loading: boolean
   error: string | null
+  isEn: boolean
   onSelectOrder: (id: string) => void
 }) {
   return (
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
       <div className="pb-4 border-b border-stone-200 dark:border-stone-800">
-        <h2 className="font-heading text-xl uppercase tracking-wider">Sipariş Geçmişim</h2>
+        <h2 className="font-heading text-xl uppercase tracking-wider">
+          {isEn ? 'Order History' : 'Sipariş Geçmişim'}
+        </h2>
         <p className="text-xs text-stone-500">
-          BİRİM Shop üzerinden gerçekleştirdiğiniz satın alımlar.
+          {isEn
+            ? 'Purchases made through BİRİM Shop.'
+            : 'BİRİM Shop üzerinden gerçekleştirdiğiniz satın alımlar.'}
         </p>
       </div>
 
@@ -1355,26 +1565,30 @@ function OrdersSection({
 
       {loading ? (
         <div className="py-12 flex items-center justify-center text-xs font-mono uppercase tracking-wider text-stone-400">
-          <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Siparişler yükleniyor...
+          <RefreshCw className="w-4 h-4 animate-spin mr-2" />{' '}
+          {isEn ? 'Loading orders...' : 'Siparişler yükleniyor...'}
         </div>
       ) : orders.length === 0 ? (
         <div className="py-12 text-center space-y-3">
           <Package className="w-8 h-8 text-stone-300 dark:text-stone-700 mx-auto" />
-          <p className="text-sm text-stone-500">Henüz kayıtlı siparişiniz bulunmamaktadır.</p>
+          <p className="text-sm text-stone-500">
+            {isEn ? 'You do not have any orders yet.' : 'Henüz kayıtlı siparişiniz bulunmamaktadır.'}
+          </p>
           <a
             href="https://shop.birim.com"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 underline"
           >
-            BİRİM Shop Koleksiyonunu Keşfedin <ExternalLink className="w-3 h-3" />
+            {isEn ? 'Explore the BİRİM Shop Collection' : 'BİRİM Shop Koleksiyonunu Keşfedin'}{' '}
+            <ExternalLink className="w-3 h-3" />
           </a>
         </div>
       ) : (
         <div className="space-y-3">
           {orders.map(order => {
             const count = (order as any).itemCount ?? order.itemsCount ?? 1
-            const firstItemName = (order as any).firstItemNameSnapshot || 'Ürün'
+            const firstItemName = (order as any).firstItemNameSnapshot || (isEn ? 'Product' : 'Ürün')
             const firstItemSku = (order as any).firstItemSkuSnapshot
             return (
               <div
@@ -1384,15 +1598,15 @@ function OrdersSection({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm font-semibold">{order.orderNumber}</span>
-                    <OrderStatusBadge status={order.status} />
-                    <PaymentStatusBadge status={order.paymentStatus} />
+                    <OrderStatusBadge status={order.status} isEn={isEn} />
+                    <PaymentStatusBadge status={order.paymentStatus} isEn={isEn} />
                   </div>
                   <p className="text-xs text-stone-700 dark:text-stone-300">
                     {firstItemName}
-                    {count > 1 ? ` (+${count - 1} ürün daha)` : ''}
+                    {count > 1 ? (isEn ? ` (+${count - 1} more items)` : ` (+${count - 1} ürün daha)`) : ''}
                   </p>
                   <div className="flex items-center gap-3 text-[11px] text-stone-500 font-mono">
-                    <span>{new Date(order.createdAt).toLocaleDateString('tr-TR')}</span>
+                    <span>{new Date(order.createdAt).toLocaleDateString(isEn ? 'en-US' : 'tr-TR')}</span>
                     {firstItemSku && <span>SKU: {firstItemSku}</span>}
                   </div>
                 </div>
@@ -1405,7 +1619,7 @@ function OrdersSection({
                     onClick={() => onSelectOrder(order.id)}
                     className="px-4 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200"
                   >
-                    Detay
+                    {isEn ? 'Detail' : 'Detay'}
                   </button>
                 </div>
               </div>
@@ -1420,16 +1634,26 @@ function OrdersSection({
 // ==========================================
 // 6. PROFESSIONAL SECTION
 // ==========================================
-function ProfessionalSection({profile}: {profile: CustomerProfileData | null}) {
+function ProfessionalSection({
+  profile,
+  isEn,
+}: {
+  profile: CustomerProfileData | null
+  isEn: boolean
+}) {
   const isArchitect = profile?.role === 'architect'
   const status = profile?.architectVerificationStatus || (isArchitect ? 'approved' : 'none')
 
   return (
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
       <div className="pb-4 border-b border-stone-200 dark:border-stone-800">
-        <h2 className="font-heading text-xl uppercase tracking-wider">Profesyonel Hesabım</h2>
+        <h2 className="font-heading text-xl uppercase tracking-wider">
+          {isEn ? 'Professional Account' : 'Profesyonel Hesabım'}
+        </h2>
         <p className="text-xs text-stone-500">
-          Mimarlık ve kurumsal tasarım ofisi üyelik bilgileri.
+          {isEn
+            ? 'Architecture and corporate design office membership information.'
+            : 'Mimarlık ve kurumsal tasarım ofisi üyelik bilgileri.'}
         </p>
       </div>
 
@@ -1438,24 +1662,25 @@ function ProfessionalSection({profile}: {profile: CustomerProfileData | null}) {
           <div className="flex items-center gap-3">
             <Award className="w-5 h-5 text-stone-800 dark:text-stone-200" />
             <span className="font-heading uppercase text-sm font-semibold tracking-wider">
-              Üyelik Doğrulama Durumu
+              {isEn ? 'Membership Verification Status' : 'Üyelik Doğrulama Durumu'}
             </span>
           </div>
           {status === 'approved' ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-mono uppercase">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Doğrulandı (Aktif)
+              <CheckCircle2 className="w-3.5 h-3.5" />{' '}
+              {isEn ? 'Verified (Active)' : 'Doğrulandı (Aktif)'}
             </span>
           ) : status === 'pending' ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs font-mono uppercase">
-              <Clock className="w-3.5 h-3.5" /> İnceleniyor
+              <Clock className="w-3.5 h-3.5" /> {isEn ? 'Under Review' : 'İnceleniyor'}
             </span>
           ) : status === 'rejected' ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs font-mono uppercase">
-              <AlertCircle className="w-3.5 h-3.5" /> Onaylanmadı
+              <AlertCircle className="w-3.5 h-3.5" /> {isEn ? 'Not Approved' : 'Onaylanmadı'}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 text-xs font-mono uppercase">
-              Standart Üyelik
+              {isEn ? 'Standard Membership' : 'Standart Üyelik'}
             </span>
           )}
         </div>
@@ -1463,15 +1688,21 @@ function ProfessionalSection({profile}: {profile: CustomerProfileData | null}) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
           <div className="border border-stone-100 dark:border-stone-800 p-4 bg-stone-50/50 dark:bg-stone-950/30">
             <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              Hesap Rolü
+              {isEn ? 'Account Role' : 'Hesap Rolü'}
             </span>
             <p className="text-xs font-medium text-stone-900 dark:text-stone-100 mt-1 uppercase font-mono">
-              {isArchitect ? 'Mimar / Profesyonel' : 'Standart Müşteri'}
+              {isArchitect
+                ? isEn
+                  ? 'Architect / Professional'
+                  : 'Mimar / Profesyonel'
+                : isEn
+                  ? 'Standard Customer'
+                  : 'Standart Müşteri'}
             </p>
           </div>
           <div className="border border-stone-100 dark:border-stone-800 p-4 bg-stone-50/50 dark:bg-stone-950/30">
             <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              Firma Bilgisi
+              {isEn ? 'Company' : 'Firma Bilgisi'}
             </span>
             <p className="text-xs font-medium text-stone-900 dark:text-stone-100 mt-1 truncate">
               {profile?.company || '—'}
@@ -1479,7 +1710,7 @@ function ProfessionalSection({profile}: {profile: CustomerProfileData | null}) {
           </div>
           <div className="border border-stone-100 dark:border-stone-800 p-4 bg-stone-50/50 dark:bg-stone-950/30">
             <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-              Meslek / Uzmanlık
+              {isEn ? 'Profession / Specialty' : 'Meslek / Uzmanlık'}
             </span>
             <p className="text-xs font-medium text-stone-900 dark:text-stone-100 mt-1 truncate">
               {profile?.profession || '—'}
@@ -1496,9 +1727,11 @@ function ProfessionalSection({profile}: {profile: CustomerProfileData | null}) {
 // ==========================================
 function NewsletterSection({
   profile,
+  isEn,
   onToggle,
 }: {
   profile: CustomerProfileData | null
+  isEn: boolean
   onToggle: (subscribed: boolean) => void
 }) {
   const isSubscribed = Boolean(profile?.newsletterSubscribed)
@@ -1514,23 +1747,34 @@ function NewsletterSection({
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
       <div className="pb-4 border-b border-stone-200 dark:border-stone-800">
         <h2 className="font-heading text-xl uppercase tracking-wider">
-          Bülten & İletişim Tercihleri
+          {isEn ? 'Newsletter & Preferences' : 'Bülten & İletişim Tercihleri'}
         </h2>
         <p className="text-xs text-stone-500">
-          Yeni koleksiyonlar, mimari bültenler ve etkinlik bildirimleri.
+          {isEn
+            ? 'New collections, architectural digests, and event notifications.'
+            : 'Yeni koleksiyonlar, mimari bültenler ve etkinlik bildirimleri.'}
         </p>
       </div>
 
       <div className="border border-stone-200 dark:border-stone-800 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <span className="font-heading uppercase text-sm font-semibold tracking-wider">
-            BİRİM Mimari Bülten
+            {isEn ? 'BİRİM Architectural Digest' : 'BİRİM Mimari Bülten'}
           </span>
           <p className="text-xs text-stone-600 dark:text-stone-400">
-            Yeni ürün lansmanları, tasarım makaleleri ve özel davetler hakkında e-posta alın.
+            {isEn
+              ? 'Receive emails about new product launches, design editorials, and private invitations.'
+              : 'Yeni ürün lansmanları, tasarım makaleleri ve özel davetler hakkında e-posta alın.'}
           </p>
           <span className="text-[10px] font-mono text-stone-400">
-            Durum: {isSubscribed ? 'Abone (Aktif)' : 'Abone Değil'}
+            {isEn ? 'Status' : 'Durum'}:{' '}
+            {isSubscribed
+              ? isEn
+                ? 'Subscribed (Active)'
+                : 'Abone (Aktif)'
+              : isEn
+                ? 'Not Subscribed'
+                : 'Abone Değil'}
           </span>
         </div>
 
@@ -1543,7 +1787,17 @@ function NewsletterSection({
               : 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-200'
           }`}
         >
-          {loading ? 'Güncelleniyor...' : isSubscribed ? 'Abonelikten Çık' : 'Abone Ol'}
+          {loading
+            ? isEn
+              ? 'Updating...'
+              : 'Güncelleniyor...'
+            : isSubscribed
+              ? isEn
+                ? 'Unsubscribe'
+                : 'Abonelikten Çık'
+              : isEn
+                ? 'Subscribe'
+                : 'Abone Ol'}
         </button>
       </div>
     </div>
@@ -1558,12 +1812,14 @@ function AddressModal({
   address,
   defaultRecipient = '',
   defaultPhone = '',
+  isEn,
   onClose,
   onSave,
 }: {
   address: CustomerAddress | null
   defaultRecipient?: string
   defaultPhone?: string
+  isEn: boolean
   onClose: () => void
   onSave: (payload: AddressPayload) => void
 }) {
@@ -1584,7 +1840,7 @@ function AddressModal({
     e.preventDefault()
     onSave({
       label: label.trim() || undefined,
-      recipientName: recipientName.trim() || defaultRecipient || 'Müşteri',
+      recipientName: recipientName.trim() || defaultRecipient || (isEn ? 'Customer' : 'Müşteri'),
       phone: phone.trim() || defaultPhone || '+905550000000',
       addressLine1: addressLine1.trim(),
       addressLine2: addressLine2.trim() || null,
@@ -1601,7 +1857,13 @@ function AddressModal({
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-lg p-6 space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800">
           <h3 className="font-heading text-lg uppercase tracking-wider">
-            {address ? 'Adresi Düzenle' : 'Yeni Teslimat Adresi'}
+            {address
+              ? isEn
+                ? 'Edit Shipping Address'
+                : 'Adresi Düzenle'
+              : isEn
+                ? 'Add New Shipping Address'
+                : 'Yeni Teslimat Adresi'}
           </h3>
           <button onClick={onClose} className="p-1 hover:text-stone-500">
             <X className="w-5 h-5" />
@@ -1615,12 +1877,12 @@ function AddressModal({
                 htmlFor="addr-label"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Adres Başlığı (Opsiyonel)
+                {isEn ? 'Address Title (Optional)' : 'Adres Başlığı (Opsiyonel)'}
               </label>
               <input
                 id="addr-label"
                 type="text"
-                placeholder="Örn: Ev, Ofis"
+                placeholder={isEn ? 'e.g. Home, Office' : 'Örn: Ev, Ofis'}
                 value={label}
                 onChange={e => setLabel(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none"
@@ -1632,11 +1894,12 @@ function AddressModal({
                 htmlFor="addr-recipient"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Alıcı Ad Soyad *
+                {isEn ? 'Recipient Name *' : 'Alıcı Ad Soyad *'}
               </label>
               <input
                 id="addr-recipient"
                 type="text"
+                required
                 value={recipientName}
                 onChange={e => setRecipientName(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none"
@@ -1648,11 +1911,12 @@ function AddressModal({
                 htmlFor="addr-phone"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Telefon *
+                {isEn ? 'Phone *' : 'Telefon *'}
               </label>
               <input
                 id="addr-phone"
                 type="tel"
+                required
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none font-mono"
@@ -1664,13 +1928,13 @@ function AddressModal({
                 htmlFor="addr-line1"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Adres Satırı 1 *
+                {isEn ? 'Address Line 1 *' : 'Adres Satırı 1 *'}
               </label>
               <input
                 id="addr-line1"
                 type="text"
                 required
-                placeholder="Cadde, mahalle, bina no"
+                placeholder={isEn ? 'Street, building no, etc.' : 'Cadde, mahalle, bina no'}
                 value={addressLine1}
                 onChange={e => setAddressLine1(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none"
@@ -1682,7 +1946,7 @@ function AddressModal({
                 htmlFor="addr-line2"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Adres Satırı 2 (Kat, Daire vb.)
+                {isEn ? 'Address Line 2 (Apt, suite, unit)' : 'Adres Satırı 2 (Kat, Daire vb.)'}
               </label>
               <input
                 id="addr-line2"
@@ -1698,11 +1962,12 @@ function AddressModal({
                 htmlFor="addr-city"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Şehir / İl *
+                {isEn ? 'City / Province *' : 'Şehir / İl *'}
               </label>
               <input
                 id="addr-city"
                 type="text"
+                required
                 value={city}
                 onChange={e => setCity(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none"
@@ -1714,7 +1979,7 @@ function AddressModal({
                 htmlFor="addr-district"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                İlçe *
+                {isEn ? 'District *' : 'İlçe *'}
               </label>
               <input
                 id="addr-district"
@@ -1732,7 +1997,7 @@ function AddressModal({
                 htmlFor="addr-postal"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Posta Kodu
+                {isEn ? 'Postal Code' : 'Posta Kodu'}
               </label>
               <input
                 id="addr-postal"
@@ -1748,7 +2013,7 @@ function AddressModal({
                 htmlFor="addr-country"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Ülke
+                {isEn ? 'Country' : 'Ülke'}
               </label>
               <input
                 id="addr-country"
@@ -1772,7 +2037,7 @@ function AddressModal({
               htmlFor="isDefaultShipping"
               className="text-xs text-stone-700 dark:text-stone-300 cursor-pointer"
             >
-              Varsayılan teslimat adresi olarak ayarla
+              {isEn ? 'Set as default shipping address' : 'Varsayılan teslimat adresi olarak ayarla'}
             </label>
           </div>
 
@@ -1782,13 +2047,13 @@ function AddressModal({
               onClick={onClose}
               className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase"
             >
-              Vazgeç
+              {isEn ? 'Cancel' : 'Vazgeç'}
             </button>
             <button
               type="submit"
               className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase"
             >
-              Kaydet
+              {isEn ? 'Save' : 'Kaydet'}
             </button>
           </div>
         </form>
@@ -1800,11 +2065,13 @@ function AddressModal({
 function BillingModal({
   billing,
   defaultRecipient = '',
+  isEn,
   onClose,
   onSave,
 }: {
   billing: CustomerBillingProfile | null
   defaultRecipient?: string
+  isEn: boolean
   onClose: () => void
   onSave: (payload: BillingProfilePayload) => void
 }) {
@@ -1830,7 +2097,7 @@ function BillingModal({
       billingType,
       label: label.trim() || undefined,
       fullName:
-        billingType === 'individual' ? fullName.trim() || defaultRecipient || 'Müşteri' : null,
+        billingType === 'individual' ? fullName.trim() || defaultRecipient || (isEn ? 'Customer' : 'Müşteri') : null,
       companyName: billingType === 'company' ? companyName.trim() : null,
       taxOffice: billingType === 'company' ? taxOffice.trim() : null,
       taxNumber: taxNumber.trim() || null,
@@ -1849,7 +2116,13 @@ function BillingModal({
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-lg p-6 space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800">
           <h3 className="font-heading text-lg uppercase tracking-wider">
-            {billing ? 'Fatura Profilini Düzenle' : 'Yeni Fatura Profili'}
+            {billing
+              ? isEn
+                ? 'Edit Billing Profile'
+                : 'Fatura Profilini Düzenle'
+              : isEn
+                ? 'Add New Billing Profile'
+                : 'Yeni Fatura Profili'}
           </h3>
           <button onClick={onClose} className="p-1 hover:text-stone-500">
             <X className="w-5 h-5" />
@@ -1868,7 +2141,7 @@ function BillingModal({
                   : 'border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-400'
               }`}
             >
-              Kurumsal (Şirket)
+              {isEn ? 'Corporate (Company)' : 'Kurumsal (Şirket)'}
             </button>
             <button
               type="button"
@@ -1879,7 +2152,7 @@ function BillingModal({
                   : 'border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-400'
               }`}
             >
-              Bireysel (Şahıs)
+              {isEn ? 'Individual (Personal)' : 'Bireysel (Şahıs)'}
             </button>
           </div>
 
@@ -1889,12 +2162,12 @@ function BillingModal({
                 htmlFor="bill-label"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Profil Başlığı (Opsiyonel)
+                {isEn ? 'Profile Title (Optional)' : 'Profil Başlığı (Opsiyonel)'}
               </label>
               <input
                 id="bill-label"
                 type="text"
-                placeholder="Örn: Şirket Faturası, Şahıs"
+                placeholder={isEn ? 'e.g. Company Invoice, Personal' : 'Örn: Şirket Faturası, Şahıs'}
                 value={label}
                 onChange={e => setLabel(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none"
@@ -1908,7 +2181,7 @@ function BillingModal({
                     htmlFor="bill-company"
                     className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
                   >
-                    Şirket Resmi Unvanı *
+                    {isEn ? 'Company Legal Name *' : 'Şirket Resmi Unvanı *'}
                   </label>
                   <input
                     id="bill-company"
@@ -1924,7 +2197,7 @@ function BillingModal({
                     htmlFor="bill-tax-office"
                     className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
                   >
-                    Vergi Dairesi *
+                    {isEn ? 'Tax Office *' : 'Vergi Dairesi *'}
                   </label>
                   <input
                     id="bill-tax-office"
@@ -1940,7 +2213,7 @@ function BillingModal({
                     htmlFor="bill-tax-number"
                     className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
                   >
-                    Vergi Numarası (VKN) *
+                    {isEn ? 'Tax Number (VKN) *' : 'Vergi Numarası (VKN) *'}
                   </label>
                   <input
                     id="bill-tax-number"
@@ -1959,7 +2232,7 @@ function BillingModal({
                     htmlFor="bill-fullname"
                     className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
                   >
-                    Ad Soyad *
+                    {isEn ? 'Full Name *' : 'Ad Soyad *'}
                   </label>
                   <input
                     id="bill-fullname"
@@ -1975,7 +2248,7 @@ function BillingModal({
                     htmlFor="bill-tckn"
                     className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
                   >
-                    TC Kimlik No (Opsiyonel)
+                    {isEn ? 'National ID Number (Optional)' : 'TC Kimlik No (Opsiyonel)'}
                   </label>
                   <input
                     id="bill-tckn"
@@ -1993,7 +2266,7 @@ function BillingModal({
                 htmlFor="bill-line1"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Fatura Adresi *
+                {isEn ? 'Billing Address *' : 'Fatura Adresi *'}
               </label>
               <input
                 id="bill-line1"
@@ -2010,7 +2283,7 @@ function BillingModal({
                 htmlFor="bill-line2"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Adres Satırı 2 (Kat, Daire vb.)
+                {isEn ? 'Address Line 2 (Apt, suite, unit)' : 'Adres Satırı 2 (Kat, Daire vb.)'}
               </label>
               <input
                 id="bill-line2"
@@ -2026,11 +2299,12 @@ function BillingModal({
                 htmlFor="bill-city"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Şehir *
+                {isEn ? 'City *' : 'Şehir *'}
               </label>
               <input
                 id="bill-city"
                 type="text"
+                required
                 value={city}
                 onChange={e => setCity(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none"
@@ -2042,7 +2316,7 @@ function BillingModal({
                 htmlFor="bill-district"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                İlçe *
+                {isEn ? 'District *' : 'İlçe *'}
               </label>
               <input
                 id="bill-district"
@@ -2059,7 +2333,7 @@ function BillingModal({
                 htmlFor="bill-postal"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Posta Kodu
+                {isEn ? 'Postal Code' : 'Posta Kodu'}
               </label>
               <input
                 id="bill-postal"
@@ -2075,7 +2349,7 @@ function BillingModal({
                 htmlFor="bill-country"
                 className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
               >
-                Ülke
+                {isEn ? 'Country' : 'Ülke'}
               </label>
               <input
                 id="bill-country"
@@ -2099,7 +2373,7 @@ function BillingModal({
               htmlFor="isDefaultBilling"
               className="text-xs text-stone-700 dark:text-stone-300 cursor-pointer"
             >
-              Varsayılan fatura profili olarak ayarla
+              {isEn ? 'Set as default billing profile' : 'Varsayılan fatura profili olarak ayarla'}
             </label>
           </div>
 
@@ -2109,13 +2383,177 @@ function BillingModal({
               onClick={onClose}
               className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase"
             >
-              Vazgeç
+              {isEn ? 'Cancel' : 'Vazgeç'}
             </button>
             <button
               type="submit"
               className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase"
             >
-              Kaydet
+              {isEn ? 'Save' : 'Kaydet'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function ChangePasswordModal({
+  isEn,
+  onClose,
+  onSuccess,
+}: {
+  isEn: boolean
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+
+    if (newPassword.length < 6) {
+      setError(
+        isEn
+          ? 'New password must be at least 6 characters long.'
+          : 'Yeni şifre en az 6 karakter olmalıdır.'
+      )
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError(
+        isEn
+          ? 'New passwords do not match.'
+          : 'Yeni şifreler birbiriyle eşleşmiyor.'
+      )
+      return
+    }
+
+    if (currentPassword === newPassword) {
+      setError(
+        isEn
+          ? 'New password cannot be the same as your current password.'
+          : 'Yeni şifreniz mevcut şifrenizle aynı olamaz.'
+      )
+      return
+    }
+
+    setLoading(true)
+    try {
+      await changeAccountPassword(currentPassword, newPassword)
+      onSuccess()
+    } catch (err: any) {
+      setError(err.message || (isEn ? 'Failed to change password.' : 'Şifre değiştirilemedi.'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-md p-6 space-y-5">
+        <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800">
+          <div className="flex items-center gap-2">
+            <Lock className="w-5 h-5 text-stone-700 dark:text-stone-300" />
+            <h3 className="font-heading text-lg uppercase tracking-wider">
+              {isEn ? 'Change Password' : 'Şifre Değiştir'}
+            </h3>
+          </div>
+          <button onClick={onClose} className="p-1 hover:text-stone-500">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {error && (
+          <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-300">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label
+              htmlFor="curr-pwd"
+              className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
+            >
+              {isEn ? 'Current Password *' : 'Mevcut Şifre *'}
+            </label>
+            <input
+              id="curr-pwd"
+              type="password"
+              required
+              value={currentPassword}
+              onChange={e => setCurrentPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none font-mono"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="new-pwd"
+              className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
+            >
+              {isEn ? 'New Password * (Min 6 characters)' : 'Yeni Şifre * (En az 6 karakter)'}
+            </label>
+            <input
+              id="new-pwd"
+              type="password"
+              required
+              minLength={6}
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none font-mono"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="confirm-pwd"
+              className="block text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-1"
+            >
+              {isEn ? 'Confirm New Password *' : 'Yeni Şifre (Tekrar) *'}
+            </label>
+            <input
+              id="confirm-pwd"
+              type="password"
+              required
+              minLength={6}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none font-mono"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200 dark:border-stone-800">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase"
+            >
+              {isEn ? 'Cancel' : 'Vazgeç'}
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 disabled:opacity-50"
+            >
+              {loading
+                ? isEn
+                  ? 'Updating...'
+                  : 'Güncelleniyor...'
+                : isEn
+                  ? 'Update Password'
+                  : 'Şifreyi Güncelle'}
             </button>
           </div>
         </form>
@@ -2128,22 +2566,33 @@ function DeleteConfirmModal({
   title,
   type,
   isDeleting,
+  isEn,
   onClose,
   onConfirm,
 }: {
   title: string
   type: string
   isDeleting: boolean
+  isEn: boolean
   onClose: () => void
   onConfirm: () => void
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-sm p-6 space-y-4">
-        <h3 className="font-heading text-lg uppercase tracking-wider text-rose-600">Silme Onayı</h3>
+        <h3 className="font-heading text-lg uppercase tracking-wider text-rose-600">
+          {isEn ? 'Delete Confirmation' : 'Silme Onayı'}
+        </h3>
         <p className="text-xs text-stone-600 dark:text-stone-400">
-          <strong>&quot;{title}&quot;</strong> başlıklı {type} kalıcı olarak silmek istediğinizden
-          emin misiniz?
+          {isEn ? (
+            <>
+              Are you sure you want to permanently delete {type} <strong>&quot;{title}&quot;</strong>?
+            </>
+          ) : (
+            <>
+              <strong>&quot;{title}&quot;</strong> başlıklı {type} kalıcı olarak silmek istediğinizden emin misiniz?
+            </>
+          )}
         </p>
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-200 dark:border-stone-800">
           <button
@@ -2152,15 +2601,15 @@ function DeleteConfirmModal({
             disabled={isDeleting}
             className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase"
           >
-            İptal
+            {isEn ? 'Cancel' : 'İptal'}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="px-4 py-2 bg-rose-600 text-white text-xs font-mono uppercase hover:bg-rose-700"
+            className="px-4 py-2 bg-rose-600 text-white text-xs font-mono uppercase hover:bg-rose-700 disabled:opacity-50"
           >
-            {isDeleting ? 'Siliniyor...' : 'Sil'}
+            {isDeleting ? (isEn ? 'Deleting...' : 'Siliniyor...') : isEn ? 'Delete' : 'Sil'}
           </button>
         </div>
       </div>
@@ -2173,12 +2622,14 @@ function OrderDetailModal({
   orderDetail,
   loading,
   error,
+  isEn,
   onClose,
 }: {
   orderId: string
   orderDetail: OrderDetailResult | null
   loading: boolean
   error: string | null
+  isEn: boolean
   onClose: () => void
 }) {
   const anyDetail = orderDetail as any
@@ -2193,7 +2644,9 @@ function OrderDetailModal({
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
           <div>
-            <h3 className="font-heading text-xl uppercase tracking-wider">Sipariş Detayı</h3>
+            <h3 className="font-heading text-xl uppercase tracking-wider">
+              {isEn ? 'Order Details' : 'Sipariş Detayı'}
+            </h3>
             <span className="font-mono text-xs text-stone-500">
               {orderDetail?.orderNumber || orderId}
             </span>
@@ -2206,7 +2659,7 @@ function OrderDetailModal({
         {loading ? (
           <div className="py-16 flex flex-col items-center justify-center text-xs font-mono uppercase tracking-wider text-stone-400 space-y-2">
             <RefreshCw className="w-5 h-5 animate-spin" />
-            <span>Detaylar yükleniyor...</span>
+            <span>{isEn ? 'Loading details...' : 'Detaylar yükleniyor...'}</span>
           </div>
         ) : error ? (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-300">
@@ -2218,26 +2671,32 @@ function OrderDetailModal({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-800">
               <div>
                 <span className="text-[10px] font-mono uppercase text-stone-500">
-                  Sipariş Durumu
+                  {isEn ? 'Order Status' : 'Sipariş Durumu'}
                 </span>
                 <div className="mt-1">
-                  <OrderStatusBadge status={orderDetail.status} />
+                  <OrderStatusBadge status={orderDetail.status} isEn={isEn} />
                 </div>
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase text-stone-500">Ödeme Durumu</span>
+                <span className="text-[10px] font-mono uppercase text-stone-500">
+                  {isEn ? 'Payment Status' : 'Ödeme Durumu'}
+                </span>
                 <div className="mt-1">
-                  <PaymentStatusBadge status={orderDetail.paymentStatus} />
+                  <PaymentStatusBadge status={orderDetail.paymentStatus} isEn={isEn} />
                 </div>
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase text-stone-500">Tarih</span>
+                <span className="text-[10px] font-mono uppercase text-stone-500">
+                  {isEn ? 'Date' : 'Tarih'}
+                </span>
                 <p className="font-mono text-xs font-medium mt-1">
-                  {new Date(orderDetail.createdAt).toLocaleDateString('tr-TR')}
+                  {new Date(orderDetail.createdAt).toLocaleDateString(isEn ? 'en-US' : 'tr-TR')}
                 </p>
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase text-stone-500">Toplam Tutar</span>
+                <span className="text-[10px] font-mono uppercase text-stone-500">
+                  {isEn ? 'Grand Total' : 'Toplam Tutar'}
+                </span>
                 <p className="font-mono text-sm font-semibold mt-1">
                   {formatCurrency(orderDetail.grandTotal, orderDetail.currency)}
                 </p>
@@ -2247,13 +2706,13 @@ function OrderDetailModal({
             {/* Items Snapshot */}
             <div className="space-y-3">
               <h4 className="font-heading text-sm uppercase tracking-wider text-stone-900 dark:text-stone-100">
-                Sipariş Edilen Ürünler
+                {isEn ? 'Ordered Products' : 'Sipariş Edilen Ürünler'}
               </h4>
               <div className="border border-stone-200 dark:border-stone-800 divide-y divide-stone-100 dark:divide-stone-800">
                 {orderDetail.items.map((item, idx) => {
                   const anyItem = item as any
                   const name =
-                    anyItem.productNameSnapshot || anyItem.productName || anyItem.name || 'Ürün'
+                    anyItem.productNameSnapshot || anyItem.productName || anyItem.name || (isEn ? 'Product' : 'Ürün')
                   const sku = anyItem.skuSnapshot || anyItem.sku || ''
                   return (
                     <div key={idx} className="p-3 flex items-center justify-between gap-4">
@@ -2263,7 +2722,7 @@ function OrderDetailModal({
                         </p>
                         <div className="flex items-center gap-3 text-[10px] font-mono text-stone-500 mt-0.5">
                           {sku && <span>SKU: {sku}</span>}
-                          <span>Adet: {item.quantity}</span>
+                          <span>{isEn ? 'Quantity' : 'Adet'}: {item.quantity}</span>
                         </div>
                       </div>
                       <span className="font-mono text-xs font-semibold">
@@ -2281,7 +2740,7 @@ function OrderDetailModal({
                 {shippingSnapshot && (
                   <div className="p-4 border border-stone-200 dark:border-stone-800 space-y-1">
                     <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-                      Teslimat Adresi (Kayıt Anı)
+                      {isEn ? 'Shipping Address (Snapshot)' : 'Teslimat Adresi (Kayıt Anı)'}
                     </span>
                     <p className="text-xs font-medium">
                       {shippingSnapshot.firstName} {shippingSnapshot.lastName}
@@ -2299,19 +2758,19 @@ function OrderDetailModal({
                 {billingSnapshot && (
                   <div className="p-4 border border-stone-200 dark:border-stone-800 space-y-1">
                     <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500">
-                      Fatura Bilgisi (Kayıt Anı)
+                      {isEn ? 'Billing Address (Snapshot)' : 'Fatura Bilgisi (Kayıt Anı)'}
                     </span>
                     {corporateSnapshot ? (
                       <>
                         <p className="text-xs font-medium">{corporateSnapshot.companyName}</p>
                         <p className="text-xs text-stone-600 dark:text-stone-400 font-mono">
-                          VKN: {maskTaxNumber(corporateSnapshot.taxNumber)} •{' '}
+                          {isEn ? 'Tax No' : 'VKN'}: {maskTaxNumber(corporateSnapshot.taxNumber)} •{' '}
                           {corporateSnapshot.taxOffice}
                         </p>
                       </>
                     ) : (
                       <p className="text-xs font-medium">
-                        {billingSnapshot.firstName} {billingSnapshot.lastName} (Bireysel)
+                        {billingSnapshot.firstName} {billingSnapshot.lastName} ({isEn ? 'Individual' : 'Bireysel'})
                       </p>
                     )}
                     <p className="text-xs text-stone-600 dark:text-stone-400">
@@ -2329,19 +2788,19 @@ function OrderDetailModal({
             {/* Price Breakdown */}
             <div className="p-4 bg-stone-50 dark:bg-stone-950/50 border border-stone-200 dark:border-stone-800 space-y-1 text-xs">
               <div className="flex justify-between text-stone-600 dark:text-stone-400">
-                <span>Ara Toplam</span>
+                <span>{isEn ? 'Subtotal' : 'Ara Toplam'}</span>
                 <span className="font-mono">
                   {formatCurrency(orderDetail.subtotal, orderDetail.currency)}
                 </span>
               </div>
               <div className="flex justify-between text-stone-600 dark:text-stone-400">
-                <span>KDV</span>
+                <span>{isEn ? 'VAT / Tax' : 'KDV'}</span>
                 <span className="font-mono">
                   {formatCurrency(orderDetail.taxTotal, orderDetail.currency)}
                 </span>
               </div>
               <div className="flex justify-between font-semibold text-stone-900 dark:text-stone-100 pt-2 border-t border-stone-200 dark:border-stone-800">
-                <span>Genel Toplam</span>
+                <span>{isEn ? 'Grand Total' : 'Genel Toplam'}</span>
                 <span className="font-mono">
                   {formatCurrency(orderDetail.grandTotal, orderDetail.currency)}
                 </span>
@@ -2365,8 +2824,8 @@ function maskTaxNumber(taxNumber?: string | null): string {
   return '******' + trimmed.slice(-4)
 }
 
-function OrderStatusBadge({status}: {status: string}) {
-  const map: Record<string, {label: string; style: string}> = {
+function OrderStatusBadge({status, isEn}: {status: string; isEn?: boolean}) {
+  const mapTr: Record<string, {label: string; style: string}> = {
     CONFIRMED: {
       label: 'Onaylandı',
       style:
@@ -2398,6 +2857,41 @@ function OrderStatusBadge({status}: {status: string}) {
         'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200',
     },
   }
+
+  const mapEn: Record<string, {label: string; style: string}> = {
+    CONFIRMED: {
+      label: 'Confirmed',
+      style:
+        'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200',
+    },
+    PENDING_PAYMENT: {
+      label: 'Pending Payment',
+      style:
+        'bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200',
+    },
+    PROCESSING: {
+      label: 'Processing',
+      style:
+        'bg-blue-50 dark:bg-blue-950/60 border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-200',
+    },
+    SHIPPED: {
+      label: 'Shipped',
+      style:
+        'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-300 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200',
+    },
+    DELIVERED: {
+      label: 'Delivered',
+      style:
+        'bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-200',
+    },
+    CANCELLED: {
+      label: 'Cancelled',
+      style:
+        'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200',
+    },
+  }
+
+  const map = isEn ? mapEn : mapTr
   const item = map[status] || {label: status, style: 'bg-stone-100 border-stone-300 text-stone-700'}
   return (
     <span
@@ -2408,8 +2902,8 @@ function OrderStatusBadge({status}: {status: string}) {
   )
 }
 
-function PaymentStatusBadge({status}: {status: string}) {
-  const map: Record<string, {label: string; style: string}> = {
+function PaymentStatusBadge({status, isEn}: {status: string; isEn?: boolean}) {
+  const mapTr: Record<string, {label: string; style: string}> = {
     PAID: {
       label: 'Ödendi',
       style:
@@ -2431,6 +2925,31 @@ function PaymentStatusBadge({status}: {status: string}) {
         'bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-200',
     },
   }
+
+  const mapEn: Record<string, {label: string; style: string}> = {
+    PAID: {
+      label: 'Paid',
+      style:
+        'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200',
+    },
+    PENDING: {
+      label: 'Pending',
+      style:
+        'bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200',
+    },
+    FAILED: {
+      label: 'Failed',
+      style:
+        'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200',
+    },
+    REFUNDED: {
+      label: 'Refunded',
+      style:
+        'bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-200',
+    },
+  }
+
+  const map = isEn ? mapEn : mapTr
   const item = map[status] || {label: status, style: 'bg-stone-100 border-stone-300 text-stone-700'}
   return (
     <span
