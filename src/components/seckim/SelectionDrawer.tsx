@@ -78,7 +78,12 @@ export const SelectionDrawer: React.FC = () => {
               className="relative w-full max-w-md h-full bg-[var(--bg-primary)] text-[var(--text-primary)] border-l border-[var(--border-primary)] shadow-2xl flex flex-col z-10"
             >
               {/* Drawer Header */}
-              <div className="px-6 py-6 border-b border-[var(--border-primary)] flex items-start justify-between">
+              <motion.div
+                initial={{opacity: 0, y: -10}}
+                animate={{opacity: 1, y: 0}}
+                transition={{delay: 0.12, duration: 0.45, ease: [0.16, 1, 0.3, 1]}}
+                className="px-6 py-6 border-b border-[var(--border-primary)] flex items-start justify-between"
+              >
                 <div>
                   <h2 className="text-xl font-light tracking-wider uppercase text-[var(--text-primary)]">
                     {t('seckim')}
@@ -129,7 +134,7 @@ export const SelectionDrawer: React.FC = () => {
                     </svg>
                   </button>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Drawer Content */}
               <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col">
@@ -147,8 +152,8 @@ export const SelectionDrawer: React.FC = () => {
                   </div>
                 ) : (
                   <>
-                    <AnimatePresence initial={false}>
-                      {selectedProducts.map(product => {
+                    <AnimatePresence initial={true}>
+                      {selectedProducts.map((product, idx) => {
                         const imgProps = getProductImageProps(product)
                         const categoryTitle = categoryMap.get(product.categoryId) || ''
 
@@ -156,7 +161,8 @@ export const SelectionDrawer: React.FC = () => {
                           <motion.div
                             key={product.id}
                             layout
-                            initial={{opacity: 1, height: 'auto'}}
+                            initial={{opacity: 0, y: 14}}
+                            animate={{opacity: 1, y: 0}}
                             exit={{
                               opacity: 0,
                               x: 24,
@@ -174,6 +180,9 @@ export const SelectionDrawer: React.FC = () => {
                               },
                             }}
                             transition={{
+                              duration: 0.42,
+                              delay: 0.08 + Math.min(idx * 0.05, 0.25),
+                              ease: [0.16, 1, 0.3, 1],
                               layout: {
                                 duration: 0.55,
                                 ease: [0.22, 1, 0.36, 1],
@@ -282,10 +291,10 @@ export const SelectionDrawer: React.FC = () => {
               <AnimatePresence>
                 {selectedProducts.length > 0 && (
                   <motion.div
-                    initial={{opacity: 0, y: 10}}
+                    initial={{opacity: 0, y: 12}}
                     animate={{opacity: 1, y: 0}}
-                    exit={{opacity: 0, y: 10, transition: {duration: 0.25}}}
-                    transition={{duration: 0.35, ease: [0.16, 1, 0.3, 1]}}
+                    exit={{opacity: 0, y: 12, transition: {duration: 0.25}}}
+                    transition={{duration: 0.4, delay: 0.18, ease: [0.16, 1, 0.3, 1]}}
                     className="px-6 py-5 border-t border-[var(--border-primary)] bg-[var(--bg-primary)]"
                   >
                     <div className="grid grid-cols-2 gap-3">

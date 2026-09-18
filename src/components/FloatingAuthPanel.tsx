@@ -123,7 +123,13 @@ export const FloatingAuthPanel: React.FC = () => {
               transition={{type: 'tween', duration: 0.6, ease: [0.16, 1, 0.3, 1]}}
               className="fixed right-0 top-0 bottom-0 w-full max-w-[400px] bg-[var(--bg-secondary)] shadow-[-10px_0_40px_-15px_rgba(0,0,0,0.3)] z-[101] flex flex-col"
             >
-              <div className="flex items-center justify-between px-8 py-10 border-b border-[var(--border-primary)]/10 bg-[var(--bg-primary)]/40">
+              {/* Panel Header */}
+              <motion.div
+                initial={{opacity: 0, y: -10}}
+                animate={{opacity: 1, y: 0}}
+                transition={{delay: 0.15, duration: 0.45, ease: [0.16, 1, 0.3, 1]}}
+                className="flex items-center justify-between px-8 py-10 border-b border-[var(--border-primary)]/10 bg-[var(--bg-primary)]/40"
+              >
                 <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-[var(--text-primary)]">
                   {isLoggedIn ? t('profile') : t('login')}
                   <span className="block h-0.5 w-12 bg-primary mt-3" />
@@ -135,15 +141,15 @@ export const FloatingAuthPanel: React.FC = () => {
                 >
                   <X className="w-5 h-5 transition-transform duration-300" />
                 </button>
-              </div>
+              </motion.div>
 
               <div className="flex-1 overflow-y-auto px-8 py-10">
                 {isLoggedIn ? (
                   <div className="space-y-12">
                     <motion.div
-                      initial={{opacity: 0, y: 10}}
+                      initial={{opacity: 0, y: 15}}
                       animate={{opacity: 1, y: 0}}
-                      transition={{delay: 0.2}}
+                      transition={{delay: 0.22, duration: 0.5, ease: [0.16, 1, 0.3, 1]}}
                     >
                       <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-[0.3em] font-bold mb-4">
                         {t('welcome_back') || 'Hoş Geldiniz'}
@@ -156,7 +162,12 @@ export const FloatingAuthPanel: React.FC = () => {
                       </p>
                     </motion.div>
 
-                    <div className="space-y-4 pt-10 border-t border-[var(--border-primary)]/10">
+                    <motion.div
+                      initial={{opacity: 0, y: 15}}
+                      animate={{opacity: 1, y: 0}}
+                      transition={{delay: 0.32, duration: 0.5, ease: [0.16, 1, 0.3, 1]}}
+                      className="space-y-4 pt-10 border-t border-[var(--border-primary)]/10"
+                    >
                       <Link
                         to="/hesabim"
                         onClick={() => setIsOpen(false)}
@@ -177,12 +188,17 @@ export const FloatingAuthPanel: React.FC = () => {
                         <span>{t('logout')}</span>
                         <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                       </button>
-                    </div>
+                    </motion.div>
                   </div>
                 ) : (
                   <div className="space-y-10">
                     <form onSubmit={handleLogin} className="space-y-8">
-                      <div className="relative group">
+                      <motion.div
+                        initial={{opacity: 0, y: 14}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{delay: 0.2, duration: 0.45, ease: [0.16, 1, 0.3, 1]}}
+                        className="relative group"
+                      >
                         <label
                           htmlFor="floating-auth-email"
                           className="block text-[10px] uppercase tracking-[0.3em] font-bold text-[var(--text-secondary)] mb-2 transition-colors group-focus-within:text-[var(--text-primary)]"
@@ -201,8 +217,14 @@ export const FloatingAuthPanel: React.FC = () => {
                           style={{outline: 'none', boxShadow: 'none'}}
                           placeholder="e-posta@adresiniz.com"
                         />
-                      </div>
-                      <div className="relative group">
+                      </motion.div>
+
+                      <motion.div
+                        initial={{opacity: 0, y: 14}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{delay: 0.28, duration: 0.45, ease: [0.16, 1, 0.3, 1]}}
+                        className="relative group"
+                      >
                         <label
                           htmlFor="floating-auth-password"
                           className="block text-[10px] uppercase tracking-[0.3em] font-bold text-[var(--text-secondary)] mb-2 transition-colors group-focus-within:text-[var(--text-primary)]"
@@ -221,7 +243,7 @@ export const FloatingAuthPanel: React.FC = () => {
                           style={{outline: 'none', boxShadow: 'none'}}
                           placeholder="••••••••"
                         />
-                      </div>
+                      </motion.div>
 
                       {error && (
                         <motion.p
@@ -233,38 +255,50 @@ export const FloatingAuthPanel: React.FC = () => {
                         </motion.p>
                       )}
 
-                      <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-primary)] p-5 mt-4 uppercase tracking-[0.3em] text-[11px] font-bold hover:bg-[var(--bg-primary)] transition-all duration-500 disabled:opacity-50 flex justify-between items-center font-inter group"
+                      <motion.div
+                        initial={{opacity: 0, y: 14}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{delay: 0.36, duration: 0.45, ease: [0.16, 1, 0.3, 1]}}
+                        className="space-y-4"
                       >
-                        <span>{isLoading ? t('waiting') : t('login')}</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </button>
-
-                      <div className="text-center pt-2">
-                        <Link
-                          to="/reset-password"
-                          onClick={() => setIsOpen(false)}
-                          className="text-[10px] text-[var(--text-secondary)] hover:text-primary uppercase tracking-[0.2em] font-bold font-inter transition-colors inline-block pb-1 border-b border-transparent hover:border-primary"
+                        <button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-full bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-primary)] p-5 uppercase tracking-[0.3em] text-[11px] font-bold hover:bg-[var(--bg-primary)] transition-all duration-500 disabled:opacity-50 flex justify-between items-center font-inter group cursor-pointer"
                         >
-                          {t('forgot_password')}
-                        </Link>
-                      </div>
+                          <span>{isLoading ? t('waiting') : t('login')}</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </button>
+
+                        <div className="text-center pt-2">
+                          <Link
+                            to="/reset-password"
+                            onClick={() => setIsOpen(false)}
+                            className="text-[10px] text-[var(--text-secondary)] hover:text-primary uppercase tracking-[0.2em] font-bold font-inter transition-colors inline-block pb-1 border-b border-transparent hover:border-primary"
+                          >
+                            {t('forgot_password')}
+                          </Link>
+                        </div>
+                      </motion.div>
                     </form>
 
-                    <div className="pt-12 mt-12 border-t border-[var(--border-primary)]/10 text-center">
+                    <motion.div
+                      initial={{opacity: 0, y: 14}}
+                      animate={{opacity: 1, y: 0}}
+                      transition={{delay: 0.44, duration: 0.45, ease: [0.16, 1, 0.3, 1]}}
+                      className="pt-12 mt-12 border-t border-[var(--border-primary)]/10 text-center"
+                    >
                       <p className="text-[10px] text-[var(--text-secondary)] mb-6 tracking-[0.3em] uppercase font-bold">
                         {t('not_registered')}
                       </p>
                       <button
                         onClick={scrollToFooter}
-                        className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-primary)] p-5 uppercase tracking-[0.25em] text-[10px] md:text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-primary)] hover:border-[var(--text-primary)] transition-all duration-500 font-inter group flex items-center justify-between shadow-sm"
+                        className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-primary)] p-5 uppercase tracking-[0.25em] text-[10px] md:text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-primary)] hover:border-[var(--text-primary)] transition-all duration-500 font-inter group flex items-center justify-between shadow-sm cursor-pointer"
                       >
                         <span>{t('register_or_subscribe')}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </button>
-                    </div>
+                    </motion.div>
                   </div>
                 )}
               </div>
