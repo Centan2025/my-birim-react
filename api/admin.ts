@@ -111,6 +111,15 @@ function checkAdminAuthorization(req: VercelRequest): boolean {
     return true
   }
 
+  const origin = typeof req.headers.origin === 'string' ? req.headers.origin.trim() : ''
+  const referer = typeof req.headers.referer === 'string' ? req.headers.referer.trim() : ''
+  if (
+    origin === 'https://birim.sanity.studio' ||
+    referer.startsWith('https://birim.sanity.studio')
+  ) {
+    return true
+  }
+
   return false
 }
 

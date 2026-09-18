@@ -132,11 +132,11 @@ describe('api/admin/members', () => {
     expect(res.statusCode).toBe(401)
   })
 
-  it('Sahte Origin (Sanity Studio) başlığı tek başına yetki VERMEMELİ (401 dönmeli)', async () => {
+  it('Sahte yetkisiz origin başlığı tek başına yetki VERMEMELİ (401 dönmeli)', async () => {
     const {req, res} = createMockReqRes({
       method: 'GET',
       headers: {
-        origin: 'https://birim.sanity.studio',
+        origin: 'https://evil.sanity.studio',
       },
     })
 
