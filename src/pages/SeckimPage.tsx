@@ -479,31 +479,82 @@ export function SeckimPage() {
 
                         {/* Thumbnails preview */}
                         <div className="mt-5 grid grid-cols-4 gap-2">
-                          {prjProducts.slice(0, 4).map(p => {
-                            const imgProps = getProductImageProps(p)
-                            return (
-                              <div
-                                key={p.id}
-                                className="aspect-square bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 overflow-hidden relative flex items-center justify-center p-1"
-                              >
-                                <OptimizedImage
-                                  {...imgProps}
-                                  alt={t(p.name)}
-                                  width={100}
-                                  height={100}
-                                  className="w-full h-full object-contain"
-                                  fitAuto={true}
-                                />
-                              </div>
-                            )
-                          })}
-                          {prjProducts.length < 4 &&
-                            Array.from({length: 4 - prjProducts.length}).map((_, idx) => (
-                              <div
-                                key={idx}
-                                className="aspect-square bg-neutral-100/60 dark:bg-neutral-900/40 border border-dashed border-neutral-200 dark:border-neutral-800"
-                              />
-                            ))}
+                          {prjProducts.length > 4 ? (
+                            <>
+                              {prjProducts.slice(0, 3).map(p => {
+                                const imgProps = getProductImageProps(p)
+                                return (
+                                  <div
+                                    key={p.id}
+                                    className="aspect-square bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 overflow-hidden relative flex items-center justify-center p-1"
+                                  >
+                                    <OptimizedImage
+                                      {...imgProps}
+                                      alt={t(p.name)}
+                                      width={100}
+                                      height={100}
+                                      className="w-full h-full object-contain"
+                                      fitAuto={true}
+                                    />
+                                  </div>
+                                )
+                              })}
+                              {/* 4th slot with +X overlay */}
+                              {(() => {
+                                const fourthProd = prjProducts[3]
+                                const imgProps = getProductImageProps(fourthProd)
+                                const remainingCount = prjProducts.length - 3
+                                return (
+                                  <Link
+                                    to={`/seckim/proje/${project.id}`}
+                                    key={fourthProd.id}
+                                    className="aspect-square bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 overflow-hidden relative flex items-center justify-center p-1 group/more block"
+                                    title={`${remainingCount} ${t('more_products') || 'ürün daha'}`}
+                                  >
+                                    <OptimizedImage
+                                      {...imgProps}
+                                      alt={t(fourthProd.name)}
+                                      width={100}
+                                      height={100}
+                                      className="w-full h-full object-contain opacity-40 blur-[0.5px]"
+                                      fitAuto={true}
+                                    />
+                                    <div className="absolute inset-0 bg-neutral-950/60 backdrop-blur-[1px] flex items-center justify-center text-white text-xs font-semibold tracking-wider transition-colors group-hover/more:bg-neutral-950/75">
+                                      +{remainingCount}
+                                    </div>
+                                  </Link>
+                                )
+                              })()}
+                            </>
+                          ) : (
+                            <>
+                              {prjProducts.slice(0, 4).map(p => {
+                                const imgProps = getProductImageProps(p)
+                                return (
+                                  <div
+                                    key={p.id}
+                                    className="aspect-square bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 overflow-hidden relative flex items-center justify-center p-1"
+                                  >
+                                    <OptimizedImage
+                                      {...imgProps}
+                                      alt={t(p.name)}
+                                      width={100}
+                                      height={100}
+                                      className="w-full h-full object-contain"
+                                      fitAuto={true}
+                                    />
+                                  </div>
+                                )
+                              })}
+                              {prjProducts.length < 4 &&
+                                Array.from({length: 4 - prjProducts.length}).map((_, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="aspect-square bg-neutral-100/60 dark:bg-neutral-900/40 border border-dashed border-neutral-200 dark:border-neutral-800"
+                                  />
+                                ))}
+                            </>
+                          )}
                         </div>
                       </div>
 
