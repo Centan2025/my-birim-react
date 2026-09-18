@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {useNavigate, Link} from 'react-router-dom'
+import {useNavigate, useSearchParams, Link} from 'react-router-dom'
 import {motion} from 'framer-motion'
 import {ArrowRight, UserCheck, CheckCircle2} from 'lucide-react'
 import {useAuth} from '../context/AuthContext'
@@ -16,8 +16,51 @@ import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 
+const TRUSTED_DOMAINS = [
+  'birim.com',
+  'www.birim.com',
+  'shop.birim.com',
+  'staging.birim.com',
+]
+
+function getSafeReturnUrl(targetUrl?: string | null): string {
+  if (!targetUrl || typeof targetUrl !== 'string') {
+    return '/hesabim'
+  }
+
+  const trimmed = targetUrl.trim()
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.startsWith('/\\')) {
+    return trimmed
+  }
+
+  try {
+    const parsed = new URL(trimmed)
+    const hostname = parsed.hostname.toLowerCase()
+
+    const isTrustedDomain = TRUSTED_DOMAINS.some(
+      (d) => hostname === d || hostname.endsWith(`.${d}`)
+    )
+    const isStagingOrDev =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname.endsWith('.vercel.app')
+
+    if (isTrustedDomain || isStagingOrDev) {
+      return trimmed
+    }
+  } catch {
+    // Malformed URL -> fallback
+  }
+
+  return '/hesabim'
+}
+
 export function LoginPage() {
-  const [isLoginMode, setIsLoginMode] = useState(true)
+  const [searchParams] = useSearchParams()
+  const returnToParam = searchParams.get('returnTo') || searchParams.get('redirect')
+  const modeParam = searchParams.get('mode') || searchParams.get('action')
+
+  const [isLoginMode, setIsLoginMode] = useState(modeParam !== 'register')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -37,6 +80,15 @@ export function LoginPage() {
   const {t} = useTranslation()
   const {reset} = useHeaderTheme()
 
+  const proceedToDestination = (destination?: string | null) => {
+    const safeUrl = getSafeReturnUrl(destination)
+    if (safeUrl.startsWith('http://') || safeUrl.startsWith('https://')) {
+      window.location.href = safeUrl
+    } else {
+      navigate(safeUrl, {replace: true})
+    }
+  }
+
   useEffect(() => {
     reset()
     return () => reset()
@@ -55,12 +107,12 @@ export function LoginPage() {
     locale: 'tr_TR',
   })
 
-  // Eğer kullanıcı zaten giriş yaptıysa, /login'e geldiğinde direkt hesabına yönlendir
+  // Eğer kullanıcı zaten giriş yaptıysa, returnTo veya /hesabim'e yönlendir
   useEffect(() => {
     if (auth.isLoggedIn) {
-      navigate('/hesabim', {replace: true})
+      proceedToDestination(returnToParam)
     }
-  }, [auth.isLoggedIn, navigate])
+  }, [auth.isLoggedIn, returnToParam])
 
   if (auth.isLoggedIn && auth.user) {
     return (
@@ -112,7 +164,7 @@ export function LoginPage() {
       if (user) {
         loginRateLimiter.reset(rateLimitKey)
         auth.login(user)
-        navigate('/hesabim')
+        proceedToDestination(returnToParam)
       } else {
         setError(t('invalid_credentials') || 'Geçersiz e-posta veya şifre')
         const remaining = rateLimitResult.remaining
@@ -164,7 +216,7 @@ export function LoginPage() {
         auth.login(user)
         setSuccess('Kayıt başarılı! Hesabınız oluşturuldu.')
         setTimeout(() => {
-          navigate('/hesabim')
+          proceedToDestination(returnToParam)
         }, 1000)
       } else {
         setSuccess('Kayıt başarılı! Lütfen e-posta kutunuzu kontrol edin ve üyeliğinizi onaylayın.')

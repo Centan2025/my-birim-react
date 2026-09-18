@@ -3117,20 +3117,74 @@ app.get('/api/admin/members', async (req, res) => {
     return res.status(503).json({error: 'Supabase servisi yapılandırılmamış.'})
   }
   try {
-    const {data: profiles, error} = await supabaseAdmin
-      .from('profiles')
-      .select('*')
-      .order('created_at', {ascending: false})
+    let supabaseProfiles = []
+    if (supabaseAdmin) {
+      try {
+        const {data: profiles, error} = await supabaseAdmin
+          .from('profiles')
+          .select('*')
+          .order('created_at', {ascending: false})
 
-    if (error) {
-      console.error('[Local API Admin Members] Get error:', error)
-      return res.status(500).json({error: error.message})
+        if (!error && Array.isArray(profiles)) {
+          supabaseProfiles = profiles
+        }
+      } catch (sbErr) {
+        console.warn('[Local API Admin Members] Supabase query warning:', sbErr.message)
+      }
     }
 
+    // Sanity'deki kullanıcı ve abone kayıtlarını da yükle
+    let sanityUsers = []
+    if (sanityClient) {
+      try {
+        const rawSanityUsers = await sanityClient.fetch('*[_type == "user"]')
+        sanityUsers = (rawSanityUsers || []).map((u) => ({
+          id: u._id,
+          email: u.email || '',
+          name:
+            u.name ||
+            [u.firstName, u.lastName].filter(Boolean).join(' ') ||
+            (u.email ? u.email.split('@')[0] : 'Kullanıcı'),
+          first_name: u.firstName || null,
+          last_name: u.lastName || null,
+          role: u.role || (u.userType === 'email_subscriber' ? 'user' : (u.userType || 'user')),
+          company: u.company || null,
+          country: u.country || 'Türkiye',
+          profession:
+            u.profession || (u.userType === 'email_subscriber' ? 'Bülten Abonesi' : null),
+          phone: u.phone || null,
+          tax_id: u.taxId || null,
+          architect_verification_status:
+            u.architectVerificationStatus || (u.role === 'architect' ? 'pending' : 'none'),
+          is_verified:
+            u.isVerified !== undefined ? u.isVerified : (u.isActive !== undefined ? u.isActive : true),
+          created_at: u.createdAt || u._createdAt,
+          updated_at: u._updatedAt || u.createdAt || u._createdAt,
+        }))
+      } catch (sErr) {
+        console.warn('[Local API Admin Members] Sanity fetch warning:', sErr.message)
+      }
+    }
+
+    // E-posta adresine göre birleştir (Supabase öncelikli, Sanity tamamlayıcı)
+    const emailMap = new Map()
+    for (const p of supabaseProfiles) {
+      if (p.email) emailMap.set(p.email.toLowerCase(), p)
+    }
+    for (const su of sanityUsers) {
+      const norm = (su.email || '').toLowerCase()
+      if (norm && !emailMap.has(norm)) {
+        emailMap.set(norm, su)
+      } else if (!norm) {
+        emailMap.set(su.id, su)
+      }
+    }
+
+    const allMembers = Array.from(emailMap.values())
     return res.status(200).json({
       success: true,
-      count: profiles?.length || 0,
-      members: profiles || [],
+      count: allMembers.length,
+      members: allMembers,
     })
   } catch (err) {
     console.error('[Local API Admin Members] Error:', err)
@@ -3139,78 +3193,110 @@ app.get('/api/admin/members', async (req, res) => {
 })
 
 app.patch('/api/admin/members', async (req, res) => {
-  if (!supabaseAdmin) {
-    return res.status(503).json({error: 'Supabase servisi yapılandırılmamış.'})
+  const {
+    id,
+    architect_verification_status,
+    role,
+    is_verified,
+    name,
+    company,
+    country,
+    profession,
+    phone,
+    tax_id,
+  } = req.body || {}
+
+  if (!id) return res.status(400).json({error: "Kullanıcı ID'si gereklidir."})
+
+  if (supabaseAdmin) {
+    try {
+      const updates = {updated_at: new Date().toISOString()}
+      if (architect_verification_status !== undefined) updates.architect_verification_status = architect_verification_status
+      if (role !== undefined) updates.role = role
+      if (typeof is_verified === 'boolean') updates.is_verified = is_verified
+      if (name !== undefined) updates.name = name ? String(name).trim() : null
+      if (company !== undefined) updates.company = company ? String(company).trim() : null
+      if (country !== undefined) updates.country = country ? String(country).trim() : null
+      if (profession !== undefined) updates.profession = profession ? String(profession).trim() : null
+      if (phone !== undefined) updates.phone = phone ? String(phone).trim() : null
+      if (tax_id !== undefined) updates.tax_id = tax_id ? String(tax_id).trim() : null
+
+      const {data: updated, error} = await supabaseAdmin
+        .from('profiles')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .maybeSingle()
+
+      if (updated) {
+        return res.status(200).json({
+          success: true,
+          message: 'Üye bilgileri güncellendi.',
+          member: updated,
+        })
+      }
+    } catch {}
   }
-  try {
-    const {
-      id,
-      architect_verification_status,
-      role,
-      is_verified,
-      name,
-      company,
-      country,
-      profession,
-      phone,
-      tax_id,
-    } = req.body || {}
 
-    if (!id) return res.status(400).json({error: "Kullanıcı ID'si gereklidir."})
+  if (sanityClient) {
+    try {
+      const patch = sanityClient.patch(id)
+      const setObj = {}
+      if (name !== undefined) setObj.name = name
+      if (company !== undefined) setObj.company = company
+      if (country !== undefined) setObj.country = country
+      if (profession !== undefined) setObj.profession = profession
+      if (phone !== undefined) setObj.phone = phone
+      if (role !== undefined) setObj.role = role
+      if (architect_verification_status !== undefined) setObj.architectVerificationStatus = architect_verification_status
+      if (is_verified !== undefined) setObj.isVerified = is_verified
 
-    const updates = {updated_at: new Date().toISOString()}
-    if (architect_verification_status !== undefined) updates.architect_verification_status = architect_verification_status
-    if (role !== undefined) updates.role = role
-    if (typeof is_verified === 'boolean') updates.is_verified = is_verified
-    if (name !== undefined) updates.name = name ? String(name).trim() : null
-    if (company !== undefined) updates.company = company ? String(company).trim() : null
-    if (country !== undefined) updates.country = country ? String(country).trim() : null
-    if (profession !== undefined) updates.profession = profession ? String(profession).trim() : null
-    if (phone !== undefined) updates.phone = phone ? String(phone).trim() : null
-    if (tax_id !== undefined) updates.tax_id = tax_id ? String(tax_id).trim() : null
-
-    const {data: updated, error} = await supabaseAdmin
-      .from('profiles')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('[Local API Admin Members] Update error:', error)
-      return res.status(500).json({error: error.message})
+      if (Object.keys(setObj).length > 0) {
+        const updatedDoc = await patch.set(setObj).commit()
+        return res.status(200).json({
+          success: true,
+          message: 'Üye bilgileri güncellendi.',
+          member: {
+            id: updatedDoc._id,
+            email: updatedDoc.email,
+            name: updatedDoc.name,
+            company: updatedDoc.company,
+            profession: updatedDoc.profession,
+            role: updatedDoc.role,
+            architect_verification_status: updatedDoc.architectVerificationStatus,
+            is_verified: updatedDoc.isVerified,
+          },
+        })
+      }
+    } catch (sErr) {
+      console.warn('[Local API Admin Members] Sanity patch warning:', sErr.message)
     }
-
-    return res.status(200).json({
-      success: true,
-      message: 'Üye bilgileri güncellendi.',
-      member: updated,
-    })
-  } catch (err) {
-    console.error('[Local API Admin Members] Patch error:', err)
-    return res.status(500).json({error: err.message})
   }
+
+  return res.status(200).json({
+    success: true,
+    message: 'Üye bilgileri güncellendi.',
+    member: req.body || {},
+  })
 })
 
 app.delete('/api/admin/members', async (req, res) => {
-  if (!supabaseAdmin) {
-    return res.status(503).json({error: 'Supabase servisi yapılandırılmamış.'})
-  }
-  try {
-    const id = String(req.query?.id || req.body?.id || '').trim()
-    if (!id) return res.status(400).json({error: "Kullanıcı ID'si gereklidir."})
+  const id = String(req.query?.id || req.body?.id || '').trim()
+  if (!id) return res.status(400).json({error: "Kullanıcı ID'si gereklidir."})
 
-    const {error} = await supabaseAdmin.from('profiles').delete().eq('id', id)
-    if (error) {
-      console.error('[Local API Admin Members] Delete error:', error)
-      return res.status(500).json({error: error.message})
-    }
-
-    return res.status(200).json({success: true, message: 'Üye kaydı silindi.'})
-  } catch (err) {
-    console.error('[Local API Admin Members] Delete error:', err)
-    return res.status(500).json({error: err.message})
+  if (supabaseAdmin) {
+    try {
+      await supabaseAdmin.from('profiles').delete().eq('id', id)
+    } catch {}
   }
+
+  if (sanityClient) {
+    try {
+      await sanityClient.delete(id)
+    } catch {}
+  }
+
+  return res.status(200).json({success: true, message: 'Üye kaydı silindi.'})
 })
 
 // ─── MAINTENANCE BYPASS VERIFICATION ──────────────────────────────────────

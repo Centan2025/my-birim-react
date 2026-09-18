@@ -321,7 +321,9 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
               S.listItem()
                 .title('UI Çevirileri (Sözlük)')
                 .icon(() => '📖')
-                .child(S.documentTypeList('uiTranslations').title('UI Çevirileri (Sözlük)')),
+                .child(
+                  S.documentTypeList('uiTranslations').title('UI Çevirileri (Sözlük)'),
+                ),
             ]),
         ),
 

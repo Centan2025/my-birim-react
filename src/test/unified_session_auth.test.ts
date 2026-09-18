@@ -1,4 +1,4 @@
-﻿import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest'
+import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {createToken, setAuthCookie, clearAuthCookie} from '../../lib/server/token'
 import {isOriginAllowed, handleCors} from '../../lib/server/cors'
@@ -428,6 +428,169 @@ describe('Unified Customer Account — Phase 1: Central Auth Session & Shop SSO'
       expect(order.id).toBe('order-guest-456')
       expect(order.guestToken).toBeDefined()
       expect(typeof order.guestToken).toBe('string')
+    })
+  })
+
+  describe('5. Central Registration Contract & Role Authority Protection', () => {
+    it('creates normal user with server-determined role when client sends no role', async () => {
+      const generatedUserId = 'sb-auth-user-999'
+      let upsertedProfile: Record<string, unknown> | null = null
+
+      const mockSupabaseAdmin = {
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({data: null, error: null}),
+            }),
+          }),
+          upsert: vi.fn().mockImplementation((record: Record<string, unknown>) => {
+            upsertedProfile = record
+            return Promise.resolve({data: record, error: null})
+          }),
+        }),
+        auth: {
+          admin: {
+            createUser: vi.fn().mockResolvedValue({
+              data: {
+                user: {
+                  id: generatedUserId,
+                  email: 'testcustomer@birim.com',
+                },
+              },
+              error: null,
+            }),
+          },
+        },
+      }
+
+      vi.spyOn(supabaseAdminModule, 'getSafeSupabaseAdmin').mockReturnValue(
+        mockSupabaseAdmin as unknown as import('@supabase/supabase-js').SupabaseClient
+      )
+
+      const {res, state} = createMockRes()
+      const req = createMockReq({
+        method: 'POST',
+        query: {action: 'register'},
+        url: '/api/auth/register',
+        body: {
+          email: 'testcustomer@birim.com',
+          password: 'Password123!',
+          firstName: 'Leyla',
+          lastName: 'Akın',
+        },
+      })
+
+      await authHandler(req, res)
+
+      expect(state.statusCode).toBe(201)
+      expect(upsertedProfile).toBeDefined()
+      expect(upsertedProfile?.['id']).toBe(generatedUserId)
+      expect(upsertedProfile?.['email']).toBe('testcustomer@birim.com')
+      expect(upsertedProfile?.['role']).toBe('user')
+      expect(upsertedProfile?.['is_verified']).toBe(false)
+      expect(upsertedProfile?.['architect_verification_status']).toBe('none')
+    })
+
+    it('blocks role elevation: rejects or ignores role=admin and forces canonical user role', async () => {
+      const generatedUserId = 'sb-auth-user-malicious-1'
+      let upsertedProfile: Record<string, unknown> | null = null
+
+      const mockSupabaseAdmin = {
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({data: null, error: null}),
+            }),
+          }),
+          upsert: vi.fn().mockImplementation((record: Record<string, unknown>) => {
+            upsertedProfile = record
+            return Promise.resolve({data: record, error: null})
+          }),
+        }),
+        auth: {
+          admin: {
+            createUser: vi.fn().mockResolvedValue({
+              data: {
+                user: {
+                  id: generatedUserId,
+                  email: 'hacker@birim.com',
+                },
+              },
+              error: null,
+            }),
+          },
+        },
+      }
+
+      vi.spyOn(supabaseAdminModule, 'getSafeSupabaseAdmin').mockReturnValue(
+        mockSupabaseAdmin as unknown as import('@supabase/supabase-js').SupabaseClient
+      )
+
+      const {res, state} = createMockRes()
+      const req = createMockReq({
+        method: 'POST',
+        query: {action: 'register'},
+        url: '/api/auth/register',
+        body: {
+          email: 'hacker@birim.com',
+          password: 'Password123!',
+          firstName: 'Evil',
+          lastName: 'User',
+          role: 'admin',
+          is_verified: true,
+          architect_verification_status: 'approved',
+          user_id: 'spoofed-id',
+        },
+      })
+
+      await authHandler(req, res)
+
+      expect(state.statusCode).toBe(201)
+      expect(upsertedProfile?.['id']).toBe(generatedUserId)
+      expect(upsertedProfile?.['role']).toBe('user')
+      expect(upsertedProfile?.['is_verified']).toBe(false)
+      expect(upsertedProfile?.['architect_verification_status']).toBe('none')
+    })
+
+    it('handles password reset request endpoint gracefully', async () => {
+      const mockSupabaseAdmin = {
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: {id: 'usr-reset-1', email: 'registered@birim.com', name: 'Ayşe'},
+                error: null,
+              }),
+            }),
+          }),
+        }),
+        auth: {
+          admin: {
+            updateUserById: vi.fn().mockResolvedValue({data: {}, error: null}),
+          },
+        },
+      }
+
+      vi.spyOn(supabaseAdminModule, 'getSafeSupabaseAdmin').mockReturnValue(
+        mockSupabaseAdmin as unknown as import('@supabase/supabase-js').SupabaseClient
+      )
+
+      const {res, state} = createMockRes()
+      const req = createMockReq({
+        method: 'POST',
+        query: {action: 'reset-password'},
+        url: '/api/auth/reset-password',
+        body: {
+          email: 'registered@birim.com',
+          action: 'request',
+        },
+      })
+
+      await authHandler(req, res)
+
+      expect(state.statusCode).toBe(200)
+      const body = state.body as {success: boolean; message: string}
+      expect(body.success).toBe(true)
     })
   })
 })
