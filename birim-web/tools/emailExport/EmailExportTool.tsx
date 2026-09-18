@@ -2,6 +2,7 @@ import {useState} from 'react'
 import {useClient} from 'sanity'
 import * as XLSX from 'xlsx'
 import styled from 'styled-components'
+import {getAdminApiUrl} from '../../utils/apiConfig'
 
 const Container = styled.div`
   padding: 2rem;
@@ -113,7 +114,7 @@ export function EmailExportTool() {
 
   const fetchAllUsers = async (): Promise<User[]> => {
     try {
-      const res = await fetch('/api/admin/members', {
+      const res = await fetch(getAdminApiUrl('/api/admin/members'), {
         method: 'GET',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',

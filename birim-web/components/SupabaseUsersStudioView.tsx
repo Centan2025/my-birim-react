@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useMemo} from 'react'
+import {getAdminApiUrl} from '../utils/apiConfig'
 
 export interface MemberProfile {
   id: string
@@ -57,14 +58,6 @@ export interface AuthUserDetails {
   email_confirmed_at?: string | null
   user_metadata?: Record<string, unknown>
   app_metadata?: Record<string, unknown>
-}
-
-function getAdminApiUrl(path: string): string {
-  if (typeof window === 'undefined') return path
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return `http://localhost:3002${path}`
-  }
-  return path
 }
 
 async function safeFetchAdmin(path: string, options: RequestInit = {}): Promise<Response> {

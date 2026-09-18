@@ -1,5 +1,6 @@
 import {useState, useEffect, useCallback} from 'react'
 import type {CommerceMetricsResponse, ControlCenterTimeRange} from '../types'
+import {getAdminApiUrl} from '../../../utils/apiConfig'
 
 export function useCommerceMetrics(range: ControlCenterTimeRange = '30d') {
   const [data, setData] = useState<CommerceMetricsResponse | null>(null)
@@ -13,13 +14,16 @@ export function useCommerceMetrics(range: ControlCenterTimeRange = '30d') {
     setIsUnauthorized(false)
 
     try {
-      const res = await fetch(`/api/admin/commerce/metrics?range=${encodeURIComponent(range)}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      const res = await fetch(
+        getAdminApiUrl(`/api/admin/commerce/metrics?range=${encodeURIComponent(range)}`),
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
 
       if (res.status === 401 || res.status === 403) {
         setIsUnauthorized(true)

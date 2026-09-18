@@ -1,5 +1,6 @@
 import {useState, useEffect, useCallback} from 'react'
 import type {ProductPerformanceResponse, ControlCenterTimeRange} from '../types'
+import {getAdminApiUrl} from '../../../utils/apiConfig'
 
 export function useProductPerformance(
   range: ControlCenterTimeRange = '30d',
@@ -16,7 +17,9 @@ export function useProductPerformance(
     setIsUnauthorized(false)
 
     try {
-      const url = `/api/admin/analytics/products?range=${encodeURIComponent(range)}&currency=${encodeURIComponent(currency)}`
+      const url = getAdminApiUrl(
+        `/api/admin/analytics/products?range=${encodeURIComponent(range)}&currency=${encodeURIComponent(currency)}`
+      )
       const res = await fetch(url, {
         method: 'GET',
         credentials: 'include',

@@ -1,5 +1,6 @@
 import {useState, useEffect, useCallback} from 'react'
 import type {OrderSummaryItem, RecentOrdersResponse} from '../types'
+import {getAdminApiUrl} from '../../../utils/apiConfig'
 
 export function useRecentOrders(limit: number = 6) {
   const [orders, setOrders] = useState<OrderSummaryItem[]>([])
@@ -11,7 +12,7 @@ export function useRecentOrders(limit: number = 6) {
     setError(null)
 
     try {
-      const res = await fetch(`/api/admin/commerce/orders?limit=${limit}`, {
+      const res = await fetch(getAdminApiUrl(`/api/admin/commerce/orders?limit=${limit}`), {
         method: 'GET',
         credentials: 'include',
         headers: {
