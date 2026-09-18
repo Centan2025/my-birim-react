@@ -1,22 +1,22 @@
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {z} from 'zod'
-import {handleCors} from '../../lib/server/cors.js'
-import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
-import {validateCart} from '../../lib/commerce/cart-validator.js'
-import {validateCheckout} from '../../lib/commerce/checkout-validator.js'
+import {handleCors} from '../lib/server/cors.js'
+import {isRateLimitedAsync, getClientIp} from '../lib/server/rateLimiter.js'
+import {validateCart} from '../lib/commerce/cart-validator.js'
+import {validateCheckout} from '../lib/commerce/checkout-validator.js'
 import {
   createCommerceOrder,
   getCommerceOrderById,
   listCommerceOrdersForUser,
-} from '../../lib/commerce/order-service.js'
+} from '../lib/commerce/order-service.js'
 import {
   initiatePayment,
   getPaymentStatus,
   handlePaymentCallback,
-} from '../../lib/commerce/payment/payment-service.js'
-import {PaymentError} from '../../lib/commerce/payment/errors.js'
-import {CommerceValidationError} from '../../lib/commerce/types.js'
-import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
+} from '../lib/commerce/payment/payment-service.js'
+import {PaymentError} from '../lib/commerce/payment/errors.js'
+import {CommerceValidationError} from '../lib/commerce/types.js'
+import {getAuthTokenFromReq, verifyToken} from '../lib/server/token.js'
 
 // Strict cart validation schema
 const cartItemSchema = z

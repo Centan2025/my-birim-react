@@ -1,7 +1,7 @@
 ﻿import type {VercelRequest, VercelResponse} from '@vercel/node'
-import {handleCors} from '../../lib/server/cors.js'
-import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
-import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
+import {handleCors} from '../lib/server/cors.js'
+import {isRateLimitedAsync, getClientIp} from '../lib/server/rateLimiter.js'
+import {getAuthTokenFromReq, verifyToken} from '../lib/server/token.js'
 import {
   AccountError,
   getProfileForUser,
@@ -18,7 +18,7 @@ import {
   setDefaultBillingProfileForUser,
   listOrdersForUser,
   getOrderForUser,
-} from '../../lib/account/account-service.js'
+} from '../lib/account/account-service.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (
