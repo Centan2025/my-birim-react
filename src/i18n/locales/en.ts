@@ -308,6 +308,11 @@ export default {
   remove_from_selection: 'Remove from Selections',
   clear_all_selections: 'Clear All',
   clear_selection_confirm: 'Are you sure you want to clear all selected products?',
+  clear_modal_title: 'CLEAR YOUR SELECTIONS',
+  clear_modal_desc:
+    'All selected products ({0} items) will be removed from your list. Are you sure you want to proceed?',
+  confirm_clear: 'YES, CLEAR',
+  clearing: 'CLEARING...',
   add_to_project: 'Add to Project',
   create_new_project: 'Create New Project',
   no_selections_yet: 'You have no selections yet',

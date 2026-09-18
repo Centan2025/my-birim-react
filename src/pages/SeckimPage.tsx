@@ -11,6 +11,7 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {CreateProjectModal} from '../components/seckim/CreateProjectModal'
 import {AddToProjectModal} from '../components/seckim/AddToProjectModal'
 import {InquiryModal} from '../components/seckim/InquiryModal'
+import {ClearSelectionModal} from '../components/seckim/ClearSelectionModal'
 import {generateSeckimPDF} from '../utils/pdfGenerator'
 import type {Product, Category, Designer} from '../types'
 import {getLocalizedText, getProductImageProps, type UserProject} from '../types/seckim'
@@ -49,6 +50,7 @@ export function SeckimPage() {
   const {data: designers = []} = useDesigners()
 
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false)
   const [addToProjectTarget, setAddToProjectTarget] = useState<{id: string; name: string} | null>(
     null
   )
@@ -118,9 +120,7 @@ export function SeckimPage() {
 
   const handleClearAll = () => {
     if (selectedProducts.length === 0) return
-    if (window.confirm(t('clear_selection_confirm'))) {
-      clearSelection()
-    }
+    setIsClearModalOpen(true)
   }
 
   if (!isSelectionEnabled) {
@@ -637,6 +637,13 @@ export function SeckimPage() {
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}
         selectedProducts={selectedProducts}
+      />
+
+      <ClearSelectionModal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        onConfirm={clearSelection}
+        count={selectedProducts.length}
       />
     </div>
   )

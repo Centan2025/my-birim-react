@@ -48,7 +48,7 @@ export interface SelectionContextType {
   addToSelection: (productId: string, productName?: string) => void
   removeFromSelection: (productId: string) => void
   toggleSelection: (productId: string, productName?: string) => void
-  clearSelection: () => void
+  clearSelection: () => Promise<boolean>
   createProject: (
     name: string,
     description?: string,
@@ -329,15 +329,37 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
     [selectedProductIds, removeFromSelection, addToSelection]
   )
 
-  const clearSelection = useCallback(() => {
+  const clearSelection = useCallback(async (): Promise<boolean> => {
+    isSyncingRef.current = true
     setSelectedProductIds([])
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(STORAGE_KEYS.SELECTIONS, JSON.stringify([]))
+      }
+    } catch {
+      // ignore
+    }
+
     analytics.event({
       category: 'seckim',
       action: 'selection_cleared',
     })
+
+    let isSuccess = true
     if (isLoggedIn && user?._id) {
-      clearUserSelections(user._id).catch(() => {})
+      try {
+        isSuccess = await clearUserSelections(user._id)
+      } catch (err) {
+        console.warn('clearUserSelections error:', err)
+        isSuccess = false
+      }
     }
+
+    setTimeout(() => {
+      isSyncingRef.current = false
+    }, 600)
+
+    return isSuccess
   }, [isLoggedIn, user?._id])
 
   const createProject = useCallback(

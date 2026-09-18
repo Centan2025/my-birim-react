@@ -8,6 +8,7 @@ import {useTranslation} from '../../i18n'
 import {useFocusTrap} from '../../hooks/useFocusTrap'
 import {OptimizedImage} from '../OptimizedImage'
 import {InquiryModal} from './InquiryModal'
+import {ClearSelectionModal} from './ClearSelectionModal'
 import type {Product, Category} from '../../types'
 import {getProductImageProps} from '../../types/seckim'
 
@@ -19,6 +20,7 @@ export const SelectionDrawer: React.FC = () => {
   const {t} = useTranslation()
   const navigate = useNavigate()
   const [isInquiryOpen, setIsInquiryOpen] = useState(false)
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false)
 
   const drawerRef = useFocusTrap(isDrawerOpen, closeDrawer)
 
@@ -47,9 +49,7 @@ export const SelectionDrawer: React.FC = () => {
 
   const handleClearAll = () => {
     if (selectedProducts.length === 0) return
-    if (window.confirm(t('clear_selection_confirm'))) {
-      clearSelection()
-    }
+    setIsClearModalOpen(true)
   }
 
   return (
@@ -312,6 +312,14 @@ export const SelectionDrawer: React.FC = () => {
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}
         selectedProducts={selectedProducts}
+      />
+
+      {/* Clear Selection Confirmation Modal */}
+      <ClearSelectionModal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        onConfirm={clearSelection}
+        count={selectedProducts.length}
       />
     </>
   )
