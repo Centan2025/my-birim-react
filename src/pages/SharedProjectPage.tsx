@@ -65,9 +65,9 @@ export function SharedProjectPage() {
 
   useSEO({
     title: project
-      ? `${project.name} • Proje Seçtikleri | Birim Mobilya`
-      : 'Paylaşılan Proje • Birim Mobilya',
-    description: project?.description || 'Birim Mobilya mimari mobilya seçtikleri.',
+      ? `${project.name} • ${t('project_selection')} | Birim Mobilya`
+      : `${t('shared_architectural_selection')} • Birim Mobilya`,
+    description: project?.description || t('project_default_desc'),
   })
 
   const categoryMap = useMemo(() => {
@@ -114,7 +114,7 @@ export function SharedProjectPage() {
       URL.revokeObjectURL(url)
     } catch (err) {
       console.error('PDF error:', err)
-      alert('PDF oluşturulurken bir hata oluştu.')
+      alert(t('pdf_download_error'))
     } finally {
       setIsGeneratingPdf(false)
     }
@@ -140,16 +140,16 @@ export function SharedProjectPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 pt-24">
         <h2 className="text-xl font-light uppercase tracking-wider text-[var(--text-primary)]">
-          Paylaşılan Proje Bulunamadı
+          {t('shared_project_not_found')}
         </h2>
         <p className="text-xs text-[var(--text-secondary)] mt-2 font-light">
-          Bu proje bağlantısı geçersiz, kaldırılmış veya erişime kapatılmış olabilir.
+          {t('shared_project_not_found_desc')}
         </p>
         <Link
           to="/"
           className="mt-6 px-6 py-2.5 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all"
         >
-          ANA SAYFAYA DÖN
+          {t('back_to_homepage')}
         </Link>
       </div>
     )
@@ -166,7 +166,7 @@ export function SharedProjectPage() {
             </span>
             <span className="text-neutral-300 dark:text-neutral-700">|</span>
             <span className="text-[11px] font-mono tracking-wider text-neutral-500 uppercase">
-              PAYLAŞILAN MİMARİ SEÇKİ
+              {t('shared_architectural_selection')}
             </span>
           </div>
 
@@ -174,7 +174,7 @@ export function SharedProjectPage() {
             to="/products"
             className="text-[11px] tracking-wider uppercase font-medium hover:underline text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           >
-            TÜM KOLEKSİYON →
+            {t('all_collection')}
           </Link>
         </div>
       </div>
@@ -184,7 +184,7 @@ export function SharedProjectPage() {
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-[var(--border-primary)]">
           <div>
             <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-400">
-              PROJE SEÇKİSİ • {projectProducts.length} ÜRÜN
+              {t('project_selection')} • {t('total_products_count', projectProducts.length)}
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-[var(--text-primary)] mt-2">
               {project.name}
@@ -213,7 +213,7 @@ export function SharedProjectPage() {
               >
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
               </svg>
-              <span>{copiedAll ? 'SEÇKİME EKLENDİ ✓' : 'SEÇKİME EKLE'}</span>
+              <span>{copiedAll ? t('added_to_my_selection') : t('add_to_my_selection')}</span>
             </button>
 
             {/* PDF Export */}
@@ -227,7 +227,7 @@ export function SharedProjectPage() {
                 {isGeneratingPdf ? (
                   <>
                     <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    <span>HAZIRLANIYOR...</span>
+                    <span>{t('generating_pdf')}</span>
                   </>
                 ) : (
                   <>
@@ -243,7 +243,7 @@ export function SharedProjectPage() {
                       <line x1="12" y1="18" x2="12" y2="12" />
                       <line x1="9" y1="15" x2="15" y2="15" />
                     </svg>
-                    <span>PDF İNDİR</span>
+                    <span>{t('create_pdf')}</span>
                   </>
                 )}
               </button>
@@ -266,7 +266,7 @@ export function SharedProjectPage() {
                   <path d="M22 2L11 13" />
                   <polygon points="22 2 15 22 11 13 2 9 22 2" />
                 </svg>
-                <span>BİLGİ / TEKLİF AL</span>
+                <span>{t('get_info_quote')}</span>
               </button>
             )}
           </div>
@@ -346,7 +346,7 @@ export function SharedProjectPage() {
                         to={`/product/${product.id}`}
                         className="text-[11px] font-medium tracking-wider uppercase text-[var(--text-primary)] hover:underline underline-offset-4"
                       >
-                        ÜRÜNÜ İNCELE →
+                        {t('view_product_action')}
                       </Link>
 
                       <button
@@ -354,7 +354,7 @@ export function SharedProjectPage() {
                         onClick={() => addToSelection(product.id, getLocalizedText(product.name))}
                         className="text-[11px] font-light text-neutral-500 hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                       >
-                        + Seçtiklerime Ekle
+                        + {t('add_to_selection')}
                       </button>
                     </div>
                   </div>

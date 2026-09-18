@@ -16,7 +16,7 @@ import {getProductImageProps, type UserProject} from '../types/seckim'
 export function SeckimProjectDetailPage() {
   const {projectId} = useParams<{projectId: string}>()
   const navigate = useNavigate()
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
 
   const {projects, removeProductFromProject, deleteProject, updateProject, isSelectionEnabled} =
     useSelection()
@@ -41,8 +41,8 @@ export function SeckimProjectDetailPage() {
   }, [projects, projectId])
 
   useSEO({
-    title: project ? `${project.name} • Proje Seçtikleri` : 'Proje Seçtikleri',
-    description: project?.description || 'Birim Mobilya proje ürün seçtikleri.',
+    title: project ? `${project.name} • ${t('project_selection')}` : t('project_selection'),
+    description: project?.description || t('project_default_desc'),
   })
 
   const categoryMap = useMemo(() => {
@@ -75,20 +75,22 @@ export function SeckimProjectDetailPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 pt-24">
         <h2 className="text-xl font-light uppercase tracking-wider text-[var(--text-primary)]">
-          Proje Bulunamadı
+          {t('project_not_found_title')}
         </h2>
         <p className="text-xs text-[var(--text-secondary)] mt-2 font-light">
-          İstediğiniz proje silinmiş veya mevcut değil.
+          {t('project_not_found_desc')}
         </p>
         <Link
           to="/seckim?tab=projeler"
           className="mt-6 px-6 py-2.5 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all"
         >
-          PROJELERİM'E DÖN
+          {t('back_to_projects')}
         </Link>
       </div>
     )
   }
+
+  const upperLocale = locale === 'tr' ? 'tr-TR' : 'en-US'
 
   const handlePdfDownload = async () => {
     if (projectProducts.length === 0) return
@@ -112,7 +114,7 @@ export function SeckimProjectDetailPage() {
       URL.revokeObjectURL(url)
     } catch (err) {
       console.error('PDF error:', err)
-      alert('PDF oluşturulurken bir sorun oluştu.')
+      alert(t('pdf_download_error'))
     } finally {
       setIsGeneratingPdf(false)
     }
@@ -133,12 +135,12 @@ export function SeckimProjectDetailPage() {
       setCopiedShare(true)
       setTimeout(() => setCopiedShare(false), 3000)
     } catch {
-      prompt('Paylaşılabilir proje bağlantısı:', shareUrl)
+      prompt(t('share') + ':', shareUrl)
     }
   }
 
   const handleDelete = async () => {
-    if (window.confirm(`"${project.name}" projesini silmek istediğinize emin misiniz?`)) {
+    if (window.confirm(t('delete_project_confirm', project.name))) {
       await deleteProject(project.id)
       navigate('/seckim?tab=projeler')
     }
@@ -150,10 +152,10 @@ export function SeckimProjectDetailPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-4">
         <Breadcrumbs
           items={[
-            {label: t('homepage') || 'ANASAYFA', to: '/'},
-            {label: 'SEÇTİKLERİM', to: '/seckim'},
-            {label: 'PROJELERİM', to: '/seckim?tab=projeler'},
-            {label: project.name.toUpperCase(), to: `/seckim/proje/${project.id}`},
+            {label: (t('homepage') || 'ANASAYFA').toLocaleUpperCase(upperLocale), to: '/'},
+            {label: (t('seckim') || 'SEÇTİKLERİM').toLocaleUpperCase(upperLocale), to: '/seckim'},
+            {label: (t('my_projects') || 'PROJELERİM').toLocaleUpperCase(upperLocale), to: '/seckim?tab=projeler'},
+            {label: project.name.toLocaleUpperCase(upperLocale), to: `/seckim/proje/${project.id}`},
           ]}
         />
       </div>
@@ -164,11 +166,11 @@ export function SeckimProjectDetailPage() {
           <div>
             <div className="flex items-center gap-3">
               <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-400">
-                PROJE SEÇKİSİ
+                {t('project_selection')}
               </span>
               <span className="text-[11px] font-mono uppercase text-neutral-400">•</span>
               <span className="text-[11px] font-mono uppercase text-neutral-500">
-                {projectProducts.length} ÜRÜN
+                {t('total_products_count', projectProducts.length)}
               </span>
             </div>
 
@@ -182,7 +184,7 @@ export function SeckimProjectDetailPage() {
               </p>
             ) : (
               <p className="text-xs sm:text-sm text-neutral-400 font-light mt-1 italic">
-                Projeniz için oluşturduğunuz ürün seçtikleri.
+                {t('project_default_desc')}
               </p>
             )}
           </div>
@@ -194,7 +196,7 @@ export function SeckimProjectDetailPage() {
               type="button"
               onClick={handleShare}
               className="inline-flex items-center gap-2 px-4 py-2.5 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold transition-colors cursor-pointer"
-              title="Paylaşılabilir bağlantıyı kopyala"
+              title={t('share')}
             >
               <svg
                 className="w-3.5 h-3.5"
@@ -209,7 +211,7 @@ export function SeckimProjectDetailPage() {
                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
               </svg>
-              <span>{copiedShare ? 'KOPYALANDI ✓' : 'PAYLAŞ'}</span>
+              <span>{copiedShare ? t('copied_share') : t('share')}</span>
             </button>
 
             {/* PDF Export */}
@@ -223,7 +225,7 @@ export function SeckimProjectDetailPage() {
                 {isGeneratingPdf ? (
                   <>
                     <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    <span>HAZIRLANIYOR...</span>
+                    <span>{t('generating_pdf')}</span>
                   </>
                 ) : (
                   <>
@@ -239,7 +241,7 @@ export function SeckimProjectDetailPage() {
                       <line x1="12" y1="18" x2="12" y2="12" />
                       <line x1="9" y1="15" x2="15" y2="15" />
                     </svg>
-                    <span>PDF OLUŞTUR</span>
+                    <span>{t('create_pdf')}</span>
                   </>
                 )}
               </button>
@@ -262,7 +264,7 @@ export function SeckimProjectDetailPage() {
                   <path d="M22 2L11 13" />
                   <polygon points="22 2 15 22 11 13 2 9 22 2" />
                 </svg>
-                <span>BİLGİ / TEKLİF AL</span>
+                <span>{t('get_info_quote')}</span>
               </button>
             )}
 
@@ -271,8 +273,8 @@ export function SeckimProjectDetailPage() {
               type="button"
               onClick={handleDelete}
               className="p-2.5 text-neutral-400 hover:text-red-600 transition-colors cursor-pointer"
-              title="Projeyi sil"
-              aria-label="Projeyi sil"
+              title={t('delete_project')}
+              aria-label={t('delete_project')}
             >
               <svg
                 className="w-4 h-4"
@@ -317,17 +319,16 @@ export function SeckimProjectDetailPage() {
                 </svg>
               </div>
               <h2 className="text-xl font-light uppercase tracking-wider text-[var(--text-primary)]">
-                Bu projede henüz ürün yok
+                {t('no_products_in_project')}
               </h2>
               <p className="text-xs text-[var(--text-secondary)] mt-2 font-light leading-relaxed">
-                Beğendiğiniz mobilyaları ürün kartı veya ürün detayı üzerinden bu projeye
-                ekleyebilirsiniz.
+                {t('no_products_in_project_desc')}
               </p>
               <Link
                 to="/products"
                 className="mt-8 inline-block px-8 py-3.5 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all"
               >
-                ÜRÜNLERİ İNCELE
+                {t('explore_products')}
               </Link>
             </div>
           ) : (
@@ -405,7 +406,7 @@ export function SeckimProjectDetailPage() {
                           to={`/product/${product.id}`}
                           className="text-[11px] font-medium tracking-wider uppercase text-[var(--text-primary)] hover:underline underline-offset-4"
                         >
-                          İNCELE →
+                          {t('view_product_action')}
                         </Link>
 
                         <button
@@ -413,7 +414,7 @@ export function SeckimProjectDetailPage() {
                           onClick={() => removeProductFromProject(project.id, product.id)}
                           className="text-[11px] font-light text-neutral-400 hover:text-red-600 transition-colors cursor-pointer"
                         >
-                          Projeden Çıkar
+                          {t('remove_from_project')}
                         </button>
                       </div>
                     </div>

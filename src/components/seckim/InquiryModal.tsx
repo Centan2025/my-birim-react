@@ -40,7 +40,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim() || !email.trim()) {
-      setErrorMessage('Lütfen adınızı ve e-posta adresinizi girin.')
+      setErrorMessage(t('inquiry_required_fields'))
       return
     }
 
@@ -97,10 +97,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
       if (res.success) {
         setIsSuccess(true)
       } else {
-        setErrorMessage('Talebiniz iletilirken bir sorun oluştu. Lütfen tekrar deneyin.')
+        setErrorMessage(t('inquiry_submit_error'))
       }
     } catch {
-      setErrorMessage('İşlem sırasında bir sorun oluştu. Lütfen tekrar deneyin.')
+      setErrorMessage(t('inquiry_submit_error'))
     } finally {
       setLoading(false)
     }
@@ -123,7 +123,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
           className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
-          aria-label="Bilgi ve Teklif Talebi"
+          aria-label={t('inquiry_modal_title')}
         >
           <motion.div
             initial={{opacity: 0}}
@@ -146,10 +146,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
             <div className="px-6 py-5 border-b border-[var(--border-primary)] flex items-center justify-between sticky top-0 bg-[var(--bg-primary)] z-10">
               <div>
                 <span className="text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
-                  BİRİM PROJE DESTEĞİ
+                  {t('inquiry_support_tag')}
                 </span>
                 <h3 className="text-lg font-light tracking-wide uppercase text-[var(--text-primary)] mt-0.5">
-                  BİLGİ & TEKLİF TALEBİ
+                  {t('inquiry_modal_title')}
                 </h3>
               </div>
 
@@ -157,7 +157,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 type="button"
                 onClick={handleClose}
                 className="p-1.5 text-neutral-400 hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                aria-label="Kapat"
+                aria-label={t('close') || 'Kapat'}
               >
                 <svg
                   className="w-5 h-5"
@@ -188,18 +188,17 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                     </svg>
                   </div>
                   <h4 className="text-lg font-light uppercase tracking-wider text-[var(--text-primary)]">
-                    Talebiniz Alındı
+                    {t('inquiry_success_title')}
                   </h4>
                   <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto font-light leading-relaxed">
-                    Seçtiğiniz ürünlerle ilgili talebiniz Birim proje ve mimari ekibimize
-                    iletilmiştir. En kısa sürede sizinle iletişime geçeceğiz.
+                    {t('inquiry_success_desc')}
                   </p>
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="mt-6 px-8 py-3 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all"
+                    className="mt-6 px-8 py-3 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all cursor-pointer"
                   >
-                    TAMAM
+                    {t('done')}
                   </button>
                 </div>
               ) : (
@@ -207,7 +206,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   {/* Selected Products Preview Box */}
                   <div>
                     <label className="block text-[11px] font-mono uppercase tracking-widest text-neutral-400 mb-2">
-                      SEÇİLEN ÜRÜNLER ({selectedProducts.length})
+                      {t('selected_products_label', selectedProducts.length)}
                     </label>
                     <div className="p-3 bg-neutral-50 dark:bg-neutral-900/70 border border-neutral-200/80 dark:border-neutral-800 flex flex-wrap gap-2 max-h-28 overflow-y-auto">
                       {selectedProducts.map(p => (
@@ -225,7 +224,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="inquiry-name" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
-                        Ad Soyad *
+                        {t('full_name')} *
                       </label>
                       <input
                         id="inquiry-name"
@@ -235,14 +234,14 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                         required
                         value={name}
                         onChange={e => setName(e.target.value)}
-                        placeholder="Adınız Soyadınız"
+                        placeholder={t('full_name_placeholder')}
                         className="w-full px-3.5 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 text-xs focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-colors"
                       />
                     </div>
 
                     <div>
                       <label htmlFor="inquiry-company" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
-                        Firma / Ofis
+                        {t('company_or_office')}
                       </label>
                       <input
                         id="inquiry-company"
@@ -251,7 +250,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                         autoComplete="organization"
                         value={company}
                         onChange={e => setCompany(e.target.value)}
-                        placeholder="Mimarlık Ofisi / Şirket"
+                        placeholder={t('company_placeholder_inquiry')}
                         className="w-full px-3.5 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 text-xs focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-colors"
                       />
                     </div>
@@ -260,7 +259,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="inquiry-email" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
-                        E-Posta *
+                        {t('email_required')}
                       </label>
                       <input
                         id="inquiry-email"
@@ -277,7 +276,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
 
                     <div>
                       <label htmlFor="inquiry-phone" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
-                        Telefon
+                        {t('phone_label')}
                       </label>
                       <input
                         id="inquiry-phone"
@@ -294,7 +293,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
 
                   <div>
                     <label htmlFor="inquiry-project-name" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
-                      Proje Adı / Lokasyon
+                      {t('project_name_or_location')}
                     </label>
                     <input
                       id="inquiry-project-name"
@@ -302,14 +301,14 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                       type="text"
                       value={currentProjectName}
                       onChange={e => setCurrentProjectName(e.target.value)}
-                      placeholder="Örn: Bodrum Villa Projesi, İstanbul Ofis"
+                      placeholder={t('project_location_placeholder')}
                       className="w-full px-3.5 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 text-xs focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-colors"
                     />
                   </div>
 
                   <div>
                     <label htmlFor="inquiry-message" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
-                      Notunuz / Özel Talepleriniz
+                      {t('notes_or_requests')}
                     </label>
                     <textarea
                       id="inquiry-message"
@@ -317,7 +316,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                       rows={3}
                       value={message}
                       onChange={e => setMessage(e.target.value)}
-                      placeholder="Malzeme tercihleri, proje teslim tarihi veya adetler hakkında bilgi ekleyebilirsiniz..."
+                      placeholder={t('inquiry_notes_placeholder')}
                       className="w-full px-3.5 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 text-xs focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-colors resize-none font-light"
                     />
                   </div>
@@ -334,7 +333,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                       onClick={handleClose}
                       className="px-5 py-3 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold hover:bg-[var(--bg-tertiary)] transition-colors cursor-pointer"
                     >
-                      VAZGEÇ
+                      {t('cancel')}
                     </button>
 
                     <button
@@ -345,10 +344,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                       {loading ? (
                         <>
                           <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          <span>GÖNDERİLİYOR...</span>
+                          <span>{t('sending')}</span>
                         </>
                       ) : (
-                        <span>BİRİM'E GÖNDER</span>
+                        <span>{t('submit_inquiry')}</span>
                       )}
                     </button>
                   </div>

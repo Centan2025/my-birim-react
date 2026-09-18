@@ -3,6 +3,7 @@ import {createPortal} from 'react-dom'
 import {motion, AnimatePresence} from 'framer-motion'
 import {useFocusTrap} from '../../hooks/useFocusTrap'
 import {useSelection} from '../../context/SelectionContext'
+import {useTranslation} from '../../i18n'
 import type {UserProject} from '../../types/seckim'
 
 interface CreateProjectModalProps {
@@ -19,6 +20,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   initialProductIds = [],
 }) => {
   const {createProject} = useSelection()
+  const {t} = useTranslation()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
@@ -28,7 +30,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) {
-      setError('Lütfen bir proje adı girin.')
+      setError(t('project_name_required'))
       return
     }
 
@@ -42,10 +44,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         onCreated?.(prj)
         onClose()
       } else {
-        setError('Proje oluşturulurken bir sorun oluştu.')
+        setError(t('project_create_error'))
       }
     } catch {
-      setError('İşlem sırasında bir hata oluştu.')
+      setError(t('project_create_error'))
     } finally {
       setLoading(false)
     }
@@ -60,7 +62,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="Yeni Proje Oluştur"
+          aria-label={t('create_new_project_title')}
         >
           <motion.div
             initial={{opacity: 0}}
@@ -81,13 +83,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           >
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border-primary)]">
               <h3 className="text-base font-light uppercase tracking-wider text-[var(--text-primary)]">
-                YENİ PROJE OLUŞTUR
+                {t('create_new_project_title')}
               </h3>
               <button
                 type="button"
                 onClick={onClose}
                 className="p-1 text-neutral-400 hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                aria-label="Kapat"
+                aria-label={t('close') || 'Kapat'}
               >
                 <svg
                   className="w-4 h-4"
@@ -105,7 +107,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
                 <label htmlFor="create-project-name" className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                  Proje Adı *
+                  {t('project_name_label')}
                 </label>
                 <input
                   id="create-project-name"
@@ -114,14 +116,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   required
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  placeholder="Örn: İstanbul Villa, Bodrum Residence"
+                  placeholder={t('project_name_placeholder')}
                   className="w-full px-3.5 py-2.5 bg-transparent border border-[var(--border-primary)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
                 />
               </div>
 
               <div>
                 <label htmlFor="create-project-desc" className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                  Proje Açıklaması (Opsiyonel)
+                  {t('project_desc_label')}
                 </label>
                 <textarea
                   id="create-project-desc"
@@ -129,7 +131,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   rows={2}
                   value={description}
                   onChange={e => setDescription(e.target.value)}
-                  placeholder="Projenin konumu, kapsamı veya notlarınız..."
+                  placeholder={t('project_desc_placeholder')}
                   className="w-full px-3.5 py-2.5 bg-transparent border border-[var(--border-primary)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors resize-none font-light"
                 />
               </div>
@@ -146,14 +148,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   onClick={onClose}
                   className="px-4 py-2.5 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-wider font-semibold hover:bg-[var(--bg-tertiary)] transition-colors cursor-pointer"
                 >
-                  VAZGEÇ
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-6 py-2.5 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] disabled:opacity-50 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
                 >
-                  {loading ? 'KAYDEDİLİYOR...' : 'OLUŞTUR'}
+                  {loading ? t('saving') : t('create')}
                 </button>
               </div>
             </form>
