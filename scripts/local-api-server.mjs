@@ -1154,8 +1154,8 @@ app.post('/api/account/addresses/:id/default', requireLocalAuth, async (req, res
   }
 })
 
-// ─── /api/account/billing ─────────────────────────────────────────────────
-app.get('/api/account/billing', requireLocalAuth, async (req, res) => {
+// ─── /api/account/billing & /api/account/billing-profiles ────────────────
+const handleGetBillingProfiles = async (req, res) => {
   if (!supabaseAdmin) return res.status(200).json({success: true, billingProfiles: []})
   try {
     const {data, error} = await supabaseAdmin
@@ -1190,9 +1190,9 @@ app.get('/api/account/billing', requireLocalAuth, async (req, res) => {
   } catch {
     return res.status(200).json({success: true, billingProfiles: []})
   }
-})
+}
 
-app.post('/api/account/billing', requireLocalAuth, async (req, res) => {
+const handlePostBillingProfile = async (req, res) => {
   if (!supabaseAdmin) return res.status(503).json({error: 'Supabase servisi yok.'})
   try {
     const body = req.body || {}
@@ -1252,9 +1252,9 @@ app.post('/api/account/billing', requireLocalAuth, async (req, res) => {
   } catch (err) {
     return res.status(500).json({error: err.message})
   }
-})
+}
 
-app.delete('/api/account/billing/:id', requireLocalAuth, async (req, res) => {
+const handleDeleteBillingProfile = async (req, res) => {
   if (!supabaseAdmin) return res.status(503).json({error: 'Supabase servisi yok.'})
   try {
     const {error} = await supabaseAdmin
@@ -1268,9 +1268,9 @@ app.delete('/api/account/billing/:id', requireLocalAuth, async (req, res) => {
   } catch (err) {
     return res.status(500).json({error: err.message})
   }
-})
+}
 
-app.post('/api/account/billing/:id/default', requireLocalAuth, async (req, res) => {
+const handleDefaultBillingProfile = async (req, res) => {
   if (!supabaseAdmin) return res.status(503).json({error: 'Supabase servisi yok.'})
   try {
     await supabaseAdmin
@@ -1312,7 +1312,16 @@ app.post('/api/account/billing/:id/default', requireLocalAuth, async (req, res) 
   } catch (err) {
     return res.status(500).json({error: err.message})
   }
-})
+}
+
+app.get('/api/account/billing', requireLocalAuth, handleGetBillingProfiles)
+app.get('/api/account/billing-profiles', requireLocalAuth, handleGetBillingProfiles)
+app.post('/api/account/billing', requireLocalAuth, handlePostBillingProfile)
+app.post('/api/account/billing-profiles', requireLocalAuth, handlePostBillingProfile)
+app.delete('/api/account/billing/:id', requireLocalAuth, handleDeleteBillingProfile)
+app.delete('/api/account/billing-profiles/:id', requireLocalAuth, handleDeleteBillingProfile)
+app.post('/api/account/billing/:id/default', requireLocalAuth, handleDefaultBillingProfile)
+app.post('/api/account/billing-profiles/:id/default', requireLocalAuth, handleDefaultBillingProfile)
 
 // ─── /api/account/orders ──────────────────────────────────────────────────
 app.get('/api/account/orders', requireLocalAuth, async (req, res) => {

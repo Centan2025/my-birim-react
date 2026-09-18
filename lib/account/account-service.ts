@@ -280,6 +280,14 @@ export async function listAddressesForUser(
     .order('created_at', {ascending: false})
 
   if (error) {
+    if (
+      error.code === 'PGRST205' ||
+      error.code === '42P01' ||
+      error.message?.toLowerCase().includes('schema cache') ||
+      error.message?.toLowerCase().includes('does not exist')
+    ) {
+      return []
+    }
     throw new AccountError(500, 'DATABASE_ERROR', `Adresler alınamadı: ${error.message}`)
   }
 
@@ -744,6 +752,14 @@ export async function listBillingProfilesForUser(
     .order('created_at', {ascending: false})
 
   if (error) {
+    if (
+      error.code === 'PGRST205' ||
+      error.code === '42P01' ||
+      error.message?.toLowerCase().includes('schema cache') ||
+      error.message?.toLowerCase().includes('does not exist')
+    ) {
+      return []
+    }
     throw new AccountError(500, 'DATABASE_ERROR', `Fatura profilleri alınamadı: ${error.message}`)
   }
 
