@@ -35,8 +35,14 @@ export function SeckimPage() {
     }
   }
 
-  const {selectedProductIds, projects, removeFromSelection, deleteProject, isSelectionEnabled} =
-    useSelection()
+  const {
+    selectedProductIds,
+    projects,
+    removeFromSelection,
+    clearSelection,
+    deleteProject,
+    isSelectionEnabled,
+  } = useSelection()
 
   const {data: allProducts = [], isLoading: isProductsLoading} = useProducts()
   const {data: categories = []} = useCategories()
@@ -110,12 +116,20 @@ export function SeckimPage() {
     }
   }
 
+  const handleClearAll = () => {
+    if (selectedProducts.length === 0) return
+    if (window.confirm(t('clear_selection_confirm'))) {
+      clearSelection()
+    }
+  }
+
   if (!isSelectionEnabled) {
     return null
   }
 
   const upperLocale = locale === 'tr' ? 'tr-TR' : 'en-US'
-  const containerClass = 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
+  const containerClass =
+    'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pt-16 md:pt-20 lg:pt-24 pb-32">
@@ -126,12 +140,21 @@ export function SeckimPage() {
             activeTab === 'projeler'
               ? [
                   {label: (t('homepage') || 'ANASAYFA').toLocaleUpperCase(upperLocale), to: '/'},
-                  {label: (t('seckim') || 'SEÇTİKLERİM').toLocaleUpperCase(upperLocale), to: '/seckim'},
-                  {label: (t('my_projects') || 'PROJELERİM').toLocaleUpperCase(upperLocale), to: '/seckim?tab=projeler'},
+                  {
+                    label: (t('seckim') || 'SEÇTİKLERİM').toLocaleUpperCase(upperLocale),
+                    to: '/seckim',
+                  },
+                  {
+                    label: (t('my_projects') || 'PROJELERİM').toLocaleUpperCase(upperLocale),
+                    to: '/seckim?tab=projeler',
+                  },
                 ]
               : [
                   {label: (t('homepage') || 'ANASAYFA').toLocaleUpperCase(upperLocale), to: '/'},
-                  {label: (t('seckim') || 'SEÇTİKLERİM').toLocaleUpperCase(upperLocale), to: '/seckim'},
+                  {
+                    label: (t('seckim') || 'SEÇTİKLERİM').toLocaleUpperCase(upperLocale),
+                    to: '/seckim',
+                  },
                 ]
           }
         />
@@ -172,8 +195,26 @@ export function SeckimPage() {
               <span>{t('new_project')}</span>
             </button>
 
-            {selectedProducts.length > 0 && (
+            {selectedProducts.length > 0 && activeTab === 'seckim' && (
               <>
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  className="inline-flex items-center gap-2 px-4 py-3 border border-neutral-300 dark:border-neutral-700 hover:border-red-500 hover:text-red-600 text-neutral-500 dark:text-neutral-400 bg-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold transition-colors cursor-pointer"
+                  title={t('clear_all_selections')}
+                >
+                  <svg
+                    className="w-3.5 h-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                  <span>{t('clear_all_selections')}</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={handlePdfDownload}
@@ -448,11 +489,7 @@ export function SeckimPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              if (
-                                window.confirm(
-                                  t('delete_project_confirm', project.name)
-                                )
-                              ) {
+                              if (window.confirm(t('delete_project_confirm', project.name))) {
                                 deleteProject(project.id)
                               }
                             }}

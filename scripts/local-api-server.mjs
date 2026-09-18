@@ -3949,10 +3949,32 @@ app.post('/api/account/selections/sync', requireLocalAuth, async (req, res) => {
   }
 })
 
+app.delete('/api/account/selections', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(200).json({success: true})
+  try {
+    await supabaseAdmin
+      .from('user_selections')
+      .delete()
+      .eq('user_id', req.userId)
+
+    return res.status(200).json({success: true})
+  } catch {
+    return res.status(200).json({success: true})
+  }
+})
+
 app.delete('/api/account/selections/:productId', requireLocalAuth, async (req, res) => {
   if (!supabaseAdmin) return res.status(200).json({success: true})
   try {
     const productId = req.params.productId
+    if (productId === 'all') {
+      await supabaseAdmin
+        .from('user_selections')
+        .delete()
+        .eq('user_id', req.userId)
+      return res.status(200).json({success: true})
+    }
+
     await supabaseAdmin
       .from('user_selections')
       .delete()

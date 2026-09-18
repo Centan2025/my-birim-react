@@ -4,6 +4,7 @@ import {
   listSelectionsForUser,
   saveSelectionForUser,
   removeSelectionForUser,
+  clearSelectionsForUser,
   bulkSyncSelectionsForUser,
   listProjectsForUser,
   createProjectForUser,
@@ -14,6 +15,7 @@ import accountHandler from '../../api/account.js'
 import {createToken} from '../../lib/server/token'
 import {
   fetchUserSelections,
+  clearUserSelections,
   bulkSyncUserSelections,
 } from '../services/supabase/seckim'
 
@@ -150,11 +152,28 @@ describe('Seckim & Projects Account Service & Sync', () => {
         selections: [{user_id: userId, product_id: 'prod_100'}],
       })
 
-      const removed = await removeSelectionForUser(userId, 'prod_100', {supabaseClientOverride: client})
+      const removed = await removeSelectionForUser(userId, 'prod_100', {
+        supabaseClientOverride: client,
+      })
       expect(removed).toBe(true)
 
       const selections = await listSelectionsForUser(userId, {supabaseClientOverride: client})
       expect(selections).not.toContain('prod_100')
+    })
+
+    it('clears all user selections correctly', async () => {
+      const {client} = createMockSupabaseClient({
+        selections: [
+          {user_id: userId, product_id: 'prod_100'},
+          {user_id: userId, product_id: 'prod_200'},
+        ],
+      })
+
+      const cleared = await clearSelectionsForUser(userId, {supabaseClientOverride: client})
+      expect(cleared).toBe(true)
+
+      const selections = await listSelectionsForUser(userId, {supabaseClientOverride: client})
+      expect(selections.length).toBe(0)
     })
 
     it('bulk syncs guest selections with server selections without duplication', async () => {
@@ -168,7 +187,9 @@ describe('Seckim & Projects Account Service & Sync', () => {
         {supabaseClientOverride: client}
       )
 
-      expect(merged).toEqual(expect.arrayContaining(['server_prod_1', 'guest_prod_1', 'guest_prod_2']))
+      expect(merged).toEqual(
+        expect.arrayContaining(['server_prod_1', 'guest_prod_1', 'guest_prod_2'])
+      )
       expect(merged.length).toBe(3)
     })
 
@@ -203,7 +224,9 @@ describe('Seckim & Projects Account Service & Sync', () => {
       )
       expect(updated).toBe(true)
 
-      const deleted = await deleteProjectForUser(userId, project!.id, {supabaseClientOverride: client})
+      const deleted = await deleteProjectForUser(userId, project!.id, {
+        supabaseClientOverride: client,
+      })
       expect(deleted).toBe(true)
     })
   })
@@ -265,6 +288,19 @@ describe('Seckim & Projects Account Service & Sync', () => {
       expect(Array.isArray(res.data.productIds)).toBe(true)
     })
 
+    it('handles DELETE /api/account/selections/all for bulk clear', async () => {
+      const req: any = {
+        method: 'DELETE',
+        headers: {authorization: `Bearer ${validToken}`},
+        query: {slug: ['selections', 'all']},
+      }
+      const res = createMockRes()
+      await accountHandler(req, res)
+
+      expect(res.statusCode).toBe(200)
+      expect(res.data.success).toBe(true)
+    })
+
     it('handles GET /api/account/projects for project listing', async () => {
       const reqGet: any = {
         method: 'GET',
@@ -299,6 +335,22 @@ describe('Seckim & Projects Account Service & Sync', () => {
 
       const selections = await fetchUserSelections(userId)
       expect(selections).toEqual(['chair_1', 'table_2'])
+    })
+
+    it('clears selections via /api/account/selections/all', async () => {
+      globalThis.fetch = vi.fn(async (url: string | URL | Request) => {
+        const u = url.toString()
+        if (u.includes('/api/account/selections/all')) {
+          return {
+            ok: true,
+            json: async () => ({success: true}),
+          } as Response
+        }
+        return {ok: false, json: async () => ({})} as Response
+      })
+
+      const cleared = await clearUserSelections(userId)
+      expect(cleared).toBe(true)
     })
 
     it('syncs selections via /api/account/selections/sync', async () => {

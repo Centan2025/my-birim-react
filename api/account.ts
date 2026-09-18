@@ -23,6 +23,7 @@ import {
   listSelectionsForUser,
   saveSelectionForUser,
   removeSelectionForUser,
+  clearSelectionsForUser,
   bulkSyncSelectionsForUser,
   listProjectsForUser,
   createProjectForUser,
@@ -256,8 +257,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       if (req.method === 'DELETE') {
         const productId = String(idOrAction || req.body?.productId || '').trim()
-        if (!productId) {
-          return res.status(400).json({error: 'Ürün ID gereklidir.'})
+        if (!productId || productId === 'all') {
+          const cleared = await clearSelectionsForUser(userId)
+          return res.status(200).json({success: cleared})
         }
         const removed = await removeSelectionForUser(userId, productId)
         return res.status(200).json({success: removed})

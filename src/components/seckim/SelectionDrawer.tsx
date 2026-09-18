@@ -12,7 +12,8 @@ import type {Product, Category} from '../../types'
 import {getProductImageProps} from '../../types/seckim'
 
 export const SelectionDrawer: React.FC = () => {
-  const {isDrawerOpen, closeDrawer, selectedProductIds, removeFromSelection} = useSelection()
+  const {isDrawerOpen, closeDrawer, selectedProductIds, removeFromSelection, clearSelection} =
+    useSelection()
   const {data: allProducts = [], isLoading: isProductsLoading} = useProducts()
   const {data: categories = []} = useCategories()
   const {t} = useTranslation()
@@ -42,6 +43,13 @@ export const SelectionDrawer: React.FC = () => {
   const handleExplore = () => {
     closeDrawer()
     navigate('/products')
+  }
+
+  const handleClearAll = () => {
+    if (selectedProducts.length === 0) return
+    if (window.confirm(t('clear_selection_confirm'))) {
+      clearSelection()
+    }
   }
 
   return (
@@ -80,23 +88,36 @@ export const SelectionDrawer: React.FC = () => {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={closeDrawer}
-                  className="p-2 text-neutral-500 hover:text-[var(--text-primary)] transition-colors cursor-pointer -mr-2"
-                  aria-label={t('close') || 'Kapat'}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
+                <div className="flex items-center gap-2">
+                  {selectedProducts.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearAll}
+                      className="text-[11px] uppercase tracking-wider text-neutral-400 hover:text-red-500 transition-colors py-1.5 px-2 cursor-pointer font-medium"
+                      title={t('clear_all_selections')}
+                    >
+                      {t('clear_all_selections')}
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={closeDrawer}
+                    className="p-2 text-neutral-500 hover:text-[var(--text-primary)] transition-colors cursor-pointer -mr-2"
+                    aria-label={t('close') || 'Kapat'}
                   >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
+                    <svg
+                      className="w-5 h-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               {/* Drawer Content */}

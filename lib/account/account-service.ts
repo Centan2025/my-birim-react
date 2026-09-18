@@ -157,7 +157,9 @@ export async function getProfileForUser(
     role: profile.role || 'user',
     architectVerificationStatus: profile.architect_verification_status || 'not_requested',
     isVerified: Boolean(profile.is_verified),
-    newsletterSubscribed: Boolean(raw['newsletter_subscribed'] ?? (profile.profession === 'Bülten Abonesi')),
+    newsletterSubscribed: Boolean(
+      raw['newsletter_subscribed'] ?? profile.profession === 'Bülten Abonesi'
+    ),
     createdAt: profile.created_at || new Date().toISOString(),
     updatedAt: profile.updated_at || null,
   }
@@ -1455,6 +1457,27 @@ export async function removeSelectionForUser(
   return !error
 }
 
+export async function clearSelectionsForUser(
+  userId: string,
+  options: AccountServiceOptions = {}
+): Promise<boolean> {
+  const cleanUserId = String(userId || '').trim()
+  if (!cleanUserId) {
+    throw new AccountError(401, 'UNAUTHORIZED', 'Oturum açmanız gerekmektedir.')
+  }
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) return true
+
+  const {error} = await supabase.from('user_selections').delete().eq('user_id', cleanUserId)
+
+  return !error
+}
+
 export async function bulkSyncSelectionsForUser(
   userId: string,
   clientProductIds: string[],
@@ -1601,8 +1624,7 @@ export async function createProjectForUser(
 
   if (!supabase) return null
 
-  const shareToken =
-    'prj_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36)
+  const shareToken = 'prj_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36)
 
   const {data, error} = await supabase
     .from('projects')
@@ -1673,7 +1695,8 @@ export async function updateProjectForUser(
     updated_at: new Date().toISOString(),
   }
   if (updates.name !== undefined) fieldsToUpdate['name'] = String(updates.name).trim()
-  if (updates.description !== undefined) fieldsToUpdate['description'] = String(updates.description || '')
+  if (updates.description !== undefined)
+    fieldsToUpdate['description'] = String(updates.description || '')
   if (updates.isPublic !== undefined) fieldsToUpdate['is_public'] = Boolean(updates.isPublic)
   if (updates.shareToken !== undefined) fieldsToUpdate['share_token'] = updates.shareToken
 

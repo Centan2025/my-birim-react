@@ -1,6 +1,9 @@
 import type {UserProject, InquiryPayload} from '../../types/seckim'
 
-async function apiAccountRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T | null> {
+async function apiAccountRequest<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T | null> {
   try {
     const headers: Record<string, string> = {
       Accept: 'application/json',
@@ -62,6 +65,14 @@ export async function removeUserSelection(userId: string, productId: string): Pr
     `/api/account/selections/${encodeURIComponent(productId)}`,
     {method: 'DELETE'}
   )
+  return Boolean(data?.success)
+}
+
+export async function clearUserSelections(userId: string): Promise<boolean> {
+  if (!userId) return false
+  const data = await apiAccountRequest<{success: boolean}>('/api/account/selections/all', {
+    method: 'DELETE',
+  })
   return Boolean(data?.success)
 }
 

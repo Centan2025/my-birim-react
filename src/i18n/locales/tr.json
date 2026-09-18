@@ -112,6 +112,8 @@
   "removed_from_selections": "Seçtiklerinizden çıkarıldı.",
   "add_to_selection": "Seçtiklerime Ekle",
   "remove_from_selection": "Seçtiklerimden Çıkar",
+  "clear_all_selections": "Tümünü Temizle",
+  "clear_selection_confirm": "Seçtiklerinizdeki tüm ürünleri temizlemek istediğinize emin misiniz?",
   "add_to_project": "Projeye Ekle",
   "create_new_project": "Yeni Proje Oluştur",
   "no_selections_yet": "Henüz bir seçiminiz yok",

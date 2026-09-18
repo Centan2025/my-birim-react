@@ -306,6 +306,8 @@ export default {
   removed_from_selections: 'Removed from your selections.',
   add_to_selection: 'Add to Selections',
   remove_from_selection: 'Remove from Selections',
+  clear_all_selections: 'Clear All',
+  clear_selection_confirm: 'Are you sure you want to clear all selected products?',
   add_to_project: 'Add to Project',
   create_new_project: 'Create New Project',
   no_selections_yet: 'You have no selections yet',
@@ -381,7 +383,6 @@ export default {
   add_to_my_selection: 'ADD TO SELECTION',
   added_to_my_selection: 'ADDED TO SELECTION ✓',
   shared_project_not_found: 'Shared Project Not Found',
-  shared_project_not_found_desc:
-    'This project link may be invalid, removed, or private.',
+  shared_project_not_found_desc: 'This project link may be invalid, removed, or private.',
   back_to_homepage: 'BACK TO HOME',
 }

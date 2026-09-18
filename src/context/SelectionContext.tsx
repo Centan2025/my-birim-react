@@ -16,6 +16,7 @@ import {analytics} from '../lib/analytics'
 import {
   saveUserSelection,
   removeUserSelection,
+  clearUserSelections,
   fetchUserSelections,
   bulkSyncUserSelections,
   fetchUserProjects,
@@ -152,61 +153,64 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
   }, [projects])
 
   // 3. User Login Migration & Sync with Server
-  const syncUserData = useCallback(async (isTransition = false) => {
-    if (!isLoggedIn || !user?._id || isSyncingRef.current) return
-    isSyncingRef.current = true
-    const userId = user._id
+  const syncUserData = useCallback(
+    async (isTransition = false) => {
+      if (!isLoggedIn || !user?._id || isSyncingRef.current) return
+      isSyncingRef.current = true
+      const userId = user._id
 
-    try {
-      if (isTransition) {
-        // Guest transition: merge local guest items to server once
-        const localItems = selectedProductIds
-        if (localItems.length > 0) {
-          const mergedIds = await bulkSyncUserSelections(userId, localItems)
-          if (Array.isArray(mergedIds)) {
-            setSelectedProductIds(mergedIds)
+      try {
+        if (isTransition) {
+          // Guest transition: merge local guest items to server once
+          const localItems = selectedProductIds
+          if (localItems.length > 0) {
+            const mergedIds = await bulkSyncUserSelections(userId, localItems)
+            if (Array.isArray(mergedIds)) {
+              setSelectedProductIds(mergedIds)
+            }
+          } else {
+            const serverIds = await fetchUserSelections(userId)
+            if (Array.isArray(serverIds)) {
+              setSelectedProductIds(serverIds)
+            }
+          }
+
+          // Migrate any guest local projects to server
+          const localProjects = projects.filter(p => p.id.startsWith('local_'))
+          for (const lp of localProjects) {
+            try {
+              await createUserProject(userId, {
+                name: lp.name,
+                description: lp.description,
+                productIds: lp.productIds,
+                isPublic: lp.isPublic,
+              })
+            } catch {
+              // ignore
+            }
           }
         } else {
+          // Authoritative load from server (page refresh / multi-device sync)
           const serverIds = await fetchUserSelections(userId)
           if (Array.isArray(serverIds)) {
             setSelectedProductIds(serverIds)
           }
         }
 
-        // Migrate any guest local projects to server
-        const localProjects = projects.filter(p => p.id.startsWith('local_'))
-        for (const lp of localProjects) {
-          try {
-            await createUserProject(userId, {
-              name: lp.name,
-              description: lp.description,
-              productIds: lp.productIds,
-              isPublic: lp.isPublic,
-            })
-          } catch {
-            // ignore
-          }
+        // Fetch authoritative user projects from server
+        const serverProjects = await fetchUserProjects(userId)
+        if (serverProjects) {
+          setProjects(serverProjects)
         }
-      } else {
-        // Authoritative load from server (page refresh / multi-device sync)
-        const serverIds = await fetchUserSelections(userId)
-        if (Array.isArray(serverIds)) {
-          setSelectedProductIds(serverIds)
-        }
+      } catch (err) {
+        console.warn('Seçkim sync notice:', err)
+      } finally {
+        isSyncingRef.current = false
+        prevUserIdRef.current = userId
       }
-
-      // Fetch authoritative user projects from server
-      const serverProjects = await fetchUserProjects(userId)
-      if (serverProjects) {
-        setProjects(serverProjects)
-      }
-    } catch (err) {
-      console.warn('Seçkim sync notice:', err)
-    } finally {
-      isSyncingRef.current = false
-      prevUserIdRef.current = userId
-    }
-  }, [isLoggedIn, user?._id, selectedProductIds, projects])
+    },
+    [isLoggedIn, user?._id, selectedProductIds, projects]
+  )
 
   useEffect(() => {
     if (!isLoggedIn || !user?._id) {
@@ -251,17 +255,20 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
 
   const dismissNotification = useCallback(() => setNotification(null), [])
 
-  const triggerToast = useCallback((message: string = 'added_to_selections', actionLabel = 'seckim') => {
-    setNotification({
-      visible: true,
-      message,
-      actionLabel,
-      onAction: () => {
-        setIsDrawerOpen(true)
-        setNotification(null)
-      },
-    })
-  }, [])
+  const triggerToast = useCallback(
+    (message: string = 'added_to_selections', actionLabel = 'seckim') => {
+      setNotification({
+        visible: true,
+        message,
+        actionLabel,
+        onAction: () => {
+          setIsDrawerOpen(true)
+          setNotification(null)
+        },
+      })
+    },
+    []
+  )
 
   const isInSelection = useCallback(
     (productId: string) => selectedProductIds.includes(productId),
@@ -328,7 +335,10 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
       category: 'seckim',
       action: 'selection_cleared',
     })
-  }, [])
+    if (isLoggedIn && user?._id) {
+      clearUserSelections(user._id).catch(() => {})
+    }
+  }, [isLoggedIn, user?._id])
 
   const createProject = useCallback(
     async (
