@@ -16,7 +16,7 @@ import type {Product, Category, Designer} from '../types'
 import {getLocalizedText, getProductImageProps, type UserProject} from '../types/seckim'
 
 export function SeckimPage() {
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const tabFromUrl = searchParams.get('tab') === 'projeler' ? 'projeler' : 'seckim'
@@ -57,8 +57,8 @@ export function SeckimPage() {
   }, [isSelectionEnabled, navigate])
 
   useSEO({
-    title: 'Seçtiklerim & Projelerim • Birim Mobilya',
-    description: 'Birim Mobilya mimari ve iç mimari ürün seçimleri, koleksiyon ve ürün grupları.',
+    title: `${t('seckim_and_projects')} • Birim Mobilya`,
+    description: t('seckim_page_description'),
   })
 
   const categoryMap = useMemo(() => {
@@ -87,8 +87,8 @@ export function SeckimPage() {
     setIsGeneratingPdf(true)
     try {
       const pdfBlob = await generateSeckimPDF({
-        projectName: 'BİRİM MOBİLYA - GENEL SEÇTİKLERİM',
-        projectDescription: 'Mimari ve İç Mimari Ürün Seçimleri',
+        projectName: `BİRİM MOBİLYA - ${t('seckim').toUpperCase()}`,
+        projectDescription: t('seckim_page_description'),
         products: selectedProducts,
         designerNamesMap: designerMap,
         categoryNamesMap: Object.fromEntries(categoryMap),
@@ -104,7 +104,7 @@ export function SeckimPage() {
       URL.revokeObjectURL(url)
     } catch (err) {
       console.error('PDF creation error:', err)
-      alert('PDF oluşturulurken bir sorun oluştu. Lütfen tekrar deneyin.')
+      alert(t('pdf_download_error'))
     } finally {
       setIsGeneratingPdf(false)
     }
@@ -114,6 +114,8 @@ export function SeckimPage() {
     return null
   }
 
+  const upperLocale = locale === 'tr' ? 'tr-TR' : 'en-US'
+
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pt-16 md:pt-20 lg:pt-24 pb-32">
       {/* Top Breadcrumbs */}
@@ -122,13 +124,13 @@ export function SeckimPage() {
           items={
             activeTab === 'projeler'
               ? [
-                  {label: t('homepage') || 'ANASAYFA', to: '/'},
-                  {label: 'SEÇTİKLERİM', to: '/seckim'},
-                  {label: 'PROJELERİM', to: '/seckim?tab=projeler'},
+                  {label: (t('homepage') || 'ANASAYFA').toLocaleUpperCase(upperLocale), to: '/'},
+                  {label: (t('seckim') || 'SEÇTİKLERİM').toLocaleUpperCase(upperLocale), to: '/seckim'},
+                  {label: (t('my_projects') || 'PROJELERİM').toLocaleUpperCase(upperLocale), to: '/seckim?tab=projeler'},
                 ]
               : [
-                  {label: t('homepage') || 'ANASAYFA', to: '/'},
-                  {label: 'SEÇTİKLERİM', to: '/seckim'},
+                  {label: (t('homepage') || 'ANASAYFA').toLocaleUpperCase(upperLocale), to: '/'},
+                  {label: (t('seckim') || 'SEÇTİKLERİM').toLocaleUpperCase(upperLocale), to: '/seckim'},
                 ]
           }
         />
@@ -139,14 +141,13 @@ export function SeckimPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[var(--border-primary)]">
           <div>
             <span className="text-xs font-mono tracking-widest uppercase text-neutral-400">
-              PROJE YÖNETİMİ
+              {t('project_management')}
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-[var(--text-primary)] mt-2">
-              SEÇTİKLERİM & PROJELERİM
+              {t('seckim_and_projects')}
             </h1>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-light mt-2 max-w-xl leading-relaxed">
-              Mekan ve projeleriniz için seçtiğiniz Birim tasarımlarını bir araya getirin, projelere
-              ayırın ve profesyonel teklif veya PDF oluşturun.
+              {t('seckim_page_description')}
             </p>
           </div>
 
@@ -167,7 +168,7 @@ export function SeckimPage() {
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              <span>YENİ PROJE</span>
+              <span>{t('new_project')}</span>
             </button>
 
             {selectedProducts.length > 0 && (
@@ -181,7 +182,7 @@ export function SeckimPage() {
                   {isGeneratingPdf ? (
                     <>
                       <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      <span>HAZIRLANIYOR...</span>
+                      <span>{t('generating_pdf')}</span>
                     </>
                   ) : (
                     <>
@@ -197,7 +198,7 @@ export function SeckimPage() {
                         <line x1="12" y1="18" x2="12" y2="12" />
                         <line x1="9" y1="15" x2="15" y2="15" />
                       </svg>
-                      <span>PDF OLUŞTUR</span>
+                      <span>{t('create_pdf')}</span>
                     </>
                   )}
                 </button>
@@ -217,7 +218,7 @@ export function SeckimPage() {
                     <path d="M22 2L11 13" />
                     <polygon points="22 2 15 22 11 13 2 9 22 2" />
                   </svg>
-                  <span>BİLGİ / TEKLİF AL</span>
+                  <span>{t('get_info_quote')}</span>
                 </button>
               </>
             )}
@@ -235,7 +236,7 @@ export function SeckimPage() {
                 : 'text-neutral-400 hover:text-[var(--text-primary)]'
             }`}
           >
-            <span>TÜM SEÇTİKLERİM ({selectedProducts.length})</span>
+            <span>{t('all_selections_count', selectedProducts.length)}</span>
             {activeTab === 'seckim' && (
               <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
             )}
@@ -250,7 +251,7 @@ export function SeckimPage() {
                 : 'text-neutral-400 hover:text-[var(--text-primary)]'
             }`}
           >
-            <span>PROJELERİM ({projects.length})</span>
+            <span>{t('my_projects_count', projects.length)}</span>
             {activeTab === 'projeler' && (
               <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
             )}
@@ -286,17 +287,16 @@ export function SeckimPage() {
                   </svg>
                 </div>
                 <h2 className="text-xl font-light uppercase tracking-wider text-[var(--text-primary)]">
-                  Henüz bir seçiminiz yok
+                  {t('no_selections_yet')}
                 </h2>
                 <p className="text-xs text-[var(--text-secondary)] mt-2.5 font-light leading-relaxed">
-                  Beğendiğiniz ürünleri seçtiklerinize ekleyerek projeniz için bir araya
-                  getirebilirsiniz.
+                  {t('no_selections_desc')}
                 </p>
                 <Link
                   to="/products"
                   className="mt-8 inline-block px-8 py-3.5 border border-[var(--text-primary)] text-[var(--text-primary)] text-xs uppercase tracking-widest font-semibold hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all"
                 >
-                  ÜRÜNLERİ KEŞFET
+                  {t('explore_products')}
                 </Link>
               </div>
             ) : (
@@ -366,7 +366,7 @@ export function SeckimPage() {
                             }
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] text-[11px] font-semibold tracking-wider uppercase transition-colors cursor-pointer bg-[var(--bg-primary)]"
                           >
-                            + PROJEYE EKLE
+                            + {t('add_to_project').toUpperCase()}
                           </button>
 
                           <button
@@ -374,7 +374,7 @@ export function SeckimPage() {
                             onClick={() => removeFromSelection(product.id)}
                             className="text-xs font-light text-neutral-400 hover:text-red-600 transition-colors cursor-pointer py-1 px-2"
                           >
-                            Çıkar
+                            {t('remove')}
                           </button>
                         </div>
                       </div>
@@ -404,18 +404,17 @@ export function SeckimPage() {
                   </svg>
                 </div>
                 <h2 className="text-xl font-light uppercase tracking-wider text-[var(--text-primary)]">
-                  Henüz bir proje oluşturmadınız
+                  {t('no_projects_yet_title')}
                 </h2>
                 <p className="text-xs text-[var(--text-secondary)] mt-2.5 font-light leading-relaxed">
-                  İstanbul Villa, Bodrum Residence veya Otel Projesi gibi farklı mekanlar için
-                  seçtiğiniz mobilyaları projeler altında toplayabilirsiniz.
+                  {t('no_projects_yet_desc')}
                 </p>
                 <button
                   type="button"
                   onClick={() => setIsCreateProjectOpen(true)}
                   className="mt-8 inline-block px-8 py-3.5 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all cursor-pointer shadow-sm"
                 >
-                  + PROJE OLUŞTUR
+                  + {t('create_project')}
                 </button>
               </div>
             ) : (
@@ -441,7 +440,7 @@ export function SeckimPage() {
                               {project.name}
                             </Link>
                             <span className="text-xs text-neutral-400 font-light mt-0.5 block">
-                              {project.productIds.length} ürün
+                              {t('products_count_short', project.productIds.length)}
                             </span>
                           </div>
 
@@ -450,15 +449,15 @@ export function SeckimPage() {
                             onClick={() => {
                               if (
                                 window.confirm(
-                                  `"${project.name}" projesini silmek istediğinize emin misiniz?`
+                                  t('delete_project_confirm', project.name)
                                 )
                               ) {
                                 deleteProject(project.id)
                               }
                             }}
                             className="p-1 text-neutral-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                            title="Projeyi sil"
-                            aria-label="Projeyi sil"
+                            title={t('delete_project')}
+                            aria-label={t('delete_project')}
                           >
                             <svg
                               className="w-4 h-4"
@@ -510,14 +509,14 @@ export function SeckimPage() {
 
                       <div className="mt-6 pt-4 border-t border-[var(--border-primary)] flex items-center justify-between">
                         <span className="text-[10px] font-mono text-neutral-400 uppercase">
-                          {new Date(project.createdAt).toLocaleDateString('tr-TR')}
+                          {new Date(project.createdAt).toLocaleDateString(upperLocale)}
                         </span>
 
                         <Link
                           to={`/seckim/proje/${project.id}`}
                           className="text-xs font-semibold tracking-wider uppercase text-[var(--text-primary)] hover:underline underline-offset-4"
                         >
-                          PROJEYİ İNCELE →
+                          {t('view_project')}
                         </Link>
                       </div>
                     </div>

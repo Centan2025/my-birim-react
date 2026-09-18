@@ -72,45 +72,45 @@ describe('SeckimPage Tab Switcher and Breadcrumbs', () => {
     renderSeckimPage('/seckim')
 
     // Tab buttons exist
-    const seckimTabBtn = screen.getByRole('button', {name: /TÜM SEÇTİKLERİM/i})
-    const projelerTabBtn = screen.getByRole('button', {name: /PROJELERİM/i})
+    const seckimTabBtn = screen.getByRole('button', {name: /TÜM SEÇTİKLERİM|ALL SELECTIONS/i})
+    const projelerTabBtn = screen.getByRole('button', {name: /PROJELERİM|MY PROJECTS/i})
 
     expect(seckimTabBtn).toBeInTheDocument()
     expect(projelerTabBtn).toBeInTheDocument()
 
     // Default tab is "TÜM SEÇTİKLERİM"
-    expect(screen.getByText(/Henüz bir seçiminiz yok/i)).toBeInTheDocument()
+    expect(screen.getByText(/Henüz bir seçiminiz yok|You have no selections yet/i)).toBeInTheDocument()
 
     // Breadcrumbs on default tab
     const breadcrumbNav = screen.getByRole('navigation', {name: /breadcrumb/i})
-    expect(breadcrumbNav).toHaveTextContent(/SEÇTİKLERİM/i)
-    expect(breadcrumbNav).not.toHaveTextContent(/PROJELERİM/i)
+    expect(breadcrumbNav).toHaveTextContent(/SEÇTİKLERİM|SELECTIONS/i)
+    expect(breadcrumbNav).not.toHaveTextContent(/PROJELERİM|MY PROJECTS/i)
 
     // Click "PROJELERİM" tab
     fireEvent.click(projelerTabBtn)
 
     // Should switch to "PROJELERİM" view immediately
-    expect(screen.getByText(/Henüz bir proje oluşturmadınız/i)).toBeInTheDocument()
+    expect(screen.getByText(/Henüz bir proje oluşturmadınız|haven't created any projects yet/i)).toBeInTheDocument()
 
     // Breadcrumbs updated to include PROJELERİM
-    expect(breadcrumbNav).toHaveTextContent(/SEÇTİKLERİM/i)
-    expect(breadcrumbNav).toHaveTextContent(/PROJELERİM/i)
+    expect(breadcrumbNav).toHaveTextContent(/SEÇTİKLERİM|SELECTIONS/i)
+    expect(breadcrumbNav).toHaveTextContent(/PROJELERİM|MY PROJECTS/i)
 
     // Click back to "TÜM SEÇTİKLERİM" tab
     fireEvent.click(seckimTabBtn)
 
     // Should switch back immediately
-    expect(screen.getByText(/Henüz bir seçiminiz yok/i)).toBeInTheDocument()
-    expect(breadcrumbNav).not.toHaveTextContent(/PROJELERİM/i)
+    expect(screen.getByText(/Henüz bir seçiminiz yok|You have no selections yet/i)).toBeInTheDocument()
+    expect(breadcrumbNav).not.toHaveTextContent(/PROJELERİM|MY PROJECTS/i)
   })
 
   it('renders "PROJELERİM" tab and breadcrumbs directly when URL has ?tab=projeler', () => {
     renderSeckimPage('/seckim?tab=projeler')
 
-    expect(screen.getByText(/Henüz bir proje oluşturmadınız/i)).toBeInTheDocument()
+    expect(screen.getByText(/Henüz bir proje oluşturmadınız|haven't created any projects yet/i)).toBeInTheDocument()
 
     const breadcrumbNav = screen.getByRole('navigation', {name: /breadcrumb/i})
-    expect(breadcrumbNav).toHaveTextContent(/SEÇTİKLERİM/i)
-    expect(breadcrumbNav).toHaveTextContent(/PROJELERİM/i)
+    expect(breadcrumbNav).toHaveTextContent(/SEÇTİKLERİM|SELECTIONS/i)
+    expect(breadcrumbNav).toHaveTextContent(/PROJELERİM|MY PROJECTS/i)
   })
 })

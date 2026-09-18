@@ -388,7 +388,7 @@ export async function createAddressForUser(
     address_line_2: addressLine2 ? String(addressLine2).trim() : null,
     city,
     district,
-    postal_code: postalCode ? String(postalCode).trim() : null,
+    postal_code: (postalCode && String(postalCode).trim()) || '34000',
     country: country || 'Türkiye',
     is_default_shipping: isDefaultShipping,
   }
@@ -519,7 +519,7 @@ export async function updateAddressForUser(
   }
   if (rawPayload['postal_code'] !== undefined || rawPayload['postalCode'] !== undefined) {
     const pc = rawPayload['postal_code'] ?? rawPayload['postalCode']
-    updates['postal_code'] = pc ? String(pc).trim() : null
+    updates['postal_code'] = (pc && String(pc).trim()) || '34000'
   }
   if (rawPayload['country'] !== undefined) {
     updates['country'] = String(rawPayload['country']).trim() || 'Türkiye'
@@ -894,7 +894,7 @@ export async function createBillingProfileForUser(
     address_line_2: addressLine2 ? String(addressLine2).trim() : null,
     city,
     district,
-    postal_code: postalCode ? String(postalCode).trim() : null,
+    postal_code: (postalCode && String(postalCode).trim()) || '34000',
     country: country || 'Türkiye',
     is_default: isDefault,
   }
@@ -1059,7 +1059,7 @@ export async function updateBillingProfileForUser(
 
   if (rawPayload['postal_code'] !== undefined || rawPayload['postalCode'] !== undefined) {
     const pc = rawPayload['postal_code'] ?? rawPayload['postalCode']
-    updates['postal_code'] = pc ? String(pc).trim() : null
+    updates['postal_code'] = (pc && String(pc).trim()) || '34000'
   }
 
   if (rawPayload['country'] !== undefined) {

@@ -457,6 +457,15 @@ export async function listCommerceOrdersForUser(
       .order('created_at', {ascending: false})
 
     if (ordersError) {
+      if (
+        ordersError.code === 'PGRST205' ||
+        ordersError.code === '42P01' ||
+        ordersError.message?.toLowerCase().includes('schema cache') ||
+        ordersError.message?.toLowerCase().includes('does not exist') ||
+        ordersError.message?.toLowerCase().includes('could not find the table')
+      ) {
+        return []
+      }
       throw new Error(
         `[Order Service] Database error while fetching customer orders: ${ordersError.message}`
       )

@@ -49,17 +49,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // 2. Slug Path Parsing
-  let slug = req.query['slug']
-  if (!slug) {
+  const rawSlug = req.query['slug']
+  let slug: string[] = []
+
+  if (Array.isArray(rawSlug)) {
+    slug = rawSlug.flatMap(s => String(s).split('/')).filter(Boolean)
+  } else if (typeof rawSlug === 'string' && rawSlug.trim()) {
+    slug = rawSlug.split('/').filter(Boolean)
+  } else {
     const urlParts = (req.url?.split('?')[0] || '').split('/').filter(Boolean)
     const accIdx = urlParts.indexOf('account')
     if (accIdx >= 0) {
       slug = urlParts.slice(accIdx + 1)
-    } else {
-      slug = []
     }
-  } else if (!Array.isArray(slug)) {
-    slug = [slug]
   }
 
   const [resource, idOrAction, subAction] = slug
