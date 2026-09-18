@@ -878,7 +878,7 @@ app.get('/api/account/profile', requireLocalAuth, async (req, res) => {
   try {
     const {data: profile, error} = await supabaseAdmin
       .from('profiles')
-      .select('id, email, name, first_name, last_name, company, profession, phone, tax_id, role, architect_verification_status, is_verified, newsletter_subscribed, created_at, updated_at')
+      .select('*')
       .eq('id', req.userId)
       .maybeSingle()
 
@@ -900,7 +900,7 @@ app.get('/api/account/profile', requireLocalAuth, async (req, res) => {
         role: profile.role || 'user',
         architectVerificationStatus: profile.architect_verification_status || 'not_requested',
         isVerified: Boolean(profile.is_verified),
-        newsletterSubscribed: Boolean(profile.newsletter_subscribed),
+        newsletterSubscribed: Boolean(profile.newsletter_subscribed ?? (profile.profession === 'Bülten Abonesi')),
         createdAt: profile.created_at || new Date().toISOString(),
         updatedAt: profile.updated_at || null,
       }
@@ -923,12 +923,17 @@ app.patch('/api/account/profile', requireLocalAuth, async (req, res) => {
       updates.newsletter_subscribed = Boolean(body.newsletter_subscribed ?? body.newsletterSubscribed)
     }
 
-    const {error} = await supabaseAdmin.from('profiles').update(updates).eq('id', req.userId)
+    let {error} = await supabaseAdmin.from('profiles').update(updates).eq('id', req.userId)
+    if (error && error.message?.includes('newsletter_subscribed')) {
+      delete updates.newsletter_subscribed
+      const retry = await supabaseAdmin.from('profiles').update(updates).eq('id', req.userId)
+      error = retry.error
+    }
     if (error) return res.status(500).json({error: error.message})
 
     const {data: updated} = await supabaseAdmin
       .from('profiles')
-      .select('id, email, name, first_name, last_name, company, profession, phone, tax_id, role, architect_verification_status, is_verified, newsletter_subscribed, created_at, updated_at')
+      .select('*')
       .eq('id', req.userId)
       .maybeSingle()
 
@@ -947,7 +952,7 @@ app.patch('/api/account/profile', requireLocalAuth, async (req, res) => {
         role: updated.role || 'user',
         architectVerificationStatus: updated.architect_verification_status || 'not_requested',
         isVerified: Boolean(updated.is_verified),
-        newsletterSubscribed: Boolean(updated.newsletter_subscribed),
+        newsletterSubscribed: Boolean(updated.newsletter_subscribed ?? (updated.profession === 'Bülten Abonesi')),
         createdAt: updated.created_at || new Date().toISOString(),
         updatedAt: updated.updated_at || null,
       }

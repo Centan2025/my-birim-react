@@ -130,9 +130,7 @@ export async function getProfileForUser(
 
   const {data: profile, error} = await supabase
     .from('profiles')
-    .select(
-      'id, email, name, first_name, last_name, company, profession, phone, tax_id, role, architect_verification_status, is_verified, newsletter_subscribed, created_at, updated_at'
-    )
+    .select('*')
     .eq('id', cleanUserId)
     .maybeSingle()
 
@@ -144,6 +142,8 @@ export async function getProfileForUser(
     throw new AccountError(404, 'NOT_FOUND', 'Kullanıcı profili bulunamadı.')
   }
 
+  const raw = profile as Record<string, unknown>
+
   return {
     id: profile.id,
     email: profile.email,
@@ -153,11 +153,11 @@ export async function getProfileForUser(
     company: profile.company || null,
     profession: profile.profession || null,
     phone: profile.phone || null,
-    taxId: profile.tax_id || null,
+    taxId: (raw['tax_id'] as string) || null,
     role: profile.role || 'user',
     architectVerificationStatus: profile.architect_verification_status || 'not_requested',
     isVerified: Boolean(profile.is_verified),
-    newsletterSubscribed: Boolean(profile.newsletter_subscribed),
+    newsletterSubscribed: Boolean(raw['newsletter_subscribed'] ?? (profile.profession === 'Bülten Abonesi')),
     createdAt: profile.created_at || new Date().toISOString(),
     updatedAt: profile.updated_at || null,
   }
@@ -234,7 +234,13 @@ export async function updateProfileForUser(
     throw new AccountError(500, 'DATABASE_UNAVAILABLE', 'Veritabanı servisi kullanılamıyor.')
   }
 
-  const {error} = await supabase.from('profiles').update(updates).eq('id', cleanUserId)
+  let {error} = await supabase.from('profiles').update(updates).eq('id', cleanUserId)
+
+  if (error && error.message?.includes('newsletter_subscribed')) {
+    delete updates['newsletter_subscribed']
+    const retry = await supabase.from('profiles').update(updates).eq('id', cleanUserId)
+    error = retry.error
+  }
 
   if (error) {
     throw new AccountError(500, 'DATABASE_ERROR', `Profil güncellenemedi: ${error.message}`)
