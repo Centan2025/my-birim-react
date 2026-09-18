@@ -866,6 +866,27 @@ async function handleSubscribeProfLogic(req, res) {
         const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
         const foundUser = usersList?.users?.find(u => u.email?.toLowerCase() === normEmail)
         userId = foundUser?.id || randomUUID()
+        if (foundUser) {
+          if (password) {
+            await supabaseAdmin.auth.admin.updateUserById(foundUser.id, {password}).catch(() => {})
+          }
+          await supabaseAdmin.auth.admin
+            .updateUserById(foundUser.id, {
+              user_metadata: {
+                ...foundUser.user_metadata,
+                name: name || foundUser.user_metadata?.name || '',
+                role: 'architect',
+                company: company || foundUser.user_metadata?.company || '',
+                country: country || 'Türkiye',
+                profession: profession || foundUser.user_metadata?.profession || 'Mimar / İç Mimar',
+                phone: phone || foundUser.user_metadata?.phone || '',
+                email_verified: false,
+                verification_token_hash: verificationTokenHash,
+                verification_token_expires: verificationTokenExpires,
+              },
+            })
+            .catch(() => {})
+        }
       }
 
       await supabaseAdmin.from('profiles').upsert(
@@ -879,6 +900,7 @@ async function handleSubscribeProfLogic(req, res) {
           role: 'architect',
           architect_verification_status: 'pending',
           is_verified: false,
+          updated_at: new Date().toISOString(),
         },
         {onConflict: 'id'}
       )

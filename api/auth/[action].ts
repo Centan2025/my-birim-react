@@ -909,7 +909,7 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
         .select(
           'id, email, profession, role, is_verified, architect_verification_status, name, company, phone'
         )
-        .eq('email', normEmail)
+        .ilike('email', normEmail)
         .maybeSingle()
 
       if (existing) {
@@ -918,6 +918,7 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
           existing.role === 'user' ||
           existing.architect_verification_status === 'pending' ||
           existing.architect_verification_status === 'none' ||
+          existing.architect_verification_status === 'rejected' ||
           !existing.is_verified
 
         if (canUpdate) {
@@ -953,7 +954,7 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
               })
               .catch(() => {})
           } else {
-            const {data: newAuth} = await supabaseAdmin.auth.admin.createUser({
+            const {data: newAuth, error: createErr} = await supabaseAdmin.auth.admin.createUser({
               email: normEmail,
               password: password || undefined,
               email_confirm: false,
@@ -971,6 +972,29 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
             if (newAuth?.user?.id) {
               await supabaseAdmin.from('profiles').delete().eq('id', existing.id)
               existing.id = newAuth.user.id
+            } else if (createErr?.message?.includes('already been registered') || createErr?.message?.includes('already exists')) {
+              const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
+              const foundUser = usersList?.users?.find(u => u.email?.toLowerCase() === normEmail)
+              if (foundUser?.id) {
+                if (password) {
+                  await supabaseAdmin.auth.admin.updateUserById(foundUser.id, {password}).catch(() => {})
+                }
+                await supabaseAdmin.auth.admin.updateUserById(foundUser.id, {
+                  user_metadata: {
+                    ...foundUser.user_metadata,
+                    name: name || existing.name || foundUser.user_metadata?.name || '',
+                    role: 'architect',
+                    company: company || existing.company || foundUser.user_metadata?.company || '',
+                    country: country || 'Türkiye',
+                    profession: profession || existing.profession || foundUser.user_metadata?.profession || 'Mimar / İç Mimar',
+                    phone: phone || existing.phone || foundUser.user_metadata?.phone || '',
+                    email_verified: false,
+                    verification_token_hash: verificationTokenHash,
+                    verification_token_expires: verificationTokenExpires,
+                  },
+                }).catch(() => {})
+                existing.id = foundUser.id
+              }
             }
           }
 
@@ -1027,12 +1051,45 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
         },
       })
 
+      let userId = sbAuthUser?.user?.id
+
       if (sbAuthErr) {
-        const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
-        return res.status(400).json({error: translateAuthError(sbAuthErr.message, emailLang)})
+        if (
+          sbAuthErr.message.includes('already been registered') ||
+          sbAuthErr.message.includes('already exists')
+        ) {
+          const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
+          const foundUser = usersList?.users?.find(u => u.email?.toLowerCase() === normEmail)
+          if (foundUser?.id) {
+            userId = foundUser.id
+            if (password) {
+              await supabaseAdmin.auth.admin.updateUserById(foundUser.id, {password}).catch(() => {})
+            }
+            await supabaseAdmin.auth.admin
+              .updateUserById(foundUser.id, {
+                user_metadata: {
+                  ...foundUser.user_metadata,
+                  name: name || foundUser.user_metadata?.name || '',
+                  role: 'architect',
+                  company: company || foundUser.user_metadata?.company || '',
+                  country: country || 'Türkiye',
+                  profession: profession || foundUser.user_metadata?.profession || 'Mimar / İç Mimar',
+                  phone: phone || foundUser.user_metadata?.phone || '',
+                  email_verified: false,
+                  verification_token_hash: verificationTokenHash,
+                  verification_token_expires: verificationTokenExpires,
+                },
+              })
+              .catch(() => {})
+          }
+        }
+        
+        if (!userId) {
+          const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
+          return res.status(400).json({error: translateAuthError(sbAuthErr.message, emailLang)})
+        }
       }
 
-      const userId = sbAuthUser?.user?.id
       if (userId) {
         await supabaseAdmin.from('profiles').upsert(
           {
@@ -1045,6 +1102,7 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
             role: 'architect',
             architect_verification_status: 'pending',
             is_verified: false,
+            updated_at: new Date().toISOString(),
           },
           {onConflict: 'id'}
         )
