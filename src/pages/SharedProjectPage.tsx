@@ -288,11 +288,11 @@ export function SharedProjectPage() {
               return (
                 <div
                   key={product.id}
-                  className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex flex-col overflow-hidden shadow-2xs hover:shadow-md transition-shadow"
+                  className="group bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex flex-col overflow-hidden shadow-xs hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300"
                 >
                   <Link
                     to={`/product/${product.id}`}
-                    className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white dark:bg-neutral-900 p-3 block"
+                    className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white dark:bg-neutral-900 p-4 border-b border-neutral-100 dark:border-neutral-800/80 block"
                   >
                     <OptimizedImage
                       {...imgProps}
