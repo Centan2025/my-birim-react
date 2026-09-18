@@ -71,23 +71,33 @@ export const SelectionDrawer: React.FC = () => {
             {/* Slide-over Drawer */}
             <motion.div
               ref={drawerRef as React.RefObject<HTMLDivElement>}
-              initial={{x: '100%', scaleX: 0.88, opacity: 0.6}}
-              animate={{x: 0, scaleX: 1, opacity: 1}}
+              initial={{x: '100%', scaleX: 0.6, opacity: 0}}
+              animate={{
+                x: 0,
+                scaleX: [0.6, 1.035, 0.99, 1],
+                opacity: 1,
+              }}
               exit={{
                 x: '100%',
-                scaleX: 0.88,
+                scaleX: 0.6,
                 opacity: 0,
                 transition: {duration: 0.42, ease: [0.32, 0, 0.67, 0]},
               }}
-              transition={{duration: 0.58, ease: [0.05, 0.9, 0.15, 1]}}
+              transition={{
+                duration: 0.65,
+                ease: [0.16, 1, 0.3, 1],
+                times: [0, 0.52, 0.78, 1],
+                opacity: {duration: 0.35},
+              }}
               style={{transformOrigin: 'right center'}}
               className="relative w-full max-w-md h-full bg-[var(--bg-primary)] text-[var(--text-primary)] border-l border-[var(--border-primary)] shadow-2xl flex flex-col z-10"
             >
               {/* Drawer Header */}
               <motion.div
-                initial={{opacity: 0, x: 24, scale: 0.95, filter: 'blur(3px)'}}
-                animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
-                transition={{delay: 0.12, duration: 0.48, ease: [0.05, 0.9, 0.15, 1]}}
+                initial={{opacity: 0, x: 35, scaleX: 0.85, filter: 'blur(4px)'}}
+                animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
+                transition={{delay: 0.12, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
+                style={{transformOrigin: 'right center'}}
                 className="px-6 py-6 border-b border-[var(--border-primary)] flex items-start justify-between"
               >
                 <div>
@@ -167,13 +177,13 @@ export const SelectionDrawer: React.FC = () => {
                           <motion.div
                             key={product.id}
                             layout
-                            initial={{opacity: 0, x: 28, scale: 0.94, filter: 'blur(3px)'}}
-                            animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
+                            initial={{opacity: 0, x: 40, scaleX: 0.85, filter: 'blur(4px)'}}
+                            animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
                             exit={{
                               opacity: 0,
-                              x: 24,
-                              scale: 0.92,
-                              filter: 'blur(3px)',
+                              x: 30,
+                              scaleX: 0.8,
+                              filter: 'blur(4px)',
                               height: 0,
                               paddingTop: 0,
                               paddingBottom: 0,
@@ -181,7 +191,7 @@ export const SelectionDrawer: React.FC = () => {
                               transition: {
                                 opacity: {duration: 0.25, ease: 'easeOut'},
                                 x: {duration: 0.35, ease: 'easeOut'},
-                                scale: {duration: 0.3, ease: 'easeOut'},
+                                scaleX: {duration: 0.3, ease: 'easeOut'},
                                 filter: {duration: 0.25},
                                 height: {duration: 0.55, ease: [0.22, 1, 0.36, 1]},
                                 paddingTop: {duration: 0.55, ease: [0.22, 1, 0.36, 1]},
@@ -190,15 +200,15 @@ export const SelectionDrawer: React.FC = () => {
                               },
                             }}
                             transition={{
-                              duration: 0.48,
+                              duration: 0.52,
                               delay: 0.12 + Math.min(idx * 0.06, 0.3),
-                              ease: [0.05, 0.9, 0.15, 1],
+                              ease: [0.16, 1, 0.3, 1],
                               layout: {
                                 duration: 0.55,
                                 ease: [0.22, 1, 0.36, 1],
                               },
                             }}
-                            style={{overflow: 'hidden'}}
+                            style={{transformOrigin: 'right center', overflow: 'hidden'}}
                             className="py-4 border-b border-[var(--border-primary)] flex items-center gap-4 group"
                           >
                             <Link
@@ -262,9 +272,10 @@ export const SelectionDrawer: React.FC = () => {
                     {selectedProducts.length === 0 && (
                       <motion.div
                         key="empty"
-                        initial={{opacity: 0, x: 24, scale: 0.95, filter: 'blur(3px)'}}
-                        animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
-                        transition={{duration: 0.5, delay: 0.18, ease: [0.05, 0.9, 0.15, 1]}}
+                        initial={{opacity: 0, x: 35, scaleX: 0.85, filter: 'blur(4px)'}}
+                        animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
+                        transition={{duration: 0.52, delay: 0.18, ease: [0.16, 1, 0.3, 1]}}
+                        style={{transformOrigin: 'right center'}}
                         className="my-auto flex flex-col items-center justify-center text-center py-16 px-4"
                       >
                         <div className="w-12 h-12 rounded-full border border-[var(--border-primary)] flex items-center justify-center mb-5 text-neutral-400">
@@ -301,10 +312,10 @@ export const SelectionDrawer: React.FC = () => {
               <AnimatePresence>
                 {selectedProducts.length > 0 && (
                   <motion.div
-                    initial={{opacity: 0, y: 16, scale: 0.96, filter: 'blur(2px)'}}
+                    initial={{opacity: 0, y: 20, scale: 0.94, filter: 'blur(3px)'}}
                     animate={{opacity: 1, y: 0, scale: 1, filter: 'blur(0px)'}}
-                    exit={{opacity: 0, y: 12, transition: {duration: 0.25}}}
-                    transition={{duration: 0.48, delay: 0.22, ease: [0.05, 0.9, 0.15, 1]}}
+                    exit={{opacity: 0, y: 15, transition: {duration: 0.25}}}
+                    transition={{duration: 0.52, delay: 0.2, ease: [0.16, 1, 0.3, 1]}}
                     className="px-6 py-5 border-t border-[var(--border-primary)] bg-[var(--bg-primary)]"
                   >
                     <div className="grid grid-cols-2 gap-3">

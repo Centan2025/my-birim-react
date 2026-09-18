@@ -117,23 +117,33 @@ export const FloatingAuthPanel: React.FC = () => {
               role="dialog"
               aria-modal="true"
               aria-label={isLoggedIn ? t('profile') : t('login')}
-              initial={{x: '100%', scaleX: 0.88, opacity: 0.6}}
-              animate={{x: 0, scaleX: 1, opacity: 1}}
+              initial={{x: '100%', scaleX: 0.6, opacity: 0}}
+              animate={{
+                x: 0,
+                scaleX: [0.6, 1.035, 0.99, 1],
+                opacity: 1,
+              }}
               exit={{
                 x: '100%',
-                scaleX: 0.88,
+                scaleX: 0.6,
                 opacity: 0,
                 transition: {duration: 0.42, ease: [0.32, 0, 0.67, 0]},
               }}
-              transition={{duration: 0.58, ease: [0.05, 0.9, 0.15, 1]}}
+              transition={{
+                duration: 0.65,
+                ease: [0.16, 1, 0.3, 1],
+                times: [0, 0.52, 0.78, 1],
+                opacity: {duration: 0.35},
+              }}
               style={{transformOrigin: 'right center'}}
               className="fixed right-0 top-0 bottom-0 w-full max-w-[400px] bg-[var(--bg-secondary)] shadow-[-10px_0_40px_-15px_rgba(0,0,0,0.3)] z-[101] flex flex-col"
             >
               {/* Panel Header */}
               <motion.div
-                initial={{opacity: 0, x: 24, scale: 0.95, filter: 'blur(3px)'}}
-                animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
-                transition={{delay: 0.12, duration: 0.48, ease: [0.05, 0.9, 0.15, 1]}}
+                initial={{opacity: 0, x: 35, scaleX: 0.85, filter: 'blur(4px)'}}
+                animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
+                transition={{delay: 0.12, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
+                style={{transformOrigin: 'right center'}}
                 className="flex items-center justify-between px-8 py-10 border-b border-[var(--border-primary)]/10 bg-[var(--bg-primary)]/40"
               >
                 <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-[var(--text-primary)]">
@@ -153,9 +163,10 @@ export const FloatingAuthPanel: React.FC = () => {
                 {isLoggedIn ? (
                   <div className="space-y-12">
                     <motion.div
-                      initial={{opacity: 0, x: 30, scale: 0.94, filter: 'blur(4px)'}}
-                      animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
-                      transition={{delay: 0.2, duration: 0.5, ease: [0.05, 0.9, 0.15, 1]}}
+                      initial={{opacity: 0, x: 40, scaleX: 0.85, filter: 'blur(4px)'}}
+                      animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
+                      transition={{delay: 0.18, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
+                      style={{transformOrigin: 'right center'}}
                     >
                       <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-[0.3em] font-bold mb-4">
                         {t('welcome_back') || 'Hoş Geldiniz'}
@@ -169,9 +180,10 @@ export const FloatingAuthPanel: React.FC = () => {
                     </motion.div>
 
                     <motion.div
-                      initial={{opacity: 0, x: 30, scale: 0.94, filter: 'blur(4px)'}}
-                      animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
-                      transition={{delay: 0.3, duration: 0.5, ease: [0.05, 0.9, 0.15, 1]}}
+                      initial={{opacity: 0, x: 40, scaleX: 0.85, filter: 'blur(4px)'}}
+                      animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
+                      transition={{delay: 0.25, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
+                      style={{transformOrigin: 'right center'}}
                       className="space-y-4 pt-10 border-t border-[var(--border-primary)]/10"
                     >
                       <Link
@@ -200,9 +212,10 @@ export const FloatingAuthPanel: React.FC = () => {
                   <div className="space-y-10">
                     <form onSubmit={handleLogin} className="space-y-8">
                       <motion.div
-                        initial={{opacity: 0, x: 30, scale: 0.94, filter: 'blur(3px)'}}
-                        animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
-                        transition={{delay: 0.18, duration: 0.48, ease: [0.05, 0.9, 0.15, 1]}}
+                        initial={{opacity: 0, x: 40, scaleX: 0.85, filter: 'blur(4px)'}}
+                        animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
+                        transition={{delay: 0.18, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
+                        style={{transformOrigin: 'right center'}}
                         className="relative group"
                       >
                         <label
@@ -226,9 +239,10 @@ export const FloatingAuthPanel: React.FC = () => {
                       </motion.div>
 
                       <motion.div
-                        initial={{opacity: 0, x: 30, scale: 0.94, filter: 'blur(3px)'}}
-                        animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
-                        transition={{delay: 0.26, duration: 0.48, ease: [0.05, 0.9, 0.15, 1]}}
+                        initial={{opacity: 0, x: 40, scaleX: 0.85, filter: 'blur(4px)'}}
+                        animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
+                        transition={{delay: 0.25, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
+                        style={{transformOrigin: 'right center'}}
                         className="relative group"
                       >
                         <label
@@ -262,9 +276,10 @@ export const FloatingAuthPanel: React.FC = () => {
                       )}
 
                       <motion.div
-                        initial={{opacity: 0, x: 30, scale: 0.94, filter: 'blur(3px)'}}
-                        animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
-                        transition={{delay: 0.34, duration: 0.48, ease: [0.05, 0.9, 0.15, 1]}}
+                        initial={{opacity: 0, x: 40, scaleX: 0.85, filter: 'blur(4px)'}}
+                        animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
+                        transition={{delay: 0.32, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
+                        style={{transformOrigin: 'right center'}}
                         className="space-y-4"
                       >
                         <button
@@ -289,9 +304,10 @@ export const FloatingAuthPanel: React.FC = () => {
                     </form>
 
                     <motion.div
-                      initial={{opacity: 0, x: 30, scale: 0.94, filter: 'blur(3px)'}}
-                      animate={{opacity: 1, x: 0, scale: 1, filter: 'blur(0px)'}}
-                      transition={{delay: 0.42, duration: 0.48, ease: [0.05, 0.9, 0.15, 1]}}
+                      initial={{opacity: 0, x: 40, scaleX: 0.85, filter: 'blur(4px)'}}
+                      animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
+                      transition={{delay: 0.38, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
+                      style={{transformOrigin: 'right center'}}
                       className="pt-12 mt-12 border-t border-[var(--border-primary)]/10 text-center"
                     >
                       <p className="text-[10px] text-[var(--text-secondary)] mb-6 tracking-[0.3em] uppercase font-bold">
