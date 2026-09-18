@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, {useEffect, useState, useCallback} from 'react'
-import {createPortal} from 'react-dom'
 import {useNavigate, useSearchParams, Link} from 'react-router-dom'
 import {motion, AnimatePresence, LayoutGroup} from 'framer-motion'
 import {
@@ -19,8 +18,6 @@ import {
   AlertCircle,
   X,
   ChevronRight,
-  ChevronLeft,
-  Layers,
   RefreshCw,
   ExternalLink,
   Lock,
@@ -88,40 +85,15 @@ export function AccountPage() {
     }
   }
 
-  const [indexDrawerOpen, setIndexDrawerOpen] = useState(false)
-
   // Auto-scroll active tab into center view on mobile navigation
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-      const activeBtn = document.getElementById(`account-tab-${currentTab}`)
+      const activeBtn = document.getElementById(`account-tab-mobile-${currentTab}`)
       if (activeBtn) {
         activeBtn.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'})
       }
     }
   }, [currentTab])
-
-  // Lock body scroll and pause Lenis when mobile section drawer is open
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined
-    if (indexDrawerOpen) {
-      const originalBodyOverflow = document.body.style.overflow
-      const originalHtmlOverflow = document.documentElement.style.overflow
-      const originalTouchAction = document.body.style.touchAction
-      document.body.style.overflow = 'hidden'
-      document.documentElement.style.overflow = 'hidden'
-      document.body.style.touchAction = 'none'
-      // Pause Lenis smooth scroll
-      ;(window as any).lenis?.stop?.()
-
-      return () => {
-        document.body.style.overflow = originalBodyOverflow
-        document.documentElement.style.overflow = originalHtmlOverflow
-        document.body.style.touchAction = originalTouchAction
-        ;(window as any).lenis?.start?.()
-      }
-    }
-    return undefined
-  }, [indexDrawerOpen])
 
   useSEO({
     title: isEn ? 'BİRİM — My Account' : 'BİRİM — Hesabım',
@@ -557,15 +529,6 @@ export function AccountPage() {
     },
   ]
 
-  const currentNavItem = navItems.find(n => n.id === currentTab) ?? navItems[0]!
-  const CurrentIcon = currentNavItem.icon
-  const currentNavIndex = navItems.findIndex(n => n.id === currentTab)
-  const prevNavItem = currentNavIndex > 0 ? navItems[currentNavIndex - 1] : null
-  const nextNavItem =
-    currentNavIndex >= 0 && currentNavIndex < navItems.length - 1
-      ? navItems[currentNavIndex + 1]
-      : null
-
   const displayName =
     profile?.name || auth.user?.name || auth.user?.email || (isEn ? 'Customer' : 'Müşterimiz')
 
@@ -623,226 +586,45 @@ export function AccountPage() {
           </div>
         </div>
 
-        {/* Mobile Navigation Architecture (< lg): Segmented Horizontal Rail + Architectural Index Selector */}
-        <div className="block lg:hidden mb-6 sticky top-16 md:top-20 z-30 space-y-2">
-          {/* Top Bar: Section Title + Fast Stepper + Bölümler Button (No numeric 01/07) */}
-          <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200 dark:border-stone-800 shadow-sm p-3 flex items-center justify-between gap-2">
-            {/* Active section info */}
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-8 h-8 bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 flex items-center justify-center shrink-0">
-                <CurrentIcon className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400 block truncate">
-                  {isEn ? 'Section' : 'Hesap Bölümü'}
-                </span>
-                <span className="font-heading text-xs uppercase font-semibold text-stone-900 dark:text-stone-100 truncate block">
-                  {currentNavItem.shortTitle}
-                </span>
-              </div>
-            </div>
-
-            {/* Stepper + Bölümler Selector */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              {prevNavItem && (
-                <button
-                  type="button"
-                  onClick={() => setTab(prevNavItem.id)}
-                  aria-label={isEn ? 'Previous section' : 'Önceki bölüm'}
-                  className="p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </button>
-              )}
-              {nextNavItem && (
-                <button
-                  type="button"
-                  onClick={() => setTab(nextNavItem.id)}
-                  aria-label={isEn ? 'Next section' : 'Sonraki bölüm'}
-                  className="p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              )}
-
-              {/* Architectural Sections Button */}
-              <button
-                type="button"
-                onClick={() => setIndexDrawerOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono uppercase tracking-wider border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors cursor-pointer"
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span className="font-semibold">{isEn ? 'Sections' : 'Bölümler'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Horizontal Architectural Rail (Snap & Frictionless Tap-to-Slide with Smooth Pill) */}
+        {/* Mobile Navigation Architecture (< lg): Single Pure Minimalist Architectural Segmented Rail */}
+        <div className="block lg:hidden mb-6 sticky top-16 md:top-20 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800/80 shadow-xs">
           <LayoutGroup id="account-mobile-tabs">
-            <div className="bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border border-stone-200 dark:border-stone-800 shadow-sm p-1.5 overflow-x-auto no-scrollbar flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
               {navItems.map(item => {
                 const ItemIcon = item.icon
                 const isActive = currentTab === item.id
                 return (
                   <button
                     key={item.id}
-                    id={`account-tab-${item.id}`}
+                    id={`account-tab-mobile-${item.id}`}
                     onClick={() => setTab(item.id)}
-                    className={`relative shrink-0 flex items-center gap-1.5 px-3.5 py-2 text-xs font-mono uppercase tracking-wider transition-colors duration-200 border cursor-pointer ${
+                    className={`relative shrink-0 flex items-center gap-2 px-3.5 py-2 text-xs font-mono uppercase tracking-wider transition-colors duration-200 border cursor-pointer ${
                       isActive
-                        ? 'border-stone-900 dark:border-stone-100 font-semibold'
-                        : 'bg-stone-50/70 dark:bg-stone-950/40 text-stone-600 dark:text-stone-400 border-transparent hover:text-stone-900 dark:hover:text-stone-200'
+                        ? 'border-stone-900 dark:border-stone-100 text-white dark:text-stone-900 font-semibold'
+                        : 'border-stone-200/60 dark:border-stone-800/60 bg-stone-50/70 dark:bg-stone-950/40 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-white dark:hover:bg-stone-900'
                     }`}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="activeAccountTabMobileStrip"
                         className="absolute inset-0 bg-stone-900 dark:bg-stone-100 z-0"
-                        transition={{type: 'spring', stiffness: 280, damping: 28, mass: 0.6}}
+                        transition={{type: 'spring', stiffness: 300, damping: 30, mass: 0.6}}
                       />
                     )}
                     <ItemIcon
                       className={`relative z-10 w-3.5 h-3.5 transition-colors duration-200 ${
-                        isActive ? 'text-white dark:text-stone-900' : 'text-stone-500'
+                        isActive
+                          ? 'text-white dark:text-stone-900'
+                          : 'text-stone-500 dark:text-stone-400'
                       }`}
                     />
-                    <span
-                      className={`relative z-10 whitespace-nowrap transition-colors duration-200 ${
-                        isActive ? 'text-white dark:text-stone-900' : ''
-                      }`}
-                    >
-                      {item.shortLabel}
-                    </span>
+                    <span className="relative z-10 whitespace-nowrap">{item.label}</span>
                   </button>
                 )
               })}
             </div>
           </LayoutGroup>
         </div>
-
-        {/* Minimalist Swiss Architectural Sections Modal / Bottom Sheet (Mounted to document.body via Portal) */}
-        {typeof document !== 'undefined' &&
-          createPortal(
-            <AnimatePresence>
-              {indexDrawerOpen && (
-                <div className="fixed inset-0 z-[99999] lg:hidden flex flex-col justify-end">
-                  {/* Backdrop */}
-                  <motion.div
-                    initial={{opacity: 0}}
-                    animate={{opacity: 1}}
-                    exit={{opacity: 0}}
-                    transition={{duration: 0.2}}
-                    onClick={() => setIndexDrawerOpen(false)}
-                    className="fixed inset-0 bg-black/70 backdrop-blur-xs z-0"
-                  />
-                  {/* Drawer sheet */}
-                  <motion.div
-                    initial={{opacity: 0, y: '100%'}}
-                    animate={{opacity: 1, y: 0}}
-                    exit={{opacity: 0, y: '100%'}}
-                    transition={{duration: 0.28, ease: [0.16, 1, 0.3, 1]}}
-                    className="relative z-10 w-full bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 shadow-[0_-20px_50px_rgba(0,0,0,0.35)] max-h-[82vh] flex flex-col overscroll-contain"
-                  >
-                    {/* Grab handle indicator */}
-                    <button
-                      type="button"
-                      aria-label={isEn ? 'Close drawer' : 'Çekmeceyi kapat'}
-                      className="w-full pt-3 pb-1 flex justify-center cursor-pointer bg-transparent border-0"
-                      onClick={() => setIndexDrawerOpen(false)}
-                    >
-                      <div className="w-12 h-1 rounded-full bg-stone-300 dark:bg-stone-700" />
-                    </button>
-
-                    {/* Drawer Header (No numbers) */}
-                    <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 px-4 py-3 flex items-center justify-between">
-                      <div>
-                        <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400 block">
-                          {isEn ? 'Section Selector' : 'Bölüm Seçimi'}
-                        </span>
-                        <h3 className="font-heading text-xs uppercase tracking-wider text-stone-900 dark:text-stone-100 font-bold">
-                          {isEn ? 'Account Sections' : 'Hesap Bölümleri'}
-                        </h3>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setIndexDrawerOpen(false)}
-                        className="p-1.5 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 border border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
-                        aria-label={isEn ? 'Close' : 'Kapat'}
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Section Items (Clean, No numbers) */}
-                    <LayoutGroup id="account-drawer-tabs">
-                      <div className="p-3 overflow-y-auto overscroll-contain flex-1 grid grid-cols-1 gap-1.5 divide-y divide-stone-100 dark:divide-stone-800/80">
-                        {navItems.map(item => {
-                          const ItemIcon = item.icon
-                          const isActive = currentTab === item.id
-                          return (
-                            <button
-                              key={item.id}
-                              onClick={() => {
-                                setTab(item.id)
-                                setIndexDrawerOpen(false)
-                              }}
-                              className={`relative w-full flex items-center justify-between p-3.5 text-left transition-colors duration-200 border cursor-pointer ${
-                                isActive
-                                  ? 'border-stone-900 dark:border-stone-100 font-semibold'
-                                  : 'border-transparent text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60'
-                              }`}
-                            >
-                              {isActive && (
-                                <motion.div
-                                  layoutId="activeAccountTabIndexSheet"
-                                  className="absolute inset-0 bg-stone-900 dark:bg-stone-100 z-0"
-                                  transition={{
-                                    type: 'spring',
-                                    stiffness: 280,
-                                    damping: 28,
-                                    mass: 0.6,
-                                  }}
-                                />
-                              )}
-                              <div className="relative z-10 flex items-center gap-3.5">
-                                <ItemIcon
-                                  className={`w-4 h-4 shrink-0 transition-colors duration-200 ${
-                                    isActive ? 'text-white dark:text-stone-900' : 'text-stone-500'
-                                  }`}
-                                />
-                                <div>
-                                  <span
-                                    className={`font-heading text-xs uppercase tracking-wider block transition-colors duration-200 ${
-                                      isActive ? 'text-white dark:text-stone-900' : ''
-                                    }`}
-                                  >
-                                    {item.label}
-                                  </span>
-                                  <span
-                                    className={`text-[10px] font-mono block transition-colors duration-200 ${
-                                      isActive
-                                        ? 'text-stone-300 dark:text-stone-600'
-                                        : 'text-stone-400'
-                                    }`}
-                                  >
-                                    {item.description}
-                                  </span>
-                                </div>
-                              </div>
-                              {isActive && (
-                                <CheckCircle2 className="relative z-10 w-4 h-4 shrink-0 text-white dark:text-stone-900" />
-                              )}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </LayoutGroup>
-                  </motion.div>
-                </div>
-              )}
-            </AnimatePresence>,
-            document.body
-          )}
 
         {/* Main Layout: Desktop Sidebar + Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
