@@ -155,11 +155,13 @@ export function SharedProjectPage() {
     )
   }
 
+  const containerClass = 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
+
   return (
     <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] pt-16 md:pt-20 lg:pt-24 pb-24">
       {/* Brand Top bar */}
       <div className="border-b border-[var(--border-primary)] bg-[var(--bg-primary)]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-3 flex items-center justify-between">
+        <div className={`${containerClass} py-3 flex items-center justify-between`}>
           <div className="flex items-center gap-3">
             <span className="text-xs font-semibold tracking-widest uppercase text-[var(--text-primary)]">
               BİRİM
@@ -179,7 +181,7 @@ export function SharedProjectPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-10">
+      <div className={`${containerClass} pt-10`}>
         {/* Project Header Banner */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-[var(--border-primary)]">
           <div>
