@@ -32,9 +32,22 @@ const apiFetch = async (
     const response = await fetch(`/api/auth/${endpoint}`, options)
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      const errorMsg =
+      let errorMsg =
         errorData.error ||
         `Yerel API sunucusuna erişilemedi (${response.status}). Lütfen 'npm run dev:full' çalıştırıldığından emin olun.`
+      const lower = errorMsg.toLowerCase()
+      if (
+        lower.includes('already been registered') ||
+        lower.includes('already registered') ||
+        lower.includes('already exists') ||
+        lower.includes('user with this email')
+      ) {
+        errorMsg = 'Bu e-posta adresi zaten kayıtlıdır. Lütfen giriş yapın veya şifrenizi sıfırlayın.'
+      } else if (lower.includes('invalid login credentials') || lower.includes('invalid credentials')) {
+        errorMsg = 'E-posta adresi veya şifre hatalı.'
+      } else if (lower.includes('email not confirmed')) {
+        errorMsg = 'Lütfen önce e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.'
+      }
       const fullMsg = errorData.details ? `${errorMsg}\n\nDetay:\n${errorData.details}` : errorMsg
       throw new Error(fullMsg)
     }

@@ -87,6 +87,36 @@ function detectUserLanguage(
   return 'tr'
 }
 
+function translateAuthError(errMsg: string, lang: 'tr' | 'en' = 'tr'): string {
+  if (!errMsg) return 'Bir hata oluştu.'
+  if (lang === 'en') return errMsg
+  const lower = errMsg.toLowerCase()
+  if (
+    lower.includes('already been registered') ||
+    lower.includes('already registered') ||
+    lower.includes('already exists') ||
+    lower.includes('user with this email')
+  ) {
+    return 'Bu e-posta adresi zaten kayıtlıdır. Lütfen giriş yapın veya şifrenizi sıfırlayın.'
+  }
+  if (lower.includes('invalid login credentials') || lower.includes('invalid credentials')) {
+    return 'E-posta adresi veya şifre hatalı.'
+  }
+  if (lower.includes('email not confirmed')) {
+    return 'Lütfen önce e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.'
+  }
+  if (lower.includes('password should be at least')) {
+    return 'Şifre en az 6 karakter uzunluğunda olmalıdır.'
+  }
+  if (lower.includes('rate limit') || lower.includes('too many')) {
+    return 'Çok fazla istek yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.'
+  }
+  if (lower.includes('user not found')) {
+    return 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.'
+  }
+  return errMsg
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (
     handleCors(req, res, {
@@ -320,7 +350,8 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
             }
           )
           if (updateAuthErr) {
-            return res.status(400).json({error: updateAuthErr.message})
+            const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
+            return res.status(400).json({error: translateAuthError(updateAuthErr.message, emailLang)})
           }
         } else {
           const {data: newSbAuth, error: createAuthErr} = await supabaseAdmin.auth.admin.createUser(
@@ -343,7 +374,8 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
             }
           )
           if (createAuthErr) {
-            return res.status(400).json({error: createAuthErr.message})
+            const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
+            return res.status(400).json({error: translateAuthError(createAuthErr.message, emailLang)})
           }
           if (newSbAuth?.user?.id) {
             await supabaseAdmin.from('profiles').delete().eq('id', existingProfile.id)
@@ -419,7 +451,10 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
     })
 
     if (authError || !sbAuth?.user) {
-      return res.status(400).json({error: authError?.message || 'Kayıt sırasında hata oluştu.'})
+      const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
+      return res
+        .status(400)
+        .json({error: translateAuthError(authError?.message || 'Kayıt sırasında hata oluştu.', emailLang)})
     }
 
     const userId = sbAuth.user.id
@@ -1005,7 +1040,8 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
       })
 
       if (sbAuthErr) {
-        return res.status(400).json({error: sbAuthErr.message})
+        const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
+        return res.status(400).json({error: translateAuthError(sbAuthErr.message, emailLang)})
       }
 
       const userId = sbAuthUser?.user?.id
