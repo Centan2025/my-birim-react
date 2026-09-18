@@ -139,6 +139,8 @@ async function handleAdminMembers(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0')
+    res.setHeader('Pragma', 'no-cache')
     try {
       const {data: profiles, error} = await supabaseAdmin
         .from('profiles')

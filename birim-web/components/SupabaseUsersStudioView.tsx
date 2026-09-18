@@ -61,15 +61,20 @@ export interface AuthUserDetails {
 }
 
 async function safeFetchAdmin(path: string, options: RequestInit = {}): Promise<Response> {
-  const primaryUrl = getAdminApiUrl(path)
+  const separator = path.includes('?') ? '&' : '?'
+  const cacheBustedPath = `${path}${separator}_t=${Date.now()}`
+  const primaryUrl = getAdminApiUrl(cacheBustedPath)
   const headers = {
     'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    Pragma: 'no-cache',
     ...(options.headers || {}),
   }
 
   try {
     const res = await fetch(primaryUrl, {
       ...options,
+      cache: 'no-store',
       headers,
       credentials: 'include',
     })
@@ -82,20 +87,31 @@ async function safeFetchAdmin(path: string, options: RequestInit = {}): Promise<
     ) {
       return res
     }
-    if (primaryUrl !== path) {
-      const fallbackRes = await fetch(path, {...options, headers, credentials: 'include'})
+    if (primaryUrl !== cacheBustedPath) {
+      const fallbackRes = await fetch(cacheBustedPath, {
+        ...options,
+        cache: 'no-store',
+        headers,
+        credentials: 'include',
+      })
       return fallbackRes
     }
     return res
   } catch (err) {
-    if (primaryUrl !== path) {
+    if (primaryUrl !== cacheBustedPath) {
       try {
-        const fallbackRes = await fetch(path, {...options, headers, credentials: 'include'})
+        const fallbackRes = await fetch(cacheBustedPath, {
+          ...options,
+          cache: 'no-store',
+          headers,
+          credentials: 'include',
+        })
         return fallbackRes
       } catch {}
       try {
-        const port3001Res = await fetch(`http://localhost:3001${path}`, {
+        const port3001Res = await fetch(`http://localhost:3001${cacheBustedPath}`, {
           ...options,
+          cache: 'no-store',
           headers,
           credentials: 'include',
         })

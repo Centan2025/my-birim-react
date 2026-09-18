@@ -2459,6 +2459,8 @@ app.post('/api/analytics/activity', async (req, res) => {
 
 // ─── /api/admin/members ───────────────────────────────────────────────────
 app.get('/api/admin/members', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+  res.setHeader('Pragma', 'no-cache')
   if (!supabaseAdmin) {
     return res.status(503).json({error: 'Supabase servisi yapılandırılmamış.'})
   }
