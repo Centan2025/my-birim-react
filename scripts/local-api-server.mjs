@@ -3243,6 +3243,659 @@ app.post('/api/maintenance/verify', async (req, res) => {
   }
 })
 
+// ─── /api/account ──────────────────────────────────────────────────────────
+
+// 1. Profile
+app.get('/api/account/profile', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const {data: profile, error} = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', req.userId)
+      .maybeSingle()
+    if (error) return res.status(500).json({error: error.message})
+    if (!profile) return res.status(404).json({error: 'Profil bulunamadı.'})
+
+    return res.status(200).json({
+      success: true,
+      profile: {
+        id: profile.id,
+        email: profile.email,
+        name: profile.name || null,
+        firstName: profile.first_name || null,
+        lastName: profile.last_name || null,
+        company: profile.company || null,
+        profession: profile.profession || null,
+        phone: profile.phone || null,
+        taxId: profile.tax_id || null,
+        role: profile.role || 'user',
+        architectVerificationStatus: profile.architect_verification_status || 'not_requested',
+        isVerified: Boolean(profile.is_verified),
+        newsletterSubscribed: Boolean(profile.newsletter_subscribed ?? (profile.profession === 'Bülten Abonesi')),
+        createdAt: profile.created_at || new Date().toISOString(),
+        updatedAt: profile.updated_at || null,
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+const handleProfileUpdate = async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const rawPayload = req.body || {}
+    const updates = {updated_at: new Date().toISOString()}
+    if (rawPayload.name !== undefined) updates.name = rawPayload.name ? String(rawPayload.name).trim() : null
+    if (rawPayload.phone !== undefined) updates.phone = rawPayload.phone ? String(rawPayload.phone).trim() : null
+    if (rawPayload.company !== undefined) updates.company = rawPayload.company ? String(rawPayload.company).trim() : null
+    if (rawPayload.profession !== undefined) updates.profession = rawPayload.profession ? String(rawPayload.profession).trim() : null
+    if (rawPayload.newsletter_subscribed !== undefined || rawPayload.newsletterSubscribed !== undefined) {
+      updates.newsletter_subscribed = Boolean(rawPayload.newsletter_subscribed ?? rawPayload.newsletterSubscribed)
+    }
+
+    let {data, error} = await supabaseAdmin.from('profiles').update(updates).eq('id', req.userId).select().single()
+    if (error && error.message?.includes('newsletter_subscribed')) {
+      delete updates.newsletter_subscribed
+      const retry = await supabaseAdmin.from('profiles').update(updates).eq('id', req.userId).select().single()
+      data = retry.data
+      error = retry.error
+    }
+    if (error) return res.status(500).json({error: error.message})
+
+    return res.status(200).json({
+      success: true,
+      profile: {
+        id: data.id,
+        email: data.email,
+        name: data.name || null,
+        firstName: data.first_name || null,
+        lastName: data.last_name || null,
+        company: data.company || null,
+        profession: data.profession || null,
+        phone: data.phone || null,
+        taxId: data.tax_id || null,
+        role: data.role || 'user',
+        architectVerificationStatus: data.architect_verification_status || 'not_requested',
+        isVerified: Boolean(data.is_verified),
+        newsletterSubscribed: Boolean(data.newsletter_subscribed ?? (data.profession === 'Bülten Abonesi')),
+        createdAt: data.created_at || new Date().toISOString(),
+        updatedAt: data.updated_at || null,
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+}
+app.patch('/api/account/profile', requireLocalAuth, handleProfileUpdate)
+app.put('/api/account/profile', requireLocalAuth, handleProfileUpdate)
+
+// 2. Change Password
+app.post('/api/account/change-password', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const {currentPassword, newPassword} = req.body || {}
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({error: 'Mevcut şifre ve yeni şifre gereklidir.'})
+    }
+    if (typeof newPassword !== 'string' || newPassword.length < 6) {
+      return res.status(400).json({error: 'Yeni şifre en az 6 karakter olmalıdır.'})
+    }
+
+    const {data: usrData, error: usrErr} = await supabaseAdmin.auth.admin.getUserById(req.userId)
+    if (usrErr || !usrData?.user?.email) {
+      return res.status(404).json({error: 'Kullanıcı hesabı bulunamadı.'})
+    }
+
+    if (SUPABASE_ANON_KEY) {
+      const testClient = createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY, {auth: {persistSession: false}})
+      const {error: signErr} = await testClient.auth.signInWithPassword({
+        email: usrData.user.email,
+        password: currentPassword,
+      })
+      if (signErr) {
+        return res.status(400).json({error: 'Mevcut şifreniz hatalı.'})
+      }
+    }
+
+    const {error: updateErr} = await supabaseAdmin.auth.admin.updateUserById(req.userId, {
+      password: newPassword,
+    })
+    if (updateErr) return res.status(500).json({error: updateErr.message})
+
+    return res.status(200).json({success: true, message: 'Şifreniz başarıyla güncellendi.'})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+// 3. Addresses
+app.get('/api/account/addresses', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const {data, error} = await supabaseAdmin
+      .from('customer_addresses')
+      .select('id, user_id, label, recipient_name, phone, address_line_1, address_line_2, city, district, postal_code, country, is_default_shipping, created_at, updated_at')
+      .eq('user_id', req.userId)
+      .order('is_default_shipping', {ascending: false})
+      .order('created_at', {ascending: false})
+
+    if (error) return res.status(500).json({error: error.message})
+
+    const addresses = (data || []).map(row => ({
+      id: row.id,
+      userId: row.user_id,
+      label: row.label,
+      recipientName: row.recipient_name,
+      phone: row.phone,
+      addressLine1: row.address_line_1,
+      addressLine2: row.address_line_2 || null,
+      city: row.city,
+      district: row.district,
+      postalCode: row.postal_code || null,
+      country: row.country || 'Türkiye',
+      isDefaultShipping: Boolean(row.is_default_shipping),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }))
+
+    return res.status(200).json({success: true, addresses})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.post('/api/account/addresses', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const body = req.body || {}
+    const isDefault = Boolean(body.isDefaultShipping ?? body.is_default_shipping)
+    if (isDefault) {
+      await supabaseAdmin
+        .from('customer_addresses')
+        .update({is_default_shipping: false, updated_at: new Date().toISOString()})
+        .eq('user_id', req.userId)
+        .eq('is_default_shipping', true)
+    }
+
+    const insertData = {
+      user_id: req.userId,
+      label: String(body.label || 'Teslimat Adresi').trim(),
+      recipient_name: String(body.recipientName || body.recipient_name || 'Müşteri').trim(),
+      phone: String(body.phone || '').trim(),
+      address_line_1: String(body.addressLine1 || body.address_line_1 || '').trim(),
+      address_line_2: (body.addressLine2 || body.address_line_2) ? String(body.addressLine2 || body.address_line_2).trim() : null,
+      city: String(body.city || 'İstanbul').trim(),
+      district: String(body.district || '').trim(),
+      postal_code: (body.postalCode || body.postal_code) ? String(body.postalCode || body.postal_code).trim() : null,
+      country: String(body.country || 'Türkiye').trim(),
+      is_default_shipping: isDefault,
+    }
+
+    const {data, error} = await supabaseAdmin.from('customer_addresses').insert(insertData).select().single()
+    if (error) return res.status(500).json({error: error.message})
+
+    return res.status(201).json({
+      success: true,
+      address: {
+        id: data.id,
+        userId: data.user_id,
+        label: data.label,
+        recipientName: data.recipient_name,
+        phone: data.phone,
+        addressLine1: data.address_line_1,
+        addressLine2: data.address_line_2,
+        city: data.city,
+        district: data.district,
+        postalCode: data.postal_code,
+        country: data.country,
+        isDefaultShipping: Boolean(data.is_default_shipping),
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.post('/api/account/addresses/:id/default', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const addressId = req.params.id
+    await supabaseAdmin
+      .from('customer_addresses')
+      .update({is_default_shipping: false, updated_at: new Date().toISOString()})
+      .eq('user_id', req.userId)
+
+    const {data, error} = await supabaseAdmin
+      .from('customer_addresses')
+      .update({is_default_shipping: true, updated_at: new Date().toISOString()})
+      .eq('id', addressId)
+      .eq('user_id', req.userId)
+      .select()
+      .single()
+
+    if (error) return res.status(500).json({error: error.message})
+    return res.status(200).json({
+      success: true,
+      address: {
+        id: data.id,
+        userId: data.user_id,
+        label: data.label,
+        recipientName: data.recipient_name,
+        phone: data.phone,
+        addressLine1: data.address_line_1,
+        addressLine2: data.address_line_2,
+        city: data.city,
+        district: data.district,
+        postalCode: data.postal_code,
+        country: data.country,
+        isDefaultShipping: true,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+const handleAddressUpdate = async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const addressId = req.params.id
+    const body = req.body || {}
+    const updates = {updated_at: new Date().toISOString()}
+    if (body.label !== undefined) updates.label = String(body.label).trim()
+    if (body.recipientName !== undefined || body.recipient_name !== undefined) updates.recipient_name = String(body.recipientName || body.recipient_name).trim()
+    if (body.phone !== undefined) updates.phone = String(body.phone).trim()
+    if (body.addressLine1 !== undefined || body.address_line_1 !== undefined) updates.address_line_1 = String(body.addressLine1 || body.address_line_1).trim()
+    if (body.addressLine2 !== undefined || body.address_line_2 !== undefined) updates.address_line_2 = (body.addressLine2 || body.address_line_2) ? String(body.addressLine2 || body.address_line_2).trim() : null
+    if (body.city !== undefined) updates.city = String(body.city).trim()
+    if (body.district !== undefined) updates.district = String(body.district).trim()
+    if (body.postalCode !== undefined || body.postal_code !== undefined) updates.postal_code = (body.postalCode || body.postal_code) ? String(body.postalCode || body.postal_code).trim() : null
+    if (body.country !== undefined) updates.country = String(body.country).trim()
+    if (body.isDefaultShipping !== undefined || body.is_default_shipping !== undefined) {
+      const isDef = Boolean(body.isDefaultShipping ?? body.is_default_shipping)
+      updates.is_default_shipping = isDef
+      if (isDef) {
+        await supabaseAdmin
+          .from('customer_addresses')
+          .update({is_default_shipping: false, updated_at: new Date().toISOString()})
+          .eq('user_id', req.userId)
+          .neq('id', addressId)
+      }
+    }
+
+    const {data, error} = await supabaseAdmin
+      .from('customer_addresses')
+      .update(updates)
+      .eq('id', addressId)
+      .eq('user_id', req.userId)
+      .select()
+      .single()
+
+    if (error) return res.status(500).json({error: error.message})
+    return res.status(200).json({
+      success: true,
+      address: {
+        id: data.id,
+        userId: data.user_id,
+        label: data.label,
+        recipientName: data.recipient_name,
+        phone: data.phone,
+        addressLine1: data.address_line_1,
+        addressLine2: data.address_line_2,
+        city: data.city,
+        district: data.district,
+        postalCode: data.postal_code,
+        country: data.country,
+        isDefaultShipping: Boolean(data.is_default_shipping),
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+}
+app.patch('/api/account/addresses/:id', requireLocalAuth, handleAddressUpdate)
+app.put('/api/account/addresses/:id', requireLocalAuth, handleAddressUpdate)
+
+app.delete('/api/account/addresses/:id', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const addressId = req.params.id
+    const {error} = await supabaseAdmin
+      .from('customer_addresses')
+      .delete()
+      .eq('id', addressId)
+      .eq('user_id', req.userId)
+
+    if (error) return res.status(500).json({error: error.message})
+    return res.status(200).json({success: true, message: 'Adres silindi.'})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+// 4. Billing Profiles
+app.get('/api/account/billing-profiles', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const {data, error} = await supabaseAdmin
+      .from('customer_billing_profiles')
+      .select('id, user_id, billing_type, label, full_name, company_name, tax_office, tax_number, address_line_1, address_line_2, city, district, postal_code, country, is_default, created_at, updated_at')
+      .eq('user_id', req.userId)
+      .order('is_default', {ascending: false})
+      .order('created_at', {ascending: false})
+
+    if (error) return res.status(500).json({error: error.message})
+
+    const billingProfiles = (data || []).map(row => ({
+      id: row.id,
+      userId: row.user_id,
+      billingType: row.billing_type,
+      label: row.label,
+      fullName: row.full_name || null,
+      companyName: row.company_name || null,
+      taxOffice: row.tax_office || null,
+      taxNumber: row.tax_number || null,
+      addressLine1: row.address_line_1,
+      addressLine2: row.address_line_2 || null,
+      city: row.city,
+      district: row.district,
+      postalCode: row.postal_code || null,
+      country: row.country || 'Türkiye',
+      isDefault: Boolean(row.is_default),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }))
+
+    return res.status(200).json({success: true, billingProfiles})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.post('/api/account/billing-profiles', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const body = req.body || {}
+    const isDefault = Boolean(body.isDefault ?? body.is_default)
+    if (isDefault) {
+      await supabaseAdmin
+        .from('customer_billing_profiles')
+        .update({is_default: false, updated_at: new Date().toISOString()})
+        .eq('user_id', req.userId)
+        .eq('is_default', true)
+    }
+
+    const billingType = body.billingType === 'company' ? 'company' : 'individual'
+    const insertData = {
+      user_id: req.userId,
+      billing_type: billingType,
+      label: String(body.label || (billingType === 'company' ? 'Kurumsal Fatura' : 'Bireysel Fatura')).trim(),
+      full_name: billingType === 'individual' ? String(body.fullName || body.full_name || 'Müşteri').trim() : null,
+      company_name: billingType === 'company' ? String(body.companyName || body.company_name || '').trim() : null,
+      tax_office: billingType === 'company' ? String(body.taxOffice || body.tax_office || '').trim() : null,
+      tax_number: (body.taxNumber || body.tax_number) ? String(body.taxNumber || body.tax_number).trim() : null,
+      address_line_1: String(body.addressLine1 || body.address_line_1 || '').trim(),
+      address_line_2: (body.addressLine2 || body.address_line_2) ? String(body.addressLine2 || body.address_line_2).trim() : null,
+      city: String(body.city || 'İstanbul').trim(),
+      district: String(body.district || '').trim(),
+      postal_code: (body.postalCode || body.postal_code) ? String(body.postalCode || body.postal_code).trim() : null,
+      country: String(body.country || 'Türkiye').trim(),
+      is_default: isDefault,
+    }
+
+    const {data, error} = await supabaseAdmin.from('customer_billing_profiles').insert(insertData).select().single()
+    if (error) return res.status(500).json({error: error.message})
+
+    return res.status(201).json({
+      success: true,
+      billingProfile: {
+        id: data.id,
+        userId: data.user_id,
+        billingType: data.billing_type,
+        label: data.label,
+        fullName: data.full_name,
+        companyName: data.company_name,
+        taxOffice: data.tax_office,
+        taxNumber: data.tax_number,
+        addressLine1: data.address_line_1,
+        addressLine2: data.address_line_2,
+        city: data.city,
+        district: data.district,
+        postalCode: data.postal_code,
+        country: data.country,
+        isDefault: Boolean(data.is_default),
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.post('/api/account/billing-profiles/:id/default', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const bpId = req.params.id
+    await supabaseAdmin
+      .from('customer_billing_profiles')
+      .update({is_default: false, updated_at: new Date().toISOString()})
+      .eq('user_id', req.userId)
+
+    const {data, error} = await supabaseAdmin
+      .from('customer_billing_profiles')
+      .update({is_default: true, updated_at: new Date().toISOString()})
+      .eq('id', bpId)
+      .eq('user_id', req.userId)
+      .select()
+      .single()
+
+    if (error) return res.status(500).json({error: error.message})
+    return res.status(200).json({
+      success: true,
+      billingProfile: {
+        id: data.id,
+        userId: data.user_id,
+        billingType: data.billing_type,
+        label: data.label,
+        fullName: data.full_name,
+        companyName: data.company_name,
+        taxOffice: data.tax_office,
+        taxNumber: data.tax_number,
+        addressLine1: data.address_line_1,
+        addressLine2: data.address_line_2,
+        city: data.city,
+        district: data.district,
+        postalCode: data.postal_code,
+        country: data.country,
+        isDefault: true,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+const handleBillingUpdate = async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const bpId = req.params.id
+    const body = req.body || {}
+    const updates = {updated_at: new Date().toISOString()}
+    if (body.billingType !== undefined || body.billing_type !== undefined) updates.billing_type = body.billingType || body.billing_type
+    if (body.label !== undefined) updates.label = String(body.label).trim()
+    if (body.fullName !== undefined || body.full_name !== undefined) updates.full_name = (body.fullName || body.full_name) ? String(body.fullName || body.full_name).trim() : null
+    if (body.companyName !== undefined || body.company_name !== undefined) updates.company_name = (body.companyName || body.company_name) ? String(body.companyName || body.company_name).trim() : null
+    if (body.taxOffice !== undefined || body.tax_office !== undefined) updates.tax_office = (body.taxOffice || body.tax_office) ? String(body.taxOffice || body.tax_office).trim() : null
+    if (body.taxNumber !== undefined || body.tax_number !== undefined) updates.tax_number = (body.taxNumber || body.tax_number) ? String(body.taxNumber || body.tax_number).trim() : null
+    if (body.addressLine1 !== undefined || body.address_line_1 !== undefined) updates.address_line_1 = String(body.addressLine1 || body.address_line_1).trim()
+    if (body.addressLine2 !== undefined || body.address_line_2 !== undefined) updates.address_line_2 = (body.addressLine2 || body.address_line_2) ? String(body.addressLine2 || body.address_line_2).trim() : null
+    if (body.city !== undefined) updates.city = String(body.city).trim()
+    if (body.district !== undefined) updates.district = String(body.district).trim()
+    if (body.postalCode !== undefined || body.postal_code !== undefined) updates.postal_code = (body.postalCode || body.postal_code) ? String(body.postalCode || body.postal_code).trim() : null
+    if (body.country !== undefined) updates.country = String(body.country).trim()
+    if (body.isDefault !== undefined || body.is_default !== undefined) {
+      const isDef = Boolean(body.isDefault ?? body.is_default)
+      updates.is_default = isDef
+      if (isDef) {
+        await supabaseAdmin
+          .from('customer_billing_profiles')
+          .update({is_default: false, updated_at: new Date().toISOString()})
+          .eq('user_id', req.userId)
+          .neq('id', bpId)
+      }
+    }
+
+    const {data, error} = await supabaseAdmin
+      .from('customer_billing_profiles')
+      .update(updates)
+      .eq('id', bpId)
+      .eq('user_id', req.userId)
+      .select()
+      .single()
+
+    if (error) return res.status(500).json({error: error.message})
+    return res.status(200).json({
+      success: true,
+      billingProfile: {
+        id: data.id,
+        userId: data.user_id,
+        billingType: data.billing_type,
+        label: data.label,
+        fullName: data.full_name,
+        companyName: data.company_name,
+        taxOffice: data.tax_office,
+        taxNumber: data.tax_number,
+        addressLine1: data.address_line_1,
+        addressLine2: data.address_line_2,
+        city: data.city,
+        district: data.district,
+        postalCode: data.postal_code,
+        country: data.country,
+        isDefault: Boolean(data.is_default),
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+}
+app.patch('/api/account/billing-profiles/:id', requireLocalAuth, handleBillingUpdate)
+app.put('/api/account/billing-profiles/:id', requireLocalAuth, handleBillingUpdate)
+
+app.delete('/api/account/billing-profiles/:id', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const bpId = req.params.id
+    const {error} = await supabaseAdmin
+      .from('customer_billing_profiles')
+      .delete()
+      .eq('id', bpId)
+      .eq('user_id', req.userId)
+
+    if (error) return res.status(500).json({error: error.message})
+    return res.status(200).json({success: true, message: 'Fatura profili silindi.'})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+// 5. Orders
+app.get('/api/account/orders', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const {data, error} = await supabaseAdmin
+      .from('commerce_orders')
+      .select('id, order_number, status, payment_status, currency, grand_total, created_at, items_count, first_item_name_snapshot, first_item_sku_snapshot')
+      .eq('user_id', req.userId)
+      .order('created_at', {ascending: false})
+
+    if (error) {
+      if (error.code === '42P01') {
+        return res.status(200).json({success: true, orders: []})
+      }
+      return res.status(500).json({error: error.message})
+    }
+
+    const orders = (data || []).map(row => ({
+      id: row.id,
+      orderNumber: row.order_number,
+      status: row.status,
+      paymentStatus: row.payment_status,
+      currency: row.currency,
+      grandTotal: row.grand_total,
+      createdAt: row.created_at,
+      itemCount: row.items_count || 1,
+      firstItemNameSnapshot: row.first_item_name_snapshot,
+      firstItemSkuSnapshot: row.first_item_sku_snapshot,
+    }))
+
+    return res.status(200).json({success: true, orders})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.get('/api/account/orders/:id', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const orderId = req.params.id
+    const {data: order, error} = await supabaseAdmin
+      .from('commerce_orders')
+      .select('*')
+      .eq('id', orderId)
+      .eq('user_id', req.userId)
+      .maybeSingle()
+
+    if (error) return res.status(500).json({error: error.message})
+    if (!order) return res.status(404).json({error: 'Sipariş bulunamadı.'})
+
+    const {data: items} = await supabaseAdmin
+      .from('commerce_order_items')
+      .select('*')
+      .eq('order_id', orderId)
+
+    return res.status(200).json({
+      success: true,
+      order: {
+        id: order.id,
+        orderNumber: order.order_number,
+        status: order.status,
+        paymentStatus: order.payment_status,
+        currency: order.currency,
+        subtotal: order.subtotal,
+        taxTotal: order.tax_total,
+        grandTotal: order.grand_total,
+        createdAt: order.created_at,
+        shippingAddressSnapshot: order.shipping_address_snapshot,
+        billingAddressSnapshot: order.billing_address_snapshot,
+        corporateBillingSnapshot: order.corporate_billing_snapshot,
+        items: (items || []).map(it => ({
+          id: it.id,
+          productName: it.product_name_snapshot || it.product_name,
+          sku: it.sku_snapshot || it.sku,
+          quantity: it.quantity,
+          unitPrice: it.unit_price,
+          totalPrice: it.total_price,
+        })),
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({error: `Route not found: ${req.method} ${req.path}`})
