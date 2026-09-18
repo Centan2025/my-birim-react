@@ -214,9 +214,9 @@ describe('BİRİM Canonical Account Center UI (Phase 2B Tests)', () => {
       await waitFor(() => {
         expect(screen.getByText(/Hoş Geldiniz, Ahmet Yılmaz/i)).toBeInTheDocument()
       })
-      expect(screen.getByText(/Genel Bakış/i)).toBeInTheDocument()
-      expect(screen.getByText(/Profil Bilgilerim/i)).toBeInTheDocument()
-      expect(screen.getByText(/Teslimat Adreslerim/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/Genel Bakış/i).length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/Profil Bilgilerim/i).length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/Teslimat Adreslerim/i).length).toBeGreaterThan(0)
     })
   })
 
@@ -235,7 +235,7 @@ describe('BİRİM Canonical Account Center UI (Phase 2B Tests)', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText(/Profil Bilgilerim/i)).toBeInTheDocument()
+        expect(screen.getAllByText(/Profil Bilgilerim/i).length).toBeGreaterThan(0)
       })
       expect(screen.getByText('ahmet@birim.com')).toBeInTheDocument()
       expect(screen.getByText('Birim Tasarım')).toBeInTheDocument()
@@ -305,7 +305,7 @@ describe('BİRİM Canonical Account Center UI (Phase 2B Tests)', () => {
         expect(screen.getByRole('heading', {name: /Profesyonel Hesabım/i})).toBeInTheDocument()
       })
       expect(screen.getByText(/Doğrulandı \(Aktif\)/i)).toBeInTheDocument()
-      expect(screen.getByText(/Mimar \/ Profesyonel/i)).toBeInTheDocument()
+      expect(screen.getByText(/Mimar & Tasarımcı/i)).toBeInTheDocument()
       expect(screen.getAllByText('Birim Tasarım').length).toBeGreaterThan(0)
       expect(screen.getAllByText('Mimar').length).toBeGreaterThan(0)
 

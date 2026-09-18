@@ -492,6 +492,7 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
             <select
               value={sortOrder}
               onChange={e => setSortOrder(e.target.value as SortOrder)}
+              aria-label={isTr ? 'Projeleri Sırala' : 'Sort Projects'}
               className="bg-transparent border-b border-neutral-300 text-[10px] font-mono uppercase text-neutral-800 py-1 px-1 focus:outline-none focus:border-neutral-900 transition-colors rounded-none cursor-pointer"
             >
               <option value="default">{isTr ? 'SIRALAMA: VARSAYILAN' : 'SORT: DEFAULT'}</option>
@@ -520,6 +521,7 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder={isTr ? 'Filtrele...' : 'Filter...'}
+                aria-label={isTr ? 'Projelerde filtrele' : 'Filter projects'}
                 className="w-full bg-transparent text-xs font-mono text-neutral-900 placeholder:text-neutral-400 focus:outline-none rounded-none py-0.5"
               />
               {searchQuery && (

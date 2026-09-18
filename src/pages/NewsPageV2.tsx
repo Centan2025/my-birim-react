@@ -42,44 +42,46 @@ interface NewsCardV2ItemProps {
   isTr: boolean
 }
 
-const NewsCardV2Item = forwardRef<HTMLDivElement, NewsCardV2ItemProps>(
-  function NewsCardV2Item({item, index, isTr}, forwardedRef) {
-    const localRef = useRef<HTMLDivElement>(null)
-    useImperativeHandle(forwardedRef, () => localRef.current as HTMLDivElement)
-    const isInView = useInView(localRef, {once: true, amount: 0.05, margin: '0px 0px 50px 0px'})
-    const colIndex = index % 3
-    const cardDelay = index < 6 ? 0.06 + index * 0.08 : (colIndex % 3) * 0.07
-    const {t} = useTranslation()
-    const title = t(item.title)
-    const cardImage = item.imageUrl
+const NewsCardV2Item = forwardRef<HTMLDivElement, NewsCardV2ItemProps>(function NewsCardV2Item(
+  {item, index, isTr},
+  forwardedRef
+) {
+  const localRef = useRef<HTMLDivElement>(null)
+  useImperativeHandle(forwardedRef, () => localRef.current as HTMLDivElement)
+  const isInView = useInView(localRef, {once: true, amount: 0.05, margin: '0px 0px 50px 0px'})
+  const colIndex = index % 3
+  const cardDelay = index < 6 ? 0.06 + index * 0.08 : (colIndex % 3) * 0.07
+  const {t} = useTranslation()
+  const title = t(item.title)
+  const cardImage = item.imageUrl
 
-    return (
-      <motion.div
-        ref={localRef}
-        layout
-        initial={{opacity: 0, y: 45, scale: 0.92}}
-        animate={isInView ? {opacity: 1, y: 0, scale: 1} : {opacity: 0, y: 45, scale: 0.92}}
-        exit={{opacity: 0, scale: 0.9, y: 20, transition: {duration: 0.35, ease: 'easeOut'}}}
-        transition={{
-          layout: {duration: 0.5, ease: [0.16, 1, 0.3, 1]},
-          y: {
-            duration: 0.92,
-            delay: cardDelay,
-            ease: [0.16, 1, 0.3, 1],
-          },
-          scale: {
-            duration: 0.84,
-            delay: cardDelay + 0.05,
-            ease: [0.45, 0, 0.2, 1],
-          },
-          opacity: {
-            duration: 0.68,
-            delay: cardDelay,
-            ease: 'easeOut',
-          },
-        }}
-        className="h-full"
-      >
+  return (
+    <motion.div
+      ref={localRef}
+      layout
+      initial={{opacity: 0, y: 45, scale: 0.92}}
+      animate={isInView ? {opacity: 1, y: 0, scale: 1} : {opacity: 0, y: 45, scale: 0.92}}
+      exit={{opacity: 0, scale: 0.9, y: 20, transition: {duration: 0.35, ease: 'easeOut'}}}
+      transition={{
+        layout: {duration: 0.5, ease: [0.16, 1, 0.3, 1]},
+        y: {
+          duration: 0.92,
+          delay: cardDelay,
+          ease: [0.16, 1, 0.3, 1],
+        },
+        scale: {
+          duration: 0.84,
+          delay: cardDelay + 0.05,
+          ease: [0.45, 0, 0.2, 1],
+        },
+        opacity: {
+          duration: 0.68,
+          delay: cardDelay,
+          ease: 'easeOut',
+        },
+      }}
+      className="h-full"
+    >
       <article className="group relative flex flex-col h-full bg-transparent border border-black/[0.06] dark:border-white/[0.08] hover:border-black/15 dark:hover:border-white/15 transition-colors duration-300 will-change-transform">
         <Link to={`/news/${item.id}`} className="flex flex-col h-full focus:outline-none">
           {/* Dikey Kart Görsel Alanı (Sade, rozetsiz 4:5 Dikey Görsel) */}
@@ -376,6 +378,7 @@ export function NewsPageV2() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder={isTr ? 'Haberlerde ara...' : 'Search news...'}
+                aria-label={isTr ? 'Haberlerde ara' : 'Search news'}
                 className="w-full pl-9 pr-8 py-1.5 text-xs font-mono bg-transparent border border-black/10 dark:border-white/15 focus:border-black dark:focus:border-white text-[var(--text-primary)] placeholder:text-neutral-400 focus:outline-none transition-colors"
               />
               {searchQuery && (
@@ -426,4 +429,3 @@ export function NewsPageV2() {
 }
 
 export default NewsPageV2
-

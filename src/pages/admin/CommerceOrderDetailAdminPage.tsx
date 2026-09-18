@@ -849,10 +849,15 @@ export function CommerceOrderDetailAdminPage() {
 
                 <form onSubmit={handleCancelOrder} className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-600 mb-1">
+                    <label
+                      htmlFor="cancel-order-reason"
+                      className="block text-[10px] font-bold uppercase tracking-wider text-gray-600 mb-1"
+                    >
                       İptal Gerekçesi (İsteğe Bağlı)
                     </label>
                     <textarea
+                      id="cancel-order-reason"
+                      name="cancelReason"
                       value={cancelReason}
                       onChange={e => setCancelReason(e.target.value)}
                       placeholder="Müşteri talebi, stok yetersizliği vb..."
@@ -935,7 +940,10 @@ export function CommerceOrderDetailAdminPage() {
                 <form onSubmit={handleCreateRefund} className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-600">
+                      <label
+                        htmlFor="refund-amount"
+                        className="block text-[10px] font-bold uppercase tracking-wider text-gray-600"
+                      >
                         İade Tutarı ({order.currency}) *
                       </label>
                       <button
@@ -947,6 +955,8 @@ export function CommerceOrderDetailAdminPage() {
                       </button>
                     </div>
                     <input
+                      id="refund-amount"
+                      name="refundAmount"
                       type="number"
                       step="0.01"
                       min="0.01"
@@ -960,10 +970,15 @@ export function CommerceOrderDetailAdminPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-600 mb-1">
+                    <label
+                      htmlFor="refund-reason"
+                      className="block text-[10px] font-bold uppercase tracking-wider text-gray-600 mb-1"
+                    >
                       İade Gerekçesi *
                     </label>
                     <textarea
+                      id="refund-reason"
+                      name="refundReason"
                       value={refundReason}
                       onChange={e => setRefundReason(e.target.value)}
                       placeholder="Müşteri iade talebi, kusurlu ürün, karşılıklı mutabakat vb..."

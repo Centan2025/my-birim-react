@@ -1474,7 +1474,7 @@ async function handleSubscribeProfLogic(req, res) {
 
           return res.status(200).json({
             success: true,
-            message: 'Mimar başvurusu bilgileriniz başarıyla güncellendi. Lütfen e-posta adresinize gönderilen onay bağlantısını kontrol edin.',
+            message: 'Başvurunuz başarıyla alındı. Lütfen e-posta adresinize gönderilen onay bağlantısını kontrol edin.',
             email: normEmail,
             verificationUrl,
           })
@@ -1551,7 +1551,7 @@ async function handleSubscribeProfLogic(req, res) {
 
       return res.status(201).json({
         success: true,
-        message: 'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
+        message: 'Başvurunuz başarıyla alındı. Lütfen e-posta adresinize gönderilen onay bağlantısını kontrol edin.',
         email: normEmail,
         verificationUrl,
       })

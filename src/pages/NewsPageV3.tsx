@@ -278,6 +278,7 @@ export function NewsPageV3() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder={isTr ? 'Haberlerde ara...' : 'Search news...'}
+                aria-label={isTr ? 'Haberlerde ara' : 'Search news'}
                 className="w-full pl-9 pr-8 py-1.5 text-xs font-mono bg-transparent border border-black/10 dark:border-white/15 focus:border-black dark:focus:border-white text-[var(--text-primary)] placeholder:text-neutral-400 focus:outline-none transition-colors"
               />
               {searchQuery && (

@@ -143,8 +143,11 @@ export default function AnalyticsPage() {
             <div className="relative">
               <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
+                id="analytics-pin-input"
+                name="pin"
                 type="password"
                 placeholder="Yönetici PIN / Parola"
+                aria-label="Yönetici PIN / Parola"
                 value={pinInput}
                 onChange={e => {
                   setPinInput(e.target.value)

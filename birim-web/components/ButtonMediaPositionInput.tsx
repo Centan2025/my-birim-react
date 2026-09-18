@@ -544,6 +544,7 @@ export default function ButtonMediaPositionInput(props: StringInputProps) {
                 type="range"
                 min="0"
                 max="100"
+                aria-label="Yatay pozisyon kaydırıcı"
                 value={currentCoords.x}
                 onChange={(e) => updatePosition(Number(e.target.value), currentCoords.y)}
                 style={{flex: 1, cursor: 'pointer'}}
@@ -553,6 +554,7 @@ export default function ButtonMediaPositionInput(props: StringInputProps) {
                   type="number"
                   min="0"
                   max="100"
+                  aria-label="Yatay pozisyon yüzdesi"
                   value={currentCoords.x}
                   onChange={(e) => updatePosition(Number(e.target.value), currentCoords.y)}
                   style={{
@@ -577,6 +579,7 @@ export default function ButtonMediaPositionInput(props: StringInputProps) {
                 type="range"
                 min="0"
                 max="100"
+                aria-label="Dikey pozisyon kaydırıcı"
                 value={currentCoords.y}
                 onChange={(e) => updatePosition(currentCoords.x, Number(e.target.value))}
                 style={{flex: 1, cursor: 'pointer'}}
@@ -586,6 +589,7 @@ export default function ButtonMediaPositionInput(props: StringInputProps) {
                   type="number"
                   min="0"
                   max="100"
+                  aria-label="Dikey pozisyon yüzdesi"
                   value={currentCoords.y}
                   onChange={(e) => updatePosition(currentCoords.x, Number(e.target.value))}
                   style={{

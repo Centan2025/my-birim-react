@@ -318,6 +318,7 @@ export function NewsPageV1() {
               <input
                 type="text"
                 placeholder={t('search_placeholder') || 'Ara...'}
+                aria-label={t('search_placeholder') || 'Haberlerde ara'}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="bg-transparent border-b border-black/[0.08] dark:border-white/[0.1] focus:border-[var(--text-primary)] text-xs md:text-sm py-1 px-2 text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none transition-colors w-36 sm:w-48 font-light"

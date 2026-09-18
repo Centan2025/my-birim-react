@@ -352,7 +352,9 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
           )
           if (updateAuthErr) {
             const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
-            return res.status(400).json({error: translateAuthError(updateAuthErr.message, emailLang)})
+            return res
+              .status(400)
+              .json({error: translateAuthError(updateAuthErr.message, emailLang)})
           }
         } else {
           const {data: newSbAuth, error: createAuthErr} = await supabaseAdmin.auth.admin.createUser(
@@ -376,7 +378,9 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
           )
           if (createAuthErr) {
             const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
-            return res.status(400).json({error: translateAuthError(createAuthErr.message, emailLang)})
+            return res
+              .status(400)
+              .json({error: translateAuthError(createAuthErr.message, emailLang)})
           }
           if (newSbAuth?.user?.id) {
             await supabaseAdmin.from('profiles').delete().eq('id', existingProfile.id)
@@ -455,7 +459,12 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
       const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
       return res
         .status(400)
-        .json({error: translateAuthError(authError?.message || 'Kayıt sırasında hata oluştu.', emailLang)})
+        .json({
+          error: translateAuthError(
+            authError?.message || 'Kayıt sırasında hata oluştu.',
+            emailLang
+          ),
+        })
     }
 
     const userId = sbAuth.user.id
@@ -719,7 +728,8 @@ async function handleVerify(req: VercelRequest, res: VercelResponse) {
 
     const finalUserId = finalProfile?.id || matchedUser?.id || effectiveUserId || 'verified_user'
     const finalEmail = finalProfile?.email || matchedUser?.email || targetEmail || ''
-    const finalRole = finalProfile?.role || (matchedUser?.user_metadata?.['role'] as string) || 'architect'
+    const finalRole =
+      finalProfile?.role || (matchedUser?.user_metadata?.['role'] as string) || 'architect'
 
     const sessionToken = createToken({
       sub: finalUserId,
@@ -738,12 +748,10 @@ async function handleVerify(req: VercelRequest, res: VercelResponse) {
         email: finalEmail,
         name: finalProfile?.name || (matchedUser?.user_metadata?.['name'] as string) || '',
         role: finalRole,
-        company:
-          finalProfile?.company || (matchedUser?.user_metadata?.['company'] as string) || '',
+        company: finalProfile?.company || (matchedUser?.user_metadata?.['company'] as string) || '',
         profession:
           finalProfile?.profession || (matchedUser?.user_metadata?.['profession'] as string) || '',
-        architectVerificationStatus:
-          finalProfile?.architect_verification_status || 'pending',
+        architectVerificationStatus: finalProfile?.architect_verification_status || 'pending',
         isVerified: true,
       },
     })
@@ -986,27 +994,39 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
             if (newAuth?.user?.id) {
               await supabaseAdmin.from('profiles').delete().eq('id', existing.id)
               existing.id = newAuth.user.id
-            } else if (createErr?.message?.includes('already been registered') || createErr?.message?.includes('already exists')) {
+            } else if (
+              createErr?.message?.includes('already been registered') ||
+              createErr?.message?.includes('already exists')
+            ) {
               const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
               const foundUser = usersList?.users?.find(u => u.email?.toLowerCase() === normEmail)
               if (foundUser?.id) {
                 if (password) {
-                  await supabaseAdmin.auth.admin.updateUserById(foundUser.id, {password}).catch(() => {})
+                  await supabaseAdmin.auth.admin
+                    .updateUserById(foundUser.id, {password})
+                    .catch(() => {})
                 }
-                await supabaseAdmin.auth.admin.updateUserById(foundUser.id, {
-                  user_metadata: {
-                    ...foundUser.user_metadata,
-                    name: name || existing.name || foundUser.user_metadata?.name || '',
-                    role: 'architect',
-                    company: company || existing.company || foundUser.user_metadata?.company || '',
-                    country: country || 'Türkiye',
-                    profession: profession || existing.profession || foundUser.user_metadata?.profession || 'Mimar / İç Mimar',
-                    phone: phone || existing.phone || foundUser.user_metadata?.phone || '',
-                    email_verified: false,
-                    verification_token_hash: verificationTokenHash,
-                    verification_token_expires: verificationTokenExpires,
-                  },
-                }).catch(() => {})
+                await supabaseAdmin.auth.admin
+                  .updateUserById(foundUser.id, {
+                    user_metadata: {
+                      ...foundUser.user_metadata,
+                      name: name || existing.name || foundUser.user_metadata?.name || '',
+                      role: 'architect',
+                      company:
+                        company || existing.company || foundUser.user_metadata?.company || '',
+                      country: country || 'Türkiye',
+                      profession:
+                        profession ||
+                        existing.profession ||
+                        foundUser.user_metadata?.profession ||
+                        'Mimar / İç Mimar',
+                      phone: phone || existing.phone || foundUser.user_metadata?.phone || '',
+                      email_verified: false,
+                      verification_token_hash: verificationTokenHash,
+                      verification_token_expires: verificationTokenExpires,
+                    },
+                  })
+                  .catch(() => {})
                 existing.id = foundUser.id
               }
             }
@@ -1038,7 +1058,7 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
           return res.status(200).json({
             success: true,
             message:
-              'Mimar başvurusu bilgileriniz başarıyla güncellendi. Lütfen e-posta adresinize gönderilen onay bağlantısını kontrol edin.',
+              'Başvurunuz başarıyla alındı. Lütfen e-posta adresinize gönderilen onay bağlantısını kontrol edin.',
             email: normEmail,
           })
         }
@@ -1077,7 +1097,9 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
           if (foundUser?.id) {
             userId = foundUser.id
             if (password) {
-              await supabaseAdmin.auth.admin.updateUserById(foundUser.id, {password}).catch(() => {})
+              await supabaseAdmin.auth.admin
+                .updateUserById(foundUser.id, {password})
+                .catch(() => {})
             }
             await supabaseAdmin.auth.admin
               .updateUserById(foundUser.id, {
@@ -1087,7 +1109,8 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
                   role: 'architect',
                   company: company || foundUser.user_metadata?.company || '',
                   country: country || 'Türkiye',
-                  profession: profession || foundUser.user_metadata?.profession || 'Mimar / İç Mimar',
+                  profession:
+                    profession || foundUser.user_metadata?.profession || 'Mimar / İç Mimar',
                   phone: phone || foundUser.user_metadata?.phone || '',
                   email_verified: false,
                   verification_token_hash: verificationTokenHash,
@@ -1097,7 +1120,7 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
               .catch(() => {})
           }
         }
-        
+
         if (!userId) {
           const emailLang = detectUserLanguage(req, country, req.body?.['lang'])
           return res.status(400).json({error: translateAuthError(sbAuthErr.message, emailLang)})
@@ -1132,7 +1155,7 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
       return res.status(201).json({
         success: true,
         message:
-          'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
+          'Başvurunuz başarıyla alındı. Lütfen e-posta adresinize gönderilen onay bağlantısını kontrol edin.',
         email: normEmail,
       })
     } catch (err: unknown) {

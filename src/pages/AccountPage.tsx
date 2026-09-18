@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, {useEffect, useState, useCallback} from 'react'
+import {createPortal} from 'react-dom'
 import {useNavigate, useSearchParams, Link} from 'react-router-dom'
-import {motion, AnimatePresence} from 'framer-motion'
+import {motion, AnimatePresence, LayoutGroup} from 'framer-motion'
 import {
   User,
   MapPin,
@@ -18,6 +19,8 @@ import {
   AlertCircle,
   X,
   ChevronRight,
+  ChevronLeft,
+  Layers,
   RefreshCw,
   ExternalLink,
   Lock,
@@ -73,7 +76,52 @@ export function AccountPage() {
 
   const setTab = (tab: AccountTab) => {
     setSearchParams(tab === 'overview' ? {} : {tab}, {replace: true})
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      const mainContent = document.getElementById('account-main-content')
+      if (mainContent) {
+        const topOffset = mainContent.getBoundingClientRect().top + window.pageYOffset - 140
+        window.scrollTo({
+          top: Math.max(0, topOffset),
+          behavior: 'smooth',
+        })
+      }
+    }
   }
+
+  const [indexDrawerOpen, setIndexDrawerOpen] = useState(false)
+
+  // Auto-scroll active tab into center view on mobile navigation
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      const activeBtn = document.getElementById(`account-tab-${currentTab}`)
+      if (activeBtn) {
+        activeBtn.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'})
+      }
+    }
+  }, [currentTab])
+
+  // Lock body scroll and pause Lenis when mobile section drawer is open
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    if (indexDrawerOpen) {
+      const originalBodyOverflow = document.body.style.overflow
+      const originalHtmlOverflow = document.documentElement.style.overflow
+      const originalTouchAction = document.body.style.touchAction
+      document.body.style.overflow = 'hidden'
+      document.documentElement.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+      // Pause Lenis smooth scroll
+      ;(window as any).lenis?.stop?.()
+
+      return () => {
+        document.body.style.overflow = originalBodyOverflow
+        document.documentElement.style.overflow = originalHtmlOverflow
+        document.body.style.touchAction = originalTouchAction
+        ;(window as any).lenis?.start?.()
+      }
+    }
+    return undefined
+  }, [indexDrawerOpen])
 
   useSEO({
     title: isEn ? 'BİRİM — My Account' : 'BİRİM — Hesabım',
@@ -244,7 +292,10 @@ export function AccountPage() {
       setAddressModalOpen(false)
       setEditingAddress(null)
     } catch (err: any) {
-      showFeedback('error', err.message || (isEn ? 'Failed to save address.' : 'Adres kaydedilemedi.'))
+      showFeedback(
+        'error',
+        err.message || (isEn ? 'Failed to save address.' : 'Adres kaydedilemedi.')
+      )
     }
   }
 
@@ -274,10 +325,7 @@ export function AccountPage() {
     try {
       await deleteAccountAddress(id)
       setAddresses(prev => prev.filter(a => a.id !== id))
-      showFeedback(
-        'success',
-        isEn ? 'Address deleted.' : 'Adres silindi.'
-      )
+      showFeedback('success', isEn ? 'Address deleted.' : 'Adres silindi.')
       setDeleteConfirm(null)
     } catch (err: any) {
       showFeedback(
@@ -295,10 +343,7 @@ export function AccountPage() {
       if (editingBilling) {
         const updated = await updateAccountBillingProfile(editingBilling.id, payload)
         setBillingProfiles(prev => prev.map(b => (b.id === updated.id ? updated : b)))
-        showFeedback(
-          'success',
-          isEn ? 'Billing profile updated.' : 'Fatura profili güncellendi.'
-        )
+        showFeedback('success', isEn ? 'Billing profile updated.' : 'Fatura profili güncellendi.')
       } else {
         const created = await createAccountBillingProfile(payload)
         setBillingProfiles(prev => [created, ...prev])
@@ -343,10 +388,7 @@ export function AccountPage() {
     try {
       await deleteAccountBillingProfile(id)
       setBillingProfiles(prev => prev.filter(b => b.id !== id))
-      showFeedback(
-        'success',
-        isEn ? 'Billing profile deleted.' : 'Fatura profili silindi.'
-      )
+      showFeedback('success', isEn ? 'Billing profile deleted.' : 'Fatura profili silindi.')
       setDeleteConfirm(null)
     } catch (err: any) {
       showFeedback(
@@ -400,7 +442,8 @@ export function AccountPage() {
     } catch (err: any) {
       showFeedback(
         'error',
-        err.message || (isEn ? 'Failed to update newsletter preferences.' : 'Bülten tercihi güncellenemedi.')
+        err.message ||
+          (isEn ? 'Failed to update newsletter preferences.' : 'Bülten tercihi güncellenemedi.')
       )
     }
   }
@@ -436,19 +479,95 @@ export function AccountPage() {
 
   const navItems: {
     id: AccountTab
+    index: string
     label: string
+    shortLabel: string
+    shortTitle: string
+    description: string
     icon: React.ComponentType<{className?: string}>
   }[] = [
-    {id: 'overview', label: isEn ? 'Overview' : 'Genel Bakış', icon: User},
-    {id: 'profile', label: isEn ? 'My Profile' : 'Profil Bilgilerim', icon: Edit2},
-    {id: 'addresses', label: isEn ? 'Shipping Addresses' : 'Teslimat Adreslerim', icon: MapPin},
-    {id: 'billing', label: isEn ? 'Billing Profiles' : 'Fatura Bilgilerim', icon: FileText},
-    {id: 'orders', label: isEn ? 'My Orders' : 'Siparişlerim', icon: Package},
-    {id: 'professional', label: isEn ? 'Professional Account' : 'Profesyonel Hesabım', icon: Award},
-    {id: 'newsletter', label: isEn ? 'Newsletter & Contact' : 'Bülten & İletişim', icon: Mail},
+    {
+      id: 'overview',
+      index: '01',
+      label: isEn ? 'Overview' : 'Genel Bakış',
+      shortLabel: isEn ? 'Overview' : 'Genel',
+      shortTitle: isEn ? 'Overview Dashboard' : 'Hesap Özeti',
+      description: isEn ? 'Account summary & quick access' : 'Hesap özeti ve hızlı işlemler',
+      icon: User,
+    },
+    {
+      id: 'profile',
+      index: '02',
+      label: isEn ? 'My Profile' : 'Profil Bilgilerim',
+      shortLabel: isEn ? 'Profile' : 'Profil',
+      shortTitle: isEn ? 'Personal Profile' : 'Profil Bilgileri',
+      description: isEn ? 'Personal info and password' : 'Kişisel bilgiler ve şifre',
+      icon: Edit2,
+    },
+    {
+      id: 'addresses',
+      index: '03',
+      label: isEn ? 'Shipping Addresses' : 'Teslimat Adreslerim',
+      shortLabel: isEn ? 'Addresses' : 'Adresler',
+      shortTitle: isEn ? 'Saved Addresses' : 'Kayıtlı Adresler',
+      description: isEn
+        ? `${addresses.length} saved address${addresses.length === 1 ? '' : 'es'}`
+        : `${addresses.length} kayıtlı teslimat adresi`,
+      icon: MapPin,
+    },
+    {
+      id: 'billing',
+      index: '04',
+      label: isEn ? 'Billing Profiles' : 'Fatura Bilgilerim',
+      shortLabel: isEn ? 'Billing' : 'Fatura',
+      shortTitle: isEn ? 'Billing Profiles' : 'Fatura Profilleri',
+      description: isEn
+        ? `${billingProfiles.length} billing profile${billingProfiles.length === 1 ? '' : 's'}`
+        : `${billingProfiles.length} fatura profili`,
+      icon: FileText,
+    },
+    {
+      id: 'orders',
+      index: '05',
+      label: isEn ? 'My Orders' : 'Siparişlerim',
+      shortLabel: isEn ? 'Orders' : 'Siparişler',
+      shortTitle: isEn ? 'Order History' : 'Sipariş Geçmişi',
+      description: isEn
+        ? `${orders.length} order${orders.length === 1 ? '' : 's'} recorded`
+        : `${orders.length} kayıtlı sipariş`,
+      icon: Package,
+    },
+    {
+      id: 'professional',
+      index: '06',
+      label: isEn ? 'Professional Account' : 'Profesyonel Hesabım',
+      shortLabel: isEn ? 'Professional' : 'Mimar / Pro',
+      shortTitle: isEn ? 'Professional Membership' : 'Profesyonel Üyelik',
+      description: isEn ? 'Architect verification and office' : 'Mimar doğrulama ve ofis',
+      icon: Award,
+    },
+    {
+      id: 'newsletter',
+      index: '07',
+      label: isEn ? 'Newsletter & Contact' : 'Bülten & İletişim',
+      shortLabel: isEn ? 'Newsletter' : 'Bülten',
+      shortTitle: isEn ? 'Newsletter & Digest' : 'Mimari Bülten',
+      description: isEn ? 'Editorial and digest subscriptions' : 'Mimari bülten ve iletişim',
+      icon: Mail,
+    },
   ]
 
-  const displayName = profile?.name || auth.user?.name || auth.user?.email || (isEn ? 'Customer' : 'Müşterimiz')
+  const currentNavItem = navItems.find(n => n.id === currentTab) ?? navItems[0]!
+  const CurrentIcon = currentNavItem.icon
+  const currentNavIndex = navItems.findIndex(n => n.id === currentTab)
+  const prevNavItem = currentNavIndex > 0 ? navItems[currentNavIndex - 1] : null
+  const nextNavItem =
+    currentNavIndex >= 0 && currentNavIndex < navItems.length - 1
+      ? navItems[currentNavIndex + 1]
+      : null
+
+  const displayName =
+    profile?.name || auth.user?.name || auth.user?.email || (isEn ? 'Customer' : 'Müşterimiz')
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 pt-28 pb-20 px-4 sm:px-6 lg:px-8">
@@ -492,49 +611,297 @@ export function AccountPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button
+            <motion.button
               onClick={handleLogout}
-              className="inline-flex items-center gap-2 px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              whileHover={{scale: 1.02, y: -1}}
+              whileTap={{scale: 0.98}}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 hover:border-stone-400 dark:hover:border-stone-600 transition-all duration-300 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               {isEn ? 'Sign Out' : 'Çıkış'}
-            </button>
+            </motion.button>
           </div>
         </div>
 
-        {/* Main Layout: Nav Tabs + Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Navigation Sidebar */}
-          <nav className="space-y-1 lg:col-span-1">
-            {navItems.map(item => {
-              const Icon = item.icon
-              const isActive = currentTab === item.id
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setTab(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all border ${
-                    isActive
-                      ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 border-stone-900 dark:border-stone-100 font-semibold'
-                      : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4" />
-                    <span>{item.label}</span>
-                  </div>
-                  <ChevronRight
-                    className={`w-3.5 h-3.5 transition-transform ${
-                      isActive ? 'text-white dark:text-stone-900' : 'text-stone-400'
-                    }`}
-                  />
-                </button>
-              )
-            })}
-          </nav>
+        {/* Mobile Navigation Architecture (< lg): Segmented Horizontal Rail + Architectural Index Selector */}
+        <div className="block lg:hidden mb-6 sticky top-16 md:top-20 z-30 space-y-2">
+          {/* Top Bar: Section Title + Fast Stepper + Bölümler Button (No numeric 01/07) */}
+          <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200 dark:border-stone-800 shadow-sm p-3 flex items-center justify-between gap-2">
+            {/* Active section info */}
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="w-8 h-8 bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 flex items-center justify-center shrink-0">
+                <CurrentIcon className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400 block truncate">
+                  {isEn ? 'Section' : 'Hesap Bölümü'}
+                </span>
+                <span className="font-heading text-xs uppercase font-semibold text-stone-900 dark:text-stone-100 truncate block">
+                  {currentNavItem.shortTitle}
+                </span>
+              </div>
+            </div>
 
-          {/* Content Pane */}
-          <main className="lg:col-span-3">
+            {/* Stepper + Bölümler Selector */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {prevNavItem && (
+                <button
+                  type="button"
+                  onClick={() => setTab(prevNavItem.id)}
+                  aria-label={isEn ? 'Previous section' : 'Önceki bölüm'}
+                  className="p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {nextNavItem && (
+                <button
+                  type="button"
+                  onClick={() => setTab(nextNavItem.id)}
+                  aria-label={isEn ? 'Next section' : 'Sonraki bölüm'}
+                  className="p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+
+              {/* Architectural Sections Button */}
+              <button
+                type="button"
+                onClick={() => setIndexDrawerOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono uppercase tracking-wider border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors cursor-pointer"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span className="font-semibold">{isEn ? 'Sections' : 'Bölümler'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Horizontal Architectural Rail (Snap & Frictionless Tap-to-Slide with Smooth Pill) */}
+          <LayoutGroup id="account-mobile-tabs">
+            <div className="bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border border-stone-200 dark:border-stone-800 shadow-sm p-1.5 overflow-x-auto no-scrollbar flex items-center gap-1.5">
+              {navItems.map(item => {
+                const ItemIcon = item.icon
+                const isActive = currentTab === item.id
+                return (
+                  <button
+                    key={item.id}
+                    id={`account-tab-${item.id}`}
+                    onClick={() => setTab(item.id)}
+                    className={`relative shrink-0 flex items-center gap-1.5 px-3.5 py-2 text-xs font-mono uppercase tracking-wider transition-colors duration-200 border cursor-pointer ${
+                      isActive
+                        ? 'border-stone-900 dark:border-stone-100 font-semibold'
+                        : 'bg-stone-50/70 dark:bg-stone-950/40 text-stone-600 dark:text-stone-400 border-transparent hover:text-stone-900 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeAccountTabMobileStrip"
+                        className="absolute inset-0 bg-stone-900 dark:bg-stone-100 z-0"
+                        transition={{type: 'spring', stiffness: 280, damping: 28, mass: 0.6}}
+                      />
+                    )}
+                    <ItemIcon
+                      className={`relative z-10 w-3.5 h-3.5 transition-colors duration-200 ${
+                        isActive ? 'text-white dark:text-stone-900' : 'text-stone-500'
+                      }`}
+                    />
+                    <span
+                      className={`relative z-10 whitespace-nowrap transition-colors duration-200 ${
+                        isActive ? 'text-white dark:text-stone-900' : ''
+                      }`}
+                    >
+                      {item.shortLabel}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </LayoutGroup>
+        </div>
+
+        {/* Minimalist Swiss Architectural Sections Modal / Bottom Sheet (Mounted to document.body via Portal) */}
+        {typeof document !== 'undefined' &&
+          createPortal(
+            <AnimatePresence>
+              {indexDrawerOpen && (
+                <div className="fixed inset-0 z-[99999] lg:hidden flex flex-col justify-end">
+                  {/* Backdrop */}
+                  <motion.div
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    exit={{opacity: 0}}
+                    transition={{duration: 0.2}}
+                    onClick={() => setIndexDrawerOpen(false)}
+                    className="fixed inset-0 bg-black/70 backdrop-blur-xs z-0"
+                  />
+                  {/* Drawer sheet */}
+                  <motion.div
+                    initial={{opacity: 0, y: '100%'}}
+                    animate={{opacity: 1, y: 0}}
+                    exit={{opacity: 0, y: '100%'}}
+                    transition={{duration: 0.28, ease: [0.16, 1, 0.3, 1]}}
+                    className="relative z-10 w-full bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 shadow-[0_-20px_50px_rgba(0,0,0,0.35)] max-h-[82vh] flex flex-col overscroll-contain"
+                  >
+                    {/* Grab handle indicator */}
+                    <button
+                      type="button"
+                      aria-label={isEn ? 'Close drawer' : 'Çekmeceyi kapat'}
+                      className="w-full pt-3 pb-1 flex justify-center cursor-pointer bg-transparent border-0"
+                      onClick={() => setIndexDrawerOpen(false)}
+                    >
+                      <div className="w-12 h-1 rounded-full bg-stone-300 dark:bg-stone-700" />
+                    </button>
+
+                    {/* Drawer Header (No numbers) */}
+                    <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 px-4 py-3 flex items-center justify-between">
+                      <div>
+                        <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400 block">
+                          {isEn ? 'Section Selector' : 'Bölüm Seçimi'}
+                        </span>
+                        <h3 className="font-heading text-xs uppercase tracking-wider text-stone-900 dark:text-stone-100 font-bold">
+                          {isEn ? 'Account Sections' : 'Hesap Bölümleri'}
+                        </h3>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIndexDrawerOpen(false)}
+                        className="p-1.5 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 border border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+                        aria-label={isEn ? 'Close' : 'Kapat'}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Section Items (Clean, No numbers) */}
+                    <LayoutGroup id="account-drawer-tabs">
+                      <div className="p-3 overflow-y-auto overscroll-contain flex-1 grid grid-cols-1 gap-1.5 divide-y divide-stone-100 dark:divide-stone-800/80">
+                        {navItems.map(item => {
+                          const ItemIcon = item.icon
+                          const isActive = currentTab === item.id
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                setTab(item.id)
+                                setIndexDrawerOpen(false)
+                              }}
+                              className={`relative w-full flex items-center justify-between p-3.5 text-left transition-colors duration-200 border cursor-pointer ${
+                                isActive
+                                  ? 'border-stone-900 dark:border-stone-100 font-semibold'
+                                  : 'border-transparent text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60'
+                              }`}
+                            >
+                              {isActive && (
+                                <motion.div
+                                  layoutId="activeAccountTabIndexSheet"
+                                  className="absolute inset-0 bg-stone-900 dark:bg-stone-100 z-0"
+                                  transition={{
+                                    type: 'spring',
+                                    stiffness: 280,
+                                    damping: 28,
+                                    mass: 0.6,
+                                  }}
+                                />
+                              )}
+                              <div className="relative z-10 flex items-center gap-3.5">
+                                <ItemIcon
+                                  className={`w-4 h-4 shrink-0 transition-colors duration-200 ${
+                                    isActive ? 'text-white dark:text-stone-900' : 'text-stone-500'
+                                  }`}
+                                />
+                                <div>
+                                  <span
+                                    className={`font-heading text-xs uppercase tracking-wider block transition-colors duration-200 ${
+                                      isActive ? 'text-white dark:text-stone-900' : ''
+                                    }`}
+                                  >
+                                    {item.label}
+                                  </span>
+                                  <span
+                                    className={`text-[10px] font-mono block transition-colors duration-200 ${
+                                      isActive
+                                        ? 'text-stone-300 dark:text-stone-600'
+                                        : 'text-stone-400'
+                                    }`}
+                                  >
+                                    {item.description}
+                                  </span>
+                                </div>
+                              </div>
+                              {isActive && (
+                                <CheckCircle2 className="relative z-10 w-4 h-4 shrink-0 text-white dark:text-stone-900" />
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </LayoutGroup>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>,
+            document.body
+          )}
+
+        {/* Main Layout: Desktop Sidebar + Content Area */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Desktop Navigation Sidebar (hidden on mobile) with Smooth Gliding Pill */}
+          <LayoutGroup id="account-desktop-tabs">
+            <nav
+              className="hidden lg:block space-y-1.5 lg:col-span-1"
+              aria-label="Account Navigation"
+            >
+              {navItems.map(item => {
+                const Icon = item.icon
+                const isActive = currentTab === item.id
+                return (
+                  <button
+                    key={item.id}
+                    id={`account-tab-${item.id}`}
+                    onClick={() => setTab(item.id)}
+                    className={`group relative w-full flex items-center justify-between px-4 py-3.5 text-xs font-mono uppercase tracking-wider transition-colors duration-200 border cursor-pointer ${
+                      isActive
+                        ? 'border-stone-900 dark:border-stone-100 font-semibold shadow-sm'
+                        : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 hover:bg-stone-50/80 dark:hover:bg-stone-800/50'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeAccountTabDesktop"
+                        className="absolute inset-0 bg-stone-900 dark:bg-stone-100 z-0"
+                        transition={{type: 'spring', stiffness: 280, damping: 28, mass: 0.6}}
+                      />
+                    )}
+                    <div className="relative z-10 flex items-center gap-3">
+                      <Icon
+                        className={`w-4 h-4 transition-colors duration-200 ${
+                          isActive
+                            ? 'text-white dark:text-stone-900'
+                            : 'text-stone-500 dark:text-stone-400 group-hover:text-stone-900 dark:group-hover:text-stone-100'
+                        }`}
+                      />
+                      <span
+                        className={`transition-colors duration-200 ${isActive ? 'text-white dark:text-stone-900' : ''}`}
+                      >
+                        {item.label}
+                      </span>
+                    </div>
+                    <ChevronRight
+                      className={`relative z-10 w-3.5 h-3.5 transition-all duration-200 ${
+                        isActive
+                          ? 'text-white dark:text-stone-900 translate-x-0.5'
+                          : 'text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-200 group-hover:translate-x-1'
+                      }`}
+                    />
+                  </button>
+                )
+              })}
+            </nav>
+          </LayoutGroup>
+
+          {/* Content Pane with Pure Architectural Drift & Cross-Fade */}
+          <main id="account-main-content" className="lg:col-span-3">
             {isInitialLoading ? (
               <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-12 flex flex-col items-center justify-center space-y-3">
                 <RefreshCw className="w-6 h-6 animate-spin text-stone-400" />
@@ -543,183 +910,211 @@ export function AccountPage() {
                 </span>
               </div>
             ) : (
-              <>
-                {currentTab === 'overview' && (
-                  <OverviewSection
-                    profile={profile}
-                    addresses={addresses}
-                    billingProfiles={billingProfiles}
-                    orders={orders}
-                    ordersLoading={ordersLoading}
-                    ordersError={ordersError}
-                    isEn={isEn}
-                    onNavigateTab={setTab}
-                    onSelectOrder={setSelectedOrderId}
-                  />
-                )}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentTab}
+                  initial={{opacity: 0, y: 8}}
+                  animate={{opacity: 1, y: 0}}
+                  exit={{opacity: 0, y: -6}}
+                  transition={{duration: 0.26, ease: [0.16, 1, 0.3, 1]}}
+                >
+                  {currentTab === 'overview' && (
+                    <OverviewSection
+                      profile={profile}
+                      addresses={addresses}
+                      billingProfiles={billingProfiles}
+                      orders={orders}
+                      ordersLoading={ordersLoading}
+                      ordersError={ordersError}
+                      isEn={isEn}
+                      onNavigateTab={setTab}
+                      onSelectOrder={setSelectedOrderId}
+                    />
+                  )}
 
-                {currentTab === 'profile' && (
-                  <ProfileSection
-                    profile={profile}
-                    error={profileError}
-                    isEn={isEn}
-                    onSave={handleUpdateProfile}
-                    onOpenPasswordModal={() => setPasswordModalOpen(true)}
-                  />
-                )}
+                  {currentTab === 'profile' && (
+                    <ProfileSection
+                      profile={profile}
+                      error={profileError}
+                      isEn={isEn}
+                      onSave={handleUpdateProfile}
+                      onOpenPasswordModal={() => setPasswordModalOpen(true)}
+                    />
+                  )}
 
-                {currentTab === 'addresses' && (
-                  <AddressesSection
-                    addresses={addresses}
-                    loading={addressesLoading}
-                    error={addressesError}
-                    isEn={isEn}
-                    onAdd={() => {
-                      setEditingAddress(null)
-                      setAddressModalOpen(true)
-                    }}
-                    onEdit={addr => {
-                      setEditingAddress(addr)
-                      setAddressModalOpen(true)
-                    }}
-                    onSetDefault={handleSetDefaultAddress}
-                    onDelete={addr => {
-                      setDeleteConfirm({
-                        type: 'address',
-                        id: addr.id,
-                        title: addr.label || addr.addressLine1,
-                      })
-                    }}
-                  />
-                )}
+                  {currentTab === 'addresses' && (
+                    <AddressesSection
+                      addresses={addresses}
+                      loading={addressesLoading}
+                      error={addressesError}
+                      isEn={isEn}
+                      onAdd={() => {
+                        setEditingAddress(null)
+                        setAddressModalOpen(true)
+                      }}
+                      onEdit={addr => {
+                        setEditingAddress(addr)
+                        setAddressModalOpen(true)
+                      }}
+                      onSetDefault={handleSetDefaultAddress}
+                      onDelete={addr => {
+                        setDeleteConfirm({
+                          type: 'address',
+                          id: addr.id,
+                          title: addr.label || addr.addressLine1,
+                        })
+                      }}
+                    />
+                  )}
 
-                {currentTab === 'billing' && (
-                  <BillingSection
-                    billingProfiles={billingProfiles}
-                    loading={billingLoading}
-                    error={billingError}
-                    isEn={isEn}
-                    onAdd={() => {
-                      setEditingBilling(null)
-                      setBillingModalOpen(true)
-                    }}
-                    onEdit={bp => {
-                      setEditingBilling(bp)
-                      setBillingModalOpen(true)
-                    }}
-                    onSetDefault={handleSetDefaultBilling}
-                    onDelete={bp => {
-                      setDeleteConfirm({
-                        type: 'billing',
-                        id: bp.id,
-                        title: bp.label || bp.companyName || bp.fullName || (isEn ? 'Billing Profile' : 'Fatura Profili'),
-                      })
-                    }}
-                  />
-                )}
+                  {currentTab === 'billing' && (
+                    <BillingSection
+                      billingProfiles={billingProfiles}
+                      loading={billingLoading}
+                      error={billingError}
+                      isEn={isEn}
+                      onAdd={() => {
+                        setEditingBilling(null)
+                        setBillingModalOpen(true)
+                      }}
+                      onEdit={bp => {
+                        setEditingBilling(bp)
+                        setBillingModalOpen(true)
+                      }}
+                      onSetDefault={handleSetDefaultBilling}
+                      onDelete={bp => {
+                        setDeleteConfirm({
+                          type: 'billing',
+                          id: bp.id,
+                          title:
+                            bp.label ||
+                            bp.companyName ||
+                            bp.fullName ||
+                            (isEn ? 'Billing Profile' : 'Fatura Profili'),
+                        })
+                      }}
+                    />
+                  )}
 
-                {currentTab === 'orders' && (
-                  <OrdersSection
-                    orders={orders}
-                    loading={ordersLoading}
-                    error={ordersError}
-                    isEn={isEn}
-                    onSelectOrder={setSelectedOrderId}
-                  />
-                )}
+                  {currentTab === 'orders' && (
+                    <OrdersSection
+                      orders={orders}
+                      loading={ordersLoading}
+                      error={ordersError}
+                      isEn={isEn}
+                      onSelectOrder={setSelectedOrderId}
+                    />
+                  )}
 
-                {currentTab === 'professional' && <ProfessionalSection profile={profile} isEn={isEn} />}
+                  {currentTab === 'professional' && (
+                    <ProfessionalSection profile={profile} isEn={isEn} />
+                  )}
 
-                {currentTab === 'newsletter' && (
-                  <NewsletterSection profile={profile} isEn={isEn} onToggle={handleToggleNewsletter} />
-                )}
-              </>
+                  {currentTab === 'newsletter' && (
+                    <NewsletterSection
+                      profile={profile}
+                      isEn={isEn}
+                      onToggle={handleToggleNewsletter}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
             )}
           </main>
         </div>
       </div>
 
       {/* Address Create / Edit Modal */}
-      {addressModalOpen && (
-        <AddressModal
-          address={editingAddress}
-          defaultRecipient={profile?.name || auth.user?.name || ''}
-          defaultPhone={profile?.phone || ''}
-          isEn={isEn}
-          onClose={() => {
-            setAddressModalOpen(false)
-            setEditingAddress(null)
-          }}
-          onSave={handleSaveAddress}
-        />
-      )}
+      <AnimatePresence>
+        {addressModalOpen && (
+          <AddressModal
+            address={editingAddress}
+            defaultRecipient={profile?.name || auth.user?.name || ''}
+            defaultPhone={profile?.phone || ''}
+            isEn={isEn}
+            onClose={() => {
+              setAddressModalOpen(false)
+              setEditingAddress(null)
+            }}
+            onSave={handleSaveAddress}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Billing Create / Edit Modal */}
-      {billingModalOpen && (
-        <BillingModal
-          billing={editingBilling}
-          defaultRecipient={profile?.name || auth.user?.name || ''}
-          isEn={isEn}
-          onClose={() => {
-            setBillingModalOpen(false)
-            setEditingBilling(null)
-          }}
-          onSave={handleSaveBilling}
-        />
-      )}
+      <AnimatePresence>
+        {billingModalOpen && (
+          <BillingModal
+            billing={editingBilling}
+            defaultRecipient={profile?.name || auth.user?.name || ''}
+            isEn={isEn}
+            onClose={() => {
+              setBillingModalOpen(false)
+              setEditingBilling(null)
+            }}
+            onSave={handleSaveBilling}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Change Password Modal */}
-      {passwordModalOpen && (
-        <ChangePasswordModal
-          isEn={isEn}
-          onClose={() => setPasswordModalOpen(false)}
-          onSuccess={() => {
-            setPasswordModalOpen(false)
-            showFeedback(
-              'success',
-              isEn ? 'Password changed successfully.' : 'Şifreniz başarıyla değiştirildi.'
-            )
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {passwordModalOpen && (
+          <ChangePasswordModal
+            isEn={isEn}
+            onClose={() => setPasswordModalOpen(false)}
+            onSuccess={() => {
+              setPasswordModalOpen(false)
+              showFeedback(
+                'success',
+                isEn ? 'Password changed successfully.' : 'Şifreniz başarıyla değiştirildi.'
+              )
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <DeleteConfirmModal
-          title={deleteConfirm.title}
-          type={
-            deleteConfirm.type === 'address'
-              ? isEn
-                ? 'shipping address'
-                : 'teslimat adresini'
-              : isEn
-                ? 'billing profile'
-                : 'fatura profilini'
-          }
-          isDeleting={isDeleting}
-          isEn={isEn}
-          onClose={() => setDeleteConfirm(null)}
-          onConfirm={() => {
-            if (deleteConfirm.type === 'address') {
-              handleDeleteAddress(deleteConfirm.id)
-            } else {
-              handleDeleteBilling(deleteConfirm.id)
+      <AnimatePresence>
+        {deleteConfirm && (
+          <DeleteConfirmModal
+            title={deleteConfirm.title}
+            type={
+              deleteConfirm.type === 'address'
+                ? isEn
+                  ? 'shipping address'
+                  : 'teslimat adresini'
+                : isEn
+                  ? 'billing profile'
+                  : 'fatura profilini'
             }
-          }}
-        />
-      )}
+            isDeleting={isDeleting}
+            isEn={isEn}
+            onClose={() => setDeleteConfirm(null)}
+            onConfirm={() => {
+              if (deleteConfirm.type === 'address') {
+                handleDeleteAddress(deleteConfirm.id)
+              } else {
+                handleDeleteBilling(deleteConfirm.id)
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Order Detail Modal / Drawer */}
-      {selectedOrderId && (
-        <OrderDetailModal
-          orderId={selectedOrderId}
-          orderDetail={orderDetail}
-          loading={orderDetailLoading}
-          error={orderDetailError}
-          isEn={isEn}
-          onClose={() => setSelectedOrderId(null)}
-        />
-      )}
+      <AnimatePresence>
+        {selectedOrderId && (
+          <OrderDetailModal
+            orderId={selectedOrderId}
+            orderDetail={orderDetail}
+            loading={orderDetailLoading}
+            error={orderDetailError}
+            isEn={isEn}
+            onClose={() => setSelectedOrderId(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -756,7 +1151,7 @@ function OverviewSection({
       {/* Quick Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Profile Card */}
-        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-5 flex flex-col justify-between">
+        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 transition-all duration-300 p-5 flex flex-col justify-between shadow-sm">
           <div>
             <div className="flex items-center justify-between text-stone-500 dark:text-stone-400 mb-3">
               <span className="text-[10px] font-mono uppercase tracking-widest">
@@ -776,14 +1171,17 @@ function OverviewSection({
           </div>
           <button
             onClick={() => onNavigateTab('profile')}
-            className="mt-4 inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:underline"
+            className="group mt-4 inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:text-stone-600 dark:hover:text-stone-300 transition-colors cursor-pointer"
           >
-            {isEn ? 'Edit Profile' : 'Profili Düzenle'} &rarr;
+            <span>{isEn ? 'Edit Profile' : 'Profili Düzenle'}</span>
+            <span className="inline-block transition-transform duration-300 ease-out group-hover:translate-x-1.5">
+              &rarr;
+            </span>
           </button>
         </div>
 
         {/* Default Shipping Card */}
-        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-5 flex flex-col justify-between">
+        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 transition-all duration-300 p-5 flex flex-col justify-between shadow-sm">
           <div>
             <div className="flex items-center justify-between text-stone-500 dark:text-stone-400 mb-3">
               <span className="text-[10px] font-mono uppercase tracking-widest">
@@ -812,14 +1210,21 @@ function OverviewSection({
           </div>
           <button
             onClick={() => onNavigateTab('addresses')}
-            className="mt-4 inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:underline"
+            className="group mt-4 inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:text-stone-600 dark:hover:text-stone-300 transition-colors cursor-pointer"
           >
-            {isEn ? `Manage Addresses (${addresses.length})` : `Adresleri Yönet (${addresses.length})`} &rarr;
+            <span>
+              {isEn
+                ? `Manage Addresses (${addresses.length})`
+                : `Adresleri Yönet (${addresses.length})`}
+            </span>
+            <span className="inline-block transition-transform duration-300 ease-out group-hover:translate-x-1.5">
+              &rarr;
+            </span>
           </button>
         </div>
 
         {/* Default Billing Card */}
-        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-5 flex flex-col justify-between">
+        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 transition-all duration-300 p-5 flex flex-col justify-between shadow-sm">
           <div>
             <div className="flex items-center justify-between text-stone-500 dark:text-stone-400 mb-3">
               <span className="text-[10px] font-mono uppercase tracking-widest">
@@ -852,18 +1257,22 @@ function OverviewSection({
           </div>
           <button
             onClick={() => onNavigateTab('billing')}
-            className="mt-4 inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:underline"
+            className="group mt-4 inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:text-stone-600 dark:hover:text-stone-300 transition-colors cursor-pointer"
           >
-            {isEn
-              ? `Manage Profiles (${billingProfiles.length})`
-              : `Profilleri Yönet (${billingProfiles.length})`}{' '}
-            &rarr;
+            <span>
+              {isEn
+                ? `Manage Profiles (${billingProfiles.length})`
+                : `Profilleri Yönet (${billingProfiles.length})`}
+            </span>
+            <span className="inline-block transition-transform duration-300 ease-out group-hover:translate-x-1.5">
+              &rarr;
+            </span>
           </button>
         </div>
       </div>
 
       {/* Recent Orders Overview */}
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6">
+      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 shadow-sm">
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800 mb-4">
           <div>
             <h2 className="font-heading text-lg uppercase tracking-wider">
@@ -877,9 +1286,12 @@ function OverviewSection({
           </div>
           <button
             onClick={() => onNavigateTab('orders')}
-            className="text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:underline"
+            className="group inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:text-stone-600 dark:hover:text-stone-300 transition-colors cursor-pointer"
           >
-            {isEn ? `View All (${orders.length})` : `Tümünü Gör (${orders.length})`} &rarr;
+            <span>{isEn ? `View All (${orders.length})` : `Tümünü Gör (${orders.length})`}</span>
+            <span className="inline-block transition-transform duration-300 ease-out group-hover:translate-x-1.5">
+              &rarr;
+            </span>
           </button>
         </div>
 
@@ -898,11 +1310,12 @@ function OverviewSection({
           <div className="space-y-3">
             {orders.slice(0, 3).map(order => {
               const count = (order as any).itemCount ?? order.itemsCount ?? 1
-              const firstItemName = (order as any).firstItemNameSnapshot || (isEn ? 'Product' : 'Ürün')
+              const firstItemName =
+                (order as any).firstItemNameSnapshot || (isEn ? 'Product' : 'Ürün')
               return (
                 <div
                   key={order.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-950/40 gap-3"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-950/40 hover:border-stone-300 dark:hover:border-stone-700 transition-all duration-200 gap-3"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -911,7 +1324,11 @@ function OverviewSection({
                     </div>
                     <p className="text-xs text-stone-600 dark:text-stone-400">
                       {firstItemName}
-                      {count > 1 ? (isEn ? ` and ${count - 1} more items` : ` ve ${count - 1} diğer ürün`) : ''}
+                      {count > 1
+                        ? isEn
+                          ? ` and ${count - 1} more items`
+                          : ` ve ${count - 1} diğer ürün`
+                        : ''}
                     </p>
                     <span className="text-[10px] text-stone-400 font-mono">
                       {new Date(order.createdAt).toLocaleDateString(isEn ? 'en-US' : 'tr-TR')}
@@ -921,12 +1338,14 @@ function OverviewSection({
                     <span className="font-mono text-sm font-semibold">
                       {formatCurrency(order.grandTotal, order.currency)}
                     </span>
-                    <button
+                    <motion.button
                       onClick={() => onSelectOrder(order.id)}
-                      className="px-3 py-1.5 border border-stone-300 dark:border-stone-700 text-[11px] font-mono uppercase tracking-wider hover:bg-stone-100 dark:hover:bg-stone-800"
+                      whileHover={{scale: 1.02}}
+                      whileTap={{scale: 0.98}}
+                      className="px-3.5 py-1.5 border border-stone-300 dark:border-stone-700 text-[11px] font-mono uppercase tracking-wider hover:bg-stone-900 hover:text-white dark:hover:bg-stone-100 dark:hover:text-stone-900 hover:border-stone-900 dark:hover:border-stone-100 transition-all duration-300 cursor-pointer"
                     >
                       {isEn ? 'Detail' : 'Detay'}
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
               )
@@ -992,7 +1411,7 @@ function ProfileSection({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
+      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6 shadow-sm">
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
           <div>
             <h2 className="font-heading text-xl uppercase tracking-wider">
@@ -1005,13 +1424,15 @@ function ProfileSection({
             </p>
           </div>
           {!isEditing && (
-            <button
+            <motion.button
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              whileHover={{scale: 1.02, y: -1}}
+              whileTap={{scale: 0.98}}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider hover:bg-stone-900 hover:text-white dark:hover:bg-stone-100 dark:hover:text-stone-900 hover:border-stone-900 dark:hover:border-stone-100 transition-all duration-300 cursor-pointer shadow-sm"
             >
               <Edit2 className="w-3.5 h-3.5" />
               {isEn ? 'Edit' : 'Düzenle'}
-            </button>
+            </motion.button>
           )}
         </div>
 
@@ -1067,8 +1488,8 @@ function ProfileSection({
               <p className="text-sm font-medium uppercase font-mono">
                 {profile?.role === 'architect'
                   ? isEn
-                    ? 'Architect / Professional'
-                    : 'Mimar / Profesyonel'
+                    ? 'Architect / Designer'
+                    : 'Mimar & Tasarımcı'
                   : isEn
                     ? 'Standard Customer'
                     : 'Standart Müşteri'}
@@ -1091,7 +1512,7 @@ function ProfileSection({
                   required
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100"
+                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100 transition-colors"
                 />
               </div>
 
@@ -1124,7 +1545,7 @@ function ProfileSection({
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                   placeholder="+905xxxxxxxxx"
-                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100 font-mono"
+                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100 font-mono transition-colors"
                 />
               </div>
 
@@ -1140,7 +1561,7 @@ function ProfileSection({
                   type="text"
                   value={company}
                   onChange={e => setCompany(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100"
+                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100 transition-colors"
                 />
               </div>
 
@@ -1156,24 +1577,30 @@ function ProfileSection({
                   type="text"
                   value={profession}
                   onChange={e => setProfession(e.target.value)}
-                  placeholder={isEn ? 'e.g. Interior Designer, Architect' : 'Örn: İç Mimar, Tasarımcı'}
-                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100"
+                  placeholder={
+                    isEn ? 'e.g. Interior Designer, Architect' : 'Örn: İç Mimar, Tasarımcı'
+                  }
+                  className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none focus:border-stone-900 dark:focus:border-stone-100 transition-colors"
                 />
               </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200 dark:border-stone-800">
-              <button
+              <motion.button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider hover:bg-stone-100 dark:hover:bg-stone-800"
+                whileHover={{backgroundColor: 'rgba(0,0,0,0.05)'}}
+                whileTap={{scale: 0.98}}
+                className="px-5 py-2.5 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase tracking-wider hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
               >
                 {isEn ? 'Cancel' : 'Vazgeç'}
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors"
+                whileHover={{scale: 1.01, y: -1}}
+                whileTap={{scale: 0.98}}
+                className="px-6 py-2.5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-all duration-300 cursor-pointer shadow-sm disabled:opacity-50"
               >
                 {saving
                   ? isEn
@@ -1182,14 +1609,14 @@ function ProfileSection({
                   : isEn
                     ? 'Save Changes'
                     : 'Değişiklikleri Kaydet'}
-              </button>
+              </motion.button>
             </div>
           </form>
         )}
       </div>
 
       {/* Security & Password Card */}
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8">
+      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -1204,13 +1631,15 @@ function ProfileSection({
                 : 'E-posta sıfırlama bağlantısına gerek kalmadan doğrudan hesap şifrenizi güncelleyin.'}
             </p>
           </div>
-          <button
+          <motion.button
             onClick={onOpenPasswordModal}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors shrink-0"
+            whileHover={{scale: 1.02, y: -1}}
+            whileTap={{scale: 0.98}}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-all duration-300 shrink-0 cursor-pointer shadow-sm"
           >
             <Lock className="w-3.5 h-3.5" />
             {isEn ? 'Change Password' : 'Şifre Değiştir'}
-          </button>
+          </motion.button>
         </div>
       </div>
     </div>
@@ -1240,7 +1669,7 @@ function AddressesSection({
   onDelete: (address: CustomerAddress) => void
 }) {
   return (
-    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
+    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800 gap-4">
         <div>
           <h2 className="font-heading text-xl uppercase tracking-wider">
@@ -1252,13 +1681,15 @@ function AddressesSection({
               : 'Siparişlerinizde kullanacağınız kayıtlı adresleriniz.'}
           </p>
         </div>
-        <button
+        <motion.button
           onClick={onAdd}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200"
+          whileHover={{scale: 1.02, y: -1}}
+          whileTap={{scale: 0.98}}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-all duration-300 cursor-pointer shadow-sm"
         >
           <Plus className="w-3.5 h-3.5" />
           {isEn ? 'Add New Address' : 'Yeni Adres Ekle'}
-        </button>
+        </motion.button>
       </div>
 
       {error && (
@@ -1276,11 +1707,13 @@ function AddressesSection({
         <div className="py-12 text-center space-y-3">
           <MapPin className="w-8 h-8 text-stone-300 dark:text-stone-700 mx-auto" />
           <p className="text-sm text-stone-500">
-            {isEn ? 'You have no saved shipping addresses.' : 'Kayıtlı teslimat adresiniz bulunmuyor.'}
+            {isEn
+              ? 'You have no saved shipping addresses.'
+              : 'Kayıtlı teslimat adresiniz bulunmuyor.'}
           </p>
           <button
             onClick={onAdd}
-            className="text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 underline"
+            className="text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 underline underline-offset-4 cursor-pointer"
           >
             {isEn ? 'Add your first address' : 'İlk adresinizi ekleyin'} &rarr;
           </button>
@@ -1290,10 +1723,10 @@ function AddressesSection({
           {addresses.map(address => (
             <div
               key={address.id}
-              className={`border p-5 flex flex-col justify-between relative ${
+              className={`border p-5 flex flex-col justify-between relative transition-all duration-300 ${
                 address.isDefaultShipping
-                  ? 'border-stone-900 dark:border-stone-100 bg-stone-50/50 dark:bg-stone-800/30'
-                  : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900'
+                  ? 'border-stone-900 dark:border-stone-100 bg-stone-50/50 dark:bg-stone-800/30 shadow-sm'
+                  : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:border-stone-400 dark:hover:border-stone-600'
               }`}
             >
               <div>
@@ -1328,27 +1761,31 @@ function AddressesSection({
                   {!address.isDefaultShipping && (
                     <button
                       onClick={() => onSetDefault(address.id)}
-                      className="text-[11px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 underline"
+                      className="text-[11px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 underline underline-offset-4 transition-colors cursor-pointer"
                     >
                       {isEn ? 'Set as Default' : 'Varsayılan Yap'}
                     </button>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
+                <div className="flex items-center gap-1.5">
+                  <motion.button
                     onClick={() => onEdit(address)}
-                    className="p-1.5 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
+                    whileHover={{scale: 1.15}}
+                    whileTap={{scale: 0.9}}
+                    className="p-1.5 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
                     title={isEn ? 'Edit' : 'Düzenle'}
                   >
                     <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
                     onClick={() => onDelete(address)}
-                    className="p-1.5 text-stone-400 hover:text-rose-600 transition-colors"
+                    whileHover={{scale: 1.15}}
+                    whileTap={{scale: 0.9}}
+                    className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                     title={isEn ? 'Delete' : 'Sil'}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  </motion.button>
                 </div>
               </div>
             </div>
@@ -1382,7 +1819,7 @@ function BillingSection({
   onDelete: (bp: CustomerBillingProfile) => void
 }) {
   return (
-    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6">
+    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-6 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800 gap-4">
         <div>
           <h2 className="font-heading text-xl uppercase tracking-wider">
@@ -1394,13 +1831,15 @@ function BillingSection({
               : 'Bireysel ve kurumsal e-fatura profilleriniz.'}
           </p>
         </div>
-        <button
+        <motion.button
           onClick={onAdd}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200"
+          whileHover={{scale: 1.02, y: -1}}
+          whileTap={{scale: 0.98}}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-all duration-300 cursor-pointer shadow-sm"
         >
           <Plus className="w-3.5 h-3.5" />
           {isEn ? 'Add Billing Profile' : 'Yeni Fatura Profili'}
-        </button>
+        </motion.button>
       </div>
 
       {error && (
@@ -1495,29 +1934,35 @@ function BillingSection({
               <div className="flex items-center justify-between pt-4 mt-4 border-t border-stone-200 dark:border-stone-800">
                 <div>
                   {!bp.isDefault && (
-                    <button
+                    <motion.button
+                      whileHover={{scale: 1.02}}
+                      whileTap={{scale: 0.98}}
                       onClick={() => onSetDefault(bp.id)}
-                      className="text-[11px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 underline"
+                      className="text-[11px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 underline transition-colors"
                     >
                       {isEn ? 'Set as Default' : 'Varsayılan Yap'}
-                    </button>
+                    </motion.button>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
+                  <motion.button
+                    whileHover={{scale: 1.1}}
+                    whileTap={{scale: 0.95}}
                     onClick={() => onEdit(bp)}
-                    className="p-1.5 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
+                    className="p-1.5 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors"
                     title={isEn ? 'Edit' : 'Düzenle'}
                   >
                     <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
+                    whileHover={{scale: 1.1}}
+                    whileTap={{scale: 0.95}}
                     onClick={() => onDelete(bp)}
                     className="p-1.5 text-stone-400 hover:text-rose-600 transition-colors"
                     title={isEn ? 'Delete' : 'Sil'}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  </motion.button>
                 </div>
               </div>
             </div>
@@ -1572,13 +2017,15 @@ function OrdersSection({
         <div className="py-12 text-center space-y-3">
           <Package className="w-8 h-8 text-stone-300 dark:text-stone-700 mx-auto" />
           <p className="text-sm text-stone-500">
-            {isEn ? 'You do not have any orders yet.' : 'Henüz kayıtlı siparişiniz bulunmamaktadır.'}
+            {isEn
+              ? 'You do not have any orders yet.'
+              : 'Henüz kayıtlı siparişiniz bulunmamaktadır.'}
           </p>
           <a
             href="https://shop.birim.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 underline"
+            className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-stone-900 dark:text-stone-100 hover:text-stone-600 dark:hover:text-stone-300 underline transition-colors"
           >
             {isEn ? 'Explore the BİRİM Shop Collection' : 'BİRİM Shop Koleksiyonunu Keşfedin'}{' '}
             <ExternalLink className="w-3 h-3" />
@@ -1588,7 +2035,8 @@ function OrdersSection({
         <div className="space-y-3">
           {orders.map(order => {
             const count = (order as any).itemCount ?? order.itemsCount ?? 1
-            const firstItemName = (order as any).firstItemNameSnapshot || (isEn ? 'Product' : 'Ürün')
+            const firstItemName =
+              (order as any).firstItemNameSnapshot || (isEn ? 'Product' : 'Ürün')
             const firstItemSku = (order as any).firstItemSkuSnapshot
             return (
               <div
@@ -1603,10 +2051,16 @@ function OrdersSection({
                   </div>
                   <p className="text-xs text-stone-700 dark:text-stone-300">
                     {firstItemName}
-                    {count > 1 ? (isEn ? ` (+${count - 1} more items)` : ` (+${count - 1} ürün daha)`) : ''}
+                    {count > 1
+                      ? isEn
+                        ? ` (+${count - 1} more items)`
+                        : ` (+${count - 1} ürün daha)`
+                      : ''}
                   </p>
                   <div className="flex items-center gap-3 text-[11px] text-stone-500 font-mono">
-                    <span>{new Date(order.createdAt).toLocaleDateString(isEn ? 'en-US' : 'tr-TR')}</span>
+                    <span>
+                      {new Date(order.createdAt).toLocaleDateString(isEn ? 'en-US' : 'tr-TR')}
+                    </span>
                     {firstItemSku && <span>SKU: {firstItemSku}</span>}
                   </div>
                 </div>
@@ -1615,12 +2069,14 @@ function OrdersSection({
                   <span className="font-mono text-base font-semibold">
                     {formatCurrency(order.grandTotal, order.currency)}
                   </span>
-                  <button
+                  <motion.button
+                    whileHover={{scale: 1.03}}
+                    whileTap={{scale: 0.97}}
                     onClick={() => onSelectOrder(order.id)}
-                    className="px-4 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200"
+                    className="px-4 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-mono uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors"
                   >
                     {isEn ? 'Detail' : 'Detay'}
-                  </button>
+                  </motion.button>
                 </div>
               </div>
             )
@@ -1693,8 +2149,8 @@ function ProfessionalSection({
             <p className="text-xs font-medium text-stone-900 dark:text-stone-100 mt-1 uppercase font-mono">
               {isArchitect
                 ? isEn
-                  ? 'Architect / Professional'
-                  : 'Mimar / Profesyonel'
+                  ? 'Architect / Designer'
+                  : 'Mimar & Tasarımcı'
                 : isEn
                   ? 'Standard Customer'
                   : 'Standart Müşteri'}
@@ -1778,7 +2234,9 @@ function NewsletterSection({
           </span>
         </div>
 
-        <button
+        <motion.button
+          whileHover={{scale: 1.03}}
+          whileTap={{scale: 0.97}}
           onClick={handleToggle}
           disabled={loading}
           className={`px-5 py-2.5 text-xs font-mono uppercase tracking-wider border transition-colors ${
@@ -1798,7 +2256,7 @@ function NewsletterSection({
               : isEn
                 ? 'Subscribe'
                 : 'Abone Ol'}
-        </button>
+        </motion.button>
       </div>
     </div>
   )
@@ -1853,8 +2311,20 @@ function AddressModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-lg p-6 space-y-5">
+    <motion.div
+      initial={{opacity: 0}}
+      animate={{opacity: 1}}
+      exit={{opacity: 0}}
+      transition={{duration: 0.2}}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{opacity: 0, scale: 0.96, y: 10}}
+        animate={{opacity: 1, scale: 1, y: 0}}
+        exit={{opacity: 0, scale: 0.96, y: 10}}
+        transition={{type: 'spring', stiffness: 450, damping: 30}}
+        className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-lg p-6 space-y-5 shadow-2xl"
+      >
         <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800">
           <h3 className="font-heading text-lg uppercase tracking-wider">
             {address
@@ -1865,9 +2335,14 @@ function AddressModal({
                 ? 'Add New Shipping Address'
                 : 'Yeni Teslimat Adresi'}
           </h3>
-          <button onClick={onClose} className="p-1 hover:text-stone-500">
+          <motion.button
+            whileHover={{scale: 1.1}}
+            whileTap={{scale: 0.9}}
+            onClick={onClose}
+            className="p-1 hover:text-stone-500 transition-colors"
+          >
             <X className="w-5 h-5" />
-          </button>
+          </motion.button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -2037,28 +2512,34 @@ function AddressModal({
               htmlFor="isDefaultShipping"
               className="text-xs text-stone-700 dark:text-stone-300 cursor-pointer"
             >
-              {isEn ? 'Set as default shipping address' : 'Varsayılan teslimat adresi olarak ayarla'}
+              {isEn
+                ? 'Set as default shipping address'
+                : 'Varsayılan teslimat adresi olarak ayarla'}
             </label>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200 dark:border-stone-800">
-            <button
+            <motion.button
+              whileHover={{scale: 1.02}}
+              whileTap={{scale: 0.98}}
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase"
+              className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             >
               {isEn ? 'Cancel' : 'Vazgeç'}
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{scale: 1.02}}
+              whileTap={{scale: 0.98}}
               type="submit"
-              className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase"
+              className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors"
             >
               {isEn ? 'Save' : 'Kaydet'}
-            </button>
+            </motion.button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -2097,7 +2578,9 @@ function BillingModal({
       billingType,
       label: label.trim() || undefined,
       fullName:
-        billingType === 'individual' ? fullName.trim() || defaultRecipient || (isEn ? 'Customer' : 'Müşteri') : null,
+        billingType === 'individual'
+          ? fullName.trim() || defaultRecipient || (isEn ? 'Customer' : 'Müşteri')
+          : null,
       companyName: billingType === 'company' ? companyName.trim() : null,
       taxOffice: billingType === 'company' ? taxOffice.trim() : null,
       taxNumber: taxNumber.trim() || null,
@@ -2112,8 +2595,20 @@ function BillingModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-lg p-6 space-y-5">
+    <motion.div
+      initial={{opacity: 0}}
+      animate={{opacity: 1}}
+      exit={{opacity: 0}}
+      transition={{duration: 0.2}}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{opacity: 0, scale: 0.96, y: 10}}
+        animate={{opacity: 1, scale: 1, y: 0}}
+        exit={{opacity: 0, scale: 0.96, y: 10}}
+        transition={{type: 'spring', stiffness: 450, damping: 30}}
+        className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-lg p-6 space-y-5 shadow-2xl"
+      >
         <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800">
           <h3 className="font-heading text-lg uppercase tracking-wider">
             {billing
@@ -2124,9 +2619,14 @@ function BillingModal({
                 ? 'Add New Billing Profile'
                 : 'Yeni Fatura Profili'}
           </h3>
-          <button onClick={onClose} className="p-1 hover:text-stone-500">
+          <motion.button
+            whileHover={{scale: 1.1}}
+            whileTap={{scale: 0.9}}
+            onClick={onClose}
+            className="p-1 hover:text-stone-500 transition-colors"
+          >
             <X className="w-5 h-5" />
-          </button>
+          </motion.button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -2135,10 +2635,10 @@ function BillingModal({
             <button
               type="button"
               onClick={() => setBillingType('company')}
-              className={`py-2 text-xs font-mono uppercase tracking-wider border text-center ${
+              className={`py-2 px-3 text-xs font-mono uppercase tracking-wider text-center transition-all duration-150 border ${
                 billingType === 'company'
-                  ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 border-stone-900 dark:border-stone-100 font-semibold'
-                  : 'border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-400'
+                  ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 border-stone-900 dark:border-stone-100 font-semibold shadow-sm'
+                  : 'bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-500 hover:text-stone-900 dark:hover:text-stone-100'
               }`}
             >
               {isEn ? 'Corporate (Company)' : 'Kurumsal (Şirket)'}
@@ -2146,10 +2646,10 @@ function BillingModal({
             <button
               type="button"
               onClick={() => setBillingType('individual')}
-              className={`py-2 text-xs font-mono uppercase tracking-wider border text-center ${
+              className={`py-2 px-3 text-xs font-mono uppercase tracking-wider text-center transition-all duration-150 border ${
                 billingType === 'individual'
-                  ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 border-stone-900 dark:border-stone-100 font-semibold'
-                  : 'border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-400'
+                  ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 border-stone-900 dark:border-stone-100 font-semibold shadow-sm'
+                  : 'bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-500 hover:text-stone-900 dark:hover:text-stone-100'
               }`}
             >
               {isEn ? 'Individual (Personal)' : 'Bireysel (Şahıs)'}
@@ -2167,7 +2667,9 @@ function BillingModal({
               <input
                 id="bill-label"
                 type="text"
-                placeholder={isEn ? 'e.g. Company Invoice, Personal' : 'Örn: Şirket Faturası, Şahıs'}
+                placeholder={
+                  isEn ? 'e.g. Company Invoice, Personal' : 'Örn: Şirket Faturası, Şahıs'
+                }
                 value={label}
                 onChange={e => setLabel(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-stone-300 dark:border-stone-700 bg-transparent focus:outline-none"
@@ -2378,23 +2880,27 @@ function BillingModal({
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200 dark:border-stone-800">
-            <button
+            <motion.button
+              whileHover={{scale: 1.02}}
+              whileTap={{scale: 0.98}}
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase"
+              className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             >
               {isEn ? 'Cancel' : 'Vazgeç'}
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{scale: 1.02}}
+              whileTap={{scale: 0.98}}
               type="submit"
-              className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase"
+              className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors"
             >
               {isEn ? 'Save' : 'Kaydet'}
-            </button>
+            </motion.button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -2427,11 +2933,7 @@ function ChangePasswordModal({
     }
 
     if (newPassword !== confirmPassword) {
-      setError(
-        isEn
-          ? 'New passwords do not match.'
-          : 'Yeni şifreler birbiriyle eşleşmiyor.'
-      )
+      setError(isEn ? 'New passwords do not match.' : 'Yeni şifreler birbiriyle eşleşmiyor.')
       return
     }
 
@@ -2456,8 +2958,20 @@ function ChangePasswordModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-md p-6 space-y-5">
+    <motion.div
+      initial={{opacity: 0}}
+      animate={{opacity: 1}}
+      exit={{opacity: 0}}
+      transition={{duration: 0.2}}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{opacity: 0, scale: 0.96, y: 10}}
+        animate={{opacity: 1, scale: 1, y: 0}}
+        exit={{opacity: 0, scale: 0.96, y: 10}}
+        transition={{type: 'spring', stiffness: 450, damping: 30}}
+        className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-md p-6 space-y-5 shadow-2xl"
+      >
         <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800">
           <div className="flex items-center gap-2">
             <Lock className="w-5 h-5 text-stone-700 dark:text-stone-300" />
@@ -2465,9 +2979,14 @@ function ChangePasswordModal({
               {isEn ? 'Change Password' : 'Şifre Değiştir'}
             </h3>
           </div>
-          <button onClick={onClose} className="p-1 hover:text-stone-500">
+          <motion.button
+            whileHover={{scale: 1.1}}
+            whileTap={{scale: 0.9}}
+            onClick={onClose}
+            className="p-1 hover:text-stone-500 transition-colors"
+          >
             <X className="w-5 h-5" />
-          </button>
+          </motion.button>
         </div>
 
         {error && (
@@ -2534,18 +3053,22 @@ function ChangePasswordModal({
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200 dark:border-stone-800">
-            <button
+            <motion.button
+              whileHover={{scale: 1.02}}
+              whileTap={{scale: 0.98}}
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase"
+              className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors disabled:opacity-50"
             >
               {isEn ? 'Cancel' : 'Vazgeç'}
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{scale: 1.02}}
+              whileTap={{scale: 0.98}}
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 disabled:opacity-50"
+              className="px-6 py-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 dark:hover:bg-stone-200 disabled:opacity-50 transition-colors"
             >
               {loading
                 ? isEn
@@ -2554,11 +3077,11 @@ function ChangePasswordModal({
                 : isEn
                   ? 'Update Password'
                   : 'Şifreyi Güncelle'}
-            </button>
+            </motion.button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -2578,42 +3101,60 @@ function DeleteConfirmModal({
   onConfirm: () => void
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-sm p-6 space-y-4">
+    <motion.div
+      initial={{opacity: 0}}
+      animate={{opacity: 1}}
+      exit={{opacity: 0}}
+      transition={{duration: 0.2}}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{opacity: 0, scale: 0.96, y: 10}}
+        animate={{opacity: 1, scale: 1, y: 0}}
+        exit={{opacity: 0, scale: 0.96, y: 10}}
+        transition={{type: 'spring', stiffness: 450, damping: 30}}
+        className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-sm p-6 space-y-4 shadow-2xl"
+      >
         <h3 className="font-heading text-lg uppercase tracking-wider text-rose-600">
           {isEn ? 'Delete Confirmation' : 'Silme Onayı'}
         </h3>
         <p className="text-xs text-stone-600 dark:text-stone-400">
           {isEn ? (
             <>
-              Are you sure you want to permanently delete {type} <strong>&quot;{title}&quot;</strong>?
+              Are you sure you want to permanently delete {type}{' '}
+              <strong>&quot;{title}&quot;</strong>?
             </>
           ) : (
             <>
-              <strong>&quot;{title}&quot;</strong> başlıklı {type} kalıcı olarak silmek istediğinizden emin misiniz?
+              <strong>&quot;{title}&quot;</strong> başlıklı {type} kalıcı olarak silmek
+              istediğinizden emin misiniz?
             </>
           )}
         </p>
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-200 dark:border-stone-800">
-          <button
+          <motion.button
+            whileHover={{scale: 1.02}}
+            whileTap={{scale: 0.98}}
             type="button"
             onClick={onClose}
             disabled={isDeleting}
-            className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase"
+            className="px-4 py-2 border border-stone-300 dark:border-stone-700 text-xs font-mono uppercase hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
           >
             {isEn ? 'Cancel' : 'İptal'}
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{scale: 1.02}}
+            whileTap={{scale: 0.98}}
             type="button"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="px-4 py-2 bg-rose-600 text-white text-xs font-mono uppercase hover:bg-rose-700 disabled:opacity-50"
+            className="px-4 py-2 bg-rose-600 text-white text-xs font-mono uppercase hover:bg-rose-700 disabled:opacity-50 transition-colors"
           >
             {isDeleting ? (isEn ? 'Deleting...' : 'Siliniyor...') : isEn ? 'Delete' : 'Sil'}
-          </button>
+          </motion.button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -2640,8 +3181,20 @@ function OrderDetailModal({
     anyDetail?.corporateBillingSnapshot || anyDetail?.corporate_billing_snapshot
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6">
+    <motion.div
+      initial={{opacity: 0}}
+      animate={{opacity: 1}}
+      exit={{opacity: 0}}
+      transition={{duration: 0.2}}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{opacity: 0, scale: 0.96, y: 10}}
+        animate={{opacity: 1, scale: 1, y: 0}}
+        exit={{opacity: 0, scale: 0.96, y: 10}}
+        transition={{type: 'spring', stiffness: 450, damping: 30}}
+        className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6 shadow-2xl"
+      >
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
           <div>
             <h3 className="font-heading text-xl uppercase tracking-wider">
@@ -2651,9 +3204,14 @@ function OrderDetailModal({
               {orderDetail?.orderNumber || orderId}
             </span>
           </div>
-          <button onClick={onClose} className="p-1 hover:text-stone-500">
+          <motion.button
+            whileHover={{scale: 1.1}}
+            whileTap={{scale: 0.9}}
+            onClick={onClose}
+            className="p-1 hover:text-stone-500 transition-colors"
+          >
             <X className="w-5 h-5" />
-          </button>
+          </motion.button>
         </div>
 
         {loading ? (
@@ -2712,7 +3270,10 @@ function OrderDetailModal({
                 {orderDetail.items.map((item, idx) => {
                   const anyItem = item as any
                   const name =
-                    anyItem.productNameSnapshot || anyItem.productName || anyItem.name || (isEn ? 'Product' : 'Ürün')
+                    anyItem.productNameSnapshot ||
+                    anyItem.productName ||
+                    anyItem.name ||
+                    (isEn ? 'Product' : 'Ürün')
                   const sku = anyItem.skuSnapshot || anyItem.sku || ''
                   return (
                     <div key={idx} className="p-3 flex items-center justify-between gap-4">
@@ -2722,7 +3283,9 @@ function OrderDetailModal({
                         </p>
                         <div className="flex items-center gap-3 text-[10px] font-mono text-stone-500 mt-0.5">
                           {sku && <span>SKU: {sku}</span>}
-                          <span>{isEn ? 'Quantity' : 'Adet'}: {item.quantity}</span>
+                          <span>
+                            {isEn ? 'Quantity' : 'Adet'}: {item.quantity}
+                          </span>
                         </div>
                       </div>
                       <span className="font-mono text-xs font-semibold">
@@ -2770,7 +3333,8 @@ function OrderDetailModal({
                       </>
                     ) : (
                       <p className="text-xs font-medium">
-                        {billingSnapshot.firstName} {billingSnapshot.lastName} ({isEn ? 'Individual' : 'Bireysel'})
+                        {billingSnapshot.firstName} {billingSnapshot.lastName} (
+                        {isEn ? 'Individual' : 'Bireysel'})
                       </p>
                     )}
                     <p className="text-xs text-stone-600 dark:text-stone-400">
@@ -2808,8 +3372,8 @@ function OrderDetailModal({
             </div>
           </div>
         ) : null}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

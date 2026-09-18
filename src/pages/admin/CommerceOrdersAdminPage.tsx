@@ -215,6 +215,7 @@ export function CommerceOrdersAdminPage() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Sipariş No, Müşteri Adı veya E-posta ara..."
+                aria-label="Sipariş No, Müşteri Adı veya E-posta ara"
                 className="w-full pl-10 pr-4 py-2.5 bg-[#fbfbfb] border border-black/10 text-xs text-gray-900 focus:outline-none focus:border-black transition-colors"
               />
             </div>
@@ -227,6 +228,7 @@ export function CommerceOrdersAdminPage() {
                   setStatusFilter(e.target.value)
                   setPage(1)
                 }}
+                aria-label="Sipariş Durumu Filtresi"
                 className="w-full px-3 py-2.5 bg-[#fbfbfb] border border-black/10 text-xs text-gray-900 focus:outline-none focus:border-black transition-colors"
               >
                 <option value="">Tüm Sipariş Durumları</option>
@@ -247,6 +249,7 @@ export function CommerceOrdersAdminPage() {
                   setPaymentStatusFilter(e.target.value)
                   setPage(1)
                 }}
+                aria-label="Ödeme Durumu Filtresi"
                 className="w-full px-3 py-2.5 bg-[#fbfbfb] border border-black/10 text-xs text-gray-900 focus:outline-none focus:border-black transition-colors"
               >
                 <option value="">Tüm Ödeme Durumları</option>

@@ -1540,10 +1540,14 @@ export const SupabaseUsersStudioView: React.FC = () => {
                     </div>
 
                     <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                      <label style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}>
+                      <label
+                        htmlFor="user-edit-name"
+                        style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}
+                      >
                         Ad Soyad:
                       </label>
                       <input
+                        id="user-edit-name"
                         type="text"
                         value={editFormData.name}
                         onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
@@ -1560,10 +1564,14 @@ export const SupabaseUsersStudioView: React.FC = () => {
                     </div>
 
                     <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                      <label style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}>
+                      <label
+                        htmlFor="user-edit-company"
+                        style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}
+                      >
                         Firma Adı:
                       </label>
                       <input
+                        id="user-edit-company"
                         type="text"
                         value={editFormData.company}
                         onChange={(e) =>
@@ -1582,10 +1590,14 @@ export const SupabaseUsersStudioView: React.FC = () => {
                     </div>
 
                     <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                      <label style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}>
+                      <label
+                        htmlFor="user-edit-country"
+                        style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}
+                      >
                         Ülke:
                       </label>
                       <input
+                        id="user-edit-country"
                         type="text"
                         value={editFormData.country}
                         onChange={(e) =>
@@ -1604,10 +1616,14 @@ export const SupabaseUsersStudioView: React.FC = () => {
                     </div>
 
                     <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                      <label style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}>
+                      <label
+                        htmlFor="user-edit-profession"
+                        style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}
+                      >
                         Meslek / Uzmanlık:
                       </label>
                       <input
+                        id="user-edit-profession"
                         type="text"
                         value={editFormData.profession}
                         onChange={(e) =>
@@ -1626,10 +1642,14 @@ export const SupabaseUsersStudioView: React.FC = () => {
                     </div>
 
                     <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                      <label style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}>
+                      <label
+                        htmlFor="user-edit-phone"
+                        style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}
+                      >
                         Telefon Numarası:
                       </label>
                       <input
+                        id="user-edit-phone"
                         type="tel"
                         value={editFormData.phone}
                         onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
@@ -1646,10 +1666,14 @@ export const SupabaseUsersStudioView: React.FC = () => {
                     </div>
 
                     <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                      <label style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}>
+                      <label
+                        htmlFor="user-edit-tax-id"
+                        style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}
+                      >
                         Vergi No / T.C. Kimlik:
                       </label>
                       <input
+                        id="user-edit-tax-id"
                         type="text"
                         value={editFormData.tax_id}
                         onChange={(e) => setEditFormData({...editFormData, tax_id: e.target.value})}
@@ -1666,10 +1690,14 @@ export const SupabaseUsersStudioView: React.FC = () => {
                     </div>
 
                     <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                      <label style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}>
+                      <label
+                        htmlFor="user-edit-role"
+                        style={{fontSize: '12px', fontWeight: 600, color: '#334155'}}
+                      >
                         Kullanıcı Rolü:
                       </label>
                       <select
+                        id="user-edit-role"
                         value={editFormData.role}
                         onChange={(e) => setEditFormData({...editFormData, role: e.target.value})}
                         style={{
