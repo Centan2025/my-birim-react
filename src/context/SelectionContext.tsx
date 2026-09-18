@@ -16,6 +16,7 @@ import {analytics} from '../lib/analytics'
 import {
   saveUserSelection,
   removeUserSelection,
+  fetchUserSelections,
   bulkSyncUserSelections,
   fetchUserProjects,
   createUserProject,
@@ -80,6 +81,8 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
 
   const isInitialSelectionsMount = useRef(true)
   const isInitialProjectsMount = useRef(true)
+  const prevUserIdRef = useRef<string | null>(null)
+  const isSyncingRef = useRef(false)
 
   // 1. Initial load from LocalStorage synchronously via lazy state initialization
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(() => {
@@ -148,22 +151,29 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
     }
   }, [projects])
 
-  // 3. User Login Migration & Sync
-  useEffect(() => {
-    if (!isLoggedIn || !user?._id) return
-
-    let isMounted = true
+  // 3. User Login Migration & Sync with Server
+  const syncUserData = useCallback(async (isTransition = false) => {
+    if (!isLoggedIn || !user?._id || isSyncingRef.current) return
+    isSyncingRef.current = true
     const userId = user._id
 
-    async function syncUserData() {
-      try {
-        // 1. Merge guest selections with server selections
-        const mergedIds = await bulkSyncUserSelections(userId, selectedProductIds)
-        if (isMounted && Array.isArray(mergedIds)) {
-          setSelectedProductIds(mergedIds)
+    try {
+      if (isTransition) {
+        // Guest transition: merge local guest items to server once
+        const localItems = selectedProductIds
+        if (localItems.length > 0) {
+          const mergedIds = await bulkSyncUserSelections(userId, localItems)
+          if (Array.isArray(mergedIds)) {
+            setSelectedProductIds(mergedIds)
+          }
+        } else {
+          const serverIds = await fetchUserSelections(userId)
+          if (Array.isArray(serverIds)) {
+            setSelectedProductIds(serverIds)
+          }
         }
 
-        // 2. Migrate any guest local projects to server
+        // Migrate any guest local projects to server
         const localProjects = projects.filter(p => p.id.startsWith('local_'))
         for (const lp of localProjects) {
           try {
@@ -174,27 +184,66 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
               isPublic: lp.isPublic,
             })
           } catch {
-            // ignore individual project creation error
+            // ignore
           }
         }
-
-        // 3. Fetch authoritative user projects from server
-        const serverProjects = await fetchUserProjects(userId)
-        if (isMounted && serverProjects) {
-          setProjects(serverProjects)
+      } else {
+        // Authoritative load from server (page refresh / multi-device sync)
+        const serverIds = await fetchUserSelections(userId)
+        if (Array.isArray(serverIds)) {
+          setSelectedProductIds(serverIds)
         }
-      } catch (err) {
-        console.warn('Seçkim sync notice:', err)
+      }
+
+      // Fetch authoritative user projects from server
+      const serverProjects = await fetchUserProjects(userId)
+      if (serverProjects) {
+        setProjects(serverProjects)
+      }
+    } catch (err) {
+      console.warn('Seçkim sync notice:', err)
+    } finally {
+      isSyncingRef.current = false
+      prevUserIdRef.current = userId
+    }
+  }, [isLoggedIn, user?._id, selectedProductIds, projects])
+
+  useEffect(() => {
+    if (!isLoggedIn || !user?._id) {
+      prevUserIdRef.current = null
+      return
+    }
+
+    const isTransition =
+      prevUserIdRef.current === null &&
+      typeof window !== 'undefined' &&
+      !sessionStorage.getItem(`birim_synced_${user._id}`)
+
+    if (isTransition && typeof window !== 'undefined') {
+      sessionStorage.setItem(`birim_synced_${user._id}`, '1')
+    }
+
+    syncUserData(isTransition)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, user?._id])
+
+  // Sync on tab focus / visibility
+  useEffect(() => {
+    if (!isLoggedIn || !user?._id) return
+
+    const handleFocus = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        syncUserData(false)
       }
     }
 
-    syncUserData()
-
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleFocus)
     return () => {
-      isMounted = false
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleFocus)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn, user?._id])
+  }, [isLoggedIn, user?._id, syncUserData])
 
   const openDrawer = useCallback(() => setIsDrawerOpen(true), [])
   const closeDrawer = useCallback(() => setIsDrawerOpen(false), [])
