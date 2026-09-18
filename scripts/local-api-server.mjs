@@ -653,10 +653,31 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/verify', async (req, res) => {
   const {token, email} = req.body || {}
   const targetEmail = email ? email.trim().toLowerCase() : null
+  const trimmedToken = typeof token === 'string' ? token.trim() : ''
 
   if (supabaseAdmin) {
     try {
       let profile = null
+      let matchedUser = null
+
+      if (targetEmail) {
+        const {data} = await supabaseAdmin
+          .from('profiles')
+          .select('*')
+          .eq('email', targetEmail)
+          .maybeSingle()
+        profile = data
+
+        if (profile?.id) {
+          try {
+            const {data: usrRes} = await supabaseAdmin.auth.admin.getUserById(profile.id)
+            if (usrRes?.user) {
+              matchedUser = usrRes.user
+            }
+          } catch {}
+        }
+      }
+
       if (targetEmail) {
         await supabaseAdmin
           .from('profiles')
@@ -668,42 +689,35 @@ app.post('/api/auth/verify', async (req, res) => {
           .select('*')
           .eq('email', targetEmail)
           .maybeSingle()
-        profile = data
+        profile = data || profile
 
         if (profile?.id) {
           await supabaseAdmin.auth.admin.updateUserById(profile.id, {
             email_confirm: true,
-            user_metadata: {email_verified: true},
+            user_metadata: {
+              ...matchedUser?.user_metadata,
+              email_verified: true,
+              verification_token_hash: null,
+              verification_token_expires: null,
+            },
           }).catch(() => {})
         }
-
-        const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
-        const authUser = usersList?.users?.find(u => u.email?.toLowerCase() === targetEmail)
-        if (authUser && authUser.id !== profile?.id) {
-          await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
-            email_confirm: true,
-            user_metadata: {...authUser.user_metadata, email_verified: true},
-          }).catch(() => {})
-        }
-
       }
 
       return res.status(200).json({
         success: true,
         message: 'E-posta adresiniz başarıyla doğrulandı.',
-        user: profile
-          ? {
-              _id: profile.id,
-              id: profile.id,
-              email: profile.email,
-              name: profile.name,
-              role: profile.role,
-              company: profile.company,
-              profession: profile.profession,
-              architectVerificationStatus: profile.architect_verification_status,
-              isVerified: true,
-            }
-          : undefined,
+        user: {
+          _id: profile?.id || matchedUser?.id || targetEmail || 'verified_user',
+          id: profile?.id || matchedUser?.id || targetEmail || 'verified_user',
+          email: profile?.email || matchedUser?.email || targetEmail || '',
+          name: profile?.name || matchedUser?.user_metadata?.name || '',
+          role: profile?.role || matchedUser?.user_metadata?.role || 'architect',
+          company: profile?.company || matchedUser?.user_metadata?.company || '',
+          profession: profile?.profession || matchedUser?.user_metadata?.profession || '',
+          architectVerificationStatus: profile?.architect_verification_status || 'pending',
+          isVerified: true,
+        },
       })
     } catch (err) {
       console.error('[Local API] Supabase verify error:', err)
@@ -714,6 +728,15 @@ app.post('/api/auth/verify', async (req, res) => {
   return res.status(200).json({
     success: true,
     message: 'E-posta adresiniz başarıyla doğrulandı.',
+    user: {
+      _id: targetEmail || 'local_user',
+      id: targetEmail || 'local_user',
+      email: targetEmail || '',
+      name: '',
+      role: 'architect',
+      architectVerificationStatus: 'pending',
+      isVerified: true,
+    }
   })
 })
 
@@ -724,6 +747,8 @@ async function handleSubscribeProfLogic(req, res) {
   const normEmail = email.trim().toLowerCase()
   const siteUrl = process.env.VITE_SITE_URL || 'http://localhost:3000'
   const verificationToken = randomUUID()
+  const verificationTokenHash = createHash('sha256').update(verificationToken).digest('hex')
+  const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
   const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(normEmail)}`
 
   if (supabaseAdmin) {
@@ -762,6 +787,8 @@ async function handleSubscribeProfLogic(req, res) {
                 profession: profession || existing.profession || 'Mimar / İç Mimar',
                 phone: phone || existing.phone || '',
                 email_verified: false,
+                verification_token_hash: verificationTokenHash,
+                verification_token_expires: verificationTokenExpires,
               },
             }).catch(() => {})
           } else {
@@ -776,6 +803,8 @@ async function handleSubscribeProfLogic(req, res) {
                 country: country || 'Türkiye',
                 profession: profession || existing.profession || 'Mimar / İç Mimar',
                 phone: phone || '',
+                verification_token_hash: verificationTokenHash,
+                verification_token_expires: verificationTokenExpires,
               },
             })
             if (newAuth?.user?.id) {
@@ -824,6 +853,8 @@ async function handleSubscribeProfLogic(req, res) {
           profession: profession || 'Mimar / İç Mimar',
           phone: phone || '',
           email_verified: false,
+          verification_token_hash: verificationTokenHash,
+          verification_token_expires: verificationTokenExpires,
         },
       })
       if (sbAuthErr && !sbAuthErr.message.includes('already been registered')) {

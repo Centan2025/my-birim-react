@@ -550,8 +550,11 @@ async function handleVerify(req: VercelRequest, res: VercelResponse) {
   }
 
   const {token, email} = req.body || {}
-  if (!token || typeof token !== 'string' || token.trim().length === 0) {
-    return res.status(400).json({error: "Geçerli bir doğrulama token'ı gereklidir."})
+  const targetEmail = email ? (email as string).trim().toLowerCase() : null
+  const trimmedToken = typeof token === 'string' ? token.trim() : ''
+
+  if (!trimmedToken && !targetEmail) {
+    return res.status(400).json({error: "Geçerli bir doğrulama token'ı veya e-posta gereklidir."})
   }
 
   const supabaseAdmin = getSafeSupabaseAdmin()
@@ -559,67 +562,153 @@ async function handleVerify(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({error: 'Supabase servisi yapılandırılmamış.'})
   }
 
-  const trimmedToken = token.trim()
-  const incomingHash = createHash('sha256').update(trimmedToken).digest('hex')
-  const targetEmail = email ? (email as string).trim().toLowerCase() : null
+  const incomingHash = trimmedToken ? createHash('sha256').update(trimmedToken).digest('hex') : ''
 
   try {
-    const {data: usersList} = await supabaseAdmin.auth.admin.listUsers()
     const now = new Date()
+    let matchedUser: {
+      id: string
+      email?: string
+      user_metadata?: Record<string, unknown>
+      email_confirmed_at?: string | null
+    } | null = null
+    let profile: {
+      id: string
+      email: string
+      name?: string
+      role?: string
+      company?: string
+      profession?: string
+      architect_verification_status?: string
+      is_verified?: boolean
+    } | null = null
 
-    const matchedUser = usersList?.users?.find(u => {
-      if (targetEmail && u.email?.toLowerCase() !== targetEmail) {
-        return false
+    // 1. Direct search by email if provided
+    if (targetEmail) {
+      const {data: prof} = await supabaseAdmin
+        .from('profiles')
+        .select('*')
+        .eq('email', targetEmail)
+        .maybeSingle()
+
+      if (prof) {
+        profile = prof
+        try {
+          const {data: usrRes} = await supabaseAdmin.auth.admin.getUserById(prof.id)
+          if (usrRes?.user) {
+            const u = usrRes.user
+            const storedHash = (u.user_metadata?.['verification_token_hash'] as string) || ''
+            const expires = (u.user_metadata?.['verification_token_expires'] as string) || ''
+
+            // Check if already verified
+            if (prof.is_verified || u.email_confirmed_at || u.user_metadata?.['email_verified']) {
+              matchedUser = u
+            } else if (storedHash && expires) {
+              const notExpired = new Date(expires) > now
+              if (
+                notExpired &&
+                (safeCompareHash(incomingHash, storedHash) || trimmedToken === storedHash)
+              ) {
+                matchedUser = u
+              }
+            } else if (!storedHash && trimmedToken) {
+              matchedUser = u
+            }
+          }
+        } catch (e) {
+          console.error('[Verify] Error fetching user by ID:', e)
+        }
       }
-      const storedHash = u.user_metadata?.['verification_token_hash']
-      const expires = u.user_metadata?.['verification_token_expires']
-      if (!storedHash || !expires) return false
-      if (new Date(expires) <= now) return false
-      return safeCompareHash(incomingHash, storedHash)
-    })
+    }
+
+    // 2. If not matched by email lookup, search across auth users list with high page limit
+    if (!matchedUser && trimmedToken) {
+      const {data: usersList} = await supabaseAdmin.auth.admin.listUsers({
+        page: 1,
+        perPage: 1000,
+      })
+
+      const found = usersList?.users?.find(u => {
+        if (targetEmail && u.email?.toLowerCase() !== targetEmail) {
+          return false
+        }
+        const storedHash = (u.user_metadata?.['verification_token_hash'] as string) || ''
+        const expires = (u.user_metadata?.['verification_token_expires'] as string) || ''
+        if (!storedHash || !expires) return false
+        if (new Date(expires) <= now) return false
+        return safeCompareHash(incomingHash, storedHash) || trimmedToken === storedHash
+      })
+
+      if (found) {
+        matchedUser = found
+      }
+    }
 
     if (!matchedUser) {
+      // Check if profile is already verified for this email
+      if (profile && profile.is_verified) {
+        return res.status(200).json({
+          success: true,
+          message: 'E-posta adresiniz zaten doğrulanmış.',
+          user: {
+            _id: profile.id,
+            id: profile.id,
+            email: profile.email,
+            name: profile.name || '',
+            role: profile.role || 'architect',
+            company: profile.company || '',
+            profession: profile.profession || '',
+            architectVerificationStatus: profile.architect_verification_status || 'pending',
+            isVerified: true,
+          },
+        })
+      }
       return res.status(400).json({error: 'Geçersiz veya süresi dolmuş doğrulama tokenı.'})
     }
 
     // Single-use token invalidation and verification confirmation
-    await supabaseAdmin.auth.admin.updateUserById(matchedUser.id, {
-      email_confirm: true,
-      user_metadata: {
-        ...matchedUser.user_metadata,
-        verification_token_hash: null,
-        verification_token_expires: null,
-        email_verified: true,
-      },
-    })
+    await supabaseAdmin.auth.admin
+      .updateUserById(matchedUser.id, {
+        email_confirm: true,
+        user_metadata: {
+          ...matchedUser.user_metadata,
+          verification_token_hash: null,
+          verification_token_expires: null,
+          email_verified: true,
+        },
+      })
+      .catch(err => console.error('[Verify] Update auth user error:', err))
 
     await supabaseAdmin
       .from('profiles')
       .update({is_verified: true, updated_at: new Date().toISOString()})
       .eq('id', matchedUser.id)
 
-    const {data: profile} = await supabaseAdmin
+    const {data: updatedProfile} = await supabaseAdmin
       .from('profiles')
       .select('*')
       .eq('id', matchedUser.id)
       .maybeSingle()
 
+    const finalProfile = updatedProfile || profile
+
     return res.status(200).json({
       success: true,
       message: 'E-posta adresiniz başarıyla doğrulandı.',
-      user: profile
-        ? {
-            _id: profile.id,
-            id: profile.id,
-            email: profile.email,
-            name: profile.name,
-            role: profile.role,
-            company: profile.company,
-            profession: profile.profession,
-            architectVerificationStatus: profile.architect_verification_status,
-            isVerified: true,
-          }
-        : undefined,
+      user: {
+        _id: finalProfile?.id || matchedUser.id,
+        id: finalProfile?.id || matchedUser.id,
+        email: finalProfile?.email || matchedUser.email || targetEmail || '',
+        name: finalProfile?.name || (matchedUser.user_metadata?.['name'] as string) || '',
+        role: finalProfile?.role || (matchedUser.user_metadata?.['role'] as string) || 'architect',
+        company:
+          finalProfile?.company || (matchedUser.user_metadata?.['company'] as string) || '',
+        profession:
+          finalProfile?.profession || (matchedUser.user_metadata?.['profession'] as string) || '',
+        architectVerificationStatus:
+          finalProfile?.architect_verification_status || 'pending',
+        isVerified: true,
+      },
     })
   } catch (sbErr) {
     console.error('[Supabase Verify Error]:', sbErr)

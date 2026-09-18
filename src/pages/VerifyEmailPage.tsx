@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import {useLocation, useNavigate, Link} from 'react-router-dom'
 import {useAuth} from '../context/AuthContext'
 import {useSEO} from '../hooks/useSEO'
+import {verifyUserByToken} from '../services/cms'
 
 export function VerifyEmailPage() {
   const location = useLocation()
@@ -34,7 +35,6 @@ export function VerifyEmailPage() {
       }
 
       try {
-        const {verifyUserByToken} = await import('../services/cms')
         const user = await verifyUserByToken(token, emailParam)
         if (!user) {
           if (!cancelled) setStatus('error')
@@ -49,6 +49,7 @@ export function VerifyEmailPage() {
           }, 1500)
         }
       } catch (e) {
+        console.error('VerifyEmailPage run error:', e)
         if (!cancelled) setStatus('error')
       }
     }

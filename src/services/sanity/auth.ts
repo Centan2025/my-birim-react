@@ -280,8 +280,20 @@ export const verifyUserByToken = async (token: string, email?: string): Promise<
   if (useSanity) {
     try {
       const data = await apiFetch('verify', {token, email})
-      if (data.success && data.user) {
-        return data.user as User
+      if (data?.success) {
+        if (data.user) {
+          return data.user as User
+        }
+        return {
+          _id: email || 'verified_user',
+          email: email || '',
+          name: '',
+          role: 'architect',
+          architectVerificationStatus: 'pending_verification',
+          isVerified: true,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+        }
       }
     } catch (e) {
       console.error('Verify token failed:', e)
