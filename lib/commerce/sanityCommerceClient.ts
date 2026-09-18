@@ -1,4 +1,4 @@
-import type {LocalizedString, SalesMode} from '../../src/types'
+import type {LocalizedString, SalesMode} from '../../src/types.js'
 
 export interface AuthoritativeVariant {
   id: string

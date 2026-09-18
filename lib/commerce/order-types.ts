@@ -1,5 +1,5 @@
-import type {CartItemInput} from './types'
-import type {CheckoutPayload} from './checkout-types'
+import type {CartItemInput} from './types.js'
+import type {CheckoutPayload} from './checkout-types.js'
 
 export interface CreateOrderRequest {
   items: CartItemInput[]

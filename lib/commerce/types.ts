@@ -1,4 +1,4 @@
-import type {ProductVariantOption} from '../../src/types'
+import type {ProductVariantOption} from '../../src/types.js'
 
 export type CommerceErrorCode =
   | 'COMMERCE_DISABLED'

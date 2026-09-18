@@ -1,5 +1,5 @@
-import type {PaymentIntentStatus} from './types'
-import {PaymentError} from './errors'
+import type {PaymentIntentStatus} from './types.js'
+import {PaymentError} from './errors.js'
 
 const VALID_TRANSITIONS: Record<PaymentIntentStatus, ReadonlySet<PaymentIntentStatus>> = {
   PENDING: new Set(['PENDING', 'PROCESSING', 'FAILED', 'CANCELLED']),

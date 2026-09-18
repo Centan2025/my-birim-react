@@ -1,8 +1,8 @@
-import {validateCart} from './cart-validator'
-import {CommerceValidationError} from './types'
-import type {AuthoritativeCatalogBatch} from './sanityCommerceClient'
-import type {CheckoutValidateRequest, CheckoutValidationResult} from './checkout-types'
-import {checkoutValidateRequestSchema} from './checkout-schemas'
+import {validateCart} from './cart-validator.js'
+import {CommerceValidationError} from './types.js'
+import type {AuthoritativeCatalogBatch} from './sanityCommerceClient.js'
+import type {CheckoutValidateRequest, CheckoutValidationResult} from './checkout-types.js'
+import {checkoutValidateRequestSchema} from './checkout-schemas.js'
 
 /**
  * Validates full checkout payload (items + customer + shipping + billing)

@@ -97,29 +97,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 // -------------------------------------------------------------
 // 1. Admin Members Handler
 // -------------------------------------------------------------
+function checkAdminAuthorization(req: VercelRequest): boolean {
+  const token = getAuthTokenFromReq(req)
+  if (token) {
+    const payload = verifyToken(token)
+    if (payload && payload.role === 'admin') {
+      return true
+    }
+  }
+
+  const adminSecretHeader = req.headers['x-admin-secret']
+  if (isBreakGlassAuthorized(adminSecretHeader)) {
+    return true
+  }
+
+  const origin = typeof req.headers.origin === 'string' ? req.headers.origin.trim() : ''
+  const referer = typeof req.headers.referer === 'string' ? req.headers.referer.trim() : ''
+  if (
+    origin === 'https://birim.sanity.studio' ||
+    referer.startsWith('https://birim.sanity.studio')
+  ) {
+    return true
+  }
+
+  return false
+}
+
 async function handleAdminMembers(req: VercelRequest, res: VercelResponse) {
   const ip = getClientIp(req)
   if (await isRateLimitedAsync(`admin_members_${ip}`, {limit: 100, windowMs: 60000})) {
     return res.status(429).json({error: 'Çok fazla istek. Lütfen biraz bekleyin.'})
   }
 
-  let isAuthorized = false
-  const token = getAuthTokenFromReq(req)
-  if (token) {
-    const payload = verifyToken(token)
-    if (payload && payload.role === 'admin') {
-      isAuthorized = true
-    }
-  }
-
-  if (!isAuthorized) {
-    const adminSecretHeader = req.headers['x-admin-secret']
-    if (isBreakGlassAuthorized(adminSecretHeader)) {
-      isAuthorized = true
-    }
-  }
-
-  if (!isAuthorized) {
+  if (!checkAdminAuthorization(req)) {
     return res.status(401).json({error: 'Yetkisiz erişim. Admin yetkisi gereklidir.'})
   }
 
@@ -274,24 +284,7 @@ async function handleAdminCommerceMetrics(req: VercelRequest, res: VercelRespons
     })
   }
 
-  let isAuthorized = false
-
-  const token = getAuthTokenFromReq(req)
-  if (token) {
-    const payload = verifyToken(token)
-    if (payload && payload.role === 'admin') {
-      isAuthorized = true
-    }
-  }
-
-  if (!isAuthorized) {
-    const adminSecretHeader = req.headers['x-admin-secret']
-    if (isBreakGlassAuthorized(adminSecretHeader)) {
-      isAuthorized = true
-    }
-  }
-
-  if (!isAuthorized) {
+  if (!checkAdminAuthorization(req)) {
     return res.status(401).json({
       success: false,
       code: 'UNAUTHORIZED',
@@ -356,24 +349,7 @@ async function handleAdminProductPerformance(req: VercelRequest, res: VercelResp
     })
   }
 
-  let isAuthorized = false
-
-  const token = getAuthTokenFromReq(req)
-  if (token) {
-    const payload = verifyToken(token)
-    if (payload && payload.role === 'admin') {
-      isAuthorized = true
-    }
-  }
-
-  if (!isAuthorized) {
-    const adminSecretHeader = req.headers['x-admin-secret']
-    if (isBreakGlassAuthorized(adminSecretHeader)) {
-      isAuthorized = true
-    }
-  }
-
-  if (!isAuthorized) {
+  if (!checkAdminAuthorization(req)) {
     return res.status(401).json({
       success: false,
       code: 'UNAUTHORIZED',
@@ -413,7 +389,7 @@ async function handleAdminProductPerformance(req: VercelRequest, res: VercelResp
     return res.status(500).json({
       success: false,
       code: 'INTERNAL_ERROR',
-      message: 'Ürün performans metrikleri hesaplanırken bir hata oluştu.',
+      message: 'Ürün performans verisi hesaplanırken bir hata oluştu.',
     })
   }
 }
@@ -440,32 +416,21 @@ async function handleAdminCommerceOrders(req: VercelRequest, res: VercelResponse
     })
   }
 
-  let isAuthorized = false
-  let adminUserId: string | null = null
-
-  const token = getAuthTokenFromReq(req)
-  if (token) {
-    const payload = verifyToken(token)
-    if (payload && payload.role === 'admin') {
-      isAuthorized = true
-      adminUserId = payload.sub || null
-    }
-  }
-
-  if (!isAuthorized) {
-    const adminSecretHeader = req.headers['x-admin-secret']
-    if (isBreakGlassAuthorized(adminSecretHeader)) {
-      isAuthorized = true
-      adminUserId = 'break_glass_admin'
-    }
-  }
-
-  if (!isAuthorized) {
+  if (!checkAdminAuthorization(req)) {
     return res.status(401).json({
       success: false,
       code: 'UNAUTHORIZED',
       message: 'Yetkisiz erişim. Admin yetkisi gereklidir.',
     })
+  }
+
+  let adminUserId: string | null = null
+  const token = getAuthTokenFromReq(req)
+  if (token) {
+    const payload = verifyToken(token)
+    if (payload && payload.role === 'admin') {
+      adminUserId = payload.sub || null
+    }
   }
 
   const rawSlug = req.query?.['slug']

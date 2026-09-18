@@ -1,16 +1,16 @@
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {CommerceValidationError} from './types'
+import {CommerceValidationError} from './types.js'
 import type {
   AdminOrderListQuery,
   AdminOrderListResult,
   AdminOrderDetailResult,
   AdminOrderSummary,
   AdminPaymentTransactionSnapshot,
-} from './admin-order-types'
-import type {OrderItemSnapshot} from './order-types'
-import type {RefundRecord, OrderEventRecord, RefundStatus} from './refund-types'
-import {calculateRefundableAmount} from './refund-service'
-import {getSafeSupabaseAdmin} from '../server/supabaseAdmin'
+} from './admin-order-types.js'
+import type {OrderItemSnapshot} from './order-types.js'
+import type {RefundRecord, OrderEventRecord, RefundStatus} from './refund-types.js'
+import {calculateRefundableAmount} from './refund-service.js'
+import {getSafeSupabaseAdmin} from '../server/supabaseAdmin.js'
 
 export interface ListAdminCommerceOrdersOptions {
   supabaseClientOverride?: SupabaseClient | null

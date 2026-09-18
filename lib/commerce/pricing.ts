@@ -1,6 +1,6 @@
-import {CommerceValidationError} from './types'
-import type {AuthoritativeProduct, AuthoritativeVariant} from './sanityCommerceClient'
-import type {LocalizedString, ProductVariantOption} from '../../src/types'
+import {CommerceValidationError} from './types.js'
+import type {AuthoritativeProduct, AuthoritativeVariant} from './sanityCommerceClient.js'
+import type {LocalizedString, ProductVariantOption} from '../../src/types.js'
 
 const ALLOWED_CURRENCIES = new Set(['TRY', 'USD', 'EUR'])
 

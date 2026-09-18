@@ -1,18 +1,18 @@
 import crypto from 'crypto'
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {initiatePaymentRequestSchema} from './schemas'
-import {PaymentError} from './errors'
-import {getPaymentProvider} from './provider-registry'
-import {verifyGuestOrderToken} from './guest-auth'
-import {assertValidPaymentTransition} from './state-machine'
-import type {PaymentProvider} from './provider'
+import {initiatePaymentRequestSchema} from './schemas.js'
+import {PaymentError} from './errors.js'
+import {getPaymentProvider} from './provider-registry.js'
+import {verifyGuestOrderToken} from './guest-auth.js'
+import {assertValidPaymentTransition} from './state-machine.js'
+import type {PaymentProvider} from './provider.js'
 import type {
   PaymentIntent,
   VerifiedPaymentEvent,
   PaymentCallbackResult,
   VerifyPaymentCallbackInput,
-} from './types'
-import {getSafeSupabaseAdmin} from '../../server/supabaseAdmin'
+} from './types.js'
+import {getSafeSupabaseAdmin} from '../../server/supabaseAdmin.js'
 
 export interface InitiatePaymentOptions {
   userId?: string | null

@@ -1,17 +1,17 @@
 import crypto from 'crypto'
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {validateCheckout} from './checkout-validator'
-import {createOrderRequestSchema} from './order-schemas'
-import {CommerceValidationError} from './types'
-import type {AuthoritativeCatalogBatch} from './sanityCommerceClient'
-import {createGuestOrderToken, verifyGuestOrderToken} from './payment/guest-auth'
+import {validateCheckout} from './checkout-validator.js'
+import {createOrderRequestSchema} from './order-schemas.js'
+import {CommerceValidationError} from './types.js'
+import type {AuthoritativeCatalogBatch} from './sanityCommerceClient.js'
+import {createGuestOrderToken, verifyGuestOrderToken} from './payment/guest-auth.js'
 import type {
   CreateOrderRequest,
   OrderResult,
   OrderDetailResult,
   CustomerOrderSummary,
-} from './order-types'
-import {getSafeSupabaseAdmin} from '../server/supabaseAdmin'
+} from './order-types.js'
+import {getSafeSupabaseAdmin} from '../server/supabaseAdmin.js'
 
 export interface CreateCommerceOrderOptions {
   userId?: string | null

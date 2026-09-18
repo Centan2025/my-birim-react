@@ -1,4 +1,4 @@
-import type {CartItemInput, ValidatedCartItem} from './types'
+import type {CartItemInput, ValidatedCartItem} from './types.js'
 
 export type CustomerType = 'INDIVIDUAL' | 'CORPORATE'
 

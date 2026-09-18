@@ -1,14 +1,14 @@
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {CommerceValidationError} from './types'
-import {createRefundRequestSchema} from './refund-schemas'
+import {CommerceValidationError} from './types.js'
+import {createRefundRequestSchema} from './refund-schemas.js'
 import type {
   CreateRefundResult,
   RefundRecord,
   RefundCalculation,
   RefundStatus,
-} from './refund-types'
-import {canRefundOrderStatus} from './order-lifecycle'
-import {getSafeSupabaseAdmin} from '../server/supabaseAdmin'
+} from './refund-types.js'
+import {canRefundOrderStatus} from './order-lifecycle.js'
+import {getSafeSupabaseAdmin} from '../server/supabaseAdmin.js'
 
 export interface CreateCommerceRefundOptions {
   actorType?: 'system' | 'customer' | 'admin'

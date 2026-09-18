@@ -3,13 +3,13 @@ import {
   type CartItemInput,
   type CartValidationResult,
   type ValidatedCartItem,
-} from './types'
+} from './types.js'
 import {
   fetchAuthoritativeCatalogBatch,
   type AuthoritativeCatalogBatch,
-} from './sanityCommerceClient'
-import {validateProductAndVariantEligibility} from './eligibility'
-import {resolveAuthoritativeItemPricing} from './pricing'
+} from './sanityCommerceClient.js'
+import {validateProductAndVariantEligibility} from './eligibility.js'
+import {resolveAuthoritativeItemPricing} from './pricing.js'
 
 export const MIN_CART_ITEMS = 1
 export const MAX_CART_ITEMS = 50

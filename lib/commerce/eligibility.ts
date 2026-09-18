@@ -1,5 +1,5 @@
-import {CommerceValidationError} from './types'
-import type {AuthoritativeProduct, AuthoritativeVariant} from './sanityCommerceClient'
+import {CommerceValidationError} from './types.js'
+import type {AuthoritativeProduct, AuthoritativeVariant} from './sanityCommerceClient.js'
 
 export interface ValidatedProductAndVariant {
   product: AuthoritativeProduct

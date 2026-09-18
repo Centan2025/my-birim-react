@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import type {PaymentProvider} from './provider'
+import type {PaymentProvider} from './provider.js'
 import type {
   CreatePaymentIntentInput,
   CreatePaymentIntentResult,
@@ -7,8 +7,8 @@ import type {
   GetPaymentStatusResult,
   VerifyPaymentCallbackInput,
   VerifiedPaymentEvent,
-} from './types'
-import {PaymentError} from './errors'
+} from './types.js'
+import {PaymentError} from './errors.js'
 
 export class MockPaymentProvider implements PaymentProvider {
   public readonly id = 'mock'

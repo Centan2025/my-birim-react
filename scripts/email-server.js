@@ -17,14 +17,15 @@ app.use(
 )
 app.use(express.json())
 
+const SMTP_USER = process.env.SMTP_USER || process.env.EMAIL_USER || 'birim@birim.com'
 const SMTP_PASSWORD = process.env.SMTP_PASSWORD
 
 const transporter = nodemailer.createTransport({
-  host: 'smtpout.secureserver.net',
-  port: 465,
+  host: process.env.SMTP_HOST || 'smtpout.secureserver.net',
+  port: Number(process.env.SMTP_PORT) || 465,
   secure: true,
   auth: {
-    user: 'birimdesign@birim.com',
+    user: SMTP_USER,
     pass: SMTP_PASSWORD,
   },
 })
@@ -66,7 +67,7 @@ app.post('/api/send-verification', async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: '"Birim Design" <birimdesign@birim.com>',
+      from: `"Birim Design" <${SMTP_USER}>`,
       to: email,
       subject: 'Birim Üyelik Doğrulaması',
       html: `
@@ -169,7 +170,7 @@ app.post('/api/send-password-reset', async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: '"Birim Design" <birimdesign@birim.com>',
+      from: `"Birim Design" <${SMTP_USER}>`,
       to: email,
       subject: 'Birim Şifre Sıfırlama',
       html: `

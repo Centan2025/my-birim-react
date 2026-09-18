@@ -1,5 +1,5 @@
-import type {OrderItemSnapshot} from './order-types'
-import type {RefundRecord, OrderEventRecord} from './refund-types'
+import type {OrderItemSnapshot} from './order-types.js'
+import type {RefundRecord, OrderEventRecord} from './refund-types.js'
 
 export interface AdminOrderSummary {
   id: string

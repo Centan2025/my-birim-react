@@ -1,6 +1,6 @@
-import type {PaymentProvider} from './provider'
-import {mockPaymentProvider} from './mock-provider'
-import {PaymentError} from './errors'
+import type {PaymentProvider} from './provider.js'
+import {mockPaymentProvider} from './mock-provider.js'
+import {PaymentError} from './errors.js'
 
 const registry = new Map<string, PaymentProvider>()
 

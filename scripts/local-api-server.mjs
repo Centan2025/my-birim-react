@@ -60,13 +60,14 @@ if (RESEND_API_KEY && Resend) {
 }
 
 let mailTransporter = null
+const SMTP_USER = process.env.SMTP_USER || process.env.EMAIL_USER || 'birim@birim.com'
 if (SMTP_PASSWORD) {
   mailTransporter = nodemailer.createTransport({
-    host: 'smtpout.secureserver.net',
-    port: 465,
+    host: process.env.SMTP_HOST || 'smtpout.secureserver.net',
+    port: Number(process.env.SMTP_PORT) || 465,
     secure: true,
     auth: {
-      user: 'birimdesign@birim.com',
+      user: SMTP_USER,
       pass: SMTP_PASSWORD,
     },
   })
@@ -1140,18 +1141,20 @@ app.post('/api/inquiry', async (req, res) => {
 
   // 3. Mail gönder
   try {
+    const adminEmail = process.env.ADMIN_EMAIL || 'birim@birim.com'
     if (resendClient) {
       await resendClient.emails.send({
-        from: 'Birim Web <onboarding@resend.dev>',
-        to: ['birimdesign@birim.com', 'birim@birim.com'],
+        from: getEmailFrom(),
+        to: [adminEmail],
         subject: `Yeni Proje Talebi: ${name} - ${projectName || 'Birim Seçki'}`,
         html: emailHtml,
       })
       console.log(`📧 [Inquiry] Resend ile teklif bildirimi gönderildi: ${email}`)
     } else if (mailTransporter) {
       await mailTransporter.sendMail({
-        from: '"Birim Design" <birimdesign@birim.com>',
-        to: 'birimdesign@birim.com',
+        from: `"Birim Design" <${SMTP_USER}>`,
+        to: adminEmail,
+        replyTo: email,
         subject: `Yeni Proje Talebi: ${name} - ${projectName || 'Birim Seçki'}`,
         html: emailHtml,
       })
@@ -1187,7 +1190,7 @@ app.post('/api/send-verification', async (req, res) => {
 
   try {
     await mailTransporter.sendMail({
-      from: '"Birim Design" <birimdesign@birim.com>',
+      from: `"Birim Design" <${SMTP_USER}>`,
       to: email,
       subject: 'Birim Üyelik Doğrulaması',
       html: `
@@ -1292,7 +1295,7 @@ app.post('/api/send-password-reset', async (req, res) => {
 
   try {
     await mailTransporter.sendMail({
-      from: '"Birim Design" <birimdesign@birim.com>',
+      from: `"Birim Design" <${SMTP_USER}>`,
       to: email,
       subject: 'Birim Şifre Sıfırlama Talebi',
       html: `

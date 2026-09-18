@@ -166,29 +166,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const resendKey = process.env['RESEND_API_KEY']
     const smtpPassword = process.env['SMTP_PASSWORD']
+    const adminEmail = process.env['ADMIN_EMAIL'] || 'birim@birim.com'
+    const smtpUser = process.env['SMTP_USER'] || process.env['EMAIL_USER'] || 'birim@birim.com'
 
     if (resendKey) {
       const resend = new Resend(resendKey)
       await resend.emails.send({
-        from: 'Birim Web <onboarding@resend.dev>',
-        to: ['birimdesign@birim.com', 'birim@birim.com'],
+        from: process.env['EMAIL_FROM'] || 'Birim Web <onboarding@resend.dev>',
+        to: [adminEmail],
         subject: `Yeni Proje Talebi: ${safeName} - ${safeProjectName || 'Birim Seçtiklerim'}`,
         html: emailHtml,
       })
     } else if (smtpPassword) {
       const transporter = nodemailer.createTransport({
-        host: 'smtpout.secureserver.net',
-        port: 465,
+        host: process.env['SMTP_HOST'] || 'smtpout.secureserver.net',
+        port: Number(process.env['SMTP_PORT']) || 465,
         secure: true,
         auth: {
-          user: 'birimdesign@birim.com',
+          user: smtpUser,
           pass: smtpPassword,
         },
       })
 
       await transporter.sendMail({
-        from: '"Birim Design" <birimdesign@birim.com>',
-        to: 'birimdesign@birim.com',
+        from: `"Birim Design" <${smtpUser}>`,
+        to: adminEmail,
+        replyTo: safeEmail,
         subject: `Yeni Proje Talebi: ${safeName} - ${safeProjectName || 'Birim Seçki'}`,
         html: emailHtml,
       })

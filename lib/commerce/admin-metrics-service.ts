@@ -1,14 +1,14 @@
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {CommerceValidationError} from './types'
+import {CommerceValidationError} from './types.js'
 import type {
   AdminCommerceMetricsQuery,
   AdminCommerceMetricsResult,
   CurrencyCommerceMetrics,
   DailyMetricPoint,
   MetricsTimeRange,
-} from './admin-metrics-types'
-import {getSafeSupabaseAdmin} from '../server/supabaseAdmin'
-import {toMinorUnits, fromMinorUnits} from './refund-service'
+} from './admin-metrics-types.js'
+import {getSafeSupabaseAdmin} from '../server/supabaseAdmin.js'
+import {toMinorUnits, fromMinorUnits} from './refund-service.js'
 
 export interface GetAdminCommerceMetricsOptions {
   supabaseClientOverride?: SupabaseClient | null

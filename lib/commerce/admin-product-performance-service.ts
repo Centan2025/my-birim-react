@@ -1,8 +1,8 @@
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {resolveDateRange} from './admin-metrics-service'
-import type {AdminCommerceMetricsQuery} from './admin-metrics-types'
-import {getSafeSupabaseAdmin} from '../server/supabaseAdmin'
-import {toMinorUnits, fromMinorUnits} from './refund-service'
+import {resolveDateRange} from './admin-metrics-service.js'
+import type {AdminCommerceMetricsQuery} from './admin-metrics-types.js'
+import {getSafeSupabaseAdmin} from '../server/supabaseAdmin.js'
+import {toMinorUnits, fromMinorUnits} from './refund-service.js'
 
 export interface ProductPerformanceItem {
   productId: string

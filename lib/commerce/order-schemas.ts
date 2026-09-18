@@ -1,5 +1,5 @@
 import {z} from 'zod'
-import {cartItemInputSchema, checkoutPayloadSchema} from './checkout-schemas'
+import {cartItemInputSchema, checkoutPayloadSchema} from './checkout-schemas.js'
 
 export const createOrderRequestSchema = z
   .object({

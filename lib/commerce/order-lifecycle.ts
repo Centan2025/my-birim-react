@@ -1,7 +1,7 @@
 import type {SupabaseClient} from '@supabase/supabase-js'
-import {CommerceValidationError} from './types'
-import {getSafeSupabaseAdmin} from '../server/supabaseAdmin'
-import {cancelOrderRequestSchema} from './refund-schemas'
+import {CommerceValidationError} from './types.js'
+import {getSafeSupabaseAdmin} from '../server/supabaseAdmin.js'
+import {cancelOrderRequestSchema} from './refund-schemas.js'
 
 export type OrderStatus =
   | 'PENDING_PAYMENT'

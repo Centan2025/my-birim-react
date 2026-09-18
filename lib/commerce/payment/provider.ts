@@ -6,7 +6,7 @@ import type {
   GetPaymentStatusResult,
   VerifyPaymentCallbackInput,
   VerifiedPaymentEvent,
-} from './types'
+} from './types.js'
 
 /**
  * Provider-Neutral Payment Provider Interface.

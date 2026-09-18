@@ -1,6 +1,6 @@
 import type {SupabaseClient} from '@supabase/supabase-js'
-import type {OrderEventRecord} from './refund-types'
-import {getSafeSupabaseAdmin} from '../server/supabaseAdmin'
+import type {OrderEventRecord} from './refund-types.js'
+import {getSafeSupabaseAdmin} from '../server/supabaseAdmin.js'
 
 export interface RecordOrderEventParams {
   orderId: string

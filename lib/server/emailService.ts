@@ -264,18 +264,20 @@ export async function sendEmail({
   const smtpPassword = process.env['SMTP_PASSWORD']
   if (smtpPassword) {
     try {
+      const smtpUser =
+        process.env['SMTP_USER'] || process.env['EMAIL_USER'] || 'birim@birim.com'
       const transporter = nodemailer.createTransport({
-        host: 'smtpout.secureserver.net',
-        port: 465,
+        host: process.env['SMTP_HOST'] || 'smtpout.secureserver.net',
+        port: Number(process.env['SMTP_PORT']) || 465,
         secure: true,
         auth: {
-          user: 'birimdesign@birim.com',
+          user: smtpUser,
           pass: smtpPassword,
         },
       })
 
       const info = await transporter.sendMail({
-        from: '"Birim Design" <birimdesign@birim.com>',
+        from: fromAddress,
         to,
         replyTo,
         subject,
