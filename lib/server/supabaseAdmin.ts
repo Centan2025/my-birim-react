@@ -19,7 +19,7 @@ function getSupabaseServerConfig(): {url: string; serviceKey: string} | null {
   }
 
   let url = (rawUrl || '').trim().replace(/^["']|["']$/g, '')
-  if (!url || url.includes('drertbtypneggtjjbiiu')) {
+  if (!url || !url.includes('rkmpfxervwqleibhbiqv')) {
     url = 'https://rkmpfxervwqleibhbiqv.supabase.co'
   }
   const serviceKey = rawKey.trim().replace(/^["']|["']$/g, '')
@@ -43,6 +43,9 @@ export function getSupabaseAdmin(): SupabaseClient {
       autoRefreshToken: false,
       persistSession: false,
     },
+    global: {
+      fetch: (url, init) => fetch(url, init),
+    },
   })
 }
 
@@ -53,6 +56,9 @@ export function getSafeSupabaseAdmin(): SupabaseClient | null {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
+    },
+    global: {
+      fetch: (url, init) => fetch(url, init),
     },
   })
 }
