@@ -1,5 +1,6 @@
 import React, {useState} from 'react'
 import {useSelection} from '../../context/SelectionContext'
+import {useTranslation} from '../../i18n'
 import {AddToProjectModal} from './AddToProjectModal'
 import type {Product} from '../../types'
 import {getLocalizedText} from '../../types/seckim'
@@ -11,6 +12,7 @@ interface DetailSelectionCTAProps {
 
 export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product}) => {
   const {isInSelection, toggleSelection, isSelectionEnabled} = useSelection()
+  const {t} = useTranslation()
   const [isAddToProjectOpen, setIsAddToProjectOpen] = useState(false)
 
   if (!isSelectionEnabled) return null
@@ -22,7 +24,8 @@ export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product})
     toggleSelection(product.id, rawName)
   }
 
-  const selectionTooltip = selected ? 'Seçtiklerimden Çıkar' : 'Seçtiklerime Ekle'
+  const selectionTooltip = selected ? t('remove_from_selection') : t('add_to_selection')
+  const addToProjectLabel = t('add_to_project')
 
   return (
     <>
@@ -37,9 +40,7 @@ export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product})
                 ? 'bg-[#525252] text-white border-[#525252] hover:bg-[#636363] hover:border-[#636363]'
                 : 'bg-transparent text-[var(--text-primary)] hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 border-neutral-400 dark:border-neutral-500 hover:border-black dark:hover:border-white'
             }`}
-            aria-label={
-              selected ? `${rawName} seçtiklerimden çıkar` : `${rawName} seçtiklerime ekle`
-            }
+            aria-label={`${rawName} - ${selectionTooltip}`}
           >
             <svg
               className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:scale-105"
@@ -56,12 +57,12 @@ export const DetailSelectionCTA: React.FC<DetailSelectionCTAProps> = ({product})
         </AnimatedTooltip>
 
         {/* Projeye Ekle Icon Butonu */}
-        <AnimatedTooltip content="Projeye Ekle" position="top">
+        <AnimatedTooltip content={addToProjectLabel} position="top">
           <button
             type="button"
             onClick={() => setIsAddToProjectOpen(true)}
             className="group relative inline-flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-none border border-neutral-400 dark:border-neutral-500 hover:border-black dark:hover:border-white text-[var(--text-primary)] hover:text-black dark:hover:text-white bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-300 cursor-pointer shrink-0 shadow-none"
-            aria-label="Projeye Ekle"
+            aria-label={addToProjectLabel}
           >
             <svg
               className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:scale-105"

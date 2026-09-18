@@ -1,9 +1,11 @@
 import React, {useEffect} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
 import {useSelection} from '../../context/SelectionContext'
+import {useTranslation} from '../../i18n'
 
 export const SelectionToast: React.FC = () => {
   const {notification, dismissNotification} = useSelection()
+  const {t} = useTranslation()
 
   useEffect(() => {
     if (!notification?.visible) return
@@ -29,7 +31,7 @@ export const SelectionToast: React.FC = () => {
             <div className="flex items-center gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-white flex-shrink-0" />
               <p className="text-xs tracking-wider uppercase font-light text-neutral-100">
-                {notification.message}
+                {t(notification.message)}
               </p>
             </div>
 
@@ -40,14 +42,14 @@ export const SelectionToast: React.FC = () => {
                   onClick={notification.onAction}
                   className="text-xs font-medium tracking-widest uppercase text-white hover:text-neutral-200 underline underline-offset-4 cursor-pointer transition-colors"
                 >
-                  {notification.actionLabel}
+                  {t(notification.actionLabel)}
                 </button>
               )}
               <button
                 type="button"
                 onClick={dismissNotification}
                 className="text-neutral-400 hover:text-white p-1 cursor-pointer transition-colors"
-                aria-label="Kapat"
+                aria-label={t('close') || 'Kapat'}
               >
                 <svg
                   className="w-3.5 h-3.5"

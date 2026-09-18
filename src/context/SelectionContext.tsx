@@ -196,7 +196,7 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
 
   const dismissNotification = useCallback(() => setNotification(null), [])
 
-  const triggerToast = useCallback((message: string, actionLabel = 'Seçtiklerim') => {
+  const triggerToast = useCallback((message: string = 'added_to_selections', actionLabel = 'seckim') => {
     setNotification({
       visible: true,
       message,
@@ -228,7 +228,7 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
         return updated
       })
 
-      triggerToast('Seçtiklerinize eklendi.')
+      triggerToast('added_to_selections', 'seckim')
 
       if (isLoggedIn && user?._id) {
         saveUserSelection(user._id, productId).catch(() => {})

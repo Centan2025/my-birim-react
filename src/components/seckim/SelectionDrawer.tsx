@@ -73,10 +73,10 @@ export const SelectionDrawer: React.FC = () => {
               <div className="px-6 py-6 border-b border-[var(--border-primary)] flex items-start justify-between">
                 <div>
                   <h2 className="text-xl font-light tracking-wider uppercase text-[var(--text-primary)]">
-                    SEÇTİKLERİM
+                    {t('seckim')}
                   </h2>
                   <p className="text-xs text-[var(--text-secondary)] mt-1 font-light tracking-wide">
-                    Projeniz için seçtiğiniz ürünler
+                    {t('seckim_drawer_subtitle')}
                   </p>
                 </div>
 
@@ -84,7 +84,7 @@ export const SelectionDrawer: React.FC = () => {
                   type="button"
                   onClick={closeDrawer}
                   className="p-2 text-neutral-500 hover:text-[var(--text-primary)] transition-colors cursor-pointer -mr-2"
-                  aria-label="Kapat"
+                  aria-label={t('close') || 'Kapat'}
                 >
                   <svg
                     className="w-5 h-5"
@@ -187,8 +187,8 @@ export const SelectionDrawer: React.FC = () => {
                               type="button"
                               onClick={() => removeFromSelection(product.id)}
                               className="p-2 text-neutral-400 hover:text-red-500 transition-colors cursor-pointer"
-                              aria-label={`${t(product.name)} seçtiklerimden çıkar`}
-                              title="Seçtiklerimden çıkar"
+                              aria-label={`${t(product.name)} - ${t('remove_from_selection')}`}
+                              title={t('remove_from_selection')}
                             >
                               <svg
                                 className="w-4 h-4"
@@ -226,18 +226,17 @@ export const SelectionDrawer: React.FC = () => {
                           </svg>
                         </div>
                         <h3 className="text-base font-light uppercase tracking-wider text-[var(--text-primary)]">
-                          Henüz bir seçiminiz yok
+                          {t('no_selections_yet')}
                         </h3>
                         <p className="text-xs text-[var(--text-secondary)] mt-2 max-w-xs font-light leading-relaxed">
-                          Beğendiğiniz ürünleri seçtiklerinize ekleyerek projeniz için bir araya
-                          getirebilirsiniz.
+                          {t('no_selections_desc')}
                         </p>
                         <button
                           type="button"
                           onClick={handleExplore}
                           className="mt-8 px-6 py-3 border border-[var(--border-primary)] hover:border-[#2c2c2c] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-widest hover:bg-[#2c2c2c] hover:text-white transition-all cursor-pointer font-semibold"
                         >
-                          ÜRÜNLERİ KEŞFET
+                          {t('explore_products')}
                         </button>
                       </motion.div>
                     )}
@@ -256,9 +255,9 @@ export const SelectionDrawer: React.FC = () => {
                     className="px-6 py-5 border-t border-[var(--border-primary)] bg-[var(--bg-primary)] space-y-3"
                   >
                     <div className="flex items-center justify-between text-xs tracking-wider uppercase text-[var(--text-secondary)] font-light">
-                      <span>Toplam</span>
+                      <span>{t('subtotal') || 'Toplam'}</span>
                       <span className="font-medium text-[var(--text-primary)]">
-                        {selectedProducts.length} ÜRÜN
+                        {t('total_products_count', selectedProducts.length)}
                       </span>
                     </div>
 
@@ -268,7 +267,7 @@ export const SelectionDrawer: React.FC = () => {
                         onClick={handleNavigateToSeckim}
                         className="w-full py-3.5 px-3 border border-[var(--border-primary)] hover:border-[#2c2c2c] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs tracking-widest uppercase font-semibold hover:bg-[#2c2c2c] hover:text-white transition-all duration-200 text-center cursor-pointer"
                       >
-                        SEÇTİKLERİM
+                        {t('seckim')}
                       </button>
 
                       <button
@@ -276,7 +275,7 @@ export const SelectionDrawer: React.FC = () => {
                         onClick={() => setIsInquiryOpen(true)}
                         className="w-full py-3.5 px-3 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs tracking-widest uppercase font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all text-center cursor-pointer shadow-sm"
                       >
-                        BİLGİ / TEKLİF AL
+                        {t('get_quote_inquiry')}
                       </button>
                     </div>
                   </motion.div>

@@ -3,6 +3,7 @@ import {createPortal} from 'react-dom'
 import {motion, AnimatePresence} from 'framer-motion'
 import {useFocusTrap} from '../../hooks/useFocusTrap'
 import {useSelection} from '../../context/SelectionContext'
+import {useTranslation} from '../../i18n'
 import {CreateProjectModal} from './CreateProjectModal'
 
 interface AddToProjectModalProps {
@@ -20,6 +21,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
 }) => {
   const {projects, addProductToProject, removeProductFromProject, isProductInProject} =
     useSelection()
+  const {t} = useTranslation()
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const modalFocusTrap = useFocusTrap(isOpen, onClose)
@@ -42,7 +44,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
             className="fixed inset-0 z-[999] flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
-            aria-label="Projeye Ekle"
+            aria-label={t('add_to_project')}
           >
             <motion.div
               initial={{opacity: 0}}
@@ -64,7 +66,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
               <div className="flex items-center justify-between pb-4 border-b border-[var(--border-primary)]">
                 <div>
                   <h3 className="text-base font-light uppercase tracking-wider text-[var(--text-primary)]">
-                    PROJEYE EKLE
+                    {t('add_to_project')}
                   </h3>
                   {productName && (
                     <p className="text-[11px] text-[var(--text-secondary)] font-light truncate max-w-[220px] mt-0.5">
@@ -77,7 +79,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
                   type="button"
                   onClick={onClose}
                   className="p-1 text-neutral-400 hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                  aria-label="Kapat"
+                  aria-label={t('close') || 'Kapat'}
                 >
                   <svg
                     className="w-4 h-4"
@@ -96,7 +98,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
               <div className="py-4 max-h-60 overflow-y-auto divide-y divide-[var(--border-primary)]">
                 {projects.length === 0 ? (
                   <div className="py-6 text-center text-xs text-neutral-400 font-light">
-                    Henüz oluşturulmuş bir projeniz yok.
+                    {t('no_projects_yet')}
                   </div>
                 ) : (
                   projects.map(project => {
@@ -120,14 +122,14 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
                               {project.name}
                             </span>
                             <span className="text-[10px] text-[var(--text-secondary)] block font-light">
-                              {project.productIds.length} ürün
+                              {t('total_products_count', project.productIds.length)}
                             </span>
                           </div>
                         </div>
 
                         {isChecked && (
                           <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                            Eklendi
+                            {t('added')}
                           </span>
                         )}
                       </label>
@@ -153,7 +155,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
-                  <span>YENİ PROJE</span>
+                  <span>{t('new_project')}</span>
                 </button>
 
                 <button
@@ -161,7 +163,7 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
                   onClick={onClose}
                   className="px-5 py-2.5 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all cursor-pointer shadow-sm"
                 >
-                  TAMAM
+                  {t('done')}
                 </button>
               </div>
             </motion.div>

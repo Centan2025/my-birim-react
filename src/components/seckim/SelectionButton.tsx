@@ -1,5 +1,6 @@
 import React from 'react'
 import {useSelection} from '../../context/SelectionContext'
+import {useTranslation} from '../../i18n'
 import type {Product} from '../../types'
 import {getLocalizedText} from '../../types/seckim'
 
@@ -15,6 +16,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
   showLabel = false,
 }) => {
   const {isInSelection, toggleSelection, isSelectionEnabled} = useSelection()
+  const {t} = useTranslation()
 
   if (!isSelectionEnabled) return null
 
@@ -27,6 +29,8 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
     toggleSelection(product.id, rawName)
   }
 
+  const labelText = selected ? t('remove_from_selection') : t('add_to_selection')
+
   return (
     <div className={`relative inline-flex items-center ${className}`}>
       <button
@@ -37,7 +41,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
             ? 'text-[#525252] dark:text-neutral-300 hover:text-[#333333] dark:hover:text-white hover:scale-110 active:scale-90'
             : 'text-neutral-400 hover:text-neutral-800 dark:text-neutral-500 dark:hover:text-white hover:scale-110 active:scale-90'
         }`}
-        aria-label={selected ? `${rawName} seçtiklerimden çıkar` : `${rawName} seçtiklerime ekle`}
+        aria-label={`${rawName} - ${labelText}`}
       >
         <svg
           className="w-4 h-4 sm:w-[18px] sm:h-[18px] transition-transform duration-300 ease-out group-hover/btn:scale-105 group-active/btn:scale-90"
@@ -53,7 +57,7 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
 
         {showLabel && (
           <span className="ml-2 text-xs uppercase tracking-wider font-light">
-            {selected ? 'Seçtiklerimden Çıkar' : 'Seçtiklerime Ekle'}
+            {labelText}
           </span>
         )}
       </button>
