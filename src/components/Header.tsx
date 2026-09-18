@@ -1427,7 +1427,7 @@ export function Header() {
                   <button
                     type="button"
                     onClick={() => window.dispatchEvent(new Event('openFloatingAuthPanel'))}
-                    className="group relative flex items-center justify-center cursor-pointer transition-opacity duration-300 hover:opacity-80"
+                    className="group relative flex items-end pb-0 pt-2 cursor-pointer transition-opacity duration-300 hover:opacity-75"
                     style={{
                       color: headerForegroundColor,
                       transition: colorTransition,
@@ -1436,54 +1436,37 @@ export function Header() {
                       isLoggedIn
                         ? user?.name || t('profile') || 'Hesabım'
                         : locale === 'tr'
-                          ? 'Giriş Yap'
+                          ? 'Giriş'
                           : 'Login'
                     }
                     title={
                       isLoggedIn
                         ? user?.name || t('profile') || 'Hesabım'
                         : locale === 'tr'
-                          ? 'Giriş Yap'
+                          ? 'Giriş'
                           : 'Login'
                     }
                   >
-                    {isLoggedIn ? (
+                    <span
+                      className="relative inline-block uppercase header-nav-text"
+                      style={{
+                        fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
+                        fontWeight: 600,
+                        letterSpacing: '0.04em',
+                        fontFamily: "'Inter', sans-serif",
+                        lineHeight: '1.25rem',
+                        color: headerForegroundColor,
+                        transition: colorTransition,
+                      }}
+                    >
+                      {isLoggedIn ? getUserInitials(user) : locale === 'tr' ? 'GİRİŞ' : 'LOGIN'}
                       <span
-                        className="relative inline-flex items-center justify-center font-mono font-semibold tracking-wider rounded-full border transition-all duration-300 group-hover:scale-105"
+                        className="header-nav-underline"
                         style={{
-                          width: '26px',
-                          height: '26px',
-                          fontSize: '10px',
-                          lineHeight: '1',
-                          borderColor: headerForegroundColor,
-                          color: headerForegroundColor,
-                          transition: colorTransition,
+                          backgroundColor: headerForegroundColor,
                         }}
-                      >
-                        {getUserInitials(user)}
-                      </span>
-                    ) : (
-                      <span
-                        className="relative inline-block uppercase header-nav-text"
-                        style={{
-                          fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
-                          fontWeight: 600,
-                          letterSpacing: '0.025em',
-                          fontFamily: "'Inter', sans-serif",
-                          lineHeight: '1.25rem',
-                          color: headerForegroundColor,
-                          transition: colorTransition,
-                        }}
-                      >
-                        {locale === 'tr' ? 'GİRİŞ' : 'LOGIN'}
-                        <span
-                          className="header-nav-underline"
-                          style={{
-                            backgroundColor: headerForegroundColor,
-                          }}
-                        />
-                      </span>
-                    )}
+                      />
+                    </span>
                   </button>
 
                   <div
