@@ -14,11 +14,14 @@ function getSupabaseServerConfig(): {url: string; serviceKey: string} | null {
     env['VITE_SUPABASE_SERVICE_ROLE_KEY'] ||
     env['VITE_SUPABASE_ANON_KEY']
 
-  if (!rawUrl || !rawKey) {
+  if (!rawKey) {
     return null
   }
 
-  const url = rawUrl.trim().replace(/^["']|["']$/g, '')
+  let url = (rawUrl || '').trim().replace(/^["']|["']$/g, '')
+  if (!url || url.includes('drertbtypneggtjjbiiu')) {
+    url = 'https://rkmpfxervwqleibhbiqv.supabase.co'
+  }
   const serviceKey = rawKey.trim().replace(/^["']|["']$/g, '')
 
   if (!url || !serviceKey) {
