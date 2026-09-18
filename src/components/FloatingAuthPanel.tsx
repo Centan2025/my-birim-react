@@ -136,7 +136,7 @@ export const FloatingAuthPanel: React.FC = () => {
                 opacity: {duration: 0.35},
               }}
               style={{transformOrigin: 'right center'}}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-[400px] bg-[var(--bg-secondary)] shadow-[-10px_0_40px_-15px_rgba(0,0,0,0.3)] z-[101] flex flex-col"
+              className="fixed right-0 top-0 bottom-0 w-full max-w-[420px] bg-[var(--bg-primary)] border-l border-[var(--border-primary)] shadow-[-10px_0_40px_-15px_rgba(0,0,0,0.3)] z-[101] flex flex-col"
             >
               {/* Panel Header */}
               <motion.div
@@ -144,22 +144,24 @@ export const FloatingAuthPanel: React.FC = () => {
                 animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
                 transition={{delay: 0.12, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
                 style={{transformOrigin: 'right center'}}
-                className="flex items-center justify-between px-8 py-10 border-b border-[var(--border-primary)]/10 bg-[var(--bg-primary)]/40"
+                className="flex items-center justify-between px-8 py-8 border-b border-[var(--border-primary)]/40 bg-[var(--bg-primary)]/80"
               >
-                <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-[var(--text-primary)]">
-                  {isLoggedIn ? t('profile') : t('login')}
-                  <span className="block h-0.5 w-12 bg-primary mt-3" />
-                </h2>
+                <div>
+                  <h2 className="text-sm font-bold uppercase tracking-[0.35em] text-[var(--text-primary)]">
+                    {isLoggedIn ? t('profile') : t('login')}
+                  </h2>
+                  <span className="block h-0.5 w-12 bg-primary mt-2.5" />
+                </div>
                 <button
                   onClick={() => setIsOpen(false)}
                   aria-label={t('close') || 'Kapat'}
-                  className="w-10 h-10 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer -mr-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800/60"
                 >
                   <X className="w-5 h-5 transition-transform duration-300" />
                 </button>
               </motion.div>
 
-              <div className="flex-1 overflow-y-auto px-8 py-10">
+              <div className="flex-1 overflow-y-auto px-8 py-8 flex flex-col">
                 {isLoggedIn ? (
                   <div className="space-y-12">
                     <motion.div

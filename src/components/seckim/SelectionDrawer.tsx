@@ -1,6 +1,7 @@
 import React, {useMemo, useState} from 'react'
 import {useNavigate, Link} from 'react-router-dom'
 import {motion, AnimatePresence} from 'framer-motion'
+import {X} from 'lucide-react'
 import {useSelection} from '../../context/SelectionContext'
 import {useProducts} from '../../hooks/useProducts'
 import {useCategories} from '../../hooks/useCategories'
@@ -63,7 +64,7 @@ export const SelectionDrawer: React.FC = () => {
               animate={{opacity: 1}}
               exit={{opacity: 0}}
               transition={{duration: 0.3}}
-              className="fixed inset-0 bg-black/60 backdrop-blur-[2px]"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
               onClick={closeDrawer}
               aria-label="Kapat"
             />
@@ -90,7 +91,7 @@ export const SelectionDrawer: React.FC = () => {
                 opacity: {duration: 0.35},
               }}
               style={{transformOrigin: 'right center'}}
-              className="relative w-full max-w-md h-full bg-[var(--bg-primary)] text-[var(--text-primary)] border-l border-[var(--border-primary)] shadow-2xl flex flex-col z-10"
+              className="fixed right-0 top-0 bottom-0 w-full max-w-[420px] bg-[var(--bg-primary)] border-l border-[var(--border-primary)] shadow-[-10px_0_40px_-15px_rgba(0,0,0,0.3)] z-[101] flex flex-col"
             >
               {/* Drawer Header */}
               <motion.div
@@ -98,15 +99,13 @@ export const SelectionDrawer: React.FC = () => {
                 animate={{opacity: 1, x: 0, scaleX: 1, filter: 'blur(0px)'}}
                 transition={{delay: 0.12, duration: 0.52, ease: [0.16, 1, 0.3, 1]}}
                 style={{transformOrigin: 'right center'}}
-                className="px-6 py-6 border-b border-[var(--border-primary)] flex items-start justify-between"
+                className="flex items-center justify-between px-8 py-8 border-b border-[var(--border-primary)]/40 bg-[var(--bg-primary)]/80"
               >
                 <div>
-                  <h2 className="text-xl font-light tracking-wider uppercase text-[var(--text-primary)]">
+                  <h2 className="text-sm font-bold uppercase tracking-[0.35em] text-[var(--text-primary)]">
                     {t('seckim')}
                   </h2>
-                  <p className="text-xs text-[var(--text-secondary)] mt-1 font-light tracking-wide">
-                    {t('seckim_drawer_subtitle')}
-                  </p>
+                  <span className="block h-0.5 w-12 bg-primary mt-2.5" />
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -114,7 +113,7 @@ export const SelectionDrawer: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleClearAll}
-                      className="text-[11px] uppercase tracking-wider text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 py-1.5 px-2.5 rounded-sm hover:bg-neutral-100 dark:hover:bg-neutral-800/60 cursor-pointer font-medium active:scale-95 flex items-center gap-1.5 group"
+                      className="text-[10px] uppercase tracking-[0.2em] font-semibold text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 py-1.5 px-3 rounded-sm hover:bg-neutral-100 dark:hover:bg-neutral-800/60 cursor-pointer active:scale-95 flex items-center gap-1.5 group"
                       title={t('clear_all_selections')}
                     >
                       <svg
@@ -133,27 +132,16 @@ export const SelectionDrawer: React.FC = () => {
                   <button
                     type="button"
                     onClick={closeDrawer}
-                    className="p-1.5 text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer -mr-1"
+                    className="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer -mr-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800/60"
                     aria-label={t('close') || 'Kapat'}
                   >
-                    <svg
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
+                    <X className="w-5 h-5 transition-transform duration-300" />
                   </button>
                 </div>
               </motion.div>
 
               {/* Drawer Content */}
-              <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col">
+              <div className="flex-1 overflow-y-auto px-8 py-8 flex flex-col">
                 {isProductsLoading && selectedProductIds.length > 0 ? (
                   <div className="space-y-4 py-2">
                     {selectedProductIds.map(id => (
@@ -247,22 +235,11 @@ export const SelectionDrawer: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => removeFromSelection(product.id)}
-                              className="p-2 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-all duration-200 hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer"
+                              className="p-2 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer rounded-full"
                               aria-label={`${t(product.name)} - ${t('remove_from_selection')}`}
                               title={t('remove_from_selection')}
                             >
-                              <svg
-                                className="w-4 h-4"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                              </svg>
+                              <X className="w-4 h-4 transition-transform duration-300" />
                             </button>
                           </motion.div>
                         )
@@ -316,13 +293,13 @@ export const SelectionDrawer: React.FC = () => {
                     animate={{opacity: 1, y: 0, scale: 1, filter: 'blur(0px)'}}
                     exit={{opacity: 0, y: 15, transition: {duration: 0.25}}}
                     transition={{duration: 0.52, delay: 0.2, ease: [0.16, 1, 0.3, 1]}}
-                    className="px-6 py-5 border-t border-[var(--border-primary)] bg-[var(--bg-primary)]"
+                    className="px-8 py-6 border-t border-[var(--border-primary)]/40 bg-[var(--bg-primary)]"
                   >
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         type="button"
                         onClick={handleNavigateToSeckim}
-                        className="w-full py-3.5 px-3 border border-[var(--border-primary)] hover:border-[#2c2c2c] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs tracking-widest uppercase font-semibold hover:bg-[#2c2c2c] hover:text-white transition-all duration-200 text-center cursor-pointer"
+                        className="w-full p-4 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] text-[11px] tracking-[0.25em] uppercase font-bold font-inter transition-all duration-300 text-center cursor-pointer shadow-sm"
                       >
                         {t('seckim')}
                       </button>
@@ -330,7 +307,7 @@ export const SelectionDrawer: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setIsInquiryOpen(true)}
-                        className="w-full py-3.5 px-3 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs tracking-widest uppercase font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all text-center cursor-pointer shadow-sm"
+                        className="w-full p-4 bg-[#2c2c2c] dark:bg-white text-white dark:text-[#171717] border border-[#2c2c2c] dark:border-white text-[11px] tracking-[0.25em] uppercase font-bold font-inter hover:bg-[#404040] dark:hover:bg-neutral-200 transition-all duration-300 text-center cursor-pointer shadow-sm"
                       >
                         {t('get_quote_inquiry')}
                       </button>
