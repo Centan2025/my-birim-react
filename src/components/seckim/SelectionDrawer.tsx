@@ -207,7 +207,7 @@ export const SelectionDrawer: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => removeFromSelection(product.id)}
-                              className="p-2 text-neutral-400 hover:text-red-500 transition-colors cursor-pointer"
+                              className="p-2 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-all duration-200 hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer"
                               aria-label={`${t(product.name)} - ${t('remove_from_selection')}`}
                               title={t('remove_from_selection')}
                             >
@@ -217,6 +217,8 @@ export const SelectionDrawer: React.FC = () => {
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                               >
                                 <line x1="18" y1="6" x2="6" y2="18" />
                                 <line x1="6" y1="6" x2="18" y2="18" />

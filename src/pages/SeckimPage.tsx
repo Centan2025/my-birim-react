@@ -305,11 +305,11 @@ export function SeckimPage() {
             <button
               type="button"
               onClick={handleClearAll}
-              className="pb-4 text-[11px] sm:text-xs font-light text-neutral-400 hover:text-red-500 transition-colors cursor-pointer flex items-center gap-1.5 group shrink-0"
+              className="pb-4 text-[11px] sm:text-xs font-light text-neutral-400 hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-1.5 group shrink-0"
               title={t('clear_all_selections')}
             >
               <svg
-                className="w-3.5 h-3.5 transition-transform group-hover:scale-110"
+                className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -375,7 +375,7 @@ export function SeckimPage() {
                       key={product.id}
                       className="group relative bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex flex-col overflow-hidden shadow-xs hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300"
                     >
-                      {/* Top-Right Remove (X) Button */}
+                      {/* Top-Right Remove (X) Button: Frameless, larger, animated rotation & scale, neutral hover */}
                       <button
                         type="button"
                         onClick={e => {
@@ -383,16 +383,16 @@ export function SeckimPage() {
                           e.stopPropagation()
                           removeFromSelection(product.id)
                         }}
-                        className="absolute top-3 right-3 z-20 w-7 h-7 rounded-full bg-white/95 dark:bg-neutral-800/95 hover:bg-red-50 dark:hover:bg-red-950/40 text-neutral-400 hover:text-red-600 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110"
+                        className="absolute top-2.5 right-2.5 z-20 w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-all duration-300 ease-out hover:scale-115 hover:rotate-90 active:scale-95 cursor-pointer"
                         title={t('remove_from_selection')}
                         aria-label={`${t(product.name)} - ${t('remove_from_selection')}`}
                       >
                         <svg
-                          className="w-3.5 h-3.5"
+                          className="w-5 h-5"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="1.75"
+                          strokeWidth="1.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >

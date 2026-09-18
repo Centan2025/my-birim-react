@@ -65,13 +65,13 @@ export const ClearSelectionModal: React.FC<ClearSelectionModalProps> = ({
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border-primary)]">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-red-500/10 text-red-600 flex items-center justify-center">
+                <div className="w-7 h-7 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 flex items-center justify-center">
                   <svg
                     className="w-4 h-4"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="1.75"
+                    strokeWidth="1.5"
                   >
                     <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                   </svg>
@@ -123,10 +123,10 @@ export const ClearSelectionModal: React.FC<ClearSelectionModalProps> = ({
                 type="button"
                 onClick={handleConfirm}
                 disabled={loading}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs uppercase tracking-widest font-semibold transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#2c2c2c] hover:bg-black dark:bg-white dark:text-black dark:hover:bg-neutral-200 text-white text-xs uppercase tracking-widest font-semibold transition-all cursor-pointer disabled:opacity-50 shadow-sm"
               >
                 {loading && (
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 )}
                 <span>{loading ? t('clearing') : t('confirm_clear')}</span>
               </button>

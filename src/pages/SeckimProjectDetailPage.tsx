@@ -354,7 +354,7 @@ export function SeckimProjectDetailPage() {
                     key={product.id}
                     className="group relative bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex flex-col overflow-hidden shadow-xs hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300"
                   >
-                    {/* Top-Right Remove (X) Button */}
+                    {/* Top-Right Remove (X) Button: Frameless, larger, animated rotation & scale, neutral hover */}
                     <button
                       type="button"
                       onClick={e => {
@@ -362,16 +362,16 @@ export function SeckimProjectDetailPage() {
                         e.stopPropagation()
                         removeProductFromProject(project.id, product.id)
                       }}
-                      className="absolute top-3 right-3 z-20 w-7 h-7 rounded-full bg-white/95 dark:bg-neutral-800/95 hover:bg-red-50 dark:hover:bg-red-950/40 text-neutral-400 hover:text-red-600 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110"
+                      className="absolute top-2.5 right-2.5 z-20 w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-all duration-300 ease-out hover:scale-115 hover:rotate-90 active:scale-95 cursor-pointer"
                       title={t('remove_from_project')}
                       aria-label={`${t(product.name)} - ${t('remove_from_project')}`}
                     >
                       <svg
-                        className="w-3.5 h-3.5"
+                        className="w-5 h-5"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="1.75"
+                        strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >

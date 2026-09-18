@@ -331,6 +331,7 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
 
   const clearSelection = useCallback(async (): Promise<boolean> => {
     isSyncingRef.current = true
+    const currentIds = [...selectedProductIds]
     setSelectedProductIds([])
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
@@ -353,6 +354,15 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
         console.warn('clearUserSelections error:', err)
         isSuccess = false
       }
+
+      // Parallel item removal guarantee to completely wipe database
+      if (currentIds.length > 0) {
+        try {
+          await Promise.allSettled(currentIds.map(pid => removeUserSelection(user._id, pid)))
+        } catch {
+          // ignore
+        }
+      }
     }
 
     setTimeout(() => {
@@ -360,7 +370,7 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
     }, 600)
 
     return isSuccess
-  }, [isLoggedIn, user?._id])
+  }, [isLoggedIn, user?._id, selectedProductIds])
 
   const createProject = useCallback(
     async (
