@@ -63,7 +63,7 @@ export function handleCors(
   const methods = options?.allowMethods || 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
   const headers =
     options?.allowHeaders ||
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, x-analytics-pin, x-api-secret, x-sanity-studio'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, x-analytics-pin, x-api-secret, x-sanity-studio, x-admin-secret, Cache-Control, Pragma'
 
   res.setHeader('Access-Control-Allow-Methods', methods)
   res.setHeader('Access-Control-Allow-Headers', headers)

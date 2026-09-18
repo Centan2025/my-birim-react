@@ -66,8 +66,6 @@ async function safeFetchAdmin(path: string, options: RequestInit = {}): Promise<
   const primaryUrl = getAdminApiUrl(cacheBustedPath)
   const headers = {
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    Pragma: 'no-cache',
     ...(options.headers || {}),
   }
 

@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (
     handleCors(req, res, {
       allowMethods: 'GET, POST, PATCH, DELETE, OPTIONS',
-      allowHeaders: 'Content-Type, Authorization, x-admin-secret',
+      allowHeaders: 'Content-Type, Authorization, x-admin-secret, Cache-Control, Pragma, x-sanity-studio',
       allowCredentials: true,
     })
   ) {
