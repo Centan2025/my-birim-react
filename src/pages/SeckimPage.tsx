@@ -502,6 +502,7 @@ export function SeckimPage() {
                               {/* 4th slot with +X overlay */}
                               {(() => {
                                 const fourthProd = prjProducts[3]
+                                if (!fourthProd) return null
                                 const imgProps = getProductImageProps(fourthProd)
                                 const remainingCount = prjProducts.length - 3
                                 return (
