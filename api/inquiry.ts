@@ -92,74 +92,213 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 2. Format products list for Email
   const productsListHtml =
     Array.isArray(selectedProducts) && selectedProducts.length > 0
-      ? `
-      <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-        <thead>
-          <tr style="border-bottom: 1px solid #ddd; text-align: left; font-size: 11px; text-transform: uppercase; color: #888;">
-            <th style="padding: 8px 4px;">#</th>
-            <th style="padding: 8px 4px;">Ürün</th>
-            <th style="padding: 8px 4px;">Ölçüler</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${selectedProducts
-            .map((p: {id?: string; name?: string; dimensions?: string}, idx: number) => {
-              const pName = escapeHtml(p.name || p.id)
-              const pDim = escapeHtml(p.dimensions || '-')
+      ? selectedProducts
+          .map(
+            (
+              p: {id?: string; name?: string; category?: string; dimensions?: string; image?: string},
+              idx: number
+            ) => {
+              const pName = escapeHtml(p.name || p.id || 'Ürün')
+              const pCategory = p.category ? escapeHtml(String(p.category)) : ''
+              const pDim = p.dimensions && p.dimensions !== '-' ? escapeHtml(String(p.dimensions)) : ''
               const safeUrlId = encodeURIComponent(String(p.id || '').trim())
+              const rawImg = p.image || ''
+              const safeImgUrl = rawImg
+                ? rawImg.startsWith('http://') || rawImg.startsWith('https://')
+                  ? rawImg
+                  : `https://birim.com${rawImg.startsWith('/') ? '' : '/'}${rawImg}`
+                : ''
+
+              const imgHtml = safeImgUrl
+                ? `<img src="${escapeHtml(safeImgUrl)}" alt="${pName}" width="56" height="56" style="width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; display: block;" />`
+                : `<div style="width: 56px; height: 56px; background-color: #f1f5f9; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center; line-height: 56px; font-size: 20px; color: #94a3b8;">🛋️</div>`
+
+              const isLast = idx === selectedProducts.length - 1
+              const borderStyle = isLast ? '' : 'border-bottom: 1px solid #f1f5f9;'
+
               return `
-            <tr style="border-bottom: 1px solid #eee; font-size: 13px;">
-              <td style="padding: 8px 4px; color: #999;">${idx + 1}</td>
-              <td style="padding: 8px 4px; font-weight: 600;">
-                <a href="https://birim.com/product/${safeUrlId}" style="color: #111; text-decoration: none;">
+            <tr style="${borderStyle}">
+              <td style="padding: 12px 12px 12px 14px; width: 56px; vertical-align: middle;">
+                ${imgHtml}
+              </td>
+              <td style="padding: 12px 12px; vertical-align: middle;">
+                <a href="https://birim.com/product/${safeUrlId}" style="color: #09090b; font-weight: 600; font-size: 14px; text-decoration: none; display: block; line-height: 1.4;">
                   ${pName}
                 </a>
+                ${
+                  pCategory
+                    ? `<span style="display: inline-block; font-size: 11px; color: #71717a; margin-top: 3px;">${pCategory}</span>`
+                    : ''
+                }
+                ${
+                  pDim
+                    ? `<div style="font-size: 11px; color: #64748b; margin-top: 3px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">Ölçü: ${pDim}</div>`
+                    : ''
+                }
               </td>
-              <td style="padding: 8px 4px; color: #666;">${pDim}</td>
+              <td style="padding: 12px 14px 12px 8px; text-align: right; vertical-align: middle; white-space: nowrap;">
+                <a href="https://birim.com/product/${safeUrlId}" style="font-size: 11px; font-weight: 600; color: #09090b; text-decoration: none; background-color: #f4f4f5; padding: 6px 12px; border-radius: 6px; display: inline-block; border: 1px solid #e4e4e7;">
+                  İncele &rarr;
+                </a>
+              </td>
             </tr>
           `
-            })
-            .join('')}
-        </tbody>
-      </table>
-    `
-      : '<p style="color: #888; font-style: italic;">Ürün seçilmedi</p>'
+            }
+          )
+          .join('')
+      : `<tr><td colspan="3" style="padding: 24px; text-align: center; color: #a1a1aa; font-style: italic; font-size: 13px;">Ürün seçilmedi</td></tr>`
+
+  const dateStr = new Date().toLocaleString('tr-TR', {
+    timeZone: 'Europe/Istanbul',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 
   const emailHtml = `
-    <div style="max-width: 600px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111; line-height: 1.6; padding: 24px;">
-      <div style="border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 24px;">
-        <span style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #888;">BİRİM MOBİLYA</span>
-        <h2 style="margin: 4px 0 0 0; font-size: 20px; font-weight: 600; text-transform: uppercase;">YENİ PROJE / SEÇTİKLERİM TEKLİF TALEBİ</h2>
-      </div>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birim Teklif Talebi</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f5f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #18181b;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f5f7; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <!-- Main Card -->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 620px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background-color: #18181b; padding: 24px 32px; text-align: left;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td>
+                    <div style="font-size: 20px; font-weight: 700; letter-spacing: 5px; color: #ffffff; text-transform: uppercase;">B İ R İ M</div>
+                    <div style="font-size: 10px; letter-spacing: 1.5px; color: #a1a1aa; text-transform: uppercase; margin-top: 4px;">MİMARİ &amp; MOBİLYA ÇÖZÜMLERİ</div>
+                  </td>
+                  <td align="right">
+                    <span style="display: inline-block; background-color: rgba(255, 255, 255, 0.12); color: #f4f4f5; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18);">
+                      Teklif Talebi
+                    </span>
+                    <div style="font-size: 10px; color: #71717a; margin-top: 4px;">${dateStr}</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-      <div style="background-color: #f8f8f8; padding: 16px 20px; margin-bottom: 24px; border-left: 3px solid #111;">
-        <p style="margin: 0 0 6px 0;"><strong>Müşteri:</strong> ${safeName}</p>
-        <p style="margin: 0 0 6px 0;"><strong>Firma / Ofis:</strong> ${safeCompany || '-'}</p>
-        <p style="margin: 0 0 6px 0;"><strong>E-posta:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
-        <p style="margin: 0 0 6px 0;"><strong>Telefon:</strong> ${safePhone || '-'}</p>
-        <p style="margin: 0;"><strong>Proje:</strong> ${safeProjectName || 'Genel Seçtiklerim'}</p>
-      </div>
+          <!-- Body Content -->
+          <tr>
+            <td style="padding: 28px 32px;">
+              
+              <!-- Customer & Project Info Card -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 18px 20px;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td style="padding-bottom: 10px; font-size: 11px; color: #71717a; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700;" colspan="2">
+                          Müşteri ve Proje Bilgileri
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; font-size: 13px; color: #71717a; width: 110px;">Proje:</td>
+                        <td style="padding: 6px 0; font-size: 14px; font-weight: 600; color: #09090b;">
+                          <span style="background-color: #f4f4f5; padding: 2px 8px; border-radius: 4px; border: 1px solid #e4e4e7;">${safeProjectName || 'Genel Seçtiklerim'}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; font-size: 13px; color: #71717a;">Müşteri:</td>
+                        <td style="padding: 6px 0; font-size: 14px; font-weight: 600; color: #09090b;">${safeName}</td>
+                      </tr>
+                      ${
+                        safeCompany
+                          ? `
+                      <tr>
+                        <td style="padding: 6px 0; font-size: 13px; color: #71717a;">Firma / Ofis:</td>
+                        <td style="padding: 6px 0; font-size: 13px; color: #18181b;">${safeCompany}</td>
+                      </tr>`
+                          : ''
+                      }
+                      <tr>
+                        <td style="padding: 6px 0; font-size: 13px; color: #71717a;">E-posta:</td>
+                        <td style="padding: 6px 0; font-size: 13px;">
+                          <a href="mailto:${safeEmail}" style="color: #2563eb; text-decoration: none; font-weight: 500;">${safeEmail}</a>
+                        </td>
+                      </tr>
+                      ${
+                        safePhone
+                          ? `
+                      <tr>
+                        <td style="padding: 6px 0; font-size: 13px; color: #71717a;">Telefon:</td>
+                        <td style="padding: 6px 0; font-size: 13px; color: #18181b;">
+                          <a href="tel:${safePhone}" style="color: #18181b; text-decoration: none;">${safePhone}</a>
+                        </td>
+                      </tr>`
+                          : ''
+                      }
+                    </table>
+                  </td>
+                </tr>
+              </table>
 
-      ${
-        safeMessage
-          ? `
-        <div style="margin-bottom: 24px;">
-          <h4 style="margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666;">Müşteri Notu:</h4>
-          <p style="margin: 0; background: #fff; border: 1px solid #eee; padding: 12px; font-size: 13px;">${safeMessage}</p>
-        </div>
-      `
-          : ''
-      }
+              <!-- Customer Note (Optional) -->
+              ${
+                safeMessage
+                  ? `
+              <div style="margin-bottom: 24px;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #71717a; margin-bottom: 8px;">
+                  Müşteri Notu
+                </div>
+                <div style="background-color: #fafafa; border-left: 3px solid #18181b; border-radius: 4px; padding: 14px 18px; font-size: 13px; color: #334155; line-height: 1.6; border: 1px solid #f1f5f9; border-left: 3px solid #18181b;">
+                  ${safeMessage}
+                </div>
+              </div>`
+                  : ''
+              }
 
-      <div style="margin-bottom: 24px;">
-        <h4 style="margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666;">Talep Edilen Ürünler:</h4>
-        ${productsListHtml}
-      </div>
+              <!-- Selected Products Section -->
+              <div style="margin-bottom: 24px;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #71717a; margin-bottom: 12px;">
+                  Seçilen Ürünler (${Array.isArray(selectedProducts) ? selectedProducts.length : 0} Adet)
+                </div>
 
-      <div style="border-top: 1px solid #eee; padding-top: 16px; font-size: 11px; color: #999; text-align: center;">
-        Bu e-posta birim.com Seçtiklerim & Proje sisteminden otomatik olarak oluşturulmuştur.
-      </div>
-    </div>
+                <!-- Products Table -->
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 1px solid #e2e8f0; border-radius: 8px; border-collapse: separate; overflow: hidden; background-color: #ffffff;">
+                  <tbody>
+                    ${productsListHtml}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Action CTA -->
+              <div style="text-align: center; margin: 28px 0 8px 0;">
+                <a href="mailto:${safeEmail}?subject=${encodeURIComponent(`Re: Birim Teklif Talebi - ${safeProjectName || 'Seçkim'}`)}" style="display: inline-block; background-color: #18181b; color: #ffffff; font-size: 13px; font-weight: 600; text-decoration: none; padding: 12px 28px; border-radius: 6px; letter-spacing: 0.3px;">
+                  Müşteriye E-posta ile Yanıt Ver &rarr;
+                </a>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; border-top: 1px solid #f3f4f6; padding: 18px 32px; text-align: center; font-size: 11px; color: #9ca3af; line-height: 1.5;">
+              Bu e-posta <a href="https://birim.com" style="color: #6b7280; text-decoration: none; font-weight: 600;">birim.com</a> Seçkim &amp; Proje sistemi üzerinden otomatik olarak gönderilmiştir.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
   `
 
   // 3. Send Email Notification
