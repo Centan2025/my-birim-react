@@ -108,6 +108,8 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
                       >
                         <div className="flex items-center gap-3">
                           <input
+                            id={`project-checkbox-${project.id}`}
+                            name={`project_${project.id}`}
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => handleToggleProject(project.id)}

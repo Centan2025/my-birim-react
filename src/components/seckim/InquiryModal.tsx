@@ -224,11 +224,14 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   {/* Form fields */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                      <label htmlFor="inquiry-name" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
                         Ad Soyad *
                       </label>
                       <input
+                        id="inquiry-name"
+                        name="name"
                         type="text"
+                        autoComplete="name"
                         required
                         value={name}
                         onChange={e => setName(e.target.value)}
@@ -238,11 +241,14 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                      <label htmlFor="inquiry-company" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
                         Firma / Ofis
                       </label>
                       <input
+                        id="inquiry-company"
+                        name="organization"
                         type="text"
+                        autoComplete="organization"
                         value={company}
                         onChange={e => setCompany(e.target.value)}
                         placeholder="Mimarlık Ofisi / Şirket"
@@ -253,11 +259,14 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                      <label htmlFor="inquiry-email" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
                         E-Posta *
                       </label>
                       <input
+                        id="inquiry-email"
+                        name="email"
                         type="email"
+                        autoComplete="email"
                         required
                         value={email}
                         onChange={e => setEmail(e.target.value)}
@@ -267,11 +276,14 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                      <label htmlFor="inquiry-phone" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
                         Telefon
                       </label>
                       <input
+                        id="inquiry-phone"
+                        name="tel"
                         type="tel"
+                        autoComplete="tel"
                         value={phone}
                         onChange={e => setPhone(e.target.value)}
                         placeholder="+90 5XX XXX XX XX"
@@ -281,10 +293,12 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                    <label htmlFor="inquiry-project-name" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
                       Proje Adı / Lokasyon
                     </label>
                     <input
+                      id="inquiry-project-name"
+                      name="project"
                       type="text"
                       value={currentProjectName}
                       onChange={e => setCurrentProjectName(e.target.value)}
@@ -294,10 +308,12 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                    <label htmlFor="inquiry-message" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
                       Notunuz / Özel Talepleriniz
                     </label>
                     <textarea
+                      id="inquiry-message"
+                      name="message"
                       rows={3}
                       value={message}
                       onChange={e => setMessage(e.target.value)}

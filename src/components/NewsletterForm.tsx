@@ -168,7 +168,10 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({variant = 'mobile', cla
         }
       >
         <input
+          id={`newsletter-form-${variant}`}
+          name="email"
           type="email"
+          autoComplete="email"
           value={email}
           onChange={e => {
             setEmail(e.target.value)

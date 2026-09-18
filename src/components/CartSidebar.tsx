@@ -216,6 +216,8 @@ export function CartSidebar() {
                 <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-800">
                   <label className="flex items-start gap-2.5 cursor-pointer text-xs text-gray-600 dark:text-gray-400 select-none">
                     <input
+                      id="cart-terms-agreement"
+                      name="termsAgreement"
                       type="checkbox"
                       checked={agreedToTerms}
                       onChange={e => {

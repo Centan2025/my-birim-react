@@ -341,7 +341,10 @@ export const HomeNewsletter: FC = () => {
                       >
                         <div className="flex-grow flex items-center px-4 py-1">
                           <input
+                            id="newsletter-email"
+                            name="email"
                             type="email"
+                            autoComplete="email"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             required
@@ -395,7 +398,10 @@ export const HomeNewsletter: FC = () => {
                         >
                           <div className="relative group">
                             <input
+                              id="prof-name"
+                              name="name"
                               type="text"
+                              autoComplete="name"
                               value={profData.name}
                               onChange={e => setProfData({...profData, name: e.target.value})}
                               required
@@ -406,7 +412,10 @@ export const HomeNewsletter: FC = () => {
                           </div>
                           <div className="relative group">
                             <input
+                              id="prof-company"
+                              name="organization"
                               type="text"
+                              autoComplete="organization"
                               value={profData.company}
                               onChange={e => setProfData({...profData, company: e.target.value})}
                               required
@@ -423,7 +432,10 @@ export const HomeNewsletter: FC = () => {
                         >
                           <div className="relative group">
                             <input
+                              id="prof-profession"
+                              name="organization-title"
                               type="text"
+                              autoComplete="organization-title"
                               value={profData.profession}
                               onChange={e => setProfData({...profData, profession: e.target.value})}
                               required
@@ -442,7 +454,10 @@ export const HomeNewsletter: FC = () => {
                           </div>
                           <div className="relative group">
                             <input
+                              id="prof-phone"
+                              name="tel"
                               type="tel"
+                              autoComplete="tel"
                               value={profData.phone}
                               onChange={e => setProfData({...profData, phone: e.target.value})}
                               required
@@ -459,7 +474,10 @@ export const HomeNewsletter: FC = () => {
                         >
                           <div className="relative group">
                             <input
+                              id="prof-email"
+                              name="email"
                               type="email"
+                              autoComplete="email"
                               value={profData.email}
                               onChange={e => setProfData({...profData, email: e.target.value})}
                               required
@@ -470,7 +488,10 @@ export const HomeNewsletter: FC = () => {
                           </div>
                           <div className="relative group">
                             <input
+                              id="prof-password"
+                              name="password"
                               type="password"
+                              autoComplete="new-password"
                               value={profData.password || ''}
                               onChange={e => setProfData({...profData, password: e.target.value})}
                               required

@@ -104,10 +104,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
+                <label htmlFor="create-project-name" className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
                   Proje Adı *
                 </label>
                 <input
+                  id="create-project-name"
+                  name="projectName"
                   type="text"
                   required
                   value={name}
@@ -118,10 +120,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
+                <label htmlFor="create-project-desc" className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
                   Proje Açıklaması (Opsiyonel)
                 </label>
                 <textarea
+                  id="create-project-desc"
+                  name="projectDescription"
                   rows={2}
                   value={description}
                   onChange={e => setDescription(e.target.value)}

@@ -733,6 +733,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 className="border border-dashed border-neutral-700 hover:border-neutral-400 bg-neutral-950/50 hover:bg-neutral-900/80 transition-all rounded-none p-8 text-center cursor-pointer flex flex-col items-center justify-center space-y-4"
               >
                 <input
+                  id="ai-room-file-input"
+                  name="roomImage"
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"

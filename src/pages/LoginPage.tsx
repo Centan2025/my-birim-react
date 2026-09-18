@@ -289,9 +289,9 @@ export function LoginPage() {
                 </label>
                 <input
                   id="email"
-                  name="login-email"
+                  name="email"
                   type="email"
-                  autoComplete="off"
+                  autoComplete="email"
                   value={email}
                   onChange={e => {
                     setEmail(e.target.value)
@@ -324,7 +324,7 @@ export function LoginPage() {
                   id="password"
                   name="password"
                   type="password"
-                  autoComplete="off"
+                  autoComplete="current-password"
                   value={password}
                   onChange={e => {
                     setPassword(e.target.value)
@@ -397,6 +397,7 @@ export function LoginPage() {
                     id="firstName"
                     name="firstName"
                     type="text"
+                    autoComplete="given-name"
                     value={firstName}
                     onChange={e => {
                       setFirstName(e.target.value)
@@ -431,6 +432,7 @@ export function LoginPage() {
                     id="lastName"
                     name="lastName"
                     type="text"
+                    autoComplete="family-name"
                     value={lastName}
                     onChange={e => {
                       setLastName(e.target.value)
@@ -464,9 +466,9 @@ export function LoginPage() {
                 </label>
                 <input
                   id="register-email"
-                  name="register-email"
+                  name="email"
                   type="email"
-                  autoComplete="off"
+                  autoComplete="email"
                   value={email}
                   onChange={e => {
                     setEmail(e.target.value)

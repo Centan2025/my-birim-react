@@ -339,7 +339,9 @@ const CheckoutInner: React.FC = () => {
                   </label>
                   <input
                     id="c-firstName"
+                    name="firstName"
                     type="text"
+                    autoComplete="given-name"
                     required
                     value={form.customer.firstName}
                     onChange={e => updateCustomer({firstName: e.target.value})}
@@ -356,7 +358,9 @@ const CheckoutInner: React.FC = () => {
                   </label>
                   <input
                     id="c-lastName"
+                    name="lastName"
                     type="text"
+                    autoComplete="family-name"
                     required
                     value={form.customer.lastName}
                     onChange={e => updateCustomer({lastName: e.target.value})}
@@ -373,7 +377,9 @@ const CheckoutInner: React.FC = () => {
                   </label>
                   <input
                     id="c-email"
+                    name="email"
                     type="email"
+                    autoComplete="email"
                     required
                     value={form.customer.email}
                     onChange={e => updateCustomer({email: e.target.value})}
@@ -390,7 +396,9 @@ const CheckoutInner: React.FC = () => {
                   </label>
                   <input
                     id="c-phone"
+                    name="phone"
                     type="tel"
+                    autoComplete="tel"
                     required
                     value={form.customer.phone}
                     onChange={e => updateCustomer({phone: e.target.value})}
@@ -437,7 +445,9 @@ const CheckoutInner: React.FC = () => {
                     </label>
                     <input
                       id="s-firstName"
+                      name="shippingFirstName"
                       type="text"
+                      autoComplete="shipping given-name"
                       required
                       value={form.shippingAddress.firstName}
                       onChange={e => updateShippingAddress({firstName: e.target.value})}
@@ -453,7 +463,9 @@ const CheckoutInner: React.FC = () => {
                     </label>
                     <input
                       id="s-lastName"
+                      name="shippingLastName"
                       type="text"
+                      autoComplete="shipping family-name"
                       required
                       value={form.shippingAddress.lastName}
                       onChange={e => updateShippingAddress({lastName: e.target.value})}
@@ -471,7 +483,9 @@ const CheckoutInner: React.FC = () => {
                   </label>
                   <input
                     id="s-address1"
+                    name="shippingAddress1"
                     type="text"
+                    autoComplete="shipping address-line1"
                     required
                     value={form.shippingAddress.addressLine1}
                     onChange={e => updateShippingAddress({addressLine1: e.target.value})}
@@ -490,7 +504,9 @@ const CheckoutInner: React.FC = () => {
                     </label>
                     <input
                       id="s-city"
+                      name="shippingCity"
                       type="text"
+                      autoComplete="shipping address-level2"
                       required
                       value={form.shippingAddress.city}
                       onChange={e => updateShippingAddress({city: e.target.value})}
@@ -506,7 +522,9 @@ const CheckoutInner: React.FC = () => {
                     </label>
                     <input
                       id="s-district"
+                      name="shippingDistrict"
                       type="text"
+                      autoComplete="shipping address-level3"
                       required
                       value={form.shippingAddress.district}
                       onChange={e => updateShippingAddress({district: e.target.value})}
@@ -522,7 +540,9 @@ const CheckoutInner: React.FC = () => {
                     </label>
                     <input
                       id="s-postal"
+                      name="shippingPostalCode"
                       type="text"
+                      autoComplete="shipping postal-code"
                       required
                       value={form.shippingAddress.postalCode}
                       onChange={e => updateShippingAddress({postalCode: e.target.value})}
@@ -569,7 +589,9 @@ const CheckoutInner: React.FC = () => {
                         </label>
                         <input
                           id="c-company"
+                          name="billingCompanyName"
                           type="text"
+                          autoComplete="organization"
                           required
                           value={form.corporateBilling.companyName}
                           onChange={e => updateCorporateBilling({companyName: e.target.value})}
@@ -585,6 +607,7 @@ const CheckoutInner: React.FC = () => {
                         </label>
                         <input
                           id="c-taxOffice"
+                          name="billingTaxOffice"
                           type="text"
                           required
                           value={form.corporateBilling.taxOffice}
@@ -601,6 +624,7 @@ const CheckoutInner: React.FC = () => {
                         </label>
                         <input
                           id="c-taxNum"
+                          name="billingTaxNumber"
                           type="text"
                           required
                           value={form.corporateBilling.taxNumber}
@@ -613,6 +637,8 @@ const CheckoutInner: React.FC = () => {
 
                   <label className="flex items-center gap-2 cursor-pointer text-sm text-neutral-700">
                     <input
+                      id="billing-same-as-shipping"
+                      name="billingSameAsShipping"
                       type="checkbox"
                       checked={form.billingSameAsShipping}
                       onChange={e => setBillingSameAsShipping(e.target.checked)}
@@ -636,7 +662,9 @@ const CheckoutInner: React.FC = () => {
                           </label>
                           <input
                             id="b-firstName"
+                            name="billingFirstName"
                             type="text"
+                            autoComplete="billing given-name"
                             required
                             value={form.billingAddress.firstName}
                             onChange={e => updateBillingAddress({firstName: e.target.value})}
@@ -652,7 +680,9 @@ const CheckoutInner: React.FC = () => {
                           </label>
                           <input
                             id="b-lastName"
+                            name="billingLastName"
                             type="text"
+                            autoComplete="billing family-name"
                             required
                             value={form.billingAddress.lastName}
                             onChange={e => updateBillingAddress({lastName: e.target.value})}
@@ -669,7 +699,9 @@ const CheckoutInner: React.FC = () => {
                         </label>
                         <input
                           id="b-addressLine1"
+                          name="billingAddress1"
                           type="text"
+                          autoComplete="billing address-line1"
                           required
                           value={form.billingAddress.addressLine1}
                           onChange={e => updateBillingAddress({addressLine1: e.target.value})}
@@ -686,7 +718,9 @@ const CheckoutInner: React.FC = () => {
                           </label>
                           <input
                             id="b-city"
+                            name="billingCity"
                             type="text"
+                            autoComplete="billing address-level2"
                             required
                             value={form.billingAddress.city}
                             onChange={e => updateBillingAddress({city: e.target.value})}
@@ -702,7 +736,9 @@ const CheckoutInner: React.FC = () => {
                           </label>
                           <input
                             id="b-district"
+                            name="billingDistrict"
                             type="text"
+                            autoComplete="billing address-level3"
                             required
                             value={form.billingAddress.district}
                             onChange={e => updateBillingAddress({district: e.target.value})}
@@ -718,7 +754,9 @@ const CheckoutInner: React.FC = () => {
                           </label>
                           <input
                             id="b-postalCode"
+                            name="billingPostalCode"
                             type="text"
+                            autoComplete="billing postal-code"
                             required
                             value={form.billingAddress.postalCode}
                             onChange={e => updateBillingAddress({postalCode: e.target.value})}
@@ -785,6 +823,7 @@ const CheckoutInner: React.FC = () => {
                 </label>
                 <textarea
                   id="order-notes"
+                  name="orderNotes"
                   rows={2}
                   value={orderNotes}
                   onChange={e => setOrderNotes(e.target.value)}

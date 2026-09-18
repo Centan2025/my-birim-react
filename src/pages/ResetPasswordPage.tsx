@@ -91,7 +91,9 @@ export function ResetPasswordPage() {
                 </label>
                 <input
                   id="email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -123,7 +125,9 @@ export function ResetPasswordPage() {
                 </label>
                 <input
                   id="password"
+                  name="password"
                   type="password"
+                  autoComplete="new-password"
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
@@ -142,7 +146,9 @@ export function ResetPasswordPage() {
                 </label>
                 <input
                   id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
+                  autoComplete="new-password"
                   required
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
