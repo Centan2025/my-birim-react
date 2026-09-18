@@ -157,25 +157,31 @@ export const SelectionProvider = ({children}: PropsWithChildren) => {
 
     async function syncUserData() {
       try {
-        // Merge guest selections with server selections
+        // 1. Merge guest selections with server selections
         const mergedIds = await bulkSyncUserSelections(userId, selectedProductIds)
-        if (isMounted && mergedIds && mergedIds.length > 0) {
-          setSelectedProductIds(prev => {
-            const set = new Set([...prev, ...mergedIds])
-            return Array.from(set)
-          })
+        if (isMounted && Array.isArray(mergedIds)) {
+          setSelectedProductIds(mergedIds)
         }
 
-        // Fetch user projects from server
-        const serverProjects = await fetchUserProjects(userId)
-        if (isMounted) {
-          if (serverProjects && serverProjects.length > 0) {
-            setProjects(prevLocal => {
-              const existingIds = new Set(serverProjects.map(p => p.id))
-              const unmigrated = prevLocal.filter(p => !existingIds.has(p.id))
-              return [...serverProjects, ...unmigrated]
+        // 2. Migrate any guest local projects to server
+        const localProjects = projects.filter(p => p.id.startsWith('local_'))
+        for (const lp of localProjects) {
+          try {
+            await createUserProject(userId, {
+              name: lp.name,
+              description: lp.description,
+              productIds: lp.productIds,
+              isPublic: lp.isPublic,
             })
+          } catch {
+            // ignore individual project creation error
           }
+        }
+
+        // 3. Fetch authoritative user projects from server
+        const serverProjects = await fetchUserProjects(userId)
+        if (isMounted && serverProjects) {
+          setProjects(serverProjects)
         }
       } catch (err) {
         console.warn('Seçkim sync notice:', err)

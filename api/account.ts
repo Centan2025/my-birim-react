@@ -20,6 +20,15 @@ import {
   setDefaultBillingProfileForUser,
   listOrdersForUser,
   getOrderForUser,
+  listSelectionsForUser,
+  saveSelectionForUser,
+  removeSelectionForUser,
+  bulkSyncSelectionsForUser,
+  listProjectsForUser,
+  createProjectForUser,
+  updateProjectForUser,
+  deleteProjectForUser,
+  getProjectByShareToken,
 } from '../lib/account/account-service.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -39,20 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(429).json({error: 'Çok fazla istek gönderildi. Lütfen bir süre bekleyin.'})
   }
 
-  // 2. Authentication Check
-  const token = getAuthTokenFromReq(req)
-  if (!token) {
-    return res.status(401).json({error: 'Oturum açmanız gerekmektedir.'})
-  }
-
-  const payload = verifyToken(token)
-  if (!payload || !payload.sub) {
-    return res.status(401).json({error: 'Geçersiz veya süresi dolmuş oturum.'})
-  }
-
-  const userId = payload.sub
-
-  // 3. Slug Path Parsing
+  // 2. Slug Path Parsing
   let slug = req.query['slug']
   if (!slug) {
     const urlParts = (req.url?.split('?')[0] || '').split('/').filter(Boolean)
@@ -67,6 +63,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const [resource, idOrAction, subAction] = slug
+
+  // Public shared project lookup (does not require login)
+  if (resource === 'projects' && idOrAction === 'share' && subAction) {
+    if (req.method === 'GET') {
+      const project = await getProjectByShareToken(subAction)
+      if (!project) {
+        return res.status(404).json({error: 'Proje bulunamadı.'})
+      }
+      return res.status(200).json({success: true, project})
+    }
+    return res.status(405).json({error: 'Method Not Allowed'})
+  }
+
+  // 3. Authentication Check
+  const token = getAuthTokenFromReq(req)
+  if (!token) {
+    return res.status(401).json({error: 'Oturum açmanız gerekmektedir.'})
+  }
+
+  const payload = verifyToken(token)
+  if (!payload || !payload.sub) {
+    return res.status(401).json({error: 'Geçersiz veya süresi dolmuş oturum.'})
+  }
+
+  const userId = payload.sub
 
   try {
     // --- PROFILE ---
@@ -208,6 +229,65 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (req.method === 'GET') {
         const order = await getOrderForUser(userId, orderId)
         return res.status(200).json({success: true, order})
+      }
+      return res.status(405).json({error: 'Method Not Allowed'})
+    }
+
+    // --- SELECTIONS / SEÇTİKLERİM ---
+    if (resource === 'selections') {
+      if (req.method === 'GET') {
+        const productIds = await listSelectionsForUser(userId)
+        return res.status(200).json({success: true, productIds})
+      }
+      if (req.method === 'POST') {
+        if (idOrAction === 'sync' || Array.isArray(req.body?.productIds)) {
+          const clientProductIds = Array.isArray(req.body?.productIds) ? req.body.productIds : []
+          const productIds = await bulkSyncSelectionsForUser(userId, clientProductIds)
+          return res.status(200).json({success: true, productIds})
+        }
+        const productId = String(req.body?.productId || '').trim()
+        if (!productId) {
+          return res.status(400).json({error: 'Ürün ID gereklidir.'})
+        }
+        const saved = await saveSelectionForUser(userId, productId)
+        return res.status(200).json({success: saved})
+      }
+      if (req.method === 'DELETE') {
+        const productId = String(idOrAction || req.body?.productId || '').trim()
+        if (!productId) {
+          return res.status(400).json({error: 'Ürün ID gereklidir.'})
+        }
+        const removed = await removeSelectionForUser(userId, productId)
+        return res.status(200).json({success: removed})
+      }
+      return res.status(405).json({error: 'Method Not Allowed'})
+    }
+
+    // --- PROJECTS / PROJELERİM ---
+    if (resource === 'projects') {
+      if (!idOrAction) {
+        if (req.method === 'GET') {
+          const projects = await listProjectsForUser(userId)
+          return res.status(200).json({success: true, projects})
+        }
+        if (req.method === 'POST') {
+          const project = await createProjectForUser(userId, req.body || {})
+          if (!project) {
+            return res.status(500).json({error: 'Proje oluşturulamadı.'})
+          }
+          return res.status(201).json({success: true, project})
+        }
+        return res.status(405).json({error: 'Method Not Allowed'})
+      }
+
+      const projectId = idOrAction
+      if (req.method === 'PATCH' || req.method === 'PUT') {
+        const updated = await updateProjectForUser(userId, projectId, req.body || {})
+        return res.status(200).json({success: updated})
+      }
+      if (req.method === 'DELETE') {
+        const deleted = await deleteProjectForUser(userId, projectId)
+        return res.status(200).json({success: deleted})
       }
       return res.status(405).json({error: 'Method Not Allowed'})
     }

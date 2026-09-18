@@ -3991,6 +3991,278 @@ app.get('/api/account/orders/:id', requireLocalAuth, async (req, res) => {
   }
 })
 
+// ─── /api/account/selections ──────────────────────────────────────────────────
+app.get('/api/account/selections', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(200).json({success: true, productIds: []})
+  try {
+    const {data, error} = await supabaseAdmin
+      .from('user_selections')
+      .select('product_id')
+      .eq('user_id', req.userId)
+
+    if (error) return res.status(200).json({success: true, productIds: []})
+    const productIds = (data || []).map(r => r.product_id)
+    return res.status(200).json({success: true, productIds})
+  } catch {
+    return res.status(200).json({success: true, productIds: []})
+  }
+})
+
+app.post('/api/account/selections', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(200).json({success: true})
+  try {
+    const productId = req.body?.productId
+    if (!productId) return res.status(400).json({error: 'Ürün ID gereklidir.'})
+
+    const {error} = await supabaseAdmin
+      .from('user_selections')
+      .insert({user_id: req.userId, product_id: productId})
+
+    if (error && error.code !== '23505') {
+      return res.status(500).json({error: error.message})
+    }
+    return res.status(200).json({success: true})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.post('/api/account/selections/sync', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) {
+    const pIds = Array.isArray(req.body?.productIds) ? req.body.productIds : []
+    return res.status(200).json({success: true, productIds: pIds})
+  }
+  try {
+    const {data: existing} = await supabaseAdmin
+      .from('user_selections')
+      .select('product_id')
+      .eq('user_id', req.userId)
+
+    const serverIds = (existing || []).map(r => r.product_id)
+    const clientIds = Array.isArray(req.body?.productIds) ? req.body.productIds : []
+    const merged = Array.from(new Set([...serverIds, ...clientIds]))
+    const newItems = merged.filter(id => !serverIds.includes(id))
+
+    if (newItems.length > 0) {
+      await supabaseAdmin
+        .from('user_selections')
+        .insert(newItems.map(pid => ({user_id: req.userId, product_id: pid})))
+    }
+
+    return res.status(200).json({success: true, productIds: merged})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.delete('/api/account/selections/:productId', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(200).json({success: true})
+  try {
+    const productId = req.params.productId
+    await supabaseAdmin
+      .from('user_selections')
+      .delete()
+      .eq('user_id', req.userId)
+      .eq('product_id', productId)
+
+    return res.status(200).json({success: true})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+// ─── /api/account/projects ────────────────────────────────────────────────────
+app.get('/api/account/projects/share/:token', async (req, res) => {
+  if (!supabaseAdmin) return res.status(404).json({error: 'Proje bulunamadı.'})
+  try {
+    const {data: project, error: pErr} = await supabaseAdmin
+      .from('projects')
+      .select('id, user_id, name, description, share_token, is_public, created_at, updated_at')
+      .eq('share_token', req.params.token)
+      .single()
+
+    if (pErr || !project) return res.status(404).json({error: 'Proje bulunamadı.'})
+
+    const {data: prodData} = await supabaseAdmin
+      .from('project_products')
+      .select('product_id')
+      .eq('project_id', project.id)
+
+    return res.status(200).json({
+      success: true,
+      project: {
+        id: project.id,
+        userId: project.user_id,
+        name: project.name,
+        description: project.description || '',
+        shareToken: project.share_token,
+        isPublic: Boolean(project.is_public),
+        createdAt: project.created_at,
+        updatedAt: project.updated_at,
+        productIds: (prodData || []).map(r => r.product_id),
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.get('/api/account/projects', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(200).json({success: true, projects: []})
+  try {
+    const {data: projectsData, error: pErr} = await supabaseAdmin
+      .from('projects')
+      .select('id, user_id, name, description, share_token, is_public, created_at, updated_at')
+      .eq('user_id', req.userId)
+      .order('created_at', {ascending: false})
+
+    if (pErr || !projectsData || projectsData.length === 0) {
+      return res.status(200).json({success: true, projects: []})
+    }
+
+    const projectIds = projectsData.map(p => p.id)
+    const {data: prodData} = await supabaseAdmin
+      .from('project_products')
+      .select('project_id, product_id')
+      .in('project_id', projectIds)
+
+    const map = new Map()
+    if (prodData) {
+      for (const row of prodData) {
+        const list = map.get(row.project_id) || []
+        list.push(row.product_id)
+        map.set(row.project_id, list)
+      }
+    }
+
+    const projects = projectsData.map(p => ({
+      id: p.id,
+      userId: p.user_id,
+      name: p.name,
+      description: p.description || '',
+      shareToken: p.share_token,
+      isPublic: Boolean(p.is_public),
+      createdAt: p.created_at,
+      updatedAt: p.updated_at,
+      productIds: map.get(p.id) || [],
+    }))
+
+    return res.status(200).json({success: true, projects})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.post('/api/account/projects', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const {name, description = '', productIds = [], isPublic = false} = req.body || {}
+    if (!name || !name.trim()) {
+      return res.status(400).json({error: 'Proje adı gereklidir.'})
+    }
+
+    const shareToken = 'prj_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36)
+    const {data, error} = await supabaseAdmin
+      .from('projects')
+      .insert({
+        user_id: req.userId,
+        name: name.trim(),
+        description: description.trim(),
+        is_public: Boolean(isPublic),
+        share_token: shareToken,
+      })
+      .select()
+      .single()
+
+    if (error || !data) {
+      return res.status(500).json({error: error?.message || 'Proje oluşturulamadı.'})
+    }
+
+    const safePids = Array.isArray(productIds) ? productIds.filter(Boolean) : []
+    if (safePids.length > 0) {
+      await supabaseAdmin.from('project_products').insert(
+        safePids.map(pid => ({
+          project_id: data.id,
+          product_id: pid,
+        }))
+      )
+    }
+
+    return res.status(201).json({
+      success: true,
+      project: {
+        id: data.id,
+        userId: data.user_id,
+        name: data.name,
+        description: data.description || '',
+        shareToken: data.share_token,
+        isPublic: Boolean(data.is_public),
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        productIds: safePids,
+      },
+    })
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.patch('/api/account/projects/:id', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const projectId = req.params.id
+    const {name, description, isPublic, shareToken, productIds} = req.body || {}
+    const fieldsToUpdate = {updated_at: new Date().toISOString()}
+    if (name !== undefined) fieldsToUpdate.name = String(name).trim()
+    if (description !== undefined) fieldsToUpdate.description = String(description || '')
+    if (isPublic !== undefined) fieldsToUpdate.is_public = Boolean(isPublic)
+    if (shareToken !== undefined) fieldsToUpdate.share_token = shareToken
+
+    const {error} = await supabaseAdmin
+      .from('projects')
+      .update(fieldsToUpdate)
+      .eq('id', projectId)
+      .eq('user_id', req.userId)
+
+    if (error) return res.status(500).json({error: error.message})
+
+    if (productIds !== undefined) {
+      await supabaseAdmin.from('project_products').delete().eq('project_id', projectId)
+      const safePids = Array.isArray(productIds) ? productIds.filter(Boolean) : []
+      if (safePids.length > 0) {
+        await supabaseAdmin.from('project_products').insert(
+          safePids.map(pid => ({
+            project_id: projectId,
+            product_id: pid,
+          }))
+        )
+      }
+    }
+
+    return res.status(200).json({success: true})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
+app.delete('/api/account/projects/:id', requireLocalAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({error: 'Veritabanı servisi kullanılamıyor.'})
+  try {
+    const projectId = req.params.id
+    await supabaseAdmin.from('project_products').delete().eq('project_id', projectId)
+    const {error} = await supabaseAdmin
+      .from('projects')
+      .delete()
+      .eq('id', projectId)
+      .eq('user_id', req.userId)
+
+    if (error) return res.status(500).json({error: error.message})
+    return res.status(200).json({success: true})
+  } catch (err) {
+    return res.status(500).json({error: err.message})
+  }
+})
+
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({error: `Route not found: ${req.method} ${req.path}`})

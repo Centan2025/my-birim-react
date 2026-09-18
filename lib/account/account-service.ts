@@ -1357,3 +1357,423 @@ export async function getOrderForUser(
     throw err
   }
 }
+
+/**
+ * 15. SELECTIONS / SEÇTİKLERİM SERVICE
+ */
+export async function listSelectionsForUser(
+  userId: string,
+  options: AccountServiceOptions = {}
+): Promise<string[]> {
+  const cleanUserId = String(userId || '').trim()
+  if (!cleanUserId) {
+    throw new AccountError(401, 'UNAUTHORIZED', 'Oturum açmanız gerekmektedir.')
+  }
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) {
+    return []
+  }
+
+  const {data, error} = await supabase
+    .from('user_selections')
+    .select('product_id')
+    .eq('user_id', cleanUserId)
+
+  if (error) {
+    console.warn('[AccountService] listSelections error:', error.message)
+    return []
+  }
+
+  return (data || []).map((row: {product_id: string}) => row.product_id)
+}
+
+export async function saveSelectionForUser(
+  userId: string,
+  productId: string,
+  options: AccountServiceOptions = {}
+): Promise<boolean> {
+  const cleanUserId = String(userId || '').trim()
+  const cleanProductId = String(productId || '').trim()
+  if (!cleanUserId) {
+    throw new AccountError(401, 'UNAUTHORIZED', 'Oturum açmanız gerekmektedir.')
+  }
+  if (!cleanProductId) {
+    throw new AccountError(400, 'INVALID_REQUEST', 'Ürün ID gereklidir.')
+  }
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) return false
+
+  const {error} = await supabase
+    .from('user_selections')
+    .insert({user_id: cleanUserId, product_id: cleanProductId})
+
+  if (error && error.code !== '23505') {
+    console.warn('[AccountService] saveSelection error:', error.message)
+    return false
+  }
+
+  return true
+}
+
+export async function removeSelectionForUser(
+  userId: string,
+  productId: string,
+  options: AccountServiceOptions = {}
+): Promise<boolean> {
+  const cleanUserId = String(userId || '').trim()
+  const cleanProductId = String(productId || '').trim()
+  if (!cleanUserId) {
+    throw new AccountError(401, 'UNAUTHORIZED', 'Oturum açmanız gerekmektedir.')
+  }
+  if (!cleanProductId) {
+    throw new AccountError(400, 'INVALID_REQUEST', 'Ürün ID gereklidir.')
+  }
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) return false
+
+  const {error} = await supabase
+    .from('user_selections')
+    .delete()
+    .eq('user_id', cleanUserId)
+    .eq('product_id', cleanProductId)
+
+  return !error
+}
+
+export async function bulkSyncSelectionsForUser(
+  userId: string,
+  clientProductIds: string[],
+  options: AccountServiceOptions = {}
+): Promise<string[]> {
+  const cleanUserId = String(userId || '').trim()
+  if (!cleanUserId) {
+    throw new AccountError(401, 'UNAUTHORIZED', 'Oturum açmanız gerekmektedir.')
+  }
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) return clientProductIds || []
+
+  const serverIds = await listSelectionsForUser(cleanUserId, options)
+  const safeClientIds = Array.isArray(clientProductIds)
+    ? clientProductIds.map(id => String(id).trim()).filter(Boolean)
+    : []
+
+  const mergedSet = new Set([...serverIds, ...safeClientIds])
+  const newItemsToInsert = Array.from(mergedSet).filter(id => !serverIds.includes(id))
+
+  if (newItemsToInsert.length > 0) {
+    const {error} = await supabase.from('user_selections').insert(
+      newItemsToInsert.map(pid => ({
+        user_id: cleanUserId,
+        product_id: pid,
+      }))
+    )
+    if (error && error.code !== '23505') {
+      console.warn('[AccountService] bulkSync insert error:', error.message)
+    }
+  }
+
+  return Array.from(mergedSet)
+}
+
+/**
+ * 16. USER PROJECTS SERVICE
+ */
+export interface UserProjectItem {
+  id: string
+  userId: string
+  name: string
+  description: string
+  shareToken?: string
+  isPublic: boolean
+  createdAt: string
+  updatedAt: string
+  productIds: string[]
+}
+
+export async function listProjectsForUser(
+  userId: string,
+  options: AccountServiceOptions = {}
+): Promise<UserProjectItem[]> {
+  const cleanUserId = String(userId || '').trim()
+  if (!cleanUserId) {
+    throw new AccountError(401, 'UNAUTHORIZED', 'Oturum açmanız gerekmektedir.')
+  }
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) return []
+
+  const {data: projectsData, error: pErr} = await supabase
+    .from('projects')
+    .select('id, user_id, name, description, share_token, is_public, created_at, updated_at')
+    .eq('user_id', cleanUserId)
+    .order('created_at', {ascending: false})
+
+  if (pErr || !projectsData || projectsData.length === 0) return []
+
+  const projectIds = projectsData.map((p: {id: string}) => p.id)
+
+  const {data: prodData} = await supabase
+    .from('project_products')
+    .select('project_id, product_id')
+    .in('project_id', projectIds)
+
+  const map = new Map<string, string[]>()
+  if (prodData) {
+    for (const row of prodData as {project_id: string; product_id: string}[]) {
+      const list = map.get(row.project_id) || []
+      list.push(row.product_id)
+      map.set(row.project_id, list)
+    }
+  }
+
+  return (
+    projectsData as Array<{
+      id: string
+      user_id: string
+      name: string
+      description?: string | null
+      share_token?: string
+      is_public?: boolean | number
+      created_at: string
+      updated_at: string
+    }>
+  ).map(p => ({
+    id: p.id,
+    userId: p.user_id,
+    name: p.name,
+    description: p.description || '',
+    shareToken: p.share_token,
+    isPublic: Boolean(p.is_public),
+    createdAt: p.created_at,
+    updatedAt: p.updated_at,
+    productIds: map.get(p.id) || [],
+  }))
+}
+
+export async function createProjectForUser(
+  userId: string,
+  projectPayload: {
+    name: string
+    description?: string
+    productIds?: string[]
+    isPublic?: boolean
+  },
+  options: AccountServiceOptions = {}
+): Promise<UserProjectItem | null> {
+  const cleanUserId = String(userId || '').trim()
+  if (!cleanUserId) {
+    throw new AccountError(401, 'UNAUTHORIZED', 'Oturum açmanız gerekmektedir.')
+  }
+
+  const name = String(projectPayload.name || '').trim()
+  if (!name) {
+    throw new AccountError(400, 'INVALID_REQUEST', 'Proje adı gereklidir.')
+  }
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) return null
+
+  const shareToken =
+    'prj_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36)
+
+  const {data, error} = await supabase
+    .from('projects')
+    .insert({
+      user_id: cleanUserId,
+      name,
+      description: projectPayload.description ? String(projectPayload.description).trim() : '',
+      is_public: Boolean(projectPayload.isPublic),
+      share_token: shareToken,
+    })
+    .select()
+    .single()
+
+  if (error || !data) {
+    console.warn('[AccountService] createProject error:', error?.message)
+    return null
+  }
+
+  const productIds = Array.isArray(projectPayload.productIds)
+    ? projectPayload.productIds.map(id => String(id).trim()).filter(Boolean)
+    : []
+
+  if (productIds.length > 0) {
+    await supabase.from('project_products').insert(
+      productIds.map(pid => ({
+        project_id: data.id,
+        product_id: pid,
+      }))
+    )
+  }
+
+  return {
+    id: data.id,
+    userId: data.user_id,
+    name: data.name,
+    description: data.description || '',
+    shareToken: data.share_token,
+    isPublic: Boolean(data.is_public),
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+    productIds,
+  }
+}
+
+export async function updateProjectForUser(
+  userId: string,
+  projectId: string,
+  updates: Partial<UserProjectItem>,
+  options: AccountServiceOptions = {}
+): Promise<boolean> {
+  const cleanUserId = String(userId || '').trim()
+  const cleanProjectId = String(projectId || '').trim()
+  if (!cleanUserId) {
+    throw new AccountError(401, 'UNAUTHORIZED', 'Oturum açmanız gerekmektedir.')
+  }
+  if (!cleanProjectId) {
+    throw new AccountError(400, 'INVALID_REQUEST', 'Proje ID gereklidir.')
+  }
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) return false
+
+  const fieldsToUpdate: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  }
+  if (updates.name !== undefined) fieldsToUpdate['name'] = String(updates.name).trim()
+  if (updates.description !== undefined) fieldsToUpdate['description'] = String(updates.description || '')
+  if (updates.isPublic !== undefined) fieldsToUpdate['is_public'] = Boolean(updates.isPublic)
+  if (updates.shareToken !== undefined) fieldsToUpdate['share_token'] = updates.shareToken
+
+  const {error} = await supabase
+    .from('projects')
+    .update(fieldsToUpdate)
+    .eq('id', cleanProjectId)
+    .eq('user_id', cleanUserId)
+
+  if (error) {
+    console.warn('[AccountService] updateProject error:', error.message)
+    return false
+  }
+
+  if (updates.productIds !== undefined) {
+    await supabase.from('project_products').delete().eq('project_id', cleanProjectId)
+    const productIds = Array.isArray(updates.productIds)
+      ? updates.productIds.map(id => String(id).trim()).filter(Boolean)
+      : []
+
+    if (productIds.length > 0) {
+      await supabase.from('project_products').insert(
+        productIds.map(pid => ({
+          project_id: cleanProjectId,
+          product_id: pid,
+        }))
+      )
+    }
+  }
+
+  return true
+}
+
+export async function deleteProjectForUser(
+  userId: string,
+  projectId: string,
+  options: AccountServiceOptions = {}
+): Promise<boolean> {
+  const cleanUserId = String(userId || '').trim()
+  const cleanProjectId = String(projectId || '').trim()
+  if (!cleanUserId) {
+    throw new AccountError(401, 'UNAUTHORIZED', 'Oturum açmanız gerekmektedir.')
+  }
+  if (!cleanProjectId) {
+    throw new AccountError(400, 'INVALID_REQUEST', 'Proje ID gereklidir.')
+  }
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) return false
+
+  await supabase.from('project_products').delete().eq('project_id', cleanProjectId)
+  const {error} = await supabase
+    .from('projects')
+    .delete()
+    .eq('id', cleanProjectId)
+    .eq('user_id', cleanUserId)
+
+  return !error
+}
+
+export async function getProjectByShareToken(
+  token: string,
+  options: AccountServiceOptions = {}
+): Promise<UserProjectItem | null> {
+  const cleanToken = String(token || '').trim()
+  if (!cleanToken) return null
+
+  const supabase =
+    options.supabaseClientOverride !== undefined
+      ? options.supabaseClientOverride
+      : getSafeSupabaseAdmin()
+
+  if (!supabase) return null
+
+  const {data: project, error: pErr} = await supabase
+    .from('projects')
+    .select('id, user_id, name, description, share_token, is_public, created_at, updated_at')
+    .eq('share_token', cleanToken)
+    .single()
+
+  if (pErr || !project) return null
+
+  const {data: prodData} = await supabase
+    .from('project_products')
+    .select('product_id')
+    .eq('project_id', project.id)
+
+  return {
+    id: project.id,
+    userId: project.user_id,
+    name: project.name,
+    description: project.description || '',
+    shareToken: project.share_token,
+    isPublic: Boolean(project.is_public),
+    createdAt: project.created_at,
+    updatedAt: project.updated_at,
+    productIds: (prodData || []).map((r: {product_id: string}) => r.product_id),
+  }
+}
