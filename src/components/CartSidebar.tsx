@@ -107,7 +107,7 @@ export function CartSidebar() {
             <button
               type="button"
               onClick={toggleCart}
-              className="p-2 text-neutral-500 hover:text-[var(--text-primary)] dark:text-neutral-400 dark:hover:text-white transition-colors cursor-pointer -mr-2"
+              className="p-1.5 text-neutral-500 hover:text-[var(--text-primary)] dark:text-neutral-400 dark:hover:text-white transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer -mr-1"
               aria-label={t('close_cart') || 'Sepeti kapat'}
             >
               <svg
@@ -116,6 +116,8 @@ export function CartSidebar() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />

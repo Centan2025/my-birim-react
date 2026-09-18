@@ -131,9 +131,9 @@ export const FloatingAuthPanel: React.FC = () => {
                 <button
                   onClick={() => setIsOpen(false)}
                   aria-label={t('close') || 'Kapat'}
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-[var(--text-primary)]/5 transition-colors group"
+                  className="w-10 h-10 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer"
                 >
-                  <X className="w-5 h-5 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
+                  <X className="w-5 h-5 transition-transform duration-300" />
                 </button>
               </div>
 
