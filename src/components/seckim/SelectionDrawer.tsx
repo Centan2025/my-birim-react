@@ -286,16 +286,9 @@ export const SelectionDrawer: React.FC = () => {
                     animate={{opacity: 1, y: 0}}
                     exit={{opacity: 0, y: 10, transition: {duration: 0.25}}}
                     transition={{duration: 0.35, ease: [0.16, 1, 0.3, 1]}}
-                    className="px-6 py-5 border-t border-[var(--border-primary)] bg-[var(--bg-primary)] space-y-3"
+                    className="px-6 py-5 border-t border-[var(--border-primary)] bg-[var(--bg-primary)]"
                   >
-                    <div className="flex items-center justify-between text-xs tracking-wider uppercase text-[var(--text-secondary)] font-light">
-                      <span>{t('subtotal') || 'Toplam'}</span>
-                      <span className="font-medium text-[var(--text-primary)]">
-                        {t('total_products_count', selectedProducts.length)}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 pt-1">
+                    <div className="grid grid-cols-2 gap-3">
                       <button
                         type="button"
                         onClick={handleNavigateToSeckim}
