@@ -223,6 +223,8 @@ export interface User {
   verificationToken?: string | null
   /** Whether account is active. */
   isActive: boolean
+  /** Optional JWT session token */
+  token?: string
   /** Registration timestamp. */
   createdAt: string
 }

@@ -23,17 +23,23 @@ async function apiAccountRequest<T>(
 
     const res = await fetch(endpoint, {
       ...options,
-      credentials: 'same-origin',
+      credentials: 'include',
       headers,
     })
 
     if (!res.ok) {
+      const errText = await res.text().catch(() => '')
+      console.warn(
+        `[apiAccountRequest] ${options.method || 'GET'} ${endpoint} failed (${res.status}):`,
+        errText
+      )
       return null
     }
 
     const data = await res.json()
     return data as T
-  } catch {
+  } catch (err) {
+    console.error(`[apiAccountRequest] ${options.method || 'GET'} ${endpoint} error:`, err)
     return null
   }
 }
@@ -73,7 +79,13 @@ export async function clearUserSelections(userId: string): Promise<boolean> {
   const data = await apiAccountRequest<{success: boolean}>('/api/account/selections/all', {
     method: 'DELETE',
   })
-  return Boolean(data?.success)
+  if (data?.success) return true
+
+  const fallback = await apiAccountRequest<{success: boolean}>('/api/account/selections', {
+    method: 'DELETE',
+    body: JSON.stringify({productId: 'all'}),
+  })
+  return Boolean(fallback?.success)
 }
 
 export async function bulkSyncUserSelections(

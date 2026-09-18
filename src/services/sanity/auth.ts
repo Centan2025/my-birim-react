@@ -23,7 +23,7 @@ const apiFetch = async (
     const options: RequestInit = {
       method,
       headers,
-      credentials: 'same-origin',
+      credentials: 'include',
     }
     if (method === 'POST' && body) {
       options.body = JSON.stringify(body)
@@ -42,11 +42,16 @@ const apiFetch = async (
         lower.includes('already exists') ||
         lower.includes('user with this email')
       ) {
-        errorMsg = 'Bu e-posta adresi zaten kayıtlıdır. Lütfen giriş yapın veya şifrenizi sıfırlayın.'
-      } else if (lower.includes('invalid login credentials') || lower.includes('invalid credentials')) {
+        errorMsg =
+          'Bu e-posta adresi zaten kayıtlıdır. Lütfen giriş yapın veya şifrenizi sıfırlayın.'
+      } else if (
+        lower.includes('invalid login credentials') ||
+        lower.includes('invalid credentials')
+      ) {
         errorMsg = 'E-posta adresi veya şifre hatalı.'
       } else if (lower.includes('email not confirmed')) {
-        errorMsg = 'Lütfen önce e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.'
+        errorMsg =
+          'Lütfen önce e-posta adresinize gönderilen doğrulama bağlantısına tıklayarak hesabınızı onaylayın.'
       }
       const fullMsg = errorData.details ? `${errorMsg}\n\nDetay:\n${errorData.details}` : errorMsg
       throw new Error(fullMsg)
@@ -220,6 +225,12 @@ export const loginUser = async (email: string, password: string): Promise<User> 
   if (useSanity) {
     try {
       const data = await apiFetch('login', {email: normEmail, password})
+      if (data?.user) {
+        return {
+          ...data.user,
+          token: data.token || undefined,
+        }
+      }
       return data.user
     } catch (err: unknown) {
       console.error('API login failed:', err)
@@ -295,7 +306,10 @@ export const verifyUserByToken = async (token: string, email?: string): Promise<
       const data = await apiFetch('verify', {token, email})
       if (data?.success) {
         if (data.user) {
-          return data.user as User
+          return {
+            ...data.user,
+            token: data.token || undefined,
+          } as User
         }
         return {
           _id: email || 'verified_user',
@@ -305,6 +319,7 @@ export const verifyUserByToken = async (token: string, email?: string): Promise<
           architectVerificationStatus: 'pending_verification',
           isVerified: true,
           isActive: true,
+          token: data.token || undefined,
           createdAt: new Date().toISOString(),
         }
       }

@@ -96,9 +96,11 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
     setUser(userData)
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        // HttpOnly cookie used as primary secure storage; clean any legacy localStorage token
-        localStorage.removeItem('birim_token')
-        const {token: _, ...cleanUser} = userData
+        if (userData.token) {
+          localStorage.setItem('birim_token', userData.token)
+        }
+        const cleanUser = {...userData}
+        delete (cleanUser as {token?: string}).token
         localStorage.setItem('birim_user', JSON.stringify(cleanUser))
       }
     } catch {
@@ -124,7 +126,7 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
         localStorage.removeItem('birim_user')
         localStorage.removeItem('birim_token')
       }
-      fetch('/api/auth/logout', {method: 'POST', credentials: 'same-origin'}).catch(() => {})
+      fetch('/api/auth/logout', {method: 'POST', credentials: 'include'}).catch(() => {})
     } catch {
       // Storage error ignored
     }

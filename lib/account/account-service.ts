@@ -1475,7 +1475,12 @@ export async function clearSelectionsForUser(
 
   const {error} = await supabase.from('user_selections').delete().eq('user_id', cleanUserId)
 
-  return !error
+  if (error) {
+    console.error('[AccountService] clearSelections error:', error.message)
+    return false
+  }
+
+  return true
 }
 
 export async function bulkSyncSelectionsForUser(
