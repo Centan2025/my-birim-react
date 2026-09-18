@@ -715,15 +715,27 @@ async function handleVerify(req: VercelRequest, res: VercelResponse) {
       if (updatedProfile) finalProfile = updatedProfile
     }
 
+    const finalUserId = finalProfile?.id || matchedUser?.id || effectiveUserId || 'verified_user'
+    const finalEmail = finalProfile?.email || matchedUser?.email || targetEmail || ''
+    const finalRole = finalProfile?.role || (matchedUser?.user_metadata?.['role'] as string) || 'architect'
+
+    const sessionToken = createToken({
+      sub: finalUserId,
+      email: finalEmail,
+      role: finalRole,
+    })
+    setAuthCookie(res, sessionToken)
+
     return res.status(200).json({
       success: true,
+      token: sessionToken,
       message: 'E-posta adresiniz başarıyla doğrulandı.',
       user: {
-        _id: finalProfile?.id || matchedUser?.id || effectiveUserId || 'verified_user',
-        id: finalProfile?.id || matchedUser?.id || effectiveUserId || 'verified_user',
-        email: finalProfile?.email || matchedUser?.email || targetEmail || '',
+        _id: finalUserId,
+        id: finalUserId,
+        email: finalEmail,
         name: finalProfile?.name || (matchedUser?.user_metadata?.['name'] as string) || '',
-        role: finalProfile?.role || (matchedUser?.user_metadata?.['role'] as string) || 'architect',
+        role: finalRole,
         company:
           finalProfile?.company || (matchedUser?.user_metadata?.['company'] as string) || '',
         profession:
