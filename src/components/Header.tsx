@@ -1409,22 +1409,17 @@ export function Header() {
                           <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                         </svg>
                       </button>
-                      <div
-                        className="absolute left-1/2 -translate-x-1/2 top-full mt-3 flex items-center justify-center pointer-events-none z-50 origin-top opacity-0 -translate-y-3 scale-95 group-hover/seckim:opacity-100 group-hover/seckim:translate-y-0 group-hover/seckim:scale-100 transition-all duration-350"
-                        style={{
-                          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                        }}
-                      >
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 flex items-center justify-center pointer-events-none z-50 origin-top opacity-0 -translate-y-4 scale-[0.94] group-hover/seckim:opacity-100 group-hover/seckim:translate-y-0 group-hover/seckim:scale-100 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
                         <span
-                          className="text-xs md:text-[12.5px] tracking-[0.16em] uppercase font-medium px-4 py-2 bg-[#2a2a2a]/95 text-white border border-neutral-700/80 shadow-[0_12px_32px_rgba(0,0,0,0.25)] whitespace-nowrap backdrop-blur-xl inline-flex items-center gap-2"
+                          className="text-xs md:text-[12px] tracking-[0.16em] uppercase font-medium px-3.5 py-1.5 bg-[#222222]/95 text-white border border-neutral-700/70 rounded-md shadow-[0_12px_28px_rgba(0,0,0,0.35)] whitespace-nowrap backdrop-blur-xl inline-flex items-center gap-2"
                           style={{
                             fontFamily: "'Inter', sans-serif",
                           }}
                         >
                           <span>{(t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc)}</span>
                           {selectionCount > 0 && (
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 bg-white/20 text-white rounded-full">
-                              {selectionCount}
+                            <span className="text-[11px] font-mono tracking-tight text-white/70 font-normal">
+                              {String(selectionCount).padStart(2, '0')}
                             </span>
                           )}
                         </span>
@@ -1471,14 +1466,9 @@ export function Header() {
                         />
                       </span>
                     </button>
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2 top-full mt-3 flex items-center justify-center pointer-events-none z-50 origin-top opacity-0 -translate-y-3 scale-95 group-hover/auth:opacity-100 group-hover/auth:translate-y-0 group-hover/auth:scale-100 transition-all duration-350"
-                      style={{
-                        transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                      }}
-                    >
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 flex items-center justify-center pointer-events-none z-50 origin-top opacity-0 -translate-y-4 scale-[0.94] group-hover/auth:opacity-100 group-hover/auth:translate-y-0 group-hover/auth:scale-100 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
                       <span
-                        className="text-xs md:text-[12.5px] tracking-[0.16em] uppercase font-medium px-4 py-2 bg-[#2a2a2a]/95 text-white border border-neutral-700/80 shadow-[0_12px_32px_rgba(0,0,0,0.25)] whitespace-nowrap backdrop-blur-xl"
+                        className="text-xs md:text-[12px] tracking-[0.16em] uppercase font-medium px-3.5 py-1.5 bg-[#222222]/95 text-white border border-neutral-700/70 rounded-md shadow-[0_12px_28px_rgba(0,0,0,0.35)] whitespace-nowrap backdrop-blur-xl"
                         style={{
                           fontFamily: "'Inter', sans-serif",
                         }}
@@ -1586,20 +1576,19 @@ export function Header() {
                           </span>
                         )}
                       </button>
-                      <div
-                        className="absolute left-1/2 -translate-x-1/2 top-full mt-3 flex items-center justify-center pointer-events-none z-50 origin-top opacity-0 -translate-y-3 scale-95 group-hover/cart:opacity-100 group-hover/cart:translate-y-0 group-hover/cart:scale-100 transition-all duration-350"
-                        style={{
-                          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                        }}
-                      >
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 flex items-center justify-center pointer-events-none z-50 origin-top opacity-0 -translate-y-4 scale-[0.94] group-hover/cart:opacity-100 group-hover/cart:translate-y-0 group-hover/cart:scale-100 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
                         <span
-                          className="text-xs md:text-[12.5px] tracking-[0.16em] uppercase font-medium px-4 py-2 bg-[#2a2a2a]/95 text-white border border-neutral-700/80 shadow-[0_12px_32px_rgba(0,0,0,0.25)] whitespace-nowrap backdrop-blur-xl"
+                          className="text-xs md:text-[12px] tracking-[0.16em] uppercase font-medium px-3.5 py-1.5 bg-[#222222]/95 text-white border border-neutral-700/70 rounded-md shadow-[0_12px_28px_rgba(0,0,0,0.35)] whitespace-nowrap backdrop-blur-xl inline-flex items-center gap-2"
                           style={{
                             fontFamily: "'Inter', sans-serif",
                           }}
                         >
-                          {(t('cart') || 'Sepet').toLocaleUpperCase(upperLoc)}
-                          {cartCount > 0 ? ` (${cartCount})` : ''}
+                          <span>{(t('cart') || 'Sepet').toLocaleUpperCase(upperLoc)}</span>
+                          {cartCount > 0 && (
+                            <span className="text-[11px] font-mono tracking-tight text-white/70 font-normal">
+                              {String(cartCount).padStart(2, '0')}
+                            </span>
+                          )}
                         </span>
                       </div>
                     </div>
