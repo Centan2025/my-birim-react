@@ -108,36 +108,14 @@ export const SelectionDrawer: React.FC = () => {
                   <span className="block h-0.5 w-full bg-primary mt-2.5" />
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {selectedProducts.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={handleClearAll}
-                      className="text-[10px] uppercase tracking-[0.2em] font-semibold text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 py-1.5 px-3 rounded-sm hover:bg-neutral-100 dark:hover:bg-neutral-800/60 cursor-pointer active:scale-95 flex items-center gap-1.5 group"
-                      title={t('clear_all_selections')}
-                    >
-                      <svg
-                        className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      >
-                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                      </svg>
-                      <span>{t('clear_all_selections')}</span>
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={closeDrawer}
-                    className="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer -mr-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800/60"
-                    aria-label={t('close') || 'Kapat'}
-                  >
-                    <X className="w-5 h-5 transition-transform duration-300" />
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={closeDrawer}
+                  className="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer -mr-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800/60"
+                  aria-label={t('close') || 'Kapat'}
+                >
+                  <X className="w-5 h-5 transition-transform duration-300" />
+                </button>
               </motion.div>
 
               {/* Drawer Content */}
@@ -156,6 +134,38 @@ export const SelectionDrawer: React.FC = () => {
                   </div>
                 ) : (
                   <>
+                    {selectedProducts.length > 0 && (
+                      <motion.div
+                        initial={{opacity: 0, x: 30, scaleX: 0.9}}
+                        animate={{opacity: 1, x: 0, scaleX: 1}}
+                        transition={{delay: 0.15, duration: 0.45, ease: [0.16, 1, 0.3, 1]}}
+                        style={{transformOrigin: 'right center'}}
+                        className="flex items-center justify-between pb-3 mb-2 border-b border-[var(--border-primary)]/20"
+                      >
+                        <span className="text-[10px] uppercase tracking-[0.25em] text-[var(--text-secondary)] font-semibold">
+                          {selectedProducts.length} {t('products') || 'ÜRÜN'}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={handleClearAll}
+                          className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-200 cursor-pointer flex items-center gap-1.5 py-1 px-2 -mr-2 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 rounded-sm active:scale-95"
+                          title={t('clear_all_selections')}
+                        >
+                          <svg
+                            className="w-3.5 h-3.5 transition-transform duration-200"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          >
+                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                          <span>{t('clear_all_selections')}</span>
+                        </button>
+                      </motion.div>
+                    )}
+
                     <AnimatePresence initial={true}>
                       {selectedProducts.map((product, idx) => {
                         const imgProps = getProductImageProps(product)
