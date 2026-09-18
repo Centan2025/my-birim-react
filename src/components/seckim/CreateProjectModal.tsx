@@ -109,7 +109,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
-                <label htmlFor="create-project-name" className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
+                <label
+                  htmlFor="create-project-name"
+                  className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5"
+                >
                   {t('project_name_label')}
                 </label>
                 <input
@@ -125,7 +128,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               </div>
 
               <div>
-                <label htmlFor="create-project-desc" className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
+                <label
+                  htmlFor="create-project-desc"
+                  className="block text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5"
+                >
                   {t('project_desc_label')}
                 </label>
                 <textarea

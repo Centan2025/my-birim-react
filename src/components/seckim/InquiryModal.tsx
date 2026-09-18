@@ -267,7 +267,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   {/* Form fields */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="inquiry-name" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                      <label
+                        htmlFor="inquiry-name"
+                        className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1"
+                      >
                         {t('full_name')} *
                       </label>
                       <input
@@ -284,7 +287,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                     </div>
 
                     <div>
-                      <label htmlFor="inquiry-company" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                      <label
+                        htmlFor="inquiry-company"
+                        className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1"
+                      >
                         {t('company_or_office')}
                       </label>
                       <input
@@ -302,7 +308,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="inquiry-email" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                      <label
+                        htmlFor="inquiry-email"
+                        className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1"
+                      >
                         {t('email_required')}
                       </label>
                       <input
@@ -319,7 +328,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                     </div>
 
                     <div>
-                      <label htmlFor="inquiry-phone" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                      <label
+                        htmlFor="inquiry-phone"
+                        className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1"
+                      >
                         {t('phone_label')}
                       </label>
                       <input
@@ -336,7 +348,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   </div>
 
                   <div>
-                    <label htmlFor="inquiry-project-name" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                    <label
+                      htmlFor="inquiry-project-name"
+                      className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1"
+                    >
                       {t('project_name_or_location')}
                     </label>
                     <input
@@ -351,7 +366,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   </div>
 
                   <div>
-                    <label htmlFor="inquiry-message" className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1">
+                    <label
+                      htmlFor="inquiry-message"
+                      className="block text-[11px] font-mono uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1"
+                    >
                       {t('notes_or_requests')}
                     </label>
                     <textarea
