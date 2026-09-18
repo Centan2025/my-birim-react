@@ -50,6 +50,31 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
         setCompany(user.company || '')
         setEmail(user.email || '')
         setPhone(user.phone || '')
+
+        // If phone or company is empty, fetch fresh profile from /api/account/profile
+        if (!user.phone || !user.company) {
+          fetch('/api/account/profile', {
+            headers: {
+              Accept: 'application/json',
+              ...(typeof window !== 'undefined' && localStorage.getItem('birim_token')
+                ? {Authorization: `Bearer ${localStorage.getItem('birim_token')}`}
+                : {}),
+            },
+            credentials: 'same-origin',
+          })
+            .then(res => (res.ok ? res.json() : null))
+            .then(data => {
+              if (data?.success && data.profile) {
+                const p = data.profile
+                if (p.phone) setPhone(p.phone)
+                if (p.company) setCompany(p.company)
+                if (!computedName && (p.first_name || p.last_name || p.name)) {
+                  setName(p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim())
+                }
+              }
+            })
+            .catch(() => {})
+        }
       }
       setCurrentProjectName(projectName || '')
       setErrorMessage(null)
