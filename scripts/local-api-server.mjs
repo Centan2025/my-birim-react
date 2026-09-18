@@ -13,8 +13,7 @@ import {createRequire} from 'module'
 import {readFileSync, existsSync} from 'fs'
 import {resolve, dirname} from 'path'
 import {fileURLToPath} from 'url'
-import crypto from 'crypto'
-import {randomUUID} from 'crypto'
+import crypto, {randomUUID, createHash} from 'crypto'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
