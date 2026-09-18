@@ -283,7 +283,7 @@ export default {
     'Beğendiğiniz ürünleri seçtiklerinize ekleyerek projeniz için bir araya getirebilirsiniz.',
   explore_products: 'ÜRÜNLERİ KEŞFET',
   seckim_drawer_subtitle: 'Projeniz için seçtiğiniz ürünler',
-  get_quote_inquiry: 'BİLGİ / TEKLİF AL',
+  get_quote_inquiry: 'TEKLİF AL',
   total_products_count: '{0} ÜRÜN',
   no_projects_yet: 'Henüz oluşturulmuş bir projeniz yok.',
   added: 'Eklendi',

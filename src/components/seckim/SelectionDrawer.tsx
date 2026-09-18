@@ -299,17 +299,17 @@ export const SelectionDrawer: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleNavigateToSeckim}
-                        className="w-full p-4 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] text-[11px] tracking-[0.25em] uppercase font-bold font-inter transition-all duration-300 text-center cursor-pointer shadow-sm"
+                        className="w-full p-4 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] text-[11px] tracking-[0.2em] uppercase font-bold font-inter transition-all duration-300 text-center cursor-pointer shadow-sm whitespace-nowrap overflow-hidden flex items-center justify-center"
                       >
-                        {t('seckim')}
+                        <span className="truncate">{t('seckim')}</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setIsInquiryOpen(true)}
-                        className="w-full p-4 bg-[#2c2c2c] dark:bg-white text-white dark:text-[#171717] border border-[#2c2c2c] dark:border-white text-[11px] tracking-[0.25em] uppercase font-bold font-inter hover:bg-[#404040] dark:hover:bg-neutral-200 transition-all duration-300 text-center cursor-pointer shadow-sm"
+                        className="w-full p-4 bg-[#2c2c2c] dark:bg-white text-white dark:text-[#171717] border border-[#2c2c2c] dark:border-white text-[11px] tracking-[0.2em] uppercase font-bold font-inter hover:bg-[#404040] dark:hover:bg-neutral-200 transition-all duration-300 text-center cursor-pointer shadow-sm whitespace-nowrap overflow-hidden flex items-center justify-center"
                       >
-                        {t('get_quote_inquiry')}
+                        <span className="truncate">{t('get_quote_inquiry')}</span>
                       </button>
                     </div>
                   </motion.div>

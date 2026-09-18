@@ -191,10 +191,10 @@ export const FloatingAuthPanel: React.FC = () => {
                       <Link
                         to="/hesabim"
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-between w-full p-5 bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-primary)] hover:bg-[var(--bg-primary)] transition-all duration-500 uppercase tracking-[0.25em] text-[11px] font-bold font-inter group"
+                        className="flex items-center justify-between w-full p-4.5 bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-primary)] hover:bg-[var(--bg-primary)] transition-all duration-300 uppercase tracking-[0.2em] text-[11px] font-bold font-inter group whitespace-nowrap overflow-hidden"
                       >
-                        <span>{t('go_to_profile') || 'Hesabıma Git'}</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <span className="truncate">{t('go_to_profile') || 'Hesabıma Git'}</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform flex-shrink-0 ml-2" />
                       </Link>
 
                       <button
@@ -203,10 +203,10 @@ export const FloatingAuthPanel: React.FC = () => {
                           setIsOpen(false)
                           navigate('/')
                         }}
-                        className="flex items-center justify-between w-full p-5 border border-[var(--border-primary)]/20 text-[var(--text-secondary)] hover:text-red-600 hover:border-red-600/30 transition-all duration-500 uppercase tracking-[0.25em] text-[11px] font-bold font-inter group"
+                        className="flex items-center justify-between w-full p-4.5 border border-[var(--border-primary)]/20 text-[var(--text-secondary)] hover:text-red-600 hover:border-red-600/30 transition-all duration-300 uppercase tracking-[0.2em] text-[11px] font-bold font-inter group whitespace-nowrap overflow-hidden"
                       >
-                        <span>{t('logout')}</span>
-                        <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span className="truncate">{t('logout')}</span>
+                        <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform flex-shrink-0 ml-2" />
                       </button>
                     </motion.div>
                   </div>
@@ -287,17 +287,17 @@ export const FloatingAuthPanel: React.FC = () => {
                         <button
                           type="submit"
                           disabled={isLoading}
-                          className="w-full bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-primary)] p-5 uppercase tracking-[0.3em] text-[11px] font-bold hover:bg-[var(--bg-primary)] transition-all duration-500 disabled:opacity-50 flex justify-between items-center font-inter group cursor-pointer"
+                          className="w-full bg-[#2c2c2c] dark:bg-white text-white dark:text-[#171717] border border-[#2c2c2c] dark:border-white p-4.5 uppercase tracking-[0.25em] text-[11px] font-bold hover:bg-[#404040] dark:hover:bg-neutral-200 transition-all duration-300 disabled:opacity-50 flex justify-between items-center font-inter group cursor-pointer shadow-sm whitespace-nowrap overflow-hidden"
                         >
-                          <span>{isLoading ? t('waiting') : t('login')}</span>
-                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          <span className="truncate">{isLoading ? t('waiting') : t('login')}</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform flex-shrink-0 ml-2" />
                         </button>
 
                         <div className="text-center pt-2">
                           <Link
                             to="/reset-password"
                             onClick={() => setIsOpen(false)}
-                            className="text-[10px] text-[var(--text-secondary)] hover:text-primary uppercase tracking-[0.2em] font-bold font-inter transition-colors inline-block pb-1 border-b border-transparent hover:border-primary"
+                            className="text-[10px] text-[var(--text-secondary)] hover:text-primary uppercase tracking-[0.2em] font-bold font-inter transition-colors inline-block pb-1 border-b border-transparent hover:border-primary whitespace-nowrap"
                           >
                             {t('forgot_password')}
                           </Link>
@@ -317,10 +317,10 @@ export const FloatingAuthPanel: React.FC = () => {
                       </p>
                       <button
                         onClick={scrollToFooter}
-                        className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-primary)] p-5 uppercase tracking-[0.25em] text-[10px] md:text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-primary)] hover:border-[var(--text-primary)] transition-all duration-500 font-inter group flex items-center justify-between shadow-sm cursor-pointer"
+                        className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-primary)] p-4.5 uppercase tracking-[0.2em] text-[10px] md:text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-primary)] hover:border-[var(--text-primary)] transition-all duration-300 font-inter group flex items-center justify-between shadow-sm cursor-pointer whitespace-nowrap overflow-hidden"
                       >
-                        <span>{t('register_or_subscribe')}</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <span className="truncate">{t('register_or_subscribe')}</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform flex-shrink-0 ml-2" />
                       </button>
                     </motion.div>
                   </div>
