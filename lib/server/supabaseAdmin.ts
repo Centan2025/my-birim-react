@@ -27,7 +27,7 @@ function getSupabaseServerConfig(): {url: string; serviceKey: string} | null {
   }
 
   let url = (rawUrl || '').trim().replace(/^["']|["']$/g, '')
-  if (!url || !url.includes('rkmpfxervwqleibhbiqv')) {
+  if (!url) {
     url = 'https://rkmpfxervwqleibhbiqv.supabase.co'
   }
   const serviceKey = rawKey.trim().replace(/^["']|["']$/g, '')
