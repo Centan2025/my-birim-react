@@ -4284,6 +4284,171 @@ app.delete('/api/account/projects/:id', requireLocalAuth, async (req, res) => {
   }
 })
 
+// ─── /api/inquiry ──────────────────────────────────────────────────────────
+const handleInquiry = async (req, res) => {
+  const {
+    name,
+    company,
+    email,
+    phone,
+    projectName,
+    message,
+    selectedProducts = [],
+    userId,
+  } = req.body || {}
+
+  if (!name || !email) {
+    return res.status(400).json({error: 'Ad ve e-posta zorunludur.'})
+  }
+
+  const safeEmail = String(email).trim().toLowerCase().slice(0, 150)
+  const safeName = String(name).trim().slice(0, 100)
+  const safeCompany = company ? String(company).trim().slice(0, 150) : null
+  const safePhone = phone ? String(phone).trim().slice(0, 50) : null
+  const safeProjectName = projectName ? String(projectName).trim().slice(0, 150) : null
+  const safeMessage = message ? String(message).trim().slice(0, 3000) : null
+
+  // 1. Save to Supabase inquiries table if exists
+  if (supabaseAdmin) {
+    try {
+      await supabaseAdmin.from('inquiries').insert({
+        user_id: userId || null,
+        name: safeName,
+        company: safeCompany,
+        email: safeEmail,
+        phone: safePhone,
+        project_name: safeProjectName,
+        message: safeMessage,
+        selected_products: Array.isArray(selectedProducts) ? selectedProducts : [],
+        status: 'new',
+      }).catch(e => console.warn('[Local API] Inquiries table save warning:', e.message))
+    } catch (dbErr) {
+      console.warn('[Local API] Supabase persistence error:', dbErr.message)
+    }
+  }
+
+  // 2. Format products list for Email
+  const productsListHtml =
+    Array.isArray(selectedProducts) && selectedProducts.length > 0
+      ? `
+      <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+        <thead>
+          <tr style="border-bottom: 1px solid #ddd; text-align: left; font-size: 11px; text-transform: uppercase; color: #888;">
+            <th style="padding: 8px 4px;">#</th>
+            <th style="padding: 8px 4px;">Ürün</th>
+            <th style="padding: 8px 4px;">Ölçüler</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${selectedProducts
+            .map((p, idx) => {
+              const pName = p.name || p.id || 'Ürün'
+              const pDim = p.dimensions || '-'
+              const safeUrlId = encodeURIComponent(String(p.id || '').trim())
+              return `
+            <tr style="border-bottom: 1px solid #eee; font-size: 13px;">
+              <td style="padding: 8px 4px; color: #999;">${idx + 1}</td>
+              <td style="padding: 8px 4px; font-weight: 600;">
+                <a href="https://birim.com/product/${safeUrlId}" style="color: #111; text-decoration: none;">
+                  ${pName}
+                </a>
+              </td>
+              <td style="padding: 8px 4px; color: #666;">${pDim}</td>
+            </tr>
+          `
+            })
+            .join('')}
+        </tbody>
+      </table>
+    `
+      : '<p style="color: #888; font-style: italic;">Ürün seçilmedi</p>'
+
+  const emailHtml = `
+    <div style="max-width: 600px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111; line-height: 1.6; padding: 24px;">
+      <div style="border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 24px;">
+        <span style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #888;">BİRİM MOBİLYA</span>
+        <h2 style="margin: 4px 0 0 0; font-size: 20px; font-weight: 600; text-transform: uppercase;">YENİ PROJE / SEÇTİKLERİM TEKLİF TALEBİ</h2>
+      </div>
+
+      <div style="background-color: #f8f8f8; padding: 16px 20px; margin-bottom: 24px; border-left: 3px solid #111;">
+        <p style="margin: 0 0 6px 0;"><strong>Müşteri:</strong> ${safeName}</p>
+        <p style="margin: 0 0 6px 0;"><strong>Firma / Ofis:</strong> ${safeCompany || '-'}</p>
+        <p style="margin: 0 0 6px 0;"><strong>E-posta:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
+        <p style="margin: 0 0 6px 0;"><strong>Telefon:</strong> ${safePhone || '-'}</p>
+        <p style="margin: 0;"><strong>Proje:</strong> ${safeProjectName || 'Genel Seçtiklerim'}</p>
+      </div>
+
+      ${
+        safeMessage
+          ? `
+        <div style="margin-bottom: 24px;">
+          <h4 style="margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666;">Müşteri Notu:</h4>
+          <p style="margin: 0; background: #fff; border: 1px solid #eee; padding: 12px; font-size: 13px;">${safeMessage}</p>
+        </div>
+      `
+          : ''
+      }
+
+      <div style="margin-bottom: 24px;">
+        <h4 style="margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666;">Talep Edilen Ürünler:</h4>
+        ${productsListHtml}
+      </div>
+
+      <div style="border-top: 1px solid #eee; padding-top: 16px; font-size: 11px; color: #999; text-align: center;">
+        Bu e-posta birim.com Seçtiklerim & Proje sisteminden otomatik olarak oluşturulmuştur.
+      </div>
+    </div>
+  `
+
+  console.log(`\n========================================`)
+  console.log(`📩 [YENİ TEKLİF TALEBİ]`)
+  console.log(`   Müşteri: ${safeName} (${safeEmail})`)
+  console.log(`   Firma: ${safeCompany || '-'}`)
+  console.log(`   Telefon: ${safePhone || '-'}`)
+  console.log(`   Proje: ${safeProjectName || 'Genel Seçtiklerim'}`)
+  console.log(`   Ürün Sayısı: ${selectedProducts.length}`)
+  console.log(`========================================\n`)
+
+  // 3. Send Email Notification
+  const adminEmail = process.env.ADMIN_EMAIL || 'birim@birim.com'
+  const subject = `Yeni Proje Talebi: ${safeName} - ${safeProjectName || 'Birim Seçtiklerim'}`
+
+  if (resendClient) {
+    try {
+      await resendClient.emails.send({
+        from: getEmailFrom(),
+        to: [adminEmail],
+        replyTo: safeEmail,
+        subject,
+        html: emailHtml,
+      })
+      console.log(`✅ [Local API] Resend ile teklif bildirimi gönderildi -> ${adminEmail}`)
+    } catch (rErr) {
+      console.warn(`⚠️ [Local API] Resend teklif gönderim hatası (${rErr.message}), SMTP deneniyor...`)
+    }
+  }
+
+  if (mailTransporter) {
+    try {
+      await mailTransporter.sendMail({
+        from: `"Birim Design" <${SMTP_USER}>`,
+        to: adminEmail,
+        replyTo: safeEmail,
+        subject,
+        html: emailHtml,
+      })
+      console.log(`✅ [Local API] SMTP ile teklif bildirimi gönderildi -> ${adminEmail}`)
+    } catch (err) {
+      console.warn(`⚠️ [Local API] SMTP teklif e-posta gönderimi başarısız (${err.message})`)
+    }
+  }
+
+  return res.status(200).json({ok: true, message: 'Inquiry received'})
+}
+
+app.post('/api/inquiry', handleInquiry)
+app.post('/api/account/inquiry', handleInquiry)
+
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({error: `Route not found: ${req.method} ${req.path}`})
