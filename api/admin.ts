@@ -147,7 +147,12 @@ async function handleAdminMembers(req: VercelRequest, res: VercelResponse) {
 
       if (error) {
         console.error('[Admin Members] Get error:', error)
-        return res.status(500).json({error: error.message})
+        return res.status(200).json({
+          success: true,
+          count: 0,
+          members: [],
+          warning: `Supabase: ${error.message}`,
+        })
       }
 
       return res.status(200).json({
@@ -157,7 +162,12 @@ async function handleAdminMembers(req: VercelRequest, res: VercelResponse) {
       })
     } catch (err: unknown) {
       console.error('[Admin Members] Error:', err)
-      return res.status(500).json({error: 'Üyeler yüklenirken bir hata oluştu.'})
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        members: [],
+        warning: err instanceof Error ? err.message : 'Supabase bağlantı hatası',
+      })
     }
   }
 
