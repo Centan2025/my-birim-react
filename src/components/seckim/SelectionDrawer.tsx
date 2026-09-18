@@ -93,17 +93,26 @@ export const SelectionDrawer: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleClearAll}
-                      className="text-[11px] uppercase tracking-wider text-neutral-400 hover:text-red-500 transition-colors py-1.5 px-2 cursor-pointer font-medium"
+                      className="text-[11px] uppercase tracking-wider text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 py-1.5 px-2.5 rounded-sm hover:bg-neutral-100 dark:hover:bg-neutral-800/60 cursor-pointer font-medium active:scale-95 flex items-center gap-1.5 group"
                       title={t('clear_all_selections')}
                     >
-                      {t('clear_all_selections')}
+                      <svg
+                        className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      >
+                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                      <span>{t('clear_all_selections')}</span>
                     </button>
                   )}
 
                   <button
                     type="button"
                     onClick={closeDrawer}
-                    className="p-2 text-neutral-500 hover:text-[var(--text-primary)] transition-colors cursor-pointer -mr-2"
+                    className="p-1.5 text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer -mr-1"
                     aria-label={t('close') || 'Kapat'}
                   >
                     <svg
@@ -112,6 +121,8 @@ export const SelectionDrawer: React.FC = () => {
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
                       <line x1="18" y1="6" x2="6" y2="18" />
                       <line x1="6" y1="6" x2="18" y2="18" />
@@ -174,7 +185,7 @@ export const SelectionDrawer: React.FC = () => {
                             <Link
                               to={`/product/${product.id}`}
                               onClick={closeDrawer}
-                              className="w-20 h-20 bg-[var(--bg-secondary)] flex-shrink-0 relative overflow-hidden flex items-center justify-center p-1 block"
+                              className="w-20 h-20 bg-white flex-shrink-0 relative overflow-hidden flex items-center justify-center p-1 block"
                             >
                               <OptimizedImage
                                 {...imgProps}

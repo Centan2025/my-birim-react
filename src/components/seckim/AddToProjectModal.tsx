@@ -78,15 +78,17 @@ export const AddToProjectModal: React.FC<AddToProjectModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="p-1 text-neutral-400 hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                  className="p-1.5 text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer"
                   aria-label={t('close') || 'Kapat'}
                 >
                   <svg
-                    className="w-4 h-4"
+                    className="w-5 h-5"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />

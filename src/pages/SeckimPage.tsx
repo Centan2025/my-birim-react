@@ -1,5 +1,6 @@
 import {useState, useMemo, useEffect} from 'react'
 import {Link, useNavigate, useSearchParams} from 'react-router-dom'
+import {motion} from 'framer-motion'
 import {useSelection} from '../context/SelectionContext'
 import {useProducts} from '../hooks/useProducts'
 import {useCategories} from '../hooks/useCategories'
@@ -272,7 +273,11 @@ export function SeckimPage() {
                 {String(selectedProducts.length).padStart(2, '0')}
               </span>
               {activeTab === 'seckim' && (
-                <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--text-primary)]" />
+                <motion.span
+                  layoutId="activeTabUnderline"
+                  className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--text-primary)]"
+                  transition={{type: 'spring', stiffness: 420, damping: 32}}
+                />
               )}
             </button>
 
@@ -296,7 +301,11 @@ export function SeckimPage() {
                 {String(projects.length).padStart(2, '0')}
               </span>
               {activeTab === 'projeler' && (
-                <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--text-primary)]" />
+                <motion.span
+                  layoutId="activeTabUnderline"
+                  className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--text-primary)]"
+                  transition={{type: 'spring', stiffness: 420, damping: 32}}
+                />
               )}
             </button>
           </div>

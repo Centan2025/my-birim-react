@@ -198,7 +198,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
               <button
                 type="button"
                 onClick={handleClose}
-                className="p-1.5 text-neutral-400 hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="p-1.5 text-neutral-400 hover:text-[var(--text-primary)] transition-all duration-300 ease-out hover:rotate-90 hover:scale-110 active:scale-95 cursor-pointer"
                 aria-label={t('close') || 'Kapat'}
               >
                 <svg
@@ -207,6 +207,8 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
@@ -247,9 +249,9 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Selected Products Preview Box */}
                   <div>
-                    <label className="block text-[11px] font-mono uppercase tracking-widest text-neutral-400 mb-2">
+                    <div className="block text-[11px] font-mono uppercase tracking-widest text-neutral-400 mb-2">
                       {t('selected_products_label', selectedProducts.length)}
-                    </label>
+                    </div>
                     <div className="p-3 bg-neutral-50 dark:bg-neutral-900/70 border border-neutral-200/80 dark:border-neutral-800 flex flex-wrap gap-2 max-h-28 overflow-y-auto">
                       {selectedProducts.map(p => (
                         <span
