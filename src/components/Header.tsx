@@ -31,6 +31,25 @@ import {useDarkMode} from '../context/DarkModeContext'
 import {useSelection} from '../context/SelectionContext'
 import {getShopBaseUrl, isShopNavVisible} from '../utils/shopBridge'
 
+function getUserInitials(user?: {name?: string; email?: string} | null): string {
+  if (!user) return 'ÜY'
+  if (user.name && user.name.trim()) {
+    const parts = user.name.trim().split(/\s+/).filter(Boolean)
+    const first = parts[0]
+    const last = parts[parts.length - 1]
+    if (first && last && parts.length >= 2) {
+      return (first.charAt(0) + last.charAt(0)).toUpperCase()
+    }
+    if (first) {
+      return first.slice(0, 2).toUpperCase()
+    }
+  }
+  if (user.email) {
+    return user.email.slice(0, 2).toUpperCase()
+  }
+  return 'ÜY'
+}
+
 export function Header() {
   const {t, setLocale, locale, supportedLocales} = useTranslation()
   const location = useLocation()
@@ -65,7 +84,7 @@ export function Header() {
   const {theme: headerTheme, reset: resetHeaderTheme} = useHeaderTheme()
 
   const {isDarkMode} = useDarkMode()
-  const {isLoggedIn} = useAuth()
+  const {isLoggedIn, user} = useAuth()
   const {cartCount, toggleCart} = useCart()
   const {selectionCount, openDrawer, isSelectionEnabled} = useSelection()
   const [headerOpacity, setHeaderOpacity] = useState(() =>
@@ -1404,42 +1423,67 @@ export function Header() {
                     </div>
                   )}
 
-                  {/* Auth Trigger Text Button (Seçtiklerim'in sağında) */}
+                  {/* Auth Trigger Text / Initials Button (Seçtiklerim'in sağında) */}
                   <button
                     type="button"
                     onClick={() => window.dispatchEvent(new Event('openFloatingAuthPanel'))}
-                    className="group relative flex items-end pb-0 pt-2 cursor-pointer transition-opacity duration-300 hover:opacity-75"
+                    className="group relative flex items-center justify-center cursor-pointer transition-opacity duration-300 hover:opacity-80"
                     style={{
                       color: headerForegroundColor,
                       transition: colorTransition,
                     }}
                     aria-label={
-                      isLoggedIn ? t('profile') || 'Profil' : locale === 'tr' ? 'Giriş' : 'Login'
+                      isLoggedIn
+                        ? user?.name || t('profile') || 'Hesabım'
+                        : locale === 'tr'
+                          ? 'Giriş Yap'
+                          : 'Login'
                     }
                     title={
-                      isLoggedIn ? t('profile') || 'Profil' : locale === 'tr' ? 'Giriş' : 'Login'
+                      isLoggedIn
+                        ? user?.name || t('profile') || 'Hesabım'
+                        : locale === 'tr'
+                          ? 'Giriş Yap'
+                          : 'Login'
                     }
                   >
-                    <span
-                      className="relative inline-block uppercase header-nav-text"
-                      style={{
-                        fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
-                        fontWeight: 600,
-                        letterSpacing: '0.025em',
-                        fontFamily: "'Inter', sans-serif",
-                        lineHeight: '1.25rem',
-                        color: headerForegroundColor,
-                        transition: colorTransition,
-                      }}
-                    >
-                      {isLoggedIn ? t('profile') || 'PROFİL' : locale === 'tr' ? 'GİRİŞ' : 'LOGIN'}
+                    {isLoggedIn ? (
                       <span
-                        className="header-nav-underline"
+                        className="relative inline-flex items-center justify-center font-mono font-semibold tracking-wider rounded-full border transition-all duration-300 group-hover:scale-105"
                         style={{
-                          backgroundColor: headerForegroundColor,
+                          width: '26px',
+                          height: '26px',
+                          fontSize: '10px',
+                          lineHeight: '1',
+                          borderColor: headerForegroundColor,
+                          color: headerForegroundColor,
+                          transition: colorTransition,
                         }}
-                      />
-                    </span>
+                      >
+                        {getUserInitials(user)}
+                      </span>
+                    ) : (
+                      <span
+                        className="relative inline-block uppercase header-nav-text"
+                        style={{
+                          fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
+                          fontWeight: 600,
+                          letterSpacing: '0.025em',
+                          fontFamily: "'Inter', sans-serif",
+                          lineHeight: '1.25rem',
+                          color: headerForegroundColor,
+                          transition: colorTransition,
+                        }}
+                      >
+                        {locale === 'tr' ? 'GİRİŞ' : 'LOGIN'}
+                        <span
+                          className="header-nav-underline"
+                          style={{
+                            backgroundColor: headerForegroundColor,
+                          }}
+                        />
+                      </span>
+                    )}
                   </button>
 
                   <div
