@@ -4209,12 +4209,13 @@ const handleInquiry = async (req, res) => {
             const pCategory = p.category ? String(p.category) : ''
             const pDim = p.dimensions && p.dimensions !== '-' ? String(p.dimensions) : ''
             const safeUrlId = encodeURIComponent(String(p.id || '').trim())
-            const rawImg = p.image || ''
-            const safeImgUrl = rawImg
-              ? rawImg.startsWith('http://') || rawImg.startsWith('https://')
-                ? rawImg
-                : `https://birim.com${rawImg.startsWith('/') ? '' : '/'}${rawImg}`
-              : ''
+            const rawImg = (p.image || '').trim()
+            const safeImgUrl =
+              rawImg && rawImg !== '/' && !rawImg.endsWith('birim.com/')
+                ? rawImg.startsWith('http://') || rawImg.startsWith('https://')
+                  ? rawImg
+                  : `https://birim.com${rawImg.startsWith('/') ? '' : '/'}${rawImg}`
+                : ''
 
             const imgHtml = safeImgUrl
               ? `<img src="${safeImgUrl}" alt="${pName}" width="56" height="56" style="width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; display: block;" />`

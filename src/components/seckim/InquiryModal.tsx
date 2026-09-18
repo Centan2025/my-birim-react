@@ -8,7 +8,7 @@ import {analytics} from '../../lib/analytics'
 import {useTranslation} from '../../i18n'
 import type {Product} from '../../types'
 import type {InquirySelectedProduct} from '../../types/seckim'
-import {getLocalizedText} from '../../types/seckim'
+import {getLocalizedText, getProductImageProps} from '../../types/seckim'
 
 interface InquiryModalProps {
   isOpen: boolean
@@ -112,10 +112,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
           name: getLocalizedText(p.name),
           category: p.categoryId,
           dimensions: dimsStr,
-          image:
-            typeof p.mainImage === 'string'
-              ? p.mainImage
-              : (p.mainImage as {url?: string} | undefined)?.url || '',
+          image: getProductImageProps(p).src || '',
         }
       })
 
