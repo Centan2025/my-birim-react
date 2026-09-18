@@ -484,7 +484,7 @@ export function SeckimPage() {
                             return (
                               <div
                                 key={p.id}
-                                className="aspect-square bg-[var(--bg-secondary)] overflow-hidden relative flex items-center justify-center p-1"
+                                className="aspect-square bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 overflow-hidden relative flex items-center justify-center p-1"
                               >
                                 <OptimizedImage
                                   {...imgProps}
