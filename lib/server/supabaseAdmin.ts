@@ -3,8 +3,16 @@ import {createClient, type SupabaseClient} from '@supabase/supabase-js'
 function getSupabaseServerConfig(): {url: string; serviceKey: string} | null {
   const env =
     (globalThis as {process?: {env?: Record<string, string | undefined>}}).process?.env || {}
-  const rawUrl = env['SUPABASE_URL'] || env['VITE_SUPABASE_URL']
-  const rawKey = env['SUPABASE_SERVICE_ROLE_KEY']
+  const rawUrl =
+    env['SUPABASE_URL'] ||
+    env['VITE_SUPABASE_URL'] ||
+    env['NEXT_PUBLIC_SUPABASE_URL']
+  const rawKey =
+    env['SUPABASE_SERVICE_ROLE_KEY'] ||
+    env['SUPABASE_SERVICE_KEY'] ||
+    env['SUPABASE_KEY'] ||
+    env['VITE_SUPABASE_SERVICE_ROLE_KEY'] ||
+    env['VITE_SUPABASE_ANON_KEY']
 
   if (!rawUrl || !rawKey) {
     return null
