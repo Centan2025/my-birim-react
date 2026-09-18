@@ -1,6 +1,6 @@
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useRef} from 'react'
 import {Link} from 'react-router-dom'
-import {motion, AnimatePresence} from 'framer-motion'
+import {motion, AnimatePresence, useInView} from 'framer-motion'
 import {getAboutPageContent, getDesigners} from '../services/cms'
 import type {AboutPageContent, NewsMedia, Designer, R2ImageMetadata} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -11,10 +11,60 @@ import {useHeaderTheme} from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
 import {TextMaskReveal} from '../components/TextMaskReveal'
 import {TextLineReveal} from '../components/TextLineReveal'
-import {ProductCardReveal} from '../components/ProductCardReveal'
 import PortableTextLite from '../components/PortableTextLite'
 import {resolvePortableTextOrString, toPlainText} from '../utils/portableText'
 import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer/FullscreenMediaViewer'
+
+interface AboutImageCardProps {
+  index?: number
+  children: React.ReactNode
+  className?: string
+  aspectRatio?: string
+  onClick?: () => void
+}
+
+function AboutImageCard({
+  index = 0,
+  children,
+  className = '',
+  aspectRatio = 'aspect-[16/10]',
+  onClick,
+}: AboutImageCardProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, {once: true, amount: 0.05, margin: '0px 0px 50px 0px'})
+  const colIndex = index % 3
+  const cardDelay = index < 6 ? 0.06 + index * 0.08 : (colIndex % 3) * 0.07
+
+  return (
+    <div ref={ref} className="h-full w-full">
+      <motion.div
+        initial={{opacity: 0, y: 50, scale: 0.92}}
+        animate={isInView ? {opacity: 1, y: 0, scale: 1} : {opacity: 0, y: 50, scale: 0.92}}
+        transition={{
+          y: {
+            duration: 0.92,
+            delay: cardDelay,
+            ease: [0.16, 1, 0.3, 1],
+          },
+          scale: {
+            duration: 0.84,
+            delay: cardDelay + 0.05,
+            ease: [0.45, 0, 0.2, 1],
+          },
+          opacity: {
+            duration: 0.68,
+            delay: cardDelay,
+            ease: 'easeOut',
+          },
+        }}
+        onClick={onClick}
+        className={`group relative overflow-hidden ${aspectRatio} bg-black/5 dark:bg-neutral-900 ${className} will-change-transform`}
+      >
+        {children}
+      </motion.div>
+    </div>
+  )
+}
 
 const containerClass =
   'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
@@ -125,58 +175,42 @@ const MediaGallery = ({media, alt}: MediaGalleryProps) => {
               key={idx}
               className="w-[78vw] max-w-[320px] flex-shrink-0 snap-center md:w-full md:max-w-none md:flex-shrink"
             >
-              <ProductCardReveal
-                direction="down"
-                duration={1.2}
-                delay={0.08 * (idx % 3)}
-                className="w-full h-full"
+              <AboutImageCard
+                index={idx}
+                aspectRatio="aspect-video"
+                onClick={() => openViewer(idx)}
               >
-                <div
-                  className="relative aspect-video overflow-hidden bg-[var(--bg-secondary)] cursor-pointer group"
-                  onClick={() => openViewer(idx)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      openViewer(idx)
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  {m.type === 'video' || m.type === 'youtube' ? (
-                    <div className="w-full h-full relative">
-                      <video
-                        src={m.url}
-                        className="w-full h-full object-cover"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                      />
-                      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-500 flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-90 transition-opacity">
-                          <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
-                        </div>
+                {m.type === 'video' || m.type === 'youtube' ? (
+                  <div className="w-full h-full relative">
+                    <video
+                      src={m.url}
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    />
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-500 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-90 transition-opacity">
+                        <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
                       </div>
                     </div>
-                  ) : (
-                    <div className="w-full h-full relative">
-                      <OptimizedImage
-                        src={m.url}
-                        fallbackSrc={DEFAULT_IMAGES.history}
-                        srcMobile={m.urlMobile}
-                        srcDesktop={m.urlDesktop}
-                        alt={`${alt} ${idx + 1}`}
-                        className="w-full h-full object-cover brightness-[0.96] group-hover:brightness-100 transition-[filter] duration-500 ease-out"
-                        crop={m.crop}
-                        hotspot={m.hotspot}
-                        origWidth={m.origWidth as number}
-                        origHeight={m.origHeight as number}
-                      />
-                    </div>
-                  )}
-                </div>
-              </ProductCardReveal>
+                  </div>
+                ) : (
+                  <OptimizedImage
+                    src={m.url}
+                    fallbackSrc={DEFAULT_IMAGES.history}
+                    srcMobile={m.urlMobile}
+                    srcDesktop={m.urlDesktop}
+                    alt={`${alt} ${idx + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                    crop={m.crop}
+                    hotspot={m.hotspot}
+                    origWidth={m.origWidth as number}
+                    origHeight={m.origHeight as number}
+                  />
+                )}
+              </AboutImageCard>
             </div>
           ))}
         </div>
@@ -697,31 +731,24 @@ export function AboutPageNew() {
                                   </motion.div>
                                 ) : null}
                               </div>
-                              <div className="relative aspect-[16/10] overflow-hidden rounded-none">
-                                <ProductCardReveal
-                                  direction="down"
-                                  duration={1.2}
-                                  delay={0.1}
-                                  className="w-full h-full"
-                                >
-                                  <OptimizedImage
-                                    key={`${era.year}-${era.image}`}
-                                    src={era.image}
-                                    srcMobile={era.imageMobile || undefined}
-                                    fallbackSrc={DEFAULT_IMAGES.history}
-                                    alt="Era History"
-                                    className="w-full h-full object-cover"
-                                    crop={era.crop}
-                                    hotspot={era.hotspot}
-                                    origWidth={era.origWidth}
-                                    origHeight={era.origHeight}
-                                    cropMobile={era.cropMobile}
-                                    hotspotMobile={era.hotspotMobile}
-                                    origWidthMobile={era.origWidthMobile}
-                                    origHeightMobile={era.origHeightMobile}
-                                  />
-                                </ProductCardReveal>
-                              </div>
+                              <AboutImageCard aspectRatio="aspect-[16/10]">
+                                <OptimizedImage
+                                  key={`${era.year}-${era.image}`}
+                                  src={era.image}
+                                  srcMobile={era.imageMobile || undefined}
+                                  fallbackSrc={DEFAULT_IMAGES.history}
+                                  alt="Era History"
+                                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                                  crop={era.crop}
+                                  hotspot={era.hotspot}
+                                  origWidth={era.origWidth}
+                                  origHeight={era.origHeight}
+                                  cropMobile={era.cropMobile}
+                                  hotspotMobile={era.hotspotMobile}
+                                  origWidthMobile={era.origWidthMobile}
+                                  origHeightMobile={era.origHeightMobile}
+                                />
+                              </AboutImageCard>
                             </div>
                           </motion.div>
                         )}
@@ -802,31 +829,24 @@ export function AboutPageNew() {
                             ) : null}
                           </div>
                           <div className="col-span-7">
-                            <div className="relative aspect-[16/10] overflow-hidden rounded-none">
-                              <ProductCardReveal
-                                direction="down"
-                                duration={1.2}
-                                delay={0.1}
-                                className="w-full h-full"
-                              >
-                                <OptimizedImage
-                                  key={`${currentEra.year}-${currentEra.image}`}
-                                  src={currentEra.image}
-                                  srcMobile={currentEra.imageMobile || undefined}
-                                  fallbackSrc={DEFAULT_IMAGES.history}
-                                  alt="Era History"
-                                  className="w-full h-full object-cover"
-                                  crop={currentEra.crop}
-                                  hotspot={currentEra.hotspot}
-                                  origWidth={currentEra.origWidth}
-                                  origHeight={currentEra.origHeight}
-                                  cropMobile={currentEra.cropMobile}
-                                  hotspotMobile={currentEra.hotspotMobile}
-                                  origWidthMobile={currentEra.origWidthMobile}
-                                  origHeightMobile={currentEra.origHeightMobile}
-                                />
-                              </ProductCardReveal>
-                            </div>
+                            <AboutImageCard aspectRatio="aspect-[16/10]">
+                              <OptimizedImage
+                                key={`${currentEra.year}-${currentEra.image}`}
+                                src={currentEra.image}
+                                srcMobile={currentEra.imageMobile || undefined}
+                                fallbackSrc={DEFAULT_IMAGES.history}
+                                alt="Era History"
+                                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                                crop={currentEra.crop}
+                                hotspot={currentEra.hotspot}
+                                origWidth={currentEra.origWidth}
+                                origHeight={currentEra.origHeight}
+                                cropMobile={currentEra.cropMobile}
+                                hotspotMobile={currentEra.hotspotMobile}
+                                origWidthMobile={currentEra.origWidthMobile}
+                                origHeightMobile={currentEra.origHeightMobile}
+                              />
+                            </AboutImageCard>
                           </div>
                         </motion.div>
                       </AnimatePresence>
@@ -865,30 +885,23 @@ export function AboutPageNew() {
                   </TextMaskReveal>
                 </div>
                 <div className="lg:col-span-7">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-none">
-                    <ProductCardReveal
-                      direction="down"
-                      duration={1.3}
-                      delay={0.15}
-                      className="w-full h-full"
-                    >
-                      <OptimizedImage
-                        src={identitySection.image}
-                        srcMobile={identitySection.imageMobile || undefined}
-                        fallbackSrc={DEFAULT_IMAGES.identity}
-                        alt="Identity"
-                        className="w-full h-full object-cover"
-                        crop={identitySection.crop}
-                        hotspot={identitySection.hotspot}
-                        origWidth={identitySection.origWidth}
-                        origHeight={identitySection.origHeight}
-                        cropMobile={identitySection.cropMobile}
-                        hotspotMobile={identitySection.hotspotMobile}
-                        origWidthMobile={identitySection.origWidthMobile}
-                        origHeightMobile={identitySection.origHeightMobile}
-                      />
-                    </ProductCardReveal>
-                  </div>
+                  <AboutImageCard aspectRatio="aspect-[4/3]">
+                    <OptimizedImage
+                      src={identitySection.image}
+                      srcMobile={identitySection.imageMobile || undefined}
+                      fallbackSrc={DEFAULT_IMAGES.identity}
+                      alt="Identity"
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                      crop={identitySection.crop}
+                      hotspot={identitySection.hotspot}
+                      origWidth={identitySection.origWidth}
+                      origHeight={identitySection.origHeight}
+                      cropMobile={identitySection.cropMobile}
+                      hotspotMobile={identitySection.hotspotMobile}
+                      origWidthMobile={identitySection.origWidthMobile}
+                      origHeightMobile={identitySection.origHeightMobile}
+                    />
+                  </AboutImageCard>
                 </div>
                 <div className="lg:col-span-12">
                   <MediaGallery media={identitySection.media} alt="Identity" />
@@ -904,31 +917,24 @@ export function AboutPageNew() {
             <div className={containerClass}>
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-16 items-start">
                 <div className="lg:col-span-7 order-2 lg:order-1">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-none">
-                    <ProductCardReveal
-                      direction="down"
-                      duration={1.3}
-                      delay={0.15}
-                      className="w-full h-full"
-                    >
-                      <OptimizedImage
-                        key={qualitySection.image}
-                        src={qualitySection.image}
-                        srcMobile={qualitySection.imageMobile || undefined}
-                        fallbackSrc={DEFAULT_IMAGES.quality}
-                        alt="Quality"
-                        className="w-full h-full object-cover"
-                        crop={qualitySection.crop}
-                        hotspot={qualitySection.hotspot}
-                        origWidth={qualitySection.origWidth}
-                        origHeight={qualitySection.origHeight}
-                        cropMobile={qualitySection.cropMobile}
-                        hotspotMobile={qualitySection.hotspotMobile}
-                        origWidthMobile={qualitySection.origWidthMobile}
-                        origHeightMobile={qualitySection.origHeightMobile}
-                      />
-                    </ProductCardReveal>
-                  </div>
+                  <AboutImageCard aspectRatio="aspect-[4/3]">
+                    <OptimizedImage
+                      key={qualitySection.image}
+                      src={qualitySection.image}
+                      srcMobile={qualitySection.imageMobile || undefined}
+                      fallbackSrc={DEFAULT_IMAGES.quality}
+                      alt="Quality"
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                      crop={qualitySection.crop}
+                      hotspot={qualitySection.hotspot}
+                      origWidth={qualitySection.origWidth}
+                      origHeight={qualitySection.origHeight}
+                      cropMobile={qualitySection.cropMobile}
+                      hotspotMobile={qualitySection.hotspotMobile}
+                      origWidthMobile={qualitySection.origWidthMobile}
+                      origHeightMobile={qualitySection.origHeightMobile}
+                    />
+                  </AboutImageCard>
                 </div>
                 <div className="lg:col-span-5 order-1 lg:order-2 space-y-4 sm:space-y-8">
                   <div>
@@ -995,63 +1001,56 @@ export function AboutPageNew() {
                           className="w-[82vw] max-w-[310px] flex-shrink-0 snap-center border border-neutral-500/40 bg-[var(--bg-secondary)] p-5 rounded-none flex flex-col justify-between shadow-sm"
                         >
                           <div className="space-y-4">
-                            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-none grayscale">
-                              <ProductCardReveal
-                                direction="down"
-                                duration={1.2}
-                                delay={0.08 + idx * 0.05}
-                                className="w-full h-full"
-                              >
-                                <OptimizedImage
-                                  src={dImgUrl}
-                                  fallbackSrc={DEFAULT_IMAGES.identity}
-                                  alt={dName}
-                                  className="w-full h-full object-cover grayscale"
-                                  crop={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.cropDesktop || designer.image.crop
-                                      : undefined
-                                  }
-                                  hotspot={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.hotspotDesktop || designer.image.hotspot
-                                      : undefined
-                                  }
-                                  origWidth={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.origWidthDesktop || designer.image.origWidth
-                                      : undefined
-                                  }
-                                  origHeight={
-                                    typeof designer.image === 'object'
-                                      ? designer.image.origHeightDesktop ||
-                                        designer.image.origHeight
-                                      : undefined
-                                  }
-                                />
-                              </ProductCardReveal>
-                            </div>
-                            <div className="space-y-2">
-                              {dRoleText && (
-                                <TextMaskReveal delay={80}>
-                                  <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] block font-light">
-                                    {dRoleText}
-                                  </span>
-                                </TextMaskReveal>
-                              )}
-                              <TextMaskReveal delay={120}>
-                                <h3 className="font-outfit text-xl font-light uppercase tracking-tight text-[var(--text-primary)]">
-                                  {dName}
-                                </h3>
+                            <AboutImageCard index={idx} aspectRatio="aspect-[3/4]" className="grayscale">
+                              <OptimizedImage
+                                src={dImgUrl}
+                                fallbackSrc={DEFAULT_IMAGES.identity}
+                                alt={dName}
+                                className="w-full h-full object-cover grayscale transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                                crop={
+                                  typeof designer.image === 'object'
+                                    ? designer.image.cropDesktop || designer.image.crop
+                                    : undefined
+                                }
+                                hotspot={
+                                  typeof designer.image === 'object'
+                                    ? designer.image.hotspotDesktop || designer.image.hotspot
+                                    : undefined
+                                }
+                                origWidth={
+                                  typeof designer.image === 'object'
+                                    ? designer.image.origWidthDesktop || designer.image.origWidth
+                                    : undefined
+                                }
+                                origHeight={
+                                  typeof designer.image === 'object'
+                                    ? designer.image.origHeightDesktop ||
+                                      designer.image.origHeight
+                                    : undefined
+                                }
+                              />
+                            </AboutImageCard>
+                          </div>
+                          <div className="space-y-2">
+                            {dRoleText && (
+                              <TextMaskReveal delay={80}>
+                                <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] block font-light">
+                                  {dRoleText}
+                                </span>
                               </TextMaskReveal>
-                              {dBioText && (
-                                <TextMaskReveal delay={160}>
-                                  <p className="text-xs text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3 whitespace-pre-line">
-                                    {dBioText}
-                                  </p>
-                                </TextMaskReveal>
-                              )}
-                            </div>
+                            )}
+                            <TextMaskReveal delay={120}>
+                              <h3 className="font-outfit text-xl font-light uppercase tracking-tight text-[var(--text-primary)]">
+                                {dName}
+                              </h3>
+                            </TextMaskReveal>
+                            {dBioText && (
+                              <TextMaskReveal delay={160}>
+                                <p className="text-xs text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3 whitespace-pre-line">
+                                  {dBioText}
+                                </p>
+                              </TextMaskReveal>
+                            )}
                           </div>
 
                           <TextMaskReveal delay={200}>
@@ -1208,13 +1207,8 @@ export function AboutPageNew() {
                               transition={{duration: 0.3}}
                               className="grid grid-cols-12 gap-8 items-center h-full"
                             >
-                              <div className="col-span-6 relative aspect-[3/4] overflow-hidden rounded-none grayscale">
-                                <ProductCardReveal
-                                  direction="down"
-                                  duration={1.2}
-                                  delay={0.1}
-                                  className="w-full h-full"
-                                >
+                              <div className="col-span-6 grayscale">
+                                <AboutImageCard aspectRatio="aspect-[3/4]" className="grayscale">
                                   <OptimizedImage
                                     src={currentImgUrl}
                                     srcMobile={
@@ -1229,7 +1223,7 @@ export function AboutPageNew() {
                                     }
                                     fallbackSrc={DEFAULT_IMAGES.identity}
                                     alt={getPlainText(t(currentDesigner.name))}
-                                    className="w-full h-full object-cover grayscale"
+                                    className="w-full h-full object-cover grayscale transition-transform duration-700 ease-out group-hover:scale-[1.015]"
                                     crop={
                                       typeof currentDesigner.image === 'object'
                                         ? currentDesigner.image.crop
@@ -1291,7 +1285,7 @@ export function AboutPageNew() {
                                         : undefined
                                     }
                                   />
-                                </ProductCardReveal>
+                                </AboutImageCard>
                               </div>
 
                               <div className="col-span-6 flex flex-col justify-between h-full space-y-6">

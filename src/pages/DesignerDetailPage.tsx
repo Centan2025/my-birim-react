@@ -1,5 +1,6 @@
 import {useEffect, useState, useRef} from 'react'
 import {useParams, useLocation} from 'react-router-dom'
+import {motion} from 'framer-motion'
 import {ProductCard} from '../components/ProductCard'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
@@ -180,16 +181,31 @@ export function DesignerDetailPage() {
           {...(!isMobile ? {'data-lenis-prevent': true} : {})}
         >
           <div className="flex-1 relative mt-0 flex items-start justify-center overflow-visible">
-            <div
+            <motion.div
               ref={imageRef}
-              className="relative w-full h-[95%] lg:h-[95%] xl:h-full max-h-[900px] z-10 flex items-center justify-center"
+              initial={fromCard ? {opacity: 1} : {opacity: 0, y: 50, scale: 0.92}}
+              animate={{
+                opacity: phase === 'animating' ? 0 : 1,
+                y: 0,
+                scale: 1,
+              }}
+              transition={
+                fromCard
+                  ? {duration: 0}
+                  : {
+                      y: {duration: 0.92, ease: [0.16, 1, 0.3, 1]},
+                      scale: {duration: 0.84, ease: [0.45, 0, 0.2, 1]},
+                      opacity: {duration: 0.68, ease: 'easeOut'},
+                    }
+              }
+              className={`relative w-full h-[95%] lg:h-[95%] xl:h-full max-h-[900px] z-10 flex items-center justify-center overflow-hidden ${imageBorderClass}`}
             >
               {isBirimStudio ? (
                 <div
-                  className={`w-full h-full min-h-[360px] flex flex-col items-center justify-center p-8 sm:p-16 relative bg-gradient-to-b from-neutral-900 via-neutral-950 to-neutral-900 border border-white/10 select-none ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
+                  className={`w-full h-full min-h-[360px] flex flex-col items-center justify-center p-8 sm:p-16 relative bg-gradient-to-b from-neutral-900 via-neutral-950 to-neutral-900 border border-white/10 select-none ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/[0.08] via-transparent to-transparent pointer-events-none" />
-                  <div className="w-full max-w-[280px] sm:max-w-[360px] flex items-center justify-center px-4 relative z-10 transition-transform duration-700 ease-out group-hover:scale-105">
+                  <div className="w-full max-w-[280px] sm:max-w-[360px] flex items-center justify-center px-4 relative z-10">
                     <SiteLogo
                       logoUrl={settings?.logoUrl}
                       className="w-full h-auto object-contain brightness-100"
@@ -212,7 +228,7 @@ export function DesignerDetailPage() {
                       : designer.imageDesktop
                   }
                   alt={t(designer.name)}
-                  className={`w-full h-full object-cover grayscale contrast-[0.95] brightness-[1.07] ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
+                  className={`w-full h-full object-cover grayscale contrast-[0.95] brightness-[1.07] ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
                   loading="eager"
                   quality={90}
                   crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
@@ -251,7 +267,7 @@ export function DesignerDetailPage() {
                   }
                 />
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
 
@@ -336,13 +352,7 @@ export function DesignerDetailPage() {
                 {products.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-8">
                     {products.map((product, index) => (
-                      <ScrollReveal
-                        key={product.id}
-                        delay={index < 8 ? index * 100 : 0}
-                        threshold={0.01}
-                      >
-                        <ProductCard product={product} />
-                      </ScrollReveal>
+                      <ProductCard key={product.id} product={product} index={index} />
                     ))}
                   </div>
                 ) : (

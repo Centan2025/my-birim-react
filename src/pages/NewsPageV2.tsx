@@ -1,7 +1,7 @@
-import {useState, useMemo} from 'react'
+import React, {useState, useMemo, useRef, forwardRef, useImperativeHandle} from 'react'
 import {Link} from 'react-router-dom'
-import {motion} from 'framer-motion'
-import {ArrowRight, Search, X} from 'lucide-react'
+import {motion, useInView, AnimatePresence} from 'framer-motion'
+import {Search, X} from 'lucide-react'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
@@ -10,10 +10,134 @@ import {useNews} from '../hooks/useNews'
 import {useSEO} from '../hooks/useSEO'
 import {TextMaskReveal} from '../components/TextMaskReveal'
 
+const ArrowRight = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M16 6 22 12" />
+    <path d="M22 12H2" />
+  </svg>
+)
+
 interface CategoryObj {
   tr?: string
   en?: string
 }
+
+type ProcessedNewsItem = NonNullable<ReturnType<typeof useNews>['data']>[number] & {
+  imageUrl: string
+  categoryLabel: string
+}
+
+interface NewsCardV2ItemProps {
+  item: ProcessedNewsItem
+  index: number
+  isTr: boolean
+}
+
+const NewsCardV2Item = forwardRef<HTMLDivElement, NewsCardV2ItemProps>(
+  function NewsCardV2Item({item, index, isTr}, forwardedRef) {
+    const localRef = useRef<HTMLDivElement>(null)
+    useImperativeHandle(forwardedRef, () => localRef.current as HTMLDivElement)
+    const isInView = useInView(localRef, {once: true, amount: 0.05, margin: '0px 0px 50px 0px'})
+    const colIndex = index % 3
+    const cardDelay = index < 6 ? 0.06 + index * 0.08 : (colIndex % 3) * 0.07
+    const {t} = useTranslation()
+    const title = t(item.title)
+    const cardImage = item.imageUrl
+
+    return (
+      <motion.div
+        ref={localRef}
+        layout
+        initial={{opacity: 0, y: 45, scale: 0.92}}
+        animate={isInView ? {opacity: 1, y: 0, scale: 1} : {opacity: 0, y: 45, scale: 0.92}}
+        exit={{opacity: 0, scale: 0.9, y: 20, transition: {duration: 0.35, ease: 'easeOut'}}}
+        transition={{
+          layout: {duration: 0.5, ease: [0.16, 1, 0.3, 1]},
+          y: {
+            duration: 0.92,
+            delay: cardDelay,
+            ease: [0.16, 1, 0.3, 1],
+          },
+          scale: {
+            duration: 0.84,
+            delay: cardDelay + 0.05,
+            ease: [0.45, 0, 0.2, 1],
+          },
+          opacity: {
+            duration: 0.68,
+            delay: cardDelay,
+            ease: 'easeOut',
+          },
+        }}
+        className="h-full"
+      >
+      <article className="group relative flex flex-col h-full bg-transparent border border-black/[0.06] dark:border-white/[0.08] hover:border-black/15 dark:hover:border-white/15 transition-colors duration-300 will-change-transform">
+        <Link to={`/news/${item.id}`} className="flex flex-col h-full focus:outline-none">
+          {/* Dikey Kart Görsel Alanı (Sade, rozetsiz 4:5 Dikey Görsel) */}
+          <div className="relative w-full aspect-[4/5] overflow-hidden bg-neutral-100 dark:bg-neutral-900 select-none">
+            {cardImage ? (
+              <OptimizedImage
+                src={cardImage}
+                alt={title}
+                className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                quality={92}
+                loading={index < 3 ? 'eager' : 'lazy'}
+                crop={typeof item.mainImage === 'object' ? item.mainImage.crop : undefined}
+                hotspot={typeof item.mainImage === 'object' ? item.mainImage.hotspot : undefined}
+                origWidth={
+                  typeof item.mainImage === 'object'
+                    ? ((item.mainImage as Record<string, unknown>)['origWidth'] as number)
+                    : undefined
+                }
+                origHeight={
+                  typeof item.mainImage === 'object'
+                    ? ((item.mainImage as Record<string, unknown>)['origHeight'] as number)
+                    : undefined
+                }
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-neutral-200 dark:bg-neutral-800 text-neutral-400 font-mono text-xs">
+                BIRIM
+              </div>
+            )}
+          </div>
+
+          {/* Dikey Kart Tipografi Alanı (Kategori, Başlık ve Haberi Oku Butonu) */}
+          <div className="flex flex-col flex-grow p-6 sm:p-7 justify-between gap-5">
+            <div className="flex flex-col gap-2">
+              {/* Kategori Etiketi */}
+              <span className="text-[11px] font-mono tracking-wide uppercase text-neutral-400 dark:text-neutral-500 font-light">
+                {item.categoryLabel}
+              </span>
+
+              {/* Başlık */}
+              <h2 className="text-lg sm:text-xl font-light text-[var(--text-primary)] group-hover:text-black dark:group-hover:text-white transition-colors duration-300 leading-snug uppercase tracking-tight font-sans line-clamp-2">
+                {title}
+              </h2>
+            </div>
+
+            {/* Haberin Detayı Butonu */}
+            <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between">
+              <span className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wide font-medium text-[var(--text-primary)]">
+                <span>{isTr ? 'Haberin Detayı' : 'Article Details'}</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[var(--text-primary)] transition-transform duration-300 group-hover:translate-x-0.5" />
+              </span>
+            </div>
+          </div>
+        </Link>
+      </article>
+    </motion.div>
+  )
+})
 
 const getCategoryLabel = (
   category: unknown,
@@ -224,7 +348,7 @@ export function NewsPageV2() {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`text-xs md:text-sm font-mono tracking-widest uppercase transition-all duration-300 relative py-1.5 whitespace-nowrap cursor-pointer ${
+                  className={`text-xs md:text-sm font-mono tracking-wide uppercase transition-colors duration-200 relative py-1.5 whitespace-nowrap cursor-pointer ${
                     isActive
                       ? 'text-[var(--text-primary)] font-medium'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -232,7 +356,11 @@ export function NewsPageV2() {
                 >
                   <span>{cat.label}</span>
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--text-primary)] animate-scale-x" />
+                    <motion.span
+                      layoutId="activeCategoryBorderV2"
+                      className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[var(--text-primary)]"
+                      transition={{type: 'spring', stiffness: 420, damping: 32}}
+                    />
                   )}
                 </button>
               )
@@ -285,85 +413,11 @@ export function NewsPageV2() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 lg:gap-12">
-            {filteredNews.map((item, index) => {
-              const title = t(item.title)
-              const cardImage = item.imageUrl
-
-              return (
-                <motion.article
-                  key={item.id}
-                  initial={{opacity: 0, y: 35}}
-                  whileInView={{opacity: 1, y: 0}}
-                  viewport={{once: true, margin: '-40px'}}
-                  transition={{
-                    duration: 0.65,
-                    ease: [0.22, 1, 0.36, 1],
-                    delay: Math.min((index % 6) * 0.08, 0.45),
-                  }}
-                  className="group relative flex flex-col h-full bg-transparent border border-black/[0.06] dark:border-white/[0.08] hover:border-black/20 dark:hover:border-white/25 transition-colors duration-300"
-                >
-                  <Link to={`/news/${item.id}`} className="flex flex-col h-full focus:outline-none">
-                    {/* Dikey Kart Görsel Alanı (Sade, rozetsiz 4:5 Dikey Görsel) */}
-                    <div className="relative w-full aspect-[4/5] overflow-hidden bg-neutral-100 dark:bg-neutral-900 select-none">
-                      {cardImage ? (
-                        <OptimizedImage
-                          src={cardImage}
-                          alt={title}
-                          className="w-full h-full object-cover object-center group-hover:opacity-95 transition-opacity duration-300"
-                          quality={90}
-                          loading={index < 3 ? 'eager' : 'lazy'}
-                          crop={
-                            typeof item.mainImage === 'object' ? item.mainImage.crop : undefined
-                          }
-                          hotspot={
-                            typeof item.mainImage === 'object' ? item.mainImage.hotspot : undefined
-                          }
-                          origWidth={
-                            typeof item.mainImage === 'object'
-                              ? ((item.mainImage as Record<string, unknown>)['origWidth'] as number)
-                              : undefined
-                          }
-                          origHeight={
-                            typeof item.mainImage === 'object'
-                              ? ((item.mainImage as Record<string, unknown>)[
-                                  'origHeight'
-                                ] as number)
-                              : undefined
-                          }
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-neutral-200 dark:bg-neutral-800 text-neutral-400 font-mono text-xs">
-                          BIRIM
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Dikey Kart Tipografi Alanı (Kategori, Başlık ve Haberi Oku Butonu) */}
-                    <div className="flex flex-col flex-grow p-6 sm:p-7 justify-between gap-5">
-                      <div className="flex flex-col gap-2">
-                        {/* Kategori Etiketi */}
-                        <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-neutral-400 dark:text-neutral-500 font-light">
-                          {item.categoryLabel}
-                        </span>
-
-                        {/* Başlık */}
-                        <h2 className="text-lg sm:text-xl font-light text-[var(--text-primary)] group-hover:text-black dark:group-hover:text-white transition-colors duration-300 leading-snug uppercase tracking-tight font-sans line-clamp-2">
-                          {title}
-                        </h2>
-                      </div>
-
-                      {/* Haberi Oku Butonu */}
-                      <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between">
-                        <span className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] font-medium text-[var(--text-primary)]">
-                          <span>{isTr ? 'Haberi Oku' : 'Read Article'}</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-[var(--text-primary)]" />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.article>
-              )
-            })}
+            <AnimatePresence mode="popLayout">
+              {filteredNews.map((item, index) => (
+                <NewsCardV2Item key={item.id} item={item} index={index} isTr={isTr} />
+              ))}
+            </AnimatePresence>
           </div>
         )}
       </main>
@@ -372,3 +426,4 @@ export function NewsPageV2() {
 }
 
 export default NewsPageV2
+

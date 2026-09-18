@@ -7,7 +7,6 @@ import PortableTextLite from '../PortableTextLite'
 import type {Category, Designer, LocalizedString, Product, ProductMaterialsGroup} from '../../types'
 import {ProductPdfButton} from './ProductPdfButton'
 import {DetailSelectionCTA} from '../seckim/DetailSelectionCTA'
-import {formatCurrency} from '../../utils/currency'
 import {isProductShopEligible, getShopProductUrl, getShopCtaLabel} from '../../utils/shopBridge'
 
 const ArrowLeft = (props: React.SVGProps<SVGSVGElement>) => (
@@ -113,14 +112,6 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
             )}
           </div>
         </div>
-      )}
-
-      {product.buyable && product.price && product.price > 0 && (
-        <TextMaskReveal delay={120}>
-          <p className="text-3xl font-medium text-gray-900 dark:text-gray-100">
-            {formatCurrency(product.price, product.currency, locale)}
-          </p>
-        </TextMaskReveal>
       )}
 
       <div>

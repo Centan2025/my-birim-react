@@ -21,16 +21,17 @@ export const isFullscreenDarkPage = (p: string, searchParam?: string): boolean =
     }
   }
 
-  // Tasarımcılar V2 sayfası (koyu / tam ekran editoryal akış)
-  if (path.startsWith('/designers')) {
-    if (
-      search.includes('v=2') ||
-      search.includes('v=v2') ||
-      (typeof window !== 'undefined' &&
-        localStorage.getItem('birim_designers_view_version') === 'v2')
-    ) {
-      return true
-    }
+  // Tasarımcılar sayfası (koyu / tam ekran editoryal akış - Header şeffaf ve beyaz elemanlar)
+  if (
+    path === '/designers' ||
+    path === '/designers/' ||
+    path === '/tasarimcilar' ||
+    path === '/tasarimcilar/' ||
+    path.startsWith('/designers-v') ||
+    path.startsWith('/tasarimcilar-v') ||
+    (path.startsWith('/designers') && !path.startsWith('/designer/'))
+  ) {
+    return true
   }
 
   return false

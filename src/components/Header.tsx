@@ -1443,7 +1443,7 @@ export function Header() {
                   </button>
 
                   <div
-                    className="flex items-end pb-0 pt-2 h-[1.25rem] box-content"
+                    className="flex items-center pb-0 pt-2 h-[1.25rem] box-content"
                     style={{
                       lineHeight: '1.25rem',
                     }}
@@ -1459,13 +1459,13 @@ export function Header() {
                               langCode === 'tr' ? 'Türkçe diline geç' : 'Switch to English'
                             }
                             aria-current={isActive ? 'true' : undefined}
-                            className="relative uppercase transition-opacity duration-300 hover:opacity-100 flex items-end pb-[1px]"
+                            className="relative uppercase transition-opacity duration-300 hover:opacity-100 flex items-center"
                             style={{
                               fontWeight: 600,
                               fontFamily: "'Inter', sans-serif",
                               letterSpacing: '0.025em',
                               fontSize: 'clamp(9.5px, 0.22rem + 0.45vw, 11px)',
-                              lineHeight: '1',
+                              lineHeight: '1.25rem',
                               color: isActive
                                 ? headerForegroundColor
                                 : `${headerForegroundColor}80`, // 50% opacity for inactive
@@ -1477,11 +1477,11 @@ export function Header() {
                           </button>
                           {!isLast && (
                             <span
-                              className="mx-1 flex items-end pb-[1px] select-none"
+                              className="mx-1 flex items-center select-none"
                               style={{
                                 color: `${headerForegroundColor}40`,
                                 fontSize: 'clamp(9.5px, 0.22rem + 0.45vw, 11px)',
-                                lineHeight: '1',
+                                lineHeight: '1.25rem',
                                 transition: colorTransition,
                               }}
                             >

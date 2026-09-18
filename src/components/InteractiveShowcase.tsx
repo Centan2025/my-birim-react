@@ -167,7 +167,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     if (!container) return
 
     const handleTouchStart = (e: TouchEvent) => {
-      if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
+      if (e.target instanceof HTMLElement && e.target.closest('a, button, [role="dialog"]')) {
         return
       }
       if (!e.touches || e.touches.length === 0) return
@@ -232,6 +232,19 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     setActiveHotspot(null)
   }, [activeIndex])
 
+  // Close popover / drawer on window or document scroll
+  useEffect(() => {
+    if (!activeHotspot) return
+    const handleScroll = (e: Event) => {
+      if (e.target instanceof HTMLElement && e.target.closest('[role="dialog"]')) {
+        return
+      }
+      setActiveHotspot(null)
+    }
+    window.addEventListener('scroll', handleScroll, {passive: true})
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [activeHotspot])
+
   // ESC key listener to close popover
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -292,7 +305,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
   const handleDragStart = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
-    if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
+    if (e.target instanceof HTMLElement && e.target.closest('a, button, [role="dialog"]')) {
       return
     }
     resetCloneIfNeeded()
@@ -465,6 +478,8 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                           key={hsIdx}
                           className="absolute pointer-events-auto -translate-x-1/2 -translate-y-1/2"
                           style={{left: `${hs.x}%`, top: `${hs.y}%`}}
+                          onMouseDown={e => e.stopPropagation()}
+                          onTouchStart={e => e.stopPropagation()}
                         >
                           {/* Modern Hotspot Pin Button */}
                           <button
@@ -516,16 +531,19 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                                 initial={{
                                   opacity: 0,
                                   scale: 0.88,
+                                  x: hs.x > 70 ? 0 : hs.x < 30 ? 0 : '-50%',
                                   y: hs.y > 60 ? 14 : -14,
                                 }}
                                 animate={{
                                   opacity: 1,
                                   scale: 1,
+                                  x: hs.x > 70 ? 0 : hs.x < 30 ? 0 : '-50%',
                                   y: 0,
                                 }}
                                 exit={{
                                   opacity: 0,
                                   scale: 0.92,
+                                  x: hs.x > 70 ? 0 : hs.x < 30 ? 0 : '-50%',
                                   y: hs.y > 60 ? 8 : -8,
                                 }}
                                 transition={{
@@ -543,9 +561,11 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                                     ? 'right-0'
                                     : hs.x < 30
                                       ? 'left-0'
-                                      : 'left-1/2 -translate-x-1/2'
+                                      : 'left-1/2'
                                 }`}
                                 onClick={e => e.stopPropagation()}
+                                onMouseDown={e => e.stopPropagation()}
+                                onTouchStart={e => e.stopPropagation()}
                                 onKeyDown={e => {
                                   if (e.key === 'Escape') {
                                     e.stopPropagation()
@@ -737,6 +757,14 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
             initial={{opacity: 0, y: '100%'}}
             animate={{opacity: 1, y: 0}}
             exit={{opacity: 0, y: '100%'}}
+            drag="y"
+            dragConstraints={{top: 0}}
+            dragElastic={{top: 0, bottom: 0.5}}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 50 || info.velocity.y > 300) {
+                setActiveHotspot(null)
+              }
+            }}
             transition={{
               type: 'spring',
               damping: 28,
@@ -745,7 +773,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
             }}
             role="dialog"
             aria-label="Mobile Hotspot details"
-            className="fixed inset-x-0 bottom-0 z-50 p-5 bg-white text-neutral-900 border-t-2 border-neutral-900 shadow-2xl rounded-none"
+            className="fixed inset-x-0 bottom-0 z-50 p-5 bg-white text-neutral-900 border-t-2 border-neutral-900 shadow-2xl rounded-none touch-none"
             onClick={e => e.stopPropagation()}
             onKeyDown={e => {
               if (e.key === 'Escape') {

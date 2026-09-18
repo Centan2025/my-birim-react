@@ -294,7 +294,7 @@ export function NewsPageV1() {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`text-xs md:text-sm font-mono tracking-widest uppercase transition-all duration-300 relative py-1 whitespace-nowrap ${
+                  className={`text-xs md:text-sm font-mono tracking-wide uppercase transition-all duration-300 relative py-1 whitespace-nowrap ${
                     isActive
                       ? 'text-[var(--text-primary)] font-medium'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'

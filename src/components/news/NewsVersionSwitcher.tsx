@@ -3,8 +3,8 @@ import {motion} from 'framer-motion'
 import {useTranslation} from '../../i18n'
 
 export interface NewsVersionSwitcherProps {
-  activeVersion: 'v1' | 'v2' | 'v3'
-  onChange: (version: 'v1' | 'v2' | 'v3') => void
+  activeVersion: 'v2' | 'v3'
+  onChange: (version: 'v2' | 'v3') => void
 }
 
 export const NewsVersionSwitcher: React.FC<NewsVersionSwitcherProps> = ({
@@ -14,8 +14,7 @@ export const NewsVersionSwitcher: React.FC<NewsVersionSwitcherProps> = ({
   const {locale} = useTranslation()
   const isTr = locale === 'tr'
 
-  const versions: {id: 'v1' | 'v2' | 'v3'; label: string; descTr: string; descEn: string}[] = [
-    {id: 'v1', label: 'V1', descTr: 'Klasik', descEn: 'Classic'},
+  const versions: {id: 'v2' | 'v3'; label: string; descTr: string; descEn: string}[] = [
     {id: 'v2', label: 'V2', descTr: 'Dikey Kart', descEn: 'Vertical'},
     {id: 'v3', label: 'V3', descTr: 'Dizin', descEn: 'Index'},
   ]

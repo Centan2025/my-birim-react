@@ -153,4 +153,16 @@ describe('useHeaderBackgroundColor', () => {
     )
     expect(projectsV4.result.current).toBe('transparent')
   })
+
+  it('tasarımcılar sayfasında header şeffaf (transparent) arka plan döndürmeli', () => {
+    const designersPage = renderHook(
+      () =>
+        useHeaderBackgroundColor({
+          ...baseParams,
+          isLightMode: false,
+        }),
+      {wrapper: wrapper('/designers')}
+    )
+    expect(designersPage.result.current).toBe('transparent')
+  })
 })

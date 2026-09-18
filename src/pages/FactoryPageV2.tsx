@@ -1,5 +1,5 @@
 import {useState, useEffect, useMemo, useRef} from 'react'
-import {motion, AnimatePresence, useReducedMotion, type Variants} from 'framer-motion'
+import {motion, AnimatePresence, useInView} from 'framer-motion'
 import {Link} from 'react-router-dom'
 import {getFactoryPageContent} from '../services/cms'
 import {mapImage} from '../services/sanity/client'
@@ -12,43 +12,52 @@ import {useHeaderTheme} from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
 import {TextMaskReveal} from '../components/TextMaskReveal'
 import {TextLineReveal} from '../components/TextLineReveal'
-import {ProductCardReveal} from '../components/ProductCardReveal'
 import PortableTextLite from '../components/PortableTextLite'
 import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer/FullscreenMediaViewer'
 
-const itemVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 40,
-  },
-  visible: (i: number = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.85,
-      delay: (i % 3) * 0.09,
-      ease: [0.215, 0.61, 0.355, 1],
-    },
-  }),
+interface FactoryMediaCardProps {
+  index: number
+  children: React.ReactNode
+  className?: string
+  onClick?: () => void
 }
 
-const getMediaZoomVariants = (reduceMotion: boolean): Variants => ({
-  hidden: {
-    scale: reduceMotion ? 1 : 1.22,
-    originX: 0,
-    originY: 0.5,
-  },
-  visible: (i: number = 0) => ({
-    scale: 1,
-    originX: 0,
-    originY: 0.5,
-    transition: {
-      duration: reduceMotion ? 0.01 : 1.25,
-      delay: reduceMotion ? 0 : (i % 3) * 0.09,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  }),
-})
+function FactoryMediaCard({index, children, className = '', onClick}: FactoryMediaCardProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, {once: true, amount: 0.05, margin: '0px 0px 50px 0px'})
+  const colIndex = index % 3
+  const cardDelay = index < 6 ? 0.06 + index * 0.08 : (colIndex % 3) * 0.07
+
+  return (
+    <div ref={ref} className="h-full w-full">
+      <motion.div
+        initial={{opacity: 0, y: 55, scale: 0.89}}
+        animate={isInView ? {opacity: 1, y: 0, scale: 1} : {opacity: 0, y: 55, scale: 0.89}}
+        transition={{
+          y: {
+            duration: 0.92,
+            delay: cardDelay,
+            ease: [0.16, 1, 0.3, 1],
+          },
+          scale: {
+            duration: 0.84,
+            delay: cardDelay + 0.05,
+            ease: [0.45, 0, 0.2, 1],
+          },
+          opacity: {
+            duration: 0.68,
+            delay: cardDelay,
+            ease: 'easeOut',
+          },
+        }}
+        onClick={onClick}
+        className={`h-full w-full will-change-transform ${className}`}
+      >
+        {children}
+      </motion.div>
+    </div>
+  )
+}
 
 const containerClass =
   'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[82vw] mx-auto px-4 md:px-8 lg:px-0'
@@ -210,11 +219,6 @@ export function FactoryPageV2() {
   const {t, locale} = useTranslation()
   const isTr = locale === 'tr'
   const {setBrightness, reset} = useHeaderTheme()
-  const shouldReduceMotion = Boolean(useReducedMotion())
-  const mediaZoomVariants = useMemo(
-    () => getMediaZoomVariants(shouldReduceMotion),
-    [shouldReduceMotion]
-  )
 
   useEffect(() => {
     let isMounted = true
@@ -667,33 +671,28 @@ export function FactoryPageV2() {
                         )}
                       </div>
 
-                      {/* Kart Görseli - Yandan gelen (direction="left") curtain animasyonu */}
-                      <div
-                        className="relative aspect-[16/10] overflow-hidden bg-black/10 cursor-pointer group shadow-sm"
-                        onClick={() => openViewer(idx % galleryItems.length)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            openViewer(idx % galleryItems.length)
-                          }
-                        }}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        <ProductCardReveal
-                          direction="left"
-                          duration={1.1}
-                          delay={0.1}
-                          className="w-full h-full"
+                      {/* Kart Görseli - Haberler V2 usulü yükselen ve açılan animasyon */}
+                      <FactoryMediaCard index={idx}>
+                        <div
+                          className="relative aspect-[16/10] overflow-hidden bg-black/10 cursor-pointer group shadow-sm"
+                          onClick={() => openViewer(idx % galleryItems.length)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              openViewer(idx % galleryItems.length)
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
                         >
                           <OptimizedImage
                             src={item.image || item.fallbackImage}
                             fallbackSrc={item.fallbackImage}
                             alt={item.title}
-                            className="w-full h-full object-cover brightness-[0.96] group-hover:brightness-100 transition-[filter] duration-500 ease-out"
+                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
                           />
-                        </ProductCardReveal>
-                      </div>
+                        </div>
+                      </FactoryMediaCard>
 
                       {/* Açıklama Metni - Görselin altında */}
                       {item.description && (
@@ -849,33 +848,27 @@ export function FactoryPageV2() {
                   </div>
 
                   <div className="col-span-7">
-                    <div
-                      className="relative aspect-[16/10] overflow-hidden bg-black/10 cursor-pointer group shadow-sm"
-                      onClick={() => openViewer(activeDisciplineIndex % galleryItems.length)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          openViewer(activeDisciplineIndex % galleryItems.length)
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <ProductCardReveal
-                        key={activeDiscipline.id}
-                        direction="left"
-                        duration={1.2}
-                        delay={0.1}
-                        className="w-full h-full"
+                    <FactoryMediaCard index={0} key={activeDiscipline.id}>
+                      <div
+                        className="relative aspect-[16/10] overflow-hidden bg-black/10 cursor-pointer group shadow-sm"
+                        onClick={() => openViewer(activeDisciplineIndex % galleryItems.length)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            openViewer(activeDisciplineIndex % galleryItems.length)
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
                       >
                         <OptimizedImage
                           src={currentDisciplineImage}
                           fallbackSrc={activeDiscipline.fallbackImage}
                           alt={activeDiscipline.title}
-                          className="w-full h-full object-cover brightness-[0.96] group-hover:brightness-100 transition-[filter] duration-500 ease-out"
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
                         />
-                      </ProductCardReveal>
-                    </div>
+                      </div>
+                    </FactoryMediaCard>
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -1004,15 +997,7 @@ export function FactoryPageV2() {
                   typeof m.caption === 'string' ? m.caption : m.caption ? String(m.caption) : ''
                 const fallbackAlt = (t('factory') as string) || 'Factory'
                 return (
-                  <motion.div
-                    key={idx}
-                    variants={itemVariants}
-                    custom={idx}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{once: true, amount: 0.12, margin: '0px 0px -30px 0px'}}
-                    className="overflow-hidden"
-                  >
+                  <FactoryMediaCard key={idx} index={idx}>
                     <div
                       className="relative aspect-[16/10] overflow-hidden bg-[var(--bg-secondary)] cursor-pointer group shadow-sm"
                       onClick={() => openViewer(idx)}
@@ -1025,52 +1010,45 @@ export function FactoryPageV2() {
                       role="button"
                       tabIndex={0}
                     >
-                      <motion.div
-                        variants={mediaZoomVariants}
-                        custom={idx}
-                        className="w-full h-full transform-gpu origin-left"
-                        style={{transformOrigin: 'left center'}}
-                      >
-                        {m.type === 'video' || m.type === 'youtube' ? (
-                          <div className="w-full h-full relative">
-                            <video
-                              src={m.url}
-                              className="w-full h-full object-cover"
-                              autoPlay
-                              muted
-                              loop
-                              playsInline
-                            />
-                            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-500 flex items-center justify-center">
-                              <div className="w-12 h-12 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-90 transition-opacity">
-                                <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
-                              </div>
+                      {m.type === 'video' || m.type === 'youtube' ? (
+                        <div className="w-full h-full relative">
+                          <video
+                            src={m.url}
+                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                          />
+                          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-500 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full border border-white/60 flex items-center justify-center backdrop-blur-sm opacity-90 transition-opacity">
+                              <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-0.5" />
                             </div>
                           </div>
-                        ) : (
-                          <div className="w-full h-full relative">
-                            <OptimizedImage
-                              src={m.url}
-                              fallbackSrc={DEFAULT_FACTORY_IMAGES.hero}
-                              srcMobile={m.urlMobile}
-                              srcDesktop={m.urlDesktop}
-                              alt={captionText || `${fallbackAlt} ${idx + 1}`}
-                              className="w-full h-full object-cover brightness-[0.96] group-hover:brightness-100 transition-[filter] duration-500 ease-out"
-                              crop={m.crop}
-                              hotspot={m.hotspot}
-                              origWidth={m.origWidth as number}
-                              origHeight={m.origHeight as number}
-                            />
-                            {captionText && (
-                              <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/70 to-transparent text-white text-xs font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                                {captionText}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </motion.div>
+                        </div>
+                      ) : (
+                        <div className="w-full h-full relative">
+                          <OptimizedImage
+                            src={m.url}
+                            fallbackSrc={DEFAULT_FACTORY_IMAGES.hero}
+                            srcMobile={m.urlMobile}
+                            srcDesktop={m.urlDesktop}
+                            alt={captionText || `${fallbackAlt} ${idx + 1}`}
+                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                            crop={m.crop}
+                            hotspot={m.hotspot}
+                            origWidth={m.origWidth as number}
+                            origHeight={m.origHeight as number}
+                          />
+                          {captionText && (
+                            <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/70 to-transparent text-white text-xs font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                              {captionText}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </motion.div>
+                  </FactoryMediaCard>
                 )
               })}
             </div>

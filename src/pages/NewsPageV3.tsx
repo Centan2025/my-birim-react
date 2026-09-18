@@ -1,6 +1,7 @@
-import {useState, useMemo} from 'react'
+import React, {useState, useMemo} from 'react'
 import {Link} from 'react-router-dom'
-import {ArrowRight, Search, X} from 'lucide-react'
+import {motion} from 'framer-motion'
+import {Search, X} from 'lucide-react'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
@@ -8,6 +9,22 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useNews} from '../hooks/useNews'
 import {useSEO} from '../hooks/useSEO'
 import {TextMaskReveal} from '../components/TextMaskReveal'
+
+const ArrowRight = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M16 6 22 12" />
+    <path d="M22 12H2" />
+  </svg>
+)
 
 interface CategoryObj {
   tr?: string
@@ -233,7 +250,7 @@ export function NewsPageV3() {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`text-xs md:text-sm font-mono tracking-widest uppercase transition-all duration-300 relative py-1.5 whitespace-nowrap cursor-pointer ${
+                  className={`text-xs md:text-sm font-mono tracking-wide uppercase transition-colors duration-200 relative py-1.5 whitespace-nowrap cursor-pointer ${
                     isActive
                       ? 'text-[var(--text-primary)] font-medium'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -241,7 +258,11 @@ export function NewsPageV3() {
                 >
                   <span>{cat.label}</span>
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--text-primary)] animate-scale-x" />
+                    <motion.span
+                      layoutId="activeCategoryBorderV3"
+                      className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[var(--text-primary)]"
+                      transition={{type: 'spring', stiffness: 420, damping: 32}}
+                    />
                   )}
                 </button>
               )
@@ -422,9 +443,9 @@ export function NewsPageV3() {
                         {title}
                       </h2>
 
-                      {/* Haberi Oku Butonu */}
+                      {/* Haberin Detayı Butonu */}
                       <div className="pt-2 flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] font-medium text-[var(--text-primary)]">
-                        <span>{isTr ? 'Haberi Oku' : 'Read Article'}</span>
+                        <span>{isTr ? 'Haberin Detayı' : 'Article Details'}</span>
                         <ArrowRight className="w-3.5 h-3.5 text-[var(--text-primary)]" />
                       </div>
                     </Link>

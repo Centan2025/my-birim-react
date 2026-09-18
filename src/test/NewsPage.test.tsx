@@ -73,41 +73,12 @@ describe('NewsPage', () => {
     } as unknown as ReturnType<typeof newsHooks.useNews>)
   })
 
-  it('renders V1 by default', () => {
+  it('renders NewsPage (V2) directly and hides V1 and V3 options', () => {
     renderComponent(['/news'])
     expect(screen.getByRole('heading', {level: 1})).toBeDefined()
     expect(screen.getByText('Birim Yeni Koleksiyonu Milano Tasarım Haftasında')).toBeDefined()
-    expect(screen.getByText('V1')).toBeDefined()
-    expect(screen.getByText('V2')).toBeDefined()
-    expect(screen.getByText('V3')).toBeDefined()
-  })
-
-  it('renders V2 (Dikey Kartlar) when query param v=2 is present', () => {
-    renderComponent(['/news?v=2'])
-    expect(screen.getByRole('heading', {level: 1})).toBeDefined()
+    expect(screen.queryByText('V1')).toBeNull()
+    expect(screen.queryByText('V3')).toBeNull()
     expect(screen.getByPlaceholderText('Haberlerde ara...')).toBeDefined()
-    expect(screen.getAllByText(/Haberi Oku/i).length).toBeGreaterThan(0)
-  })
-
-  it('renders V3 (Dizin) when query param v=3 is present', () => {
-    renderComponent(['/news?v=3'])
-    expect(screen.getByRole('heading', {level: 1})).toBeDefined()
-    expect(screen.getByPlaceholderText('Haberlerde ara...')).toBeDefined()
-  })
-
-  it('switches between versions on switcher click', () => {
-    renderComponent(['/news'])
-
-    const v3Button = screen.getByTitle(/V3/i)
-    fireEvent.click(v3Button)
-    expect(localStorage.getItem('birim_news_view_version')).toBe('v3')
-
-    const v2Button = screen.getByTitle(/V2/i)
-    fireEvent.click(v2Button)
-    expect(localStorage.getItem('birim_news_view_version')).toBe('v2')
-
-    const v1Button = screen.getByTitle(/V1/i)
-    fireEvent.click(v1Button)
-    expect(localStorage.getItem('birim_news_view_version')).toBe('v1')
   })
 })
