@@ -306,6 +306,7 @@ export default {
   removed_from_selections: 'Removed from your selections.',
   add_to_selection: 'Add to Selections',
   remove_from_selection: 'Remove from Selections',
+  clear: 'Clear',
   clear_all_selections: 'Clear All',
   clear_selection_confirm: 'Are you sure you want to clear all selected products?',
   clear_modal_title: 'CLEAR YOUR SELECTIONS',

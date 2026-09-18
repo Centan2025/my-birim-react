@@ -176,11 +176,11 @@ export function SeckimPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setIsCreateProjectOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold transition-colors cursor-pointer"
             >
               <svg
                 className="w-3.5 h-3.5"
@@ -195,31 +195,13 @@ export function SeckimPage() {
               <span>{t('new_project')}</span>
             </button>
 
-            {selectedProducts.length > 0 && activeTab === 'seckim' && (
+            {selectedProducts.length > 0 && (
               <>
-                <button
-                  type="button"
-                  onClick={handleClearAll}
-                  className="inline-flex items-center gap-2 px-4 py-3 border border-neutral-300 dark:border-neutral-700 hover:border-red-500 hover:text-red-600 text-neutral-500 dark:text-neutral-400 bg-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold transition-colors cursor-pointer"
-                  title={t('clear_all_selections')}
-                >
-                  <svg
-                    className="w-3.5 h-3.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  >
-                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                  <span>{t('clear_all_selections')}</span>
-                </button>
-
                 <button
                   type="button"
                   onClick={handlePdfDownload}
                   disabled={isGeneratingPdf}
-                  className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold hover:bg-[var(--bg-tertiary)] transition-colors cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 border border-[var(--border-primary)] hover:border-[var(--text-primary)] text-[var(--text-primary)] bg-[var(--bg-primary)] text-xs uppercase tracking-widest font-semibold hover:bg-[var(--bg-tertiary)] transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {isGeneratingPdf ? (
                     <>
@@ -248,7 +230,7 @@ export function SeckimPage() {
                 <button
                   type="button"
                   onClick={() => setIsInquiryOpen(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all cursor-pointer shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#2c2c2c] text-white border border-[#2c2c2c] text-xs uppercase tracking-widest font-semibold hover:bg-[#404040] hover:border-[#404040] transition-all cursor-pointer shadow-sm"
                 >
                   <svg
                     className="w-3.5 h-3.5"
@@ -267,37 +249,59 @@ export function SeckimPage() {
           </div>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex items-center gap-8 pt-8 border-b border-[var(--border-primary)]">
-          <button
-            type="button"
-            onClick={() => handleTabChange('seckim')}
-            className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer ${
-              activeTab === 'seckim'
-                ? 'text-[var(--text-primary)]'
-                : 'text-neutral-400 hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <span>{t('all_selections_count', selectedProducts.length)}</span>
-            {activeTab === 'seckim' && (
-              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
-            )}
-          </button>
+        {/* Tab Switcher & List Controls */}
+        <div className="flex items-center justify-between gap-4 pt-8 border-b border-[var(--border-primary)]">
+          <div className="flex items-center gap-6 sm:gap-8">
+            <button
+              type="button"
+              onClick={() => handleTabChange('seckim')}
+              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer ${
+                activeTab === 'seckim'
+                  ? 'text-[var(--text-primary)]'
+                  : 'text-neutral-400 hover:text-[var(--text-primary)]'
+              }`}
+            >
+              <span>{t('all_selections_count', selectedProducts.length)}</span>
+              {activeTab === 'seckim' && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
+              )}
+            </button>
 
-          <button
-            type="button"
-            onClick={() => handleTabChange('projeler')}
-            className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer ${
-              activeTab === 'projeler'
-                ? 'text-[var(--text-primary)]'
-                : 'text-neutral-400 hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <span>{t('my_projects_count', projects.length)}</span>
-            {activeTab === 'projeler' && (
-              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
-            )}
-          </button>
+            <button
+              type="button"
+              onClick={() => handleTabChange('projeler')}
+              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer ${
+                activeTab === 'projeler'
+                  ? 'text-[var(--text-primary)]'
+                  : 'text-neutral-400 hover:text-[var(--text-primary)]'
+              }`}
+            >
+              <span>{t('my_projects_count', projects.length)}</span>
+              {activeTab === 'projeler' && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
+              )}
+            </button>
+          </div>
+
+          {selectedProducts.length > 0 && activeTab === 'seckim' && (
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="pb-4 text-[11px] sm:text-xs font-light text-neutral-400 hover:text-red-500 transition-colors cursor-pointer flex items-center gap-1.5 group shrink-0"
+              title={t('clear_all_selections')}
+            >
+              <svg
+                className="w-3.5 h-3.5 transition-transform group-hover:scale-110"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              <span>{t('clear_all_selections')}</span>
+            </button>
+          )}
         </div>
 
         {/* TAB 1: SEÇTİKLERİM */}

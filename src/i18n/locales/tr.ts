@@ -268,6 +268,7 @@ export default {
   removed_from_selections: 'Seçtiklerinizden çıkarıldı.',
   add_to_selection: 'Seçtiklerime Ekle',
   remove_from_selection: 'Seçtiklerimden Çıkar',
+  clear: 'Temizle',
   clear_all_selections: 'Tümünü Temizle',
   clear_selection_confirm: 'Seçtiklerinizdeki tüm ürünleri temizlemek istediğinize emin misiniz?',
   clear_modal_title: 'SEÇTİKLERİNİZİ TEMİZLEYİN',
