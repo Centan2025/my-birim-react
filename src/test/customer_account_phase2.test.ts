@@ -13,7 +13,7 @@ import {
   getOrderForUser,
   AccountError,
 } from '../../lib/account/account-service'
-import accountHandler from '../../api/account/[...slug]'
+import accountHandler from '../../api/account.js'
 import {createToken} from '../../lib/server/token'
 
 // Mock Supabase Store

@@ -5,7 +5,7 @@ import {
   resolveDateRange,
   getAdminCommerceMetrics,
 } from '../../lib/commerce/admin-metrics-service.js'
-import adminHandler from '../../api/admin/[...slug].js'
+import adminHandler from '../../api/admin.js'
 import {createToken} from '../../lib/server/token.js'
 import {CommerceValidationError} from '../../lib/commerce/types.js'
 

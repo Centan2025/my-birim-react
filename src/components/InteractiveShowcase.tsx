@@ -478,12 +478,12 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                           key={hsIdx}
                           className="absolute pointer-events-auto -translate-x-1/2 -translate-y-1/2"
                           style={{left: `${hs.x}%`, top: `${hs.y}%`}}
-                          onMouseDown={e => e.stopPropagation()}
-                          onTouchStart={e => e.stopPropagation()}
                         >
                           {/* Modern Hotspot Pin Button */}
                           <button
                             type="button"
+                            onMouseDown={e => e.stopPropagation()}
+                            onTouchStart={e => e.stopPropagation()}
                             onClick={e => {
                               e.stopPropagation()
                               if (isDragging) return

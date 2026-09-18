@@ -132,8 +132,8 @@ vi.mock('../../lib/server/supabaseAdmin.js', () => ({
   })),
 }))
 
-import commerceHandler from '../../api/commerce/[...slug]'
-import adminHandler from '../../api/admin/[...slug]'
+import commerceHandler from '../../api/commerce.js'
+import adminHandler from '../../api/admin.js'
 import analyticsHandler from '../../api/analytics'
 import mediaHandler from '../../api/media/[action]'
 import {createToken, verifyToken} from '../../lib/server/token'

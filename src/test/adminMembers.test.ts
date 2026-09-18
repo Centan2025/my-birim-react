@@ -58,7 +58,7 @@ vi.mock('../../lib/server/supabaseAdmin.js', () => ({
 
 import fs from 'fs'
 import path from 'path'
-import membersHandler from '../../api/admin/[...slug]'
+import membersHandler from '../../api/admin.js'
 
 function createMockReqRes(overrides?: {
   method?: string

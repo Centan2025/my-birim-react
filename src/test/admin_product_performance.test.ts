@@ -1,7 +1,7 @@
 import {describe, it, expect, beforeEach, afterEach} from 'vitest'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {calculateProductPerformance} from '../../lib/commerce/admin-product-performance-service'
-import adminHandler from '../../api/admin/[...slug]'
+import adminHandler from '../../api/admin.js'
 import analyticsHandler from '../../api/analytics'
 import {createToken} from '../../lib/server/token'
 

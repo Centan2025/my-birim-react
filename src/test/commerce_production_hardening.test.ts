@@ -7,8 +7,8 @@ import {
   handleCheckoutValidate as checkoutValidateHandler,
   handleOrders as ordersHandler,
   handlePayments as paymentsHandler,
-} from '../../api/commerce/[...slug]'
-import adminOrdersHandler from '../../api/admin/[...slug]'
+} from '../../api/commerce.js'
+import adminOrdersHandler from '../../api/admin.js'
 import {
   isValidOrderStatusTransition,
   canCancelOrderStatus,
