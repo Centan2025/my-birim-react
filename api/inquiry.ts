@@ -95,12 +95,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? selectedProducts
           .map(
             (
-              p: {id?: string; name?: string; category?: string; dimensions?: string; image?: string},
+              p: {
+                id?: string
+                name?: string
+                category?: string
+                dimensions?: string
+                image?: string
+              },
               idx: number
             ) => {
               const pName = escapeHtml(p.name || p.id || 'Ürün')
               const pCategory = p.category ? escapeHtml(String(p.category)) : ''
-              const pDim = p.dimensions && p.dimensions !== '-' ? escapeHtml(String(p.dimensions)) : ''
+              const pDim =
+                p.dimensions && p.dimensions !== '-' ? escapeHtml(String(p.dimensions)) : ''
               const safeUrlId = encodeURIComponent(String(p.id || '').trim())
               const rawImg = (p.image || '').trim()
               const safeImgUrl =
@@ -307,34 +314,60 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const resendKey = process.env['RESEND_API_KEY']
     const smtpPassword = process.env['SMTP_PASSWORD']
     const adminEmail = process.env['ADMIN_EMAIL'] || 'birim@birim.com'
+    const fromAddress = process.env['EMAIL_FROM'] || 'Birim Design <birim@birim.com>'
     const smtpUser = process.env['SMTP_USER'] || process.env['EMAIL_USER'] || 'birim@birim.com'
+    const emailSubject = `Yeni Proje Talebi: ${safeName} - ${safeProjectName || 'Birim Seçtiklerim'}`
+
+    let emailSent = false
 
     if (resendKey) {
-      const resend = new Resend(resendKey)
-      await resend.emails.send({
-        from: process.env['EMAIL_FROM'] || 'Birim Web <onboarding@resend.dev>',
-        to: [adminEmail],
-        subject: `Yeni Proje Talebi: ${safeName} - ${safeProjectName || 'Birim Seçtiklerim'}`,
-        html: emailHtml,
-      })
-    } else if (smtpPassword) {
-      const transporter = nodemailer.createTransport({
-        host: process.env['SMTP_HOST'] || 'smtpout.secureserver.net',
-        port: Number(process.env['SMTP_PORT']) || 465,
-        secure: true,
-        auth: {
-          user: smtpUser,
-          pass: smtpPassword,
-        },
-      })
+      try {
+        const resend = new Resend(resendKey)
+        const {error: resendErr} = await resend.emails.send({
+          from: fromAddress,
+          to: [adminEmail],
+          replyTo: safeEmail,
+          subject: emailSubject,
+          html: emailHtml,
+        })
+        if (resendErr) {
+          console.warn('[Inquiry API] Resend sending error:', resendErr)
+        } else {
+          emailSent = true
+          console.log(`✅ [Inquiry API] Resend ile teklif bildirimi gönderildi -> ${adminEmail}`)
+        }
+      } catch (rErr) {
+        console.warn('[Inquiry API] Resend call failed, attempting SMTP fallback:', rErr)
+      }
+    }
 
-      await transporter.sendMail({
-        from: `"Birim Design" <${smtpUser}>`,
-        to: adminEmail,
-        replyTo: safeEmail,
-        subject: `Yeni Proje Talebi: ${safeName} - ${safeProjectName || 'Birim Seçki'}`,
-        html: emailHtml,
-      })
+    if (!emailSent && smtpPassword) {
+      try {
+        const transporter = nodemailer.createTransport({
+          host: process.env['SMTP_HOST'] || 'smtpout.secureserver.net',
+          port: Number(process.env['SMTP_PORT']) || 465,
+          secure: true,
+          auth: {
+            user: smtpUser,
+            pass: smtpPassword,
+          },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000,
+        })
+
+        await transporter.sendMail({
+          from: fromAddress,
+          to: adminEmail,
+          replyTo: safeEmail,
+          subject: emailSubject,
+          html: emailHtml,
+        })
+        emailSent = true
+        console.log(`✅ [Inquiry API] SMTP ile teklif bildirimi gönderildi -> ${adminEmail}`)
+      } catch (smtpErr) {
+        console.warn('[Inquiry API] SMTP sending error:', smtpErr)
+      }
     }
   } catch (mailErr) {
     console.warn('[Inquiry API] Email sending notice:', mailErr)
