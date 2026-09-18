@@ -155,21 +155,7 @@ export async function submitInquiry(
   userId?: string
 ): Promise<{success: boolean; id?: string; error?: string}> {
   try {
-    if (isSupabaseConfigured) {
-      await supabase.from('inquiries').insert({
-        user_id: userId || null,
-        name: payload.name,
-        company: payload.company || '',
-        email: payload.email,
-        phone: payload.phone || '',
-        project_name: payload.projectName || '',
-        message: payload.message || '',
-        selected_products: payload.selectedProducts,
-        status: 'new',
-      })
-    }
-
-    // Call server endpoint for email dispatch and lead logging
+    // Call server endpoint for database logging, email dispatch and lead management
     const response = await fetch('/api/inquiry', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
