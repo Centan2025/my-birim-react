@@ -1381,17 +1381,38 @@ export async function listSelectionsForUser(
     return []
   }
 
-  const {data, error} = await supabase
-    .from('user_selections')
-    .select('product_id')
-    .eq('user_id', cleanUserId)
-
-  if (error) {
-    console.warn('[AccountService] listSelections error:', error.message)
-    return []
+  const targetUids = [cleanUserId]
+  try {
+    const {data: prof} = await supabase
+      .from('profiles')
+      .select('id, email')
+      .or(`id.eq.${cleanUserId},email.eq.${cleanUserId}`)
+      .maybeSingle()
+    if (prof) {
+      if (prof.id && !targetUids.includes(prof.id)) targetUids.push(prof.id)
+      if (prof.email && !targetUids.includes(prof.email)) targetUids.push(prof.email)
+    }
+  } catch {
+    // ignore lookup error
   }
 
-  return (data || []).map((row: {product_id: string}) => row.product_id)
+  const allProductIds: string[] = []
+  for (const uid of targetUids) {
+    const {data, error} = await supabase
+      .from('user_selections')
+      .select('product_id')
+      .eq('user_id', uid)
+
+    if (!error && Array.isArray(data)) {
+      for (const row of data) {
+        if (row.product_id && !allProductIds.includes(row.product_id)) {
+          allProductIds.push(row.product_id)
+        }
+      }
+    }
+  }
+
+  return allProductIds
 }
 
 export async function saveSelectionForUser(
@@ -1448,13 +1469,30 @@ export async function removeSelectionForUser(
 
   if (!supabase) return false
 
-  const {error} = await supabase
-    .from('user_selections')
-    .delete()
-    .eq('user_id', cleanUserId)
-    .eq('product_id', cleanProductId)
+  const targetUids = [cleanUserId]
+  try {
+    const {data: prof} = await supabase
+      .from('profiles')
+      .select('id, email')
+      .or(`id.eq.${cleanUserId},email.eq.${cleanUserId}`)
+      .maybeSingle()
+    if (prof) {
+      if (prof.id && !targetUids.includes(prof.id)) targetUids.push(prof.id)
+      if (prof.email && !targetUids.includes(prof.email)) targetUids.push(prof.email)
+    }
+  } catch {
+    // ignore
+  }
 
-  return !error
+  for (const uid of targetUids) {
+    await supabase
+      .from('user_selections')
+      .delete()
+      .eq('user_id', uid)
+      .eq('product_id', cleanProductId)
+  }
+
+  return true
 }
 
 export async function clearSelectionsForUser(
@@ -1473,14 +1511,32 @@ export async function clearSelectionsForUser(
 
   if (!supabase) return true
 
-  const {error} = await supabase.from('user_selections').delete().eq('user_id', cleanUserId)
-
-  if (error) {
-    console.error('[AccountService] clearSelections error:', error.message)
-    return false
+  const targetUids = [cleanUserId]
+  try {
+    const {data: prof} = await supabase
+      .from('profiles')
+      .select('id, email')
+      .or(`id.eq.${cleanUserId},email.eq.${cleanUserId}`)
+      .maybeSingle()
+    if (prof) {
+      if (prof.id && !targetUids.includes(prof.id)) targetUids.push(prof.id)
+      if (prof.email && !targetUids.includes(prof.email)) targetUids.push(prof.email)
+    }
+  } catch {
+    // ignore
   }
 
-  return true
+  let anySuccess = false
+  for (const uid of targetUids) {
+    const {error} = await supabase.from('user_selections').delete().eq('user_id', uid)
+    if (!error) {
+      anySuccess = true
+    } else {
+      console.warn('[AccountService] clearSelections for uid error:', uid, error.message)
+    }
+  }
+
+  return anySuccess || targetUids.length > 0
 }
 
 export async function bulkSyncSelectionsForUser(
