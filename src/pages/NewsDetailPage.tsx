@@ -1,5 +1,6 @@
-import {useMemo, useEffect, useState, FC} from 'react'
+import {useMemo, useEffect, useState, useRef, FC} from 'react'
 import {useParams, Link, useLocation} from 'react-router-dom'
+import {motion, useInView} from 'framer-motion'
 import {FullscreenMediaViewer, type MediaItem} from '../components/FullscreenMediaViewer'
 import type {NewsMedia} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -14,7 +15,45 @@ import {useSEO} from '../hooks/useSEO'
 import PortableTextLite from '../components/PortableTextLite'
 import ScrollReveal from '../components/ScrollReveal'
 import {TextMaskReveal} from '../components/TextMaskReveal'
-import {ProductCardReveal} from '../components/ProductCardReveal'
+
+interface NewsImageRevealProps {
+  children: React.ReactNode
+  delay?: number
+  className?: string
+}
+
+function NewsImageReveal({children, delay = 0.06, className = ''}: NewsImageRevealProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, {once: true, amount: 0.05, margin: '0px 0px 50px 0px'})
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{opacity: 0, y: 45, scale: 0.92}}
+      animate={isInView ? {opacity: 1, y: 0, scale: 1} : {opacity: 0, y: 45, scale: 0.92}}
+      transition={{
+        y: {
+          duration: 0.92,
+          delay,
+          ease: [0.16, 1, 0.3, 1],
+        },
+        scale: {
+          duration: 0.84,
+          delay: delay + 0.05,
+          ease: [0.45, 0, 0.2, 1],
+        },
+        opacity: {
+          duration: 0.68,
+          delay,
+          ease: 'easeOut',
+        },
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  )
+}
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -71,7 +110,7 @@ const MediaComponent: FC<{media: NewsMedia; onImageClick?: (url: string) => void
           className="cursor-zoom-in overflow-hidden relative group"
           onClick={() => onImageClick && onImageClick(media.url)}
         >
-          <ProductCardReveal direction="down" duration={1.1} className="w-full">
+          <NewsImageReveal className="w-full">
             <OptimizedImage
               src={media.url}
               srcMobile={media.urlMobile}
@@ -94,7 +133,7 @@ const MediaComponent: FC<{media: NewsMedia; onImageClick?: (url: string) => void
               origWidthDesktop={media.origWidthDesktop}
               origHeightDesktop={media.origHeightDesktop}
             />
-          </ProductCardReveal>
+          </NewsImageReveal>
         </div>
       )
     }
@@ -422,7 +461,7 @@ export function NewsDetailPage() {
                 className="cursor-zoom-in overflow-hidden mb-8 border border-[var(--border-primary)]/40 relative group"
                 onClick={() => openFullscreenViewer(mainImageUrl)}
               >
-                <ProductCardReveal direction="down" duration={1.2} delay={0.1} className="w-full">
+                <NewsImageReveal delay={0.08} className="w-full">
                   <OptimizedImage
                     src={mainImageUrl || ''}
                     srcMobile={mainImageObj?.urlMobile}
@@ -446,7 +485,7 @@ export function NewsDetailPage() {
                     origWidthDesktop={mainImageObj?.origWidthDesktop}
                     origHeightDesktop={mainImageObj?.origHeightDesktop}
                   />
-                </ProductCardReveal>
+                </NewsImageReveal>
               </div>
             )}
 
@@ -542,7 +581,7 @@ export function NewsDetailPage() {
                   className="group flex items-center gap-4 p-4 border border-[var(--border-primary)] hover:border-[var(--text-primary)]/50 transition-colors"
                 >
                   <div className="w-20 h-16 overflow-hidden flex-shrink-0">
-                    <ProductCardReveal direction="down" duration={0.8} className="w-full h-full">
+                    <NewsImageReveal delay={0.08} className="w-full h-full">
                       <OptimizedImage
                         src={
                           typeof prevNews.mainImage === 'string'
@@ -554,7 +593,7 @@ export function NewsDetailPage() {
                         width={160}
                         height={120}
                       />
-                    </ProductCardReveal>
+                    </NewsImageReveal>
                   </div>
                   <div>
                     <span className="text-[9px] font-mono uppercase text-[var(--text-secondary)] tracking-widest block mb-1">
@@ -587,7 +626,7 @@ export function NewsDetailPage() {
                     </TextMaskReveal>
                   </div>
                   <div className="w-20 h-16 overflow-hidden flex-shrink-0">
-                    <ProductCardReveal direction="down" duration={0.8} className="w-full h-full">
+                    <NewsImageReveal delay={0.08} className="w-full h-full">
                       <OptimizedImage
                         src={
                           typeof nextNews.mainImage === 'string'
@@ -599,7 +638,7 @@ export function NewsDetailPage() {
                         width={160}
                         height={120}
                       />
-                    </ProductCardReveal>
+                    </NewsImageReveal>
                   </div>
                 </Link>
               )}
@@ -624,10 +663,8 @@ export function NewsDetailPage() {
                     className="group block border border-[var(--border-primary)] p-5 hover:border-[var(--text-primary)]/40 transition-colors"
                   >
                     <div className="h-44 overflow-hidden mb-4">
-                      <ProductCardReveal
-                        direction="down"
-                        duration={1.0}
-                        delay={0.1 + index * 0.15}
+                      <NewsImageReveal
+                        delay={0.08 + index * 0.1}
                         className="w-full h-full"
                       >
                         <OptimizedImage
@@ -641,7 +678,7 @@ export function NewsDetailPage() {
                           width={600}
                           height={400}
                         />
-                      </ProductCardReveal>
+                      </NewsImageReveal>
                     </div>
                     <TextMaskReveal delay={100 + index * 60}>
                       <span className="text-[10px] font-mono text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
