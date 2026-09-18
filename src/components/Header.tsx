@@ -1395,7 +1395,7 @@ export function Header() {
                           color: headerForegroundColor,
                           transition: colorTransition,
                         }}
-                        aria-label={`${t('seckim') || 'Seçtiklerim'}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
+                        aria-label={`${(t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc)}${selectionCount > 0 ? ` (${selectionCount})` : ''}`}
                       >
                         <svg
                           className="w-[18px] h-[18px] transition-transform duration-300 ease-out group-hover:scale-105"
@@ -1410,64 +1410,92 @@ export function Header() {
                         </svg>
                       </button>
                       <div
-                        className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 flex items-center justify-center pointer-events-none z-50 opacity-0 -translate-y-1.5 scale-95 group-hover/seckim:opacity-100 group-hover/seckim:translate-y-0 group-hover/seckim:scale-100 transition-all duration-300"
+                        className="absolute left-1/2 -translate-x-1/2 top-full mt-3 flex items-center justify-center pointer-events-none z-50 origin-top opacity-0 -translate-y-3 scale-95 group-hover/seckim:opacity-100 group-hover/seckim:translate-y-0 group-hover/seckim:scale-100 transition-all duration-350"
                         style={{
                           transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                         }}
                       >
-                        <span className="text-[10px] tracking-wide font-medium text-white bg-neutral-900/95 dark:text-neutral-900 dark:bg-white/95 px-2.5 py-1 rounded-full shadow-lg whitespace-nowrap border border-white/10 dark:border-black/10 backdrop-blur-sm">
-                          {t('seckim') || 'Seçtiklerim'}
-                          {selectionCount > 0 ? ` (${selectionCount})` : ''}
+                        <span
+                          className="text-xs md:text-[12.5px] tracking-[0.16em] uppercase font-medium px-4 py-2 bg-[#2a2a2a]/95 text-white border border-neutral-700/80 shadow-[0_12px_32px_rgba(0,0,0,0.25)] whitespace-nowrap backdrop-blur-xl inline-flex items-center gap-2"
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          <span>{(t('seckim') || 'Seçtiklerim').toLocaleUpperCase(upperLoc)}</span>
+                          {selectionCount > 0 && (
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 bg-white/20 text-white rounded-full">
+                              {selectionCount}
+                            </span>
+                          )}
                         </span>
                       </div>
                     </div>
                   )}
 
                   {/* Auth Trigger Text / Initials Button (Seçtiklerim'in sağında) */}
-                  <button
-                    type="button"
-                    onClick={() => window.dispatchEvent(new Event('openFloatingAuthPanel'))}
-                    className="group relative flex items-end pb-0 pt-2 cursor-pointer transition-opacity duration-300 hover:opacity-75"
-                    style={{
-                      color: headerForegroundColor,
-                      transition: colorTransition,
-                    }}
-                    aria-label={
-                      isLoggedIn
-                        ? user?.name || t('profile') || 'Hesabım'
-                        : locale === 'tr'
-                          ? 'Giriş'
-                          : 'Login'
-                    }
-                    title={
-                      isLoggedIn
-                        ? user?.name || t('profile') || 'Hesabım'
-                        : locale === 'tr'
-                          ? 'Giriş'
-                          : 'Login'
-                    }
-                  >
-                    <span
-                      className="relative inline-block uppercase header-nav-text"
+                  <div className="relative group/auth flex items-end">
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new Event('openFloatingAuthPanel'))}
+                      className="group relative flex items-end pb-0 pt-2 cursor-pointer transition-opacity duration-300 hover:opacity-75"
                       style={{
-                        fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
-                        fontWeight: 600,
-                        letterSpacing: '0.04em',
-                        fontFamily: "'Inter', sans-serif",
-                        lineHeight: '1.25rem',
                         color: headerForegroundColor,
                         transition: colorTransition,
                       }}
+                      aria-label={
+                        isLoggedIn
+                          ? user?.name || user?.email || t('profile') || 'Hesabım'
+                          : locale === 'tr'
+                            ? 'Giriş'
+                            : 'Login'
+                      }
                     >
-                      {isLoggedIn ? getUserInitials(user) : locale === 'tr' ? 'GİRİŞ' : 'LOGIN'}
                       <span
-                        className="header-nav-underline"
+                        className="relative inline-block uppercase header-nav-text"
                         style={{
-                          backgroundColor: headerForegroundColor,
+                          fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
+                          fontWeight: 600,
+                          letterSpacing: '0.04em',
+                          fontFamily: "'Inter', sans-serif",
+                          lineHeight: '1.25rem',
+                          color: headerForegroundColor,
+                          transition: colorTransition,
                         }}
-                      />
-                    </span>
-                  </button>
+                      >
+                        {isLoggedIn ? getUserInitials(user) : locale === 'tr' ? 'GİRİŞ' : 'LOGIN'}
+                        <span
+                          className="header-nav-underline"
+                          style={{
+                            backgroundColor: headerForegroundColor,
+                          }}
+                        />
+                      </span>
+                    </button>
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2 top-full mt-3 flex items-center justify-center pointer-events-none z-50 origin-top opacity-0 -translate-y-3 scale-95 group-hover/auth:opacity-100 group-hover/auth:translate-y-0 group-hover/auth:scale-100 transition-all duration-350"
+                      style={{
+                        transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                      }}
+                    >
+                      <span
+                        className="text-xs md:text-[12.5px] tracking-[0.16em] uppercase font-medium px-4 py-2 bg-[#2a2a2a]/95 text-white border border-neutral-700/80 shadow-[0_12px_32px_rgba(0,0,0,0.25)] whitespace-nowrap backdrop-blur-xl"
+                        style={{
+                          fontFamily: "'Inter', sans-serif",
+                        }}
+                      >
+                        {isLoggedIn
+                          ? (
+                              user?.name ||
+                              user?.email ||
+                              t('profile') ||
+                              'Hesabım'
+                            ).toLocaleUpperCase(upperLoc)
+                          : locale === 'tr'
+                            ? 'HESAP / GİRİŞ'
+                            : 'ACCOUNT / LOGIN'}
+                      </span>
+                    </div>
+                  </div>
 
                   <div
                     className="flex items-center pb-0 pt-2 h-[1.25rem] box-content"
@@ -1521,42 +1549,60 @@ export function Header() {
                   </div>
 
                   {settings?.showCartButton === true && settings?.commerce_enabled === true && (
-                    <button
-                      type="button"
-                      onClick={toggleCart}
-                      className="group relative flex items-center pb-0 pt-2 cursor-pointer transition-opacity duration-300 hover:opacity-75"
-                      style={{
-                        color: headerForegroundColor,
-                        transition: colorTransition,
-                      }}
-                      aria-label={`${t('cart') || 'Sepet'}${cartCount > 0 ? ` (${cartCount} ${t('items') || 'ürün'})` : ''}`}
-                      aria-expanded={false}
-                    >
-                      <svg
-                        className="w-[19px] h-[19px] transition-transform duration-300 ease-out group-hover:scale-105"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    <div className="relative group/cart flex items-end">
+                      <button
+                        type="button"
+                        onClick={toggleCart}
+                        className="group relative flex items-center pb-0 pt-2 cursor-pointer transition-opacity duration-300 hover:opacity-75"
+                        style={{
+                          color: headerForegroundColor,
+                          transition: colorTransition,
+                        }}
+                        aria-label={`${t('cart') || 'Sepet'}${cartCount > 0 ? ` (${cartCount} ${t('items') || 'ürün'})` : ''}`}
+                        aria-expanded={false}
                       >
-                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z" />
-                        <line x1="3" y1="6" x2="21" y2="6" />
-                        <path d="M16 10a4 4 0 0 1-8 0" />
-                      </svg>
-                      {cartCount > 0 && (
-                        <span
-                          className="absolute -top-0.5 -right-2.5 flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[10px] font-bold text-white bg-red-600 border border-white dark:border-neutral-900 shadow-xs leading-none pointer-events-none select-none"
-                          style={{
-                            fontVariantNumeric: 'tabular-nums',
-                          }}
-                          aria-hidden="true"
+                        <svg
+                          className="w-[19px] h-[19px] transition-transform duration-300 ease-out group-hover:scale-105"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                         >
-                          {cartCount}
+                          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z" />
+                          <line x1="3" y1="6" x2="21" y2="6" />
+                          <path d="M16 10a4 4 0 0 1-8 0" />
+                        </svg>
+                        {cartCount > 0 && (
+                          <span
+                            className="absolute -top-0.5 -right-2.5 flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full text-[10px] font-bold text-white bg-red-600 border border-white dark:border-neutral-900 shadow-xs leading-none pointer-events-none select-none"
+                            style={{
+                              fontVariantNumeric: 'tabular-nums',
+                            }}
+                            aria-hidden="true"
+                          >
+                            {cartCount}
+                          </span>
+                        )}
+                      </button>
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2 top-full mt-3 flex items-center justify-center pointer-events-none z-50 origin-top opacity-0 -translate-y-3 scale-95 group-hover/cart:opacity-100 group-hover/cart:translate-y-0 group-hover/cart:scale-100 transition-all duration-350"
+                        style={{
+                          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                        }}
+                      >
+                        <span
+                          className="text-xs md:text-[12.5px] tracking-[0.16em] uppercase font-medium px-4 py-2 bg-[#2a2a2a]/95 text-white border border-neutral-700/80 shadow-[0_12px_32px_rgba(0,0,0,0.25)] whitespace-nowrap backdrop-blur-xl"
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          {(t('cart') || 'Sepet').toLocaleUpperCase(upperLoc)}
+                          {cartCount > 0 ? ` (${cartCount})` : ''}
                         </span>
-                      )}
-                    </button>
+                      </div>
+                    </div>
                   )}
                 </div>
                 <div className="lg:hidden flex items-center gap-1">

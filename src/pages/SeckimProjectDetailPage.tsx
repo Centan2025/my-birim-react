@@ -146,7 +146,8 @@ export function SeckimProjectDetailPage() {
     }
   }
 
-  const containerClass = 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
+  const containerClass =
+    'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
 
   return (
     <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] pt-16 md:pt-20 lg:pt-24 pb-24">
@@ -156,7 +157,10 @@ export function SeckimProjectDetailPage() {
           items={[
             {label: (t('homepage') || 'ANASAYFA').toLocaleUpperCase(upperLocale), to: '/'},
             {label: (t('seckim') || 'SEÇTİKLERİM').toLocaleUpperCase(upperLocale), to: '/seckim'},
-            {label: (t('my_projects') || 'PROJELERİM').toLocaleUpperCase(upperLocale), to: '/seckim?tab=projeler'},
+            {
+              label: (t('my_projects') || 'PROJELERİM').toLocaleUpperCase(upperLocale),
+              to: '/seckim?tab=projeler',
+            },
             {label: project.name.toLocaleUpperCase(upperLocale), to: `/seckim/proje/${project.id}`},
           ]}
         />
@@ -348,8 +352,34 @@ export function SeckimProjectDetailPage() {
                 return (
                   <div
                     key={product.id}
-                    className="group bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex flex-col overflow-hidden shadow-xs hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300"
+                    className="group relative bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex flex-col overflow-hidden shadow-xs hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300"
                   >
+                    {/* Top-Right Remove (X) Button */}
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        removeProductFromProject(project.id, product.id)
+                      }}
+                      className="absolute top-3 right-3 z-20 w-7 h-7 rounded-full bg-white/95 dark:bg-neutral-800/95 hover:bg-red-50 dark:hover:bg-red-950/40 text-neutral-400 hover:text-red-600 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110"
+                      title={t('remove_from_project')}
+                      aria-label={`${t(product.name)} - ${t('remove_from_project')}`}
+                    >
+                      <svg
+                        className="w-3.5 h-3.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.75"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+
                     <Link
                       to={`/product/${product.id}`}
                       className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white dark:bg-neutral-900 p-4 border-b border-neutral-100 dark:border-neutral-800/80 block"
@@ -406,18 +436,10 @@ export function SeckimProjectDetailPage() {
                       <div className="pt-3 border-t border-[var(--border-primary)] flex items-center justify-between gap-2">
                         <Link
                           to={`/product/${product.id}`}
-                          className="text-[11px] font-medium tracking-wider uppercase text-[var(--text-primary)] hover:underline underline-offset-4"
+                          className="w-full text-center py-1.5 px-3 border border-neutral-200 dark:border-neutral-700 hover:border-[var(--text-primary)] text-[11px] font-semibold tracking-wider uppercase text-[var(--text-primary)] transition-colors bg-white dark:bg-neutral-800"
                         >
                           {t('view_product_action')}
                         </Link>
-
-                        <button
-                          type="button"
-                          onClick={() => removeProductFromProject(project.id, product.id)}
-                          className="text-[11px] font-light text-neutral-400 hover:text-red-600 transition-colors cursor-pointer"
-                        >
-                          {t('remove_from_project')}
-                        </button>
                       </div>
                     </div>
                   </div>

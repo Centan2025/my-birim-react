@@ -255,13 +255,22 @@ export function SeckimPage() {
             <button
               type="button"
               onClick={() => handleTabChange('seckim')}
-              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer ${
+              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer inline-flex items-center gap-2 ${
                 activeTab === 'seckim'
                   ? 'text-[var(--text-primary)]'
                   : 'text-neutral-400 hover:text-[var(--text-primary)]'
               }`}
             >
-              <span>{t('all_selections_count', selectedProducts.length)}</span>
+              <span>{t('all_selections')}</span>
+              <span
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-full transition-all duration-200 ${
+                  activeTab === 'seckim'
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold'
+                    : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
+                }`}
+              >
+                {selectedProducts.length}
+              </span>
               {activeTab === 'seckim' && (
                 <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
               )}
@@ -270,13 +279,22 @@ export function SeckimPage() {
             <button
               type="button"
               onClick={() => handleTabChange('projeler')}
-              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer ${
+              className={`pb-4 text-xs tracking-widest uppercase font-medium transition-all relative cursor-pointer inline-flex items-center gap-2 ${
                 activeTab === 'projeler'
                   ? 'text-[var(--text-primary)]'
                   : 'text-neutral-400 hover:text-[var(--text-primary)]'
               }`}
             >
-              <span>{t('my_projects_count', projects.length)}</span>
+              <span>{t('my_projects')}</span>
+              <span
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-full transition-all duration-200 ${
+                  activeTab === 'projeler'
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold'
+                    : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
+                }`}
+              >
+                {projects.length}
+              </span>
               {activeTab === 'projeler' && (
                 <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--text-primary)]" />
               )}
@@ -355,8 +373,34 @@ export function SeckimPage() {
                   return (
                     <div
                       key={product.id}
-                      className="group bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex flex-col overflow-hidden shadow-xs hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300"
+                      className="group relative bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex flex-col overflow-hidden shadow-xs hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300"
                     >
+                      {/* Top-Right Remove (X) Button */}
+                      <button
+                        type="button"
+                        onClick={e => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          removeFromSelection(product.id)
+                        }}
+                        className="absolute top-3 right-3 z-20 w-7 h-7 rounded-full bg-white/95 dark:bg-neutral-800/95 hover:bg-red-50 dark:hover:bg-red-950/40 text-neutral-400 hover:text-red-600 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110"
+                        title={t('remove_from_selection')}
+                        aria-label={`${t(product.name)} - ${t('remove_from_selection')}`}
+                      >
+                        <svg
+                          className="w-3.5 h-3.5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.75"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+
                       {/* Product Image Link */}
                       <Link
                         to={`/product/${product.id}`}
@@ -410,17 +454,9 @@ export function SeckimPage() {
                                 name: getLocalizedText(product.name),
                               })
                             }
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 border border-neutral-200 dark:border-neutral-700 hover:border-[var(--text-primary)] text-[var(--text-primary)] text-[11px] font-semibold tracking-wider uppercase transition-colors cursor-pointer bg-white dark:bg-neutral-800"
+                            className="w-full inline-flex items-center justify-center gap-1 px-3 py-2 border border-neutral-200 dark:border-neutral-700 hover:border-[var(--text-primary)] text-[var(--text-primary)] text-[11px] font-semibold tracking-wider uppercase transition-colors cursor-pointer bg-white dark:bg-neutral-800"
                           >
                             + {t('add_to_project').toUpperCase()}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => removeFromSelection(product.id)}
-                            className="text-xs font-light text-neutral-400 hover:text-red-600 transition-colors cursor-pointer py-1 px-2"
-                          >
-                            {t('remove')}
                           </button>
                         </div>
                       </div>
