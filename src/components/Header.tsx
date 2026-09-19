@@ -227,7 +227,14 @@ export function Header() {
   }, [])
 
   const upperLoc = locale === 'tr' ? 'tr-TR' : 'en-US'
-  const isProjectsVisible = settings?.isProjectsVisible !== false
+  const isLocalHost = Boolean(
+    (typeof import.meta !== 'undefined' && import.meta.env?.DEV) ||
+      (typeof window !== 'undefined' &&
+        (window.location.hostname === 'localhost' ||
+          window.location.hostname === '127.0.0.1' ||
+          window.location.hostname.endsWith('.local')))
+  )
+  const isProjectsVisible = isLocalHost || settings?.isProjectsVisible !== false
   const isShopVisible = isShopNavVisible(settings || undefined)
   const mobileMenuLinks: {to: string; label: string; isExternal?: boolean}[] = [
     {to: '/designers', label: (t('designers') || '').toLocaleUpperCase(upperLoc)},

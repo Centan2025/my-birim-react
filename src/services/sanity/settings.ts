@@ -114,6 +114,21 @@ export const updateLanguages = async (languages: string[]): Promise<void> => {
   setItem(KEYS.LANGUAGES, languages)
 }
 
+const isLocalEnvironment = (): boolean => {
+  if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
+    return true
+  }
+  if (
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.endsWith('.local'))
+  ) {
+    return true
+  }
+  return false
+}
+
 export const getSiteSettings = async (): Promise<SiteSettings> => {
   if (useSanity && sanity) {
     try {
@@ -134,7 +149,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         maintenanceMode: Boolean(s?.maintenanceMode ?? false),
         mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
         enablePageTransitions: s?.enablePageTransitions !== false,
-        isProjectsVisible: s?.isProjectsVisible !== false,
+        isProjectsVisible: isLocalEnvironment() ? true : s?.isProjectsVisible !== false,
         isFactoryVisible: Boolean(
           s?.isFactoryVisible ??
             s?.showFactory ??
@@ -166,7 +181,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     maintenanceMode: Boolean(s?.maintenanceMode ?? false),
     mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
     enablePageTransitions: s?.enablePageTransitions !== false,
-    isProjectsVisible: s?.isProjectsVisible !== false,
+    isProjectsVisible: isLocalEnvironment() ? true : s?.isProjectsVisible !== false,
     isFactoryVisible: Boolean(
       s?.isFactoryVisible ??
         (s as Record<string, unknown> | null)?.['showFactory'] ??

@@ -18,7 +18,14 @@ export function ProjectsPage() {
   const paramVersion = searchParams.get('v')
 
   useEffect(() => {
-    if (!settingsLoading && settings && settings.isProjectsVisible === false) {
+    const isLocal = Boolean(
+      (typeof import.meta !== 'undefined' && import.meta.env?.DEV) ||
+        (typeof window !== 'undefined' &&
+          (window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname.endsWith('.local')))
+    )
+    if (!isLocal && !settingsLoading && settings && settings.isProjectsVisible === false) {
       navigate('/', {replace: true})
     }
   }, [settings, settingsLoading, navigate])

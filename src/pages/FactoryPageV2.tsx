@@ -648,55 +648,49 @@ export function FactoryPageV2() {
                 {disciplinesList.map((item, idx) => (
                   <motion.div
                     key={item.id}
-                    initial={{opacity: 0, y: 30}}
+                    initial={{opacity: 0, y: 20}}
                     whileInView={{opacity: 1, y: 0}}
                     viewport={{once: true, amount: 0.15}}
-                    transition={{duration: 0.7, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1]}}
-                    className="w-[85vw] max-w-[330px] flex-shrink-0 snap-center border border-[var(--border-primary,#e5e7eb)]/60 bg-[var(--bg-secondary)] p-5 flex flex-col justify-between shadow-sm"
+                    transition={{duration: 0.6, delay: idx * 0.06, ease: [0.22, 1, 0.36, 1]}}
+                    className="w-[85vw] max-w-[340px] flex-shrink-0 snap-center border border-[var(--border-primary,#e5e7eb)]/60 bg-[var(--bg-secondary)] p-5 flex flex-col justify-between shadow-sm"
                   >
-                    <div>
-                      {/* Kart Başlığı & Alt Başlığı - Sabit yükseklik (h-[84px]) ile görseller tüm kartlarda üstten birebir aynı hizada başlar */}
-                      <div className="h-[84px] max-h-[84px] flex flex-col justify-start mb-3.5 space-y-1">
-                        <TextMaskReveal delay={60}>
-                          <h3 className="font-outfit text-xl font-medium text-[var(--text-primary)] tracking-tight leading-snug line-clamp-2">
-                            {item.title}
-                          </h3>
-                        </TextMaskReveal>
+                    <div className="space-y-3.5">
+                      {/* Kart Başlığı & Alt Başlığı */}
+                      <div className="space-y-1">
+                        <h3 className="font-outfit text-lg font-medium text-[var(--text-primary)] tracking-tight leading-snug line-clamp-2">
+                          {item.title}
+                        </h3>
                         {item.subtitle && (
-                          <TextMaskReveal delay={120}>
-                            <p className="font-outfit text-xs text-[var(--text-secondary)] italic font-light line-clamp-1">
-                              {item.subtitle}
-                            </p>
-                          </TextMaskReveal>
+                          <p className="font-outfit text-xs text-[var(--text-secondary)] italic font-light line-clamp-1">
+                            {item.subtitle}
+                          </p>
                         )}
                       </div>
 
-                      {/* Kart Görseli - Haberler V2 usulü yükselen ve açılan animasyon */}
-                      <FactoryMediaCard index={idx}>
-                        <div
-                          className="relative aspect-[16/10] overflow-hidden bg-black/10 cursor-pointer group shadow-sm"
-                          onClick={() => openViewer(idx % galleryItems.length)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault()
-                              openViewer(idx % galleryItems.length)
-                            }
-                          }}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <OptimizedImage
-                            src={item.image || item.fallbackImage}
-                            fallbackSrc={item.fallbackImage}
-                            alt={item.title}
-                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
-                          />
-                        </div>
-                      </FactoryMediaCard>
+                      {/* Kart Görseli */}
+                      <div
+                        className="relative aspect-[16/10] overflow-hidden bg-neutral-900/10 cursor-pointer group shadow-sm border border-[var(--border-primary,#e5e7eb)]/20"
+                        onClick={() => openViewer(idx % galleryItems.length)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            openViewer(idx % galleryItems.length)
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        <OptimizedImage
+                          src={item.image || item.fallbackImage}
+                          fallbackSrc={item.fallbackImage}
+                          alt={item.title}
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                        />
+                      </div>
 
                       {/* Açıklama Metni - Görselin altında */}
                       {item.description && (
-                        <p className="mt-3.5 text-xs text-[var(--text-primary)] font-light leading-relaxed">
+                        <p className="text-xs text-[var(--text-secondary)] font-light leading-relaxed">
                           {item.description}
                         </p>
                       )}
@@ -848,27 +842,25 @@ export function FactoryPageV2() {
                   </div>
 
                   <div className="col-span-7">
-                    <FactoryMediaCard index={0} key={activeDiscipline.id}>
-                      <div
-                        className="relative aspect-[16/10] overflow-hidden bg-black/10 cursor-pointer group shadow-sm"
-                        onClick={() => openViewer(activeDisciplineIndex % galleryItems.length)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            openViewer(activeDisciplineIndex % galleryItems.length)
-                          }
-                        }}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        <OptimizedImage
-                          src={currentDisciplineImage}
-                          fallbackSrc={activeDiscipline.fallbackImage}
-                          alt={activeDiscipline.title}
-                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
-                        />
-                      </div>
-                    </FactoryMediaCard>
+                    <div
+                      className="relative aspect-[16/10] overflow-hidden bg-black/10 cursor-pointer group shadow-sm border border-[var(--border-primary,#e5e7eb)]/20"
+                      onClick={() => openViewer(activeDisciplineIndex % galleryItems.length)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          openViewer(activeDisciplineIndex % galleryItems.length)
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <OptimizedImage
+                        src={currentDisciplineImage}
+                        fallbackSrc={activeDiscipline.fallbackImage}
+                        alt={activeDiscipline.title}
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                      />
+                    </div>
                   </div>
                 </motion.div>
               </AnimatePresence>
